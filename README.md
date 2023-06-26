@@ -11,9 +11,14 @@
 * Array backed integer indexed table.
 * Entries preserve insertion order.
 * Operations linearly traverse keys.
-* NULL values not permitted.
+* Non NULL values only.
 
 ## PTable
 
-* ITable Convenience wrapper with pointer key.
+* ITable convenience wrapper with pointer key.
+
+## SList
+
+* Containerless singly sinked list.
+* NULL values permitted.
 

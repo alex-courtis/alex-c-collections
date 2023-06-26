@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 /*
- * Convenience wrapper around ITable with pointer key.
+ * ITable convenience wrapper with pointer key.
  */
 struct PTable;
 
