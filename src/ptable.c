@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -6,6 +7,10 @@
 #include "ptable.h"
 
 const struct PTable *ptable_init(const size_t initial, const size_t grow) {
+
+	// pointer has to fit into ITable key
+	assert(sizeof(void*) <= sizeof(uint64_t));
+
 	return (struct PTable *)itable_init(initial, grow);
 }
 

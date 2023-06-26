@@ -4,11 +4,7 @@
 #include <stddef.h>
 
 /*
- * Array backed pointer indexed table.
- * Entries preserve insertion order.
- * Operations linearly traverse keys.
- * NULL values not permitted.
- * Convenience wrapper around ITable.
+ * Convenience wrapper around ITable with pointer key.
  */
 struct PTable;
 
