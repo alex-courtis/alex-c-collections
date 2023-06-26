@@ -1,0 +1,5 @@
+**/*.o
+
+/tst-*
+
+/.ccls-cache
