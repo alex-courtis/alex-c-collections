@@ -39,15 +39,14 @@ bool false_test(const void *data) {
 }
 
 bool before_int(const void *a, const void *b) {
-	if (!a && !b)
-		return false;
+	if (a && b)
+		return (*(int*)a < *(int*)b);
 	else if (a && !b)
 		return true;
 	else if (!a && b)
 		return false;
-	else {
-		return (*(int*)a < *(int*)b);
-	}
+	else
+		return false;
 }
 
 bool predicate_strstr(const void *val, const void *data) {
