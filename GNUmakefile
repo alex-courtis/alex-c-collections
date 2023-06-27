@@ -30,11 +30,8 @@ test: $(TST_E)
 		fi ;\
 		done
 
-valgrind: TST_WITH = valgrind --leak-check=full --show-leak-kinds=all --suppressions=/tmp/vg.supp --gen-suppressions=all
+valgrind: TST_WITH = valgrind --leak-check=full --show-leak-kinds=all
 valgrind: test
-
-/tmp/vg.supp: .vg.supp
-	cp .vg.supp /tmp/vg.supp
 
 # make -k iwyu > /dev/null
 IWYU = include-what-you-use -Xiwyu --no_fwd_decls -Xiwyu --verbose=2

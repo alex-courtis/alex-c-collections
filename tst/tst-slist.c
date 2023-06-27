@@ -38,6 +38,25 @@ bool false_test(const void *data) {
 	return false;
 }
 
+bool before_int(const void *a, const void *b) {
+	if (!a && !b)
+		return false;
+	else if (a && !b)
+		return true;
+	else if (!a && b)
+		return false;
+	else {
+		return (*(int*)a < *(int*)b);
+	}
+}
+
+bool predicate_strstr(const void *val, const void *data) {
+	if (!val || !data) {
+		return false;
+	}
+	return strstr(val, data);
+}
+
 void slist_free_vals__many(void **state) {
 	struct SList *list = NULL;
 
@@ -236,6 +255,323 @@ void slist_find_equal_val__yes(void **state) {
 	slist_free(&list);
 }
 
+void slist_equal__empty_lhs(void **state) {
+	struct SList *rhs = NULL;
+
+	void *rvals[] = { "0", "1", "2", };
+	slist_append(&rhs, rvals[0]);
+	slist_append(&rhs, rvals[1]);
+	slist_append(&rhs, rvals[2]);
+
+	assert_false(slist_equal(NULL, rhs, slist_predicate_strcmp));
+
+	slist_free(&rhs);
+}
+
+void slist_equal__empty_rhs(void **state) {
+	struct SList *lhs = NULL;
+
+	void *lvals[] = { "0", "1", "2", };
+	slist_append(&lhs, lvals[0]);
+	slist_append(&lhs, lvals[1]);
+	slist_append(&lhs, lvals[2]);
+
+	assert_false(slist_equal(lhs, NULL, slist_predicate_strcmp));
+
+	slist_free(&lhs);
+}
+
+void slist_equal__equal(void **state) {
+	struct SList *lhs = NULL;
+	struct SList *rhs = NULL;
+
+	void *lvals[] = { "0", "1", "2", };
+	slist_append(&lhs, lvals[0]);
+	slist_append(&lhs, lvals[1]);
+	slist_append(&lhs, lvals[2]);
+
+	void *rvals[] = { "0", "1", "2", };
+	slist_append(&rhs, rvals[0]);
+	slist_append(&rhs, rvals[1]);
+	slist_append(&rhs, rvals[2]);
+
+	assert_true(slist_equal(lhs, rhs, slist_predicate_strcmp));
+
+	slist_free(&lhs);
+	slist_free(&rhs);
+}
+
+void slist_equal__not_equal_start(void **state) {
+	struct SList *lhs = NULL;
+	struct SList *rhs = NULL;
+
+	void *lvals[] = { "x", "1", "2", };
+	slist_append(&lhs, lvals[0]);
+	slist_append(&lhs, lvals[1]);
+	slist_append(&lhs, lvals[2]);
+
+	void *rvals[] = { "0", "1", "2", };
+	slist_append(&rhs, rvals[0]);
+	slist_append(&rhs, rvals[1]);
+	slist_append(&rhs, rvals[2]);
+
+	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+
+	slist_free(&lhs);
+	slist_free(&rhs);
+}
+
+void slist_equal__not_equal_mid(void **state) {
+	struct SList *lhs = NULL;
+	struct SList *rhs = NULL;
+
+	void *lvals[] = { "0", "x", "2", };
+	slist_append(&lhs, lvals[0]);
+	slist_append(&lhs, lvals[1]);
+	slist_append(&lhs, lvals[2]);
+
+	void *rvals[] = { "0", "1", "2", };
+	slist_append(&rhs, rvals[0]);
+	slist_append(&rhs, rvals[1]);
+	slist_append(&rhs, rvals[2]);
+
+	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+
+	slist_free(&lhs);
+	slist_free(&rhs);
+}
+
+void slist_equal__not_equal_end(void **state) {
+	struct SList *lhs = NULL;
+	struct SList *rhs = NULL;
+
+	void *lvals[] = { "0", "1", "x", };
+	slist_append(&lhs, lvals[0]);
+	slist_append(&lhs, lvals[1]);
+	slist_append(&lhs, lvals[2]);
+
+	void *rvals[] = { "0", "1", "2", };
+	slist_append(&rhs, rvals[0]);
+	slist_append(&rhs, rvals[1]);
+	slist_append(&rhs, rvals[2]);
+
+	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+
+	slist_free(&lhs);
+	slist_free(&rhs);
+}
+
+void slist_equal__not_equal_lhs_size(void **state) {
+	struct SList *lhs = NULL;
+	struct SList *rhs = NULL;
+
+	void *lvals[] = { "0", "1", };
+	slist_append(&lhs, lvals[0]);
+	slist_append(&lhs, lvals[1]);
+
+	void *rvals[] = { "0", "1", "2", };
+	slist_append(&rhs, rvals[0]);
+	slist_append(&rhs, rvals[1]);
+	slist_append(&rhs, rvals[2]);
+
+	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+
+	slist_free(&lhs);
+	slist_free(&rhs);
+}
+
+void slist_equal__not_equal_rhs_size(void **state) {
+	struct SList *lhs = NULL;
+	struct SList *rhs = NULL;
+
+	void *lvals[] = { "0", "1", "2", };
+	slist_append(&lhs, lvals[0]);
+	slist_append(&lhs, lvals[1]);
+	slist_append(&lhs, lvals[2]);
+
+	void *rvals[] = { "0", "1", };
+	slist_append(&rhs, rvals[0]);
+	slist_append(&rhs, rvals[1]);
+
+	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+
+	slist_free(&lhs);
+	slist_free(&rhs);
+}
+
+void slist_sort__empty(void **state) {
+	struct SList *from = NULL;
+
+	struct SList *to = slist_sort(from, before_int);
+	assert_null(to);
+}
+
+void slist_sort__vals(void **state) {
+	struct SList *from = NULL;
+
+	int vals[] = { 3, 2, 5, 4, 1, 0 };
+	slist_append(&from, NULL);
+	slist_append(&from, &vals[0]);
+	slist_append(&from, NULL);
+	slist_append(&from, &vals[1]);
+	slist_append(&from, &vals[2]);
+	slist_append(&from, NULL);
+	slist_append(&from, &vals[3]);
+	slist_append(&from, &vals[4]);
+	slist_append(&from, &vals[5]);
+	slist_append(&from, NULL);
+
+	struct SList *to = slist_sort(from, before_int);
+	assert_non_null(to);
+
+	assert_int_equal(slist_length(to), 10);
+
+	// first 6 are integers
+	for (int i = 0; i < 6; i++) {
+		assert_non_null(slist_at(to, i));
+		assert_int_equal(*(int*)slist_at(to, i), i);
+	}
+
+	// remaining 4 are null
+	for (int i = 6; i < 10; i++) {
+		assert_null(slist_at(to, i));
+	}
+
+	slist_free(&from);
+	slist_free(&to);
+}
+
+void slist_move__empty(void **state) {
+	struct SList *to = NULL;
+	struct SList *from = NULL;
+
+	slist_move(&to, &from, slist_predicate_strcmp, "x");
+
+	assert_null(to);
+	assert_null(from);
+}
+
+void slist_move__empty_to(void **state) {
+	struct SList *to = NULL;
+	struct SList *from = NULL;
+
+	void *vals[] = { "0", "1", "2", };
+	slist_append(&from, vals[0]);
+	slist_append(&from, vals[1]);
+	slist_append(&from, vals[2]);
+
+	slist_move(&to, &from, slist_predicate_strcmp, "x");
+
+	assert_int_equal(slist_length(to), 0);
+	assert_int_equal(slist_length(from), 3);
+
+	slist_free(&from);
+}
+
+void slist_move__empty_from(void **state) {
+	struct SList *to = NULL;
+	struct SList *from = NULL;
+
+	void *vals[] = { "0", "1", "2", };
+	slist_append(&to, vals[0]);
+	slist_append(&to, vals[1]);
+	slist_append(&to, vals[2]);
+
+	slist_move(&to, &from, slist_predicate_strcmp, "x");
+
+	assert_int_equal(slist_length(to), 3);
+	assert_int_equal(slist_length(from), 0);
+
+	slist_free(&to);
+}
+
+void slist_move__no_match(void **state) {
+	struct SList *to = NULL;
+	struct SList *from = NULL;
+
+	void *to_vals[] = { "0", "1", "2", };
+	slist_append(&to, to_vals[0]);
+	slist_append(&to, to_vals[1]);
+	slist_append(&to, to_vals[2]);
+
+	void *from_vals[] = { "0", "1", "2", };
+	slist_append(&from, from_vals[0]);
+	slist_append(&from, from_vals[1]);
+	slist_append(&from, from_vals[2]);
+
+	slist_move(&to, &from, slist_predicate_strcmp, "x");
+
+	assert_int_equal(slist_length(to), 3);
+	assert_int_equal(slist_length(from), 3);
+
+	slist_free(&to);
+	slist_free(&from);
+}
+
+void slist_move__many(void **state) {
+	struct SList *to = NULL;
+	struct SList *from = NULL;
+
+	void *to_vals[] = { "0", "1", "2", };
+	slist_append(&to, to_vals[0]);
+	slist_append(&to, to_vals[1]);
+	slist_append(&to, to_vals[2]);
+
+	void *from_vals[] = { "x0", "1", "x2", "3", "x4", };
+	slist_append(&from, from_vals[0]);
+	slist_append(&from, from_vals[1]);
+	slist_append(&from, from_vals[2]);
+	slist_append(&from, from_vals[3]);
+	slist_append(&from, from_vals[4]);
+
+	slist_move(&to, &from, predicate_strstr, "x");
+
+	// values moved
+	assert_int_equal(slist_length(to), 6);
+	assert_string_equal(slist_at(to, 0), "0");
+	assert_string_equal(slist_at(to, 1), "1");
+	assert_string_equal(slist_at(to, 2), "2");
+	assert_string_equal(slist_at(to, 3), "x0");
+	assert_string_equal(slist_at(to, 4), "x2");
+	assert_string_equal(slist_at(to, 5), "x4");
+
+	// values remaining
+	assert_int_equal(slist_length(from), 2);
+	assert_string_equal(slist_at(from, 0), "1");
+	assert_string_equal(slist_at(from, 1), "3");
+
+	slist_free(&to);
+	slist_free(&from);
+}
+
+void slist_move__all(void **state) {
+	struct SList *to = NULL;
+	struct SList *from = NULL;
+
+	void *to_vals[] = { "0", "1", };
+	slist_append(&to, to_vals[0]);
+	slist_append(&to, to_vals[1]);
+
+	void *from_vals[] = { "x0", "x1", };
+	slist_append(&from, from_vals[0]);
+	slist_append(&from, from_vals[1]);
+
+	slist_move(&to, &from, predicate_strstr, "x");
+
+	// values moved
+	assert_int_equal(slist_length(to), 4);
+	assert_string_equal(slist_at(to, 0), "0");
+	assert_string_equal(slist_at(to, 1), "1");
+	assert_string_equal(slist_at(to, 2), "x0");
+	assert_string_equal(slist_at(to, 3), "x1");
+
+	// values remaining
+	assert_int_equal(slist_length(from), 0);
+
+	slist_free(&to);
+	slist_free(&from);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(slist_free_vals__many),
@@ -251,10 +587,24 @@ int main(void) {
 		TEST(slist_find_equal_val__no),
 		TEST(slist_find_equal_val__yes),
 
-		// TODO
-		// slist_equal
-		// slist_sort
-		// slist_move
+		TEST(slist_equal__empty_lhs),
+		TEST(slist_equal__empty_rhs),
+		TEST(slist_equal__equal),
+		TEST(slist_equal__not_equal_start),
+		TEST(slist_equal__not_equal_mid),
+		TEST(slist_equal__not_equal_end),
+		TEST(slist_equal__not_equal_lhs_size),
+		TEST(slist_equal__not_equal_rhs_size),
+
+		TEST(slist_sort__empty),
+		TEST(slist_sort__vals),
+
+		TEST(slist_move__empty),
+		TEST(slist_move__empty_to),
+		TEST(slist_move__empty_from),
+		TEST(slist_move__no_match),
+		TEST(slist_move__many),
+		TEST(slist_move__all),
 	};
 
 	return RUN(tests);
