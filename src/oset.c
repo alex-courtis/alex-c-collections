@@ -103,31 +103,6 @@ bool oset_contains(const struct OSet* const set, const void* const val) {
 	return false;
 }
 
-bool oset_remove(const struct OSet* const cset, const void* const val) {
-	if (!cset || !val)
-		return false;
-
-	struct OSet *set = (struct OSet*)cset;
-
-	// loop over vals
-	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (*v == val) {
-
-			*v = NULL;
-			set->size--;
-
-			// shift down over removed
-			for (const void **m = v; m < v + set->size; m++) {
-				*m = *(m + 1);
-			}
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
 size_t oset_size(const struct OSet* const set) {
 	if (!set)
 		return 0;
@@ -205,4 +180,31 @@ bool oset_add(const struct OSet* const cset, const void* const val) {
 	set->size++;
 
 	return true;
+}
+
+bool oset_remove(const struct OSet* const cset, const void* const val) {
+	if (!cset || !val)
+		return false;
+
+	struct OSet *set = (struct OSet*)cset;
+
+	// loop over vals
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
+		if (*v == val) {
+
+			*v = NULL;
+			set->size--;
+
+			// shift down over removed
+			const void **m;
+			for (m = v; m < v + set->size; m++) {
+				*m = *(m + 1);
+			}
+			*m = NULL;
+
+			return true;
+		}
+	}
+
+	return false;
 }

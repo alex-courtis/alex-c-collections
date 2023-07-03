@@ -42,9 +42,6 @@ void oset_iter_free(const struct OSetIter* const iter);
 // true if this set contains the specified element
 bool oset_contains(const struct OSet* const set, const void* const val);
 
-// true if this set contained the element
-bool oset_remove(const struct OSet* const set, const void* const val);
-
 // number of values
 size_t oset_size(const struct OSet* const set);
 
@@ -60,6 +57,9 @@ const struct OSetIter *oset_next(const struct OSetIter* const iter);
 
 // true if this set did not already contain the specified element
 bool oset_add(const struct OSet* const set, const void* const val);
+
+// true if this set contained the element
+bool oset_remove(const struct OSet* const set, const void* const val);
 
 #endif // OSET_H
 

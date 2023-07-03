@@ -7,6 +7,14 @@
 * NULL not permitted.
 * Not thread safe.
 
+## STable
+
+* Array backed string indexed table.
+* Entries preserve insertion order.
+* Operations linearly traverse keys.
+* NULL values permitted.
+* Not thread safe.
+
 ## ITable
 
 * Array backed integer indexed table.
