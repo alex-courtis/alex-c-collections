@@ -9,14 +9,19 @@ struct ITable {
 	const void **vals;
 	size_t capacity;
 	size_t grow;
-	size_t next;
+	size_t size;
 };
 
 struct ITableIterP {
-	// public
-	uint64_t key;		// remove const
-	const void *val;	// remove const
-	// private
+	/*
+	 * Public, removed const
+	 */
+	uint64_t key;
+	const void *val;
+
+	/*
+	 * Private
+	 */
 	const struct ITable *tab;
 	const uint64_t *k;
 	const void **v;
@@ -100,7 +105,7 @@ const void *itable_get(const struct ITable* const tab, const uint64_t key) {
 	uint64_t *k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals;
-			k < tab->keys + tab->next;
+			k < tab->keys + tab->size;
 			k++, v++) {
 		if (*k == key) {
 			return *v;
@@ -118,7 +123,7 @@ const struct ITableIter *itable_iter(const struct ITable* const tab) {
 	uint64_t *k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals;
-			v < tab->vals + tab->next && k < tab->keys + tab->next;
+			v < tab->vals + tab->size && k < tab->keys + tab->size;
 			k++, v++) {
 		if (*v) {
 			struct ITableIterP *iterp = calloc(1, sizeof(struct ITableIterP));
@@ -148,8 +153,8 @@ const struct ITableIter *itable_next(const struct ITableIter* const iter) {
 	}
 
 	// loop over keys and vals
-	while (++iterp->v < iterp->tab->vals + iterp->tab->next &&
-			++iterp->k < iterp->tab->keys + iterp->tab->next) {
+	while (++iterp->v < iterp->tab->vals + iterp->tab->size &&
+			++iterp->k < iterp->tab->keys + iterp->tab->size) {
 		if (*iterp->v) {
 			iterp->key = *(iterp->k);
 			iterp->val = *(iterp->v);
@@ -165,16 +170,7 @@ size_t itable_size(const struct ITable* const tab) {
 	if (!tab)
 		return 0;
 
-	// loop over vals
-	const void **v;
-	size_t size;
-	for (v = tab->vals, size = 0; v < tab->vals + tab->next; v++) {
-		if (*v) {
-			size++;
-		}
-	}
-
-	return size;
+	return tab->size;
 }
 
 const void *itable_put(const struct ITable* const ctab, const uint64_t key, const void* const val) {
@@ -186,10 +182,10 @@ const void *itable_put(const struct ITable* const ctab, const uint64_t key, cons
 	// loop over existing keys
 	uint64_t *k;
 	const void **v;
-	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->next; k++, v++) {
+	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
-		// overwrite existing values, skip NULL holes
-		if (*k == key && *v) {
+		// overwrite existing values
+		if (*k == key) {
 			const void *prev = *v;
 			*v = val;
 			return prev;
@@ -197,16 +193,47 @@ const void *itable_put(const struct ITable* const ctab, const uint64_t key, cons
 	}
 
 	// grow for new entry
-	if (tab->next >= tab->capacity) {
+	if (tab->size >= tab->capacity) {
 		grow_itable(tab);
-		k = &tab->keys[tab->next];
-		v = &tab->vals[tab->next];
+		k = &tab->keys[tab->size];
+		v = &tab->vals[tab->size];
 	}
 
 	// new
 	*k = key;
 	*v = val;
-	tab->next++;
+	tab->size++;
+
+	return NULL;
+}
+
+const void *itable_remove(const struct ITable* const ctab, const uint64_t key) {
+	if (!ctab)
+		return NULL;
+
+	struct ITable *tab = (struct ITable*)ctab;
+
+	// loop over existing keys
+	uint64_t *k;
+	const void **v;
+	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
+
+		if (*k == key) {
+			const void* prev = *v;
+			*v = NULL;
+			tab->size--;
+
+			// shift down over removed
+			uint64_t *mk;
+			const void **mv;
+			for (mk = k, mv = v; mk < tab->keys + tab->size; mk++, mv++) {
+				*mk = *(mk + 1);
+				*mv = *(mv + 1);
+			}
+
+			return prev;
+		}
+	}
 
 	return NULL;
 }

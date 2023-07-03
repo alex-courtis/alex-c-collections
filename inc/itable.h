@@ -8,8 +8,8 @@
  * Array backed integer indexed table.
  * Entries preserve insertion order.
  * Operations linearly traverse keys.
+ * NULL values permitted.
  * Not thread safe.
- * Non NULL values only.
  */
 struct ITable;
 
@@ -57,8 +57,11 @@ size_t itable_size(const struct ITable* const tab);
  * Mutate
  */
 
-// set key/val, return old val if overwritten, NULL val to remove
+// set key/val, return old val if overwritten
 const void *itable_put(const struct ITable* const tab, const uint64_t key, const void* const val);
+
+// remove key, return old val if present
+const void *itable_remove(const struct ITable* const tab, const uint64_t key);
 
 #endif // ITABLE_H
 

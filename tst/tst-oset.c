@@ -6,6 +6,13 @@
 
 #include "oset.h"
 
+struct OSet {
+	const void **vals;
+	size_t capacity;
+	size_t grow;
+	size_t size;
+};
+
 int before_all(void **state) {
 	return 0;
 }
@@ -32,6 +39,9 @@ void oset_init__size(void **state) {
 	assert_non_null(set);
 
 	assert_int_equal(oset_size(set), 0);
+
+	assert_int_equal(set->capacity, 5);
+	assert_int_equal(set->grow, 50);
 
 	oset_free(set);
 }
@@ -132,23 +142,28 @@ void oset_add__grow(void **state) {
 	assert_true(oset_add(set, initial[1]));
 
 	assert_int_equal(oset_size(set), 2);
+	assert_int_equal(set->capacity, 2);
+
 	assert_true(oset_contains(set, initial[0]));
 	assert_true(oset_contains(set, initial[1]));
 
 	void *grow[] = { "2", "3", };
 	assert_true(oset_add(set, grow[0]));
-	assert_true(oset_add(set, grow[1]));
-
+	assert_int_equal(oset_size(set), 3);
+	assert_int_equal(set->capacity, 7);
 	assert_true(oset_contains(set, grow[0]));
-	assert_true(oset_contains(set, grow[1]));
 
+	assert_true(oset_add(set, grow[1]));
 	assert_int_equal(oset_size(set), 4);
+	assert_int_equal(set->capacity, 7);
+	assert_true(oset_contains(set, grow[1]));
 
 	void *subsequent[] = { "4", "5", };
 	assert_true(oset_add(set, subsequent[0]));
 	assert_true(oset_add(set, subsequent[1]));
-
 	assert_int_equal(oset_size(set), 6);
+	assert_int_equal(set->capacity, 7);
+
 	assert_true(oset_contains(set, subsequent[0]));
 	assert_true(oset_contains(set, subsequent[1]));
 
@@ -166,11 +181,19 @@ void oset_remove__existing(void **state) {
 	assert_true(oset_contains(set, vals[0]));
 	assert_true(oset_contains(set, vals[1]));
 
+	// 0
 	assert_true(oset_remove(set, vals[0]));
 
 	assert_int_equal(oset_size(set), 1);
 	assert_false(oset_contains(set, vals[0]));
 	assert_true(oset_contains(set, vals[1]));
+
+	// 1
+	assert_true(oset_remove(set, vals[1]));
+
+	assert_int_equal(oset_size(set), 0);
+	assert_false(oset_contains(set, vals[0]));
+	assert_false(oset_contains(set, vals[1]));
 
 	oset_free(set);
 }
@@ -192,6 +215,16 @@ void oset_remove__inexistent(void **state) {
 	assert_int_equal(oset_size(set), 2);
 	assert_true(oset_contains(set, vals[0]));
 	assert_true(oset_contains(set, vals[1]));
+
+	oset_free(set);
+}
+
+void oset_iter__empty(void **state) {
+	const struct OSet *set = oset_init(5, 5);
+
+	assert_int_equal(oset_size(set), 0);
+
+	assert_null(oset_iter(set));
 
 	oset_free(set);
 }
@@ -219,39 +252,7 @@ void oset_iter__vals(void **state) {
 	oset_free(set);
 }
 
-void oset_iter__holes(void **state) {
-	const struct OSet *set = oset_init(5, 5);
-
-	void *vals[] = { "0", "1", "2", "3", "4", };
-	assert_true(oset_add(set, vals[0]));
-	assert_true(oset_add(set, vals[1]));
-	assert_true(oset_add(set, vals[2]));
-	assert_true(oset_add(set, vals[3]));
-	assert_true(oset_add(set, vals[4]));
-
-	assert_int_equal(oset_size(set), 5);
-
-	assert_true(oset_remove(set, vals[0]));
-	assert_true(oset_remove(set, vals[2]));
-	assert_true(oset_remove(set, vals[4]));
-
-	assert_int_equal(oset_size(set), 2);
-
-	const struct OSetIter *iter = oset_iter(set);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "1");
-
-	iter = oset_next(iter);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "3");
-
-	iter = oset_next(iter);
-	assert_null(iter);
-
-	oset_free(set);
-}
-
-void oset_add__later(void **state) {
+void oset_iter__cleared(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { "0", "1", };
@@ -260,24 +261,54 @@ void oset_add__later(void **state) {
 
 	assert_int_equal(oset_size(set), 2);
 
-	// remove zero
-	assert_true(oset_remove(set, vals[0]));
+	oset_remove(set, vals[0]);
+	oset_remove(set, vals[1]);
 
-	assert_int_equal(oset_size(set), 1);
+	assert_int_equal(oset_size(set), 0);
 
-	// put zero again afterwards
+	assert_null(oset_iter(set));
+
+	oset_free(set);
+}
+
+void oset_add__again(void **state) {
+	const struct OSet *set = oset_init(5, 5);
+
+	void *vals[] = { "0", "1", "2", "3", };
 	assert_true(oset_add(set, vals[0]));
-	assert_int_equal(oset_size(set), 2);
+	assert_true(oset_add(set, vals[1]));
+	assert_true(oset_add(set, vals[2]));
+	assert_true(oset_add(set, vals[3]));
 
-	// one
+	assert_int_equal(oset_size(set), 4);
+
+	// remove 1
+	assert_true(oset_remove(set, vals[1]));
+	assert_int_equal(oset_size(set), 3);
+
+	// put 1 again afterwards
+	assert_true(oset_add(set, vals[1]));
+	assert_int_equal(oset_size(set), 4);
+
+	// 0
 	const struct OSetIter *iter = oset_iter(set);
 	assert_non_null(iter);
-	assert_string_equal(iter->val, "1");
+	assert_string_equal(iter->val, "0");
 
-	// zero moved later
+	// 2
 	iter = oset_next(iter);
 	assert_non_null(iter);
-	assert_string_equal(iter->val, "0");
+	assert_string_equal(iter->val, "2");
+
+	// 3
+	iter = oset_next(iter);
+	assert_non_null(iter);
+	assert_string_equal(iter->val, "3");
+
+	// 0 moved later
+	iter = oset_next(iter);
+	assert_non_null(iter);
+	assert_string_equal(iter->val, "1");
 
 	// end
 	iter = oset_next(iter);
@@ -302,10 +333,11 @@ int main(void) {
 		TEST(oset_remove__existing),
 		TEST(oset_remove__inexistent),
 
+		TEST(oset_iter__empty),
 		TEST(oset_iter__vals),
-		TEST(oset_iter__holes),
+		TEST(oset_iter__cleared),
 
-		TEST(oset_add__later),
+		TEST(oset_add__again),
 	};
 
 	return RUN(tests);

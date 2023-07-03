@@ -7,8 +7,9 @@
 /*
  * Array backed ordered set.
  * Operations linearly traverse values.
- * Non NULL values only.
- */
+ * NULL not permitted.
+ * Not thread safe.
+*/
 struct OSet;
 
 /*

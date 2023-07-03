@@ -6,6 +6,14 @@
 
 #include "itable.h"
 
+struct ITable {
+	uint64_t *keys;
+	const void **vals;
+	size_t capacity;
+	size_t grow;
+	size_t size;
+};
+
 int before_all(void **state) {
 	return 0;
 }
@@ -32,6 +40,8 @@ void itable_init__size(void **state) {
 	assert_non_null(tab);
 
 	assert_int_equal(itable_size(tab), 0);
+	assert_int_equal(tab->capacity, 5);
+	assert_int_equal(tab->grow, 50);
 
 	itable_free(tab);
 }
@@ -117,23 +127,46 @@ void itable_put__new(void **state) {
 void itable_put__overwrite(void **state) {
 	const struct ITable *tab = itable_init(5, 5);
 
-	char *initial[] = { "0", "1", "2", };
+	char *initial[] = { "0", "1", "2", "3", };
 	assert_null(itable_put(tab, 0, initial[0]));
 	assert_null(itable_put(tab, 1, initial[1]));
 	assert_null(itable_put(tab, 2, initial[2]));
+	assert_null(itable_put(tab, 3, initial[3]));
 
-	char *new1 = "new";
-	assert_string_equal(itable_put(tab, 1, new1), "1");
+	char *new[] = { "10", "13", };
+	assert_string_equal(itable_put(tab, 1, new[0]), "1");
+	assert_string_equal(itable_put(tab, 3, new[1]), "3");
 
-	assert_int_equal(itable_size(tab), 3);
+	assert_int_equal(itable_size(tab), 4);
 	assert_string_equal(itable_get(tab, 0), "0");
-	assert_string_equal(itable_get(tab, 1), "new");
+	assert_string_equal(itable_get(tab, 1), "10");
 	assert_string_equal(itable_get(tab, 2), "2");
+	assert_string_equal(itable_get(tab, 3), "13");
 
 	itable_free(tab);
 }
 
 void itable_put__null(void **state) {
+	const struct ITable *tab = itable_init(5, 5);
+
+	char *vals[] = { "0", "1", "2", };
+	assert_null(itable_put(tab, 0, vals[0]));
+	assert_int_equal(itable_size(tab), 1);
+
+	assert_null(itable_put(tab, 1, NULL));
+	assert_int_equal(itable_size(tab), 2);
+
+	assert_null(itable_put(tab, 2, vals[2]));
+	assert_int_equal(itable_size(tab), 3);
+
+	assert_string_equal(itable_get(tab, 0), vals[0]);
+	assert_null(itable_get(tab, 1));
+	assert_string_equal(itable_get(tab, 2), vals[2]);
+
+	itable_free(tab);
+}
+
+void itable_put__null_overwrite(void **state) {
 	const struct ITable *tab = itable_init(5, 5);
 
 	char *zero = "0";
@@ -143,7 +176,7 @@ void itable_put__null(void **state) {
 
 	assert_string_equal(itable_put(tab, 0, NULL), "0");
 
-	assert_int_equal(itable_size(tab), 0);
+	assert_int_equal(itable_size(tab), 1);
 	assert_null(itable_get(tab, 0));
 
 	itable_free(tab);
@@ -158,13 +191,18 @@ void itable_put__grow(void **state) {
 	assert_null(itable_put(tab, 2, initial[2]));
 
 	assert_int_equal(itable_size(tab), 3);
+	assert_int_equal(tab->capacity, 3);
 
 	char *grow[] = { "3", "4", "5", };
 	assert_null(itable_put(tab, 3, grow[0]));
+	assert_int_equal(itable_size(tab), 4);
+	assert_int_equal(tab->capacity, 8);
+
 	assert_null(itable_put(tab, 4, grow[1]));
 	assert_null(itable_put(tab, 5, grow[2]));
 
 	assert_int_equal(itable_size(tab), 6);
+	assert_int_equal(tab->capacity, 8);
 
 	assert_string_equal(itable_get(tab, 0), "0");
 	assert_string_equal(itable_get(tab, 1), "1");
@@ -179,27 +217,6 @@ void itable_put__grow(void **state) {
 
 void itable_iter__empty(void **state) {
 	const struct ITable *tab = itable_init(3, 5);
-
-	assert_null(itable_iter(tab));
-
-	itable_free(tab);
-}
-
-void itable_iter__cleared(void **state) {
-	const struct ITable *tab = itable_init(3, 5);
-
-	char *vals[] = { "0", "1", "2", };
-	assert_null(itable_put(tab, 0, vals[0]));
-	assert_null(itable_put(tab, 1, vals[1]));
-	assert_null(itable_put(tab, 2, vals[2]));
-
-	assert_int_equal(itable_size(tab), 3);
-
-	assert_string_equal(itable_put(tab, 0, NULL), "0");
-	assert_string_equal(itable_put(tab, 1, NULL), "1");
-	assert_string_equal(itable_put(tab, 2, NULL), "2");
-
-	assert_int_equal(itable_size(tab), 0);
 
 	assert_null(itable_iter(tab));
 
@@ -239,7 +256,7 @@ void itable_iter__vals(void **state) {
 	itable_free(tab);
 }
 
-void itable_iter__holes(void **state) {
+void itable_iter__removed(void **state) {
 	const struct ITable *tab = itable_init(3, 5);
 
 	void *vals[] = { "0", "1", "2", "3", "4", };
@@ -249,9 +266,9 @@ void itable_iter__holes(void **state) {
 	assert_null(itable_put(tab, 3, vals[3]));
 	assert_null(itable_put(tab, 4, vals[4]));
 
-	assert_string_equal(itable_put(tab, 0, NULL), "0");
-	assert_string_equal(itable_put(tab, 2, NULL), "2");
-	assert_string_equal(itable_put(tab, 4, NULL), "4");
+	assert_string_equal(itable_remove(tab, 0), "0");
+	assert_string_equal(itable_remove(tab, 2), "2");
+	assert_string_equal(itable_remove(tab, 4), "4");
 
 	assert_int_equal(itable_size(tab), 2);
 
@@ -274,7 +291,7 @@ void itable_iter__holes(void **state) {
 	itable_free(tab);
 }
 
-void itable_put__later(void **state) {
+void itable_put__again(void **state) {
 	const struct ITable *tab = itable_init(3, 5);
 
 	void *vals[] = { "0", "1", };
@@ -286,7 +303,7 @@ void itable_put__later(void **state) {
 	assert_string_equal(itable_get(tab, 1), "1");
 
 	// remove zero
-	assert_string_equal(itable_put(tab, 0, NULL), "0");
+	assert_string_equal(itable_remove(tab, 0), "0");
 
 	assert_int_equal(itable_size(tab), 1);
 	assert_null(itable_get(tab, 0));
@@ -314,6 +331,63 @@ void itable_put__later(void **state) {
 	itable_free(tab);
 }
 
+void itable_remove__existing(void **state) {
+	const struct ITable *tab = itable_init(3, 5);
+
+	void *vals[] = { "0", "1", "2", };
+	assert_null(itable_put(tab, 0, vals[0]));
+	assert_null(itable_put(tab, 1, vals[1]));
+	assert_null(itable_put(tab, 2, vals[2]));
+
+	assert_int_equal(itable_size(tab), 3);
+	assert_string_equal(itable_get(tab, 0), "0");
+	assert_string_equal(itable_get(tab, 1), "1");
+	assert_string_equal(itable_get(tab, 2), "2");
+
+	// 1
+	assert_string_equal(itable_remove(tab, 1), "1");
+	assert_int_equal(itable_size(tab), 2);
+	assert_string_equal(itable_get(tab, 0), "0");
+	assert_null(itable_get(tab, 1));
+	assert_string_equal(itable_get(tab, 2), "2");
+
+	// 2
+	assert_string_equal(itable_remove(tab, 2), "2");
+	assert_int_equal(itable_size(tab), 1);
+	assert_string_equal(itable_get(tab, 0), "0");
+	assert_null(itable_get(tab, 1));
+	assert_null(itable_get(tab, 2));
+
+	// 0
+	assert_string_equal(itable_remove(tab, 0), "0");
+	assert_int_equal(itable_size(tab), 0);
+	assert_null(itable_get(tab, 0));
+	assert_null(itable_get(tab, 1));
+	assert_null(itable_get(tab, 2));
+
+	itable_free(tab);
+}
+
+void itable_remove__inexistent(void **state) {
+	const struct ITable *tab = itable_init(3, 5);
+
+	void *vals[] = { "0", "1", "2", };
+	assert_null(itable_put(tab, 0, vals[0]));
+	assert_null(itable_put(tab, 1, vals[1]));
+	assert_null(itable_put(tab, 2, vals[2]));
+
+	assert_int_equal(itable_size(tab), 3);
+	assert_string_equal(itable_get(tab, 0), "0");
+	assert_string_equal(itable_get(tab, 1), "1");
+	assert_string_equal(itable_get(tab, 2), "2");
+
+	// 1
+	assert_null(itable_remove(tab, 3));
+	assert_int_equal(itable_size(tab), 3);
+
+	itable_free(tab);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(itable_init__size),
@@ -326,14 +400,17 @@ int main(void) {
 		TEST(itable_put__new),
 		TEST(itable_put__overwrite),
 		TEST(itable_put__null),
+		TEST(itable_put__null_overwrite),
 		TEST(itable_put__grow),
 
 		TEST(itable_iter__empty),
-		TEST(itable_iter__cleared),
 		TEST(itable_iter__vals),
-		TEST(itable_iter__holes),
+		TEST(itable_iter__removed),
 
-		TEST(itable_put__later),
+		TEST(itable_put__again),
+
+		TEST(itable_remove__existing),
+		TEST(itable_remove__inexistent),
 	};
 
 	return RUN(tests);
