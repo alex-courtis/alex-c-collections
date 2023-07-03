@@ -5,23 +5,25 @@
 #include "oset.h"
 
 struct OSet {
-	void **vals;
+	const void **vals;
 	size_t capacity;
 	size_t grow;
 	size_t next;
 };
 
 struct OSetIterP {
-	struct OSetIter iter;
+	// public
+	const void* val;	// remove const
+	// private
 	const struct OSet *set;
-	void **v;
+	const void **v;
 };
 
 // grow to capacity + grow
 void grow_oset(struct OSet *set) {
 
 	// grow new arrays
-	void **new_vals = calloc(set->capacity + set->grow, sizeof(void*));
+	const void **new_vals = calloc(set->capacity + set->grow, sizeof(void*));
 
 	// copy old arrays
 	memcpy(new_vals, set->vals, set->capacity * sizeof(void*));
@@ -46,7 +48,7 @@ const struct OSet *oset_init(const size_t initial, const size_t grow) {
 	return set;
 }
 
-void oset_free(const void *cvset) {
+void oset_free(const void* const cvset) {
 	if (!cvset)
 		return;
 
@@ -57,19 +59,17 @@ void oset_free(const void *cvset) {
 	free(set);
 }
 
-void oset_free_vals(const struct OSet *cset, void (*free_val)(void *val)) {
-	if (!cset)
+void oset_free_vals(const struct OSet* const set, void (*free_val)(const void* const val)) {
+	if (!set)
 		return;
 
-	struct OSet *set = (struct OSet*)cset;
-
 	// loop over vals
-	for (void **v = set->vals; v < set->vals + set->capacity; v++) {
+	for (const void **v = set->vals; v < set->vals + set->capacity; v++) {
 		if (*v) {
 			if (free_val) {
 				free_val(*v);
 			} else {
-				free(*v);
+				free((void*)*v);
 			}
 		}
 	}
@@ -77,21 +77,19 @@ void oset_free_vals(const struct OSet *cset, void (*free_val)(void *val)) {
 	oset_free(set);
 }
 
-void oset_iter_free(const struct OSetIter *iter) {
+void oset_iter_free(const struct OSetIter* const iter) {
 	if (!iter)
 		return;
 
 	free((struct OSetIterP*)iter);
 }
 
-bool oset_contains(const struct OSet *cset, const void *val) {
-	if (!cset || !val)
+bool oset_contains(const struct OSet* const set, const void* const val) {
+	if (!set || !val)
 		return false;
 
-	struct OSet *set = (struct OSet*)cset;
-
 	// loop over vals
-	for (void **v = set->vals; v < set->vals + set->next; v++) {
+	for (const void **v = set->vals; v < set->vals + set->next; v++) {
 		if (*v == val) {
 			return true;
 		}
@@ -100,14 +98,12 @@ bool oset_contains(const struct OSet *cset, const void *val) {
 	return false;
 }
 
-bool oset_remove(const struct OSet *cset, const void *val) {
-	if (!cset || !val)
+bool oset_remove(const struct OSet* const set, const void* const val) {
+	if (!set || !val)
 		return false;
 
-	struct OSet *set = (struct OSet*)cset;
-
 	// loop over vals
-	for (void **v = set->vals; v < set->vals + set->next; v++) {
+	for (const void **v = set->vals; v < set->vals + set->next; v++) {
 		if (*v == val) {
 			*v = NULL;
 			return true;
@@ -117,14 +113,12 @@ bool oset_remove(const struct OSet *cset, const void *val) {
 	return false;
 }
 
-size_t oset_size(const struct OSet *cset) {
-	if (!cset)
+size_t oset_size(const struct OSet* const set) {
+	if (!set)
 		return 0;
 
-	struct OSet *set = (struct OSet*)cset;
-
 	// loop over vals
-	void **v;
+	const void **v;
 	size_t size;
 	for (v = set->vals, size = 0; v < set->vals + set->next; v++) {
 		if (*v) {
@@ -135,19 +129,17 @@ size_t oset_size(const struct OSet *cset) {
 	return size;
 }
 
-const struct OSetIter *oset_iter(const struct OSet *cset) {
-	if (!cset)
+const struct OSetIter *oset_iter(const struct OSet* const set) {
+	if (!set)
 		return NULL;
 
-	struct OSet *set = (struct OSet*)cset;
-
 	// loop over vals
-	for (void **v = set->vals; v < set->vals + set->next; v++) {
+	for (const void **v = set->vals; v < set->vals + set->next; v++) {
 		if (*v) {
 			struct OSetIterP *iterp = calloc(1, sizeof(struct OSetIterP));
 
 			iterp->set = set;
-			iterp->iter.val = *v;
+			iterp->val = *v;
 			iterp->v = v;
 
 			return (struct OSetIter*)iterp;
@@ -157,7 +149,7 @@ const struct OSetIter *oset_iter(const struct OSet *cset) {
 	return NULL;
 }
 
-const struct OSetIter *oset_next(const struct OSetIter *iter) {
+const struct OSetIter *oset_next(const struct OSetIter* const iter) {
 	if (!iter)
 		return NULL;
 
@@ -171,7 +163,7 @@ const struct OSetIter *oset_next(const struct OSetIter *iter) {
 	// loop over vals
 	while (++iterp->v < iterp->set->vals + iterp->set->next) {
 		if (*iterp->v) {
-			iterp->iter.val = *(iterp->v);
+			iterp->val = *(iterp->v);
 			return iter;
 		}
 	}
@@ -180,14 +172,14 @@ const struct OSetIter *oset_next(const struct OSetIter *iter) {
 	return NULL;
 }
 
-bool oset_add(const struct OSet *cset, const void *val) {
+bool oset_add(const struct OSet* const cset, const void* const val) {
 	if (!cset || !val)
 		return false;
 
 	struct OSet *set = (struct OSet*)cset;
 
 	// loop over vals
-	void **v;
+	const void **v;
 	for (v = set->vals; v < set->vals + set->next; v++) {
 
 		// already present

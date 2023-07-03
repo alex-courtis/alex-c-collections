@@ -22,7 +22,7 @@ int after_each(void **state) {
 	return 0;
 }
 
-void mock_free_val(void *val) {
+void mock_free_val(const void *val) {
 	check_expected(val);
 }
 
@@ -71,7 +71,7 @@ void itable_free_vals__free_val(void **state) {
 	itable_free_vals(tab, mock_free_val);
 }
 
-void free_val_itable(void *val) {
+void free_val_itable(const void *val) {
 	itable_free_vals(val, mock_free_val);
 }
 

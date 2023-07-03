@@ -22,7 +22,7 @@ int after_each(void **state) {
 	return 0;
 }
 
-void mock_free_val(void *val) {
+void mock_free_val(const void *val) {
 	check_expected(val);
 }
 

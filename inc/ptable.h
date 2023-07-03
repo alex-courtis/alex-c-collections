@@ -24,36 +24,36 @@ struct PTableIter {
 const struct PTable *ptable_init(const size_t initial, const size_t grow);
 
 // free table
-void ptable_free(const void *tab);
+void ptable_free(const void* const tab);
 
 // free table and vals, null free_val uses free()
-void ptable_free_vals(const struct PTable *tab, void (*free_val)(void *val));
+void ptable_free_vals(const struct PTable* const tab, void (*free_val)(const void* const val));
 
 // free iter
-void ptable_iter_free(const struct PTableIter *iter);
+void ptable_iter_free(const struct PTableIter* const iter);
 
 /*
  * Access
  */
 
 // return val, NULL not present
-void *ptable_get(const struct PTable *tab, const void* key);
+const void *ptable_get(const struct PTable* const tab, const void* const key);
 
 // create an iterator, caller must ptable_iter_free or invoke ptable_next until NULL
-const struct PTableIter *ptable_iter(const struct PTable *tab);
+const struct PTableIter *ptable_iter(const struct PTable* const tab);
 
 // next iterator value, NULL at end of list
-const struct PTableIter *ptable_next(const struct PTableIter *iter);
+const struct PTableIter *ptable_next(const struct PTableIter* const iter);
 
 // number of entries with val
-size_t ptable_size(const struct PTable *tab);
+size_t ptable_size(const struct PTable* const tab);
 
 /*
  * Mutate
  */
 
 // set key/val, return old val if overwritten, NULL val to remove
-void *ptable_put(const struct PTable *tab, void* key, void *val);
+const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val);
 
 #endif // PTABLE_H
 
