@@ -71,6 +71,35 @@ void itable_free_vals__free_val(void **state) {
 	itable_free_vals(tab, mock_free_val);
 }
 
+void free_val_itable(void *val) {
+	itable_free_vals(val, mock_free_val);
+}
+
+void itable_free_vals__free_val_reentrant(void **state) {
+	const struct ITable *outer = itable_init(3, 5);
+	const struct ITable *inner1 = itable_init(3, 5);
+	const struct ITable *inner2 = itable_init(3, 5);
+
+	char *vals[] = { "11", "12", "21", "22", };
+
+	expect_value(mock_free_val, val, "11");
+	expect_value(mock_free_val, val, "12");
+	expect_value(mock_free_val, val, "21");
+	expect_value(mock_free_val, val, "22");
+
+	itable_put(inner1, 1, vals[0]);
+	itable_put(inner1, 2, vals[1]);
+	itable_put(inner2, 1, vals[2]);
+	itable_put(inner2, 2, vals[3]);
+
+	itable_put(outer, 1, (void*)inner1);
+	itable_put(outer, 2, (void*)inner2);
+
+	assert_int_equal(itable_size(outer), 2);
+
+	itable_free_vals(outer, free_val_itable);
+}
+
 void itable_put__new(void **state) {
 	const struct ITable *tab = itable_init(5, 5);
 
@@ -292,6 +321,7 @@ int main(void) {
 
 		TEST(itable_free_vals__null),
 		TEST(itable_free_vals__free_val),
+		TEST(itable_free_vals__free_val_reentrant),
 
 		TEST(itable_put__new),
 		TEST(itable_put__overwrite),

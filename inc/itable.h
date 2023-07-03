@@ -8,6 +8,7 @@
  * Array backed integer indexed table.
  * Entries preserve insertion order.
  * Operations linearly traverse keys.
+ * Not thread safe.
  * Non NULL values only.
  */
 struct ITable;
