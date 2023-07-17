@@ -2,7 +2,6 @@
 #define STABLE_H
 
 #include <stddef.h>
-#include <stdint.h>
 
 /*
  * Array backed string indexed table.

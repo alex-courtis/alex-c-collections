@@ -2,6 +2,7 @@
 
 #include <cmocka.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "stable.h"
