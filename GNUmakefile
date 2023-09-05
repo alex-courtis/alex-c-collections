@@ -33,8 +33,7 @@ test: $(TST_E)
 valgrind: TST_WITH = valgrind --leak-check=full --show-leak-kinds=all
 valgrind: test
 
-# make -k iwyu > /dev/null
-IWYU = include-what-you-use -Xiwyu --no_fwd_decls -Xiwyu --verbose=2
+IWYU = include-what-you-use -Xiwyu --no_fwd_decls -Xiwyu --error=1 -Xiwyu --verbose=3
 iwyu: CC = $(IWYU) -Xiwyu --check_also="inc/*h"
 iwyu: clean $(SRC_O) $(TST_O)
 
