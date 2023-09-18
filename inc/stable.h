@@ -1,6 +1,7 @@
 #ifndef STABLE_H
 #define STABLE_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 /*
@@ -25,7 +26,7 @@ struct STableIter {
  */
 
 // construct a table with initial size, growing as necessary, NULL on zero param
-const struct STable *stable_init(const size_t initial, const size_t grow);
+const struct STable *stable_init(const size_t initial, const size_t grow, const bool case_insensitive);
 
 // free table
 void stable_free(const void* const tab);

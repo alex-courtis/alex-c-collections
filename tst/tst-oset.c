@@ -1,17 +1,12 @@
 #include "tst.h"
+#include "asserts.h"
 
 #include <cmocka.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "oset.h"
-
-struct OSet {
-	const void **vals;
-	size_t capacity;
-	size_t grow;
-	size_t size;
-};
+#include "../src/oset.c"
 
 int before_all(void **state) {
 	return 0;
@@ -36,7 +31,7 @@ void mock_free_val(const void *val) {
 void oset_init__size(void **state) {
 	const struct OSet *set = oset_init(5, 50);
 
-	assert_non_null(set);
+	assert_non_nul(set);
 
 	assert_int_equal(oset_size(set), 0);
 
@@ -49,7 +44,7 @@ void oset_init__size(void **state) {
 void oset_init__invalid(void **state) {
 	const struct OSet *set = oset_init(0, 0);
 
-	assert_null(set);
+	assert_nul(set);
 }
 
 void oset_free_vals__null(void **state) {
@@ -224,7 +219,7 @@ void oset_iter__empty(void **state) {
 
 	assert_int_equal(oset_size(set), 0);
 
-	assert_null(oset_iter(set));
+	assert_nul(oset_iter(set));
 
 	oset_free(set);
 }
@@ -239,15 +234,15 @@ void oset_iter__vals(void **state) {
 	assert_int_equal(oset_size(set), 2);
 
 	const struct OSetIter *iter = oset_iter(set);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "0");
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "0");
 
 	iter = oset_next(iter);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "1");
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "1");
 
 	iter = oset_next(iter);
-	assert_null(iter);
+	assert_nul(iter);
 
 	oset_free(set);
 }
@@ -266,7 +261,7 @@ void oset_iter__cleared(void **state) {
 
 	assert_int_equal(oset_size(set), 0);
 
-	assert_null(oset_iter(set));
+	assert_nul(oset_iter(set));
 
 	oset_free(set);
 }
@@ -292,27 +287,27 @@ void oset_add__again(void **state) {
 
 	// 0
 	const struct OSetIter *iter = oset_iter(set);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "0");
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "0");
 
 	// 2
 	iter = oset_next(iter);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "2");
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "2");
 
 	// 3
 	iter = oset_next(iter);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "3");
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "3");
 
 	// 0 moved later
 	iter = oset_next(iter);
-	assert_non_null(iter);
-	assert_string_equal(iter->val, "1");
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "1");
 
 	// end
 	iter = oset_next(iter);
-	assert_null(iter);
+	assert_nul(iter);
 
 	oset_free(set);
 }

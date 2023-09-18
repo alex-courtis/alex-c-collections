@@ -15,7 +15,7 @@ all: test
 $(SRC_O): $(INC_H) config.mk GNUmakefile
 $(TST_O): $(TST_H) $(SRC_O) config.mk GNUmakefile
 $(TST_E): $(SRC_O) $(TST_O)
-	$(CC) -o $(@) tst/$(@).o $(SRC_O) $(LDFLAGS) $(LDLIBS)
+	$(CC) -o $(@) tst/$(@).o $(LDFLAGS) $(LDLIBS)
 
 clean:
 	rm -f $(SRC_O) $(TST_O) $(TST_E)

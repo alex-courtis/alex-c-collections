@@ -1,7 +1,11 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include "stable.h"
+
+typedef int (*comparator)(const char *s1, const char *s2);
 
 struct STable {
 	const char **keys;
@@ -9,6 +13,7 @@ struct STable {
 	size_t capacity;
 	size_t grow;
 	size_t size;
+	comparator cmp;
 };
 
 struct STableIterP {
@@ -47,13 +52,18 @@ void grow_stable(struct STable *tab) {
 	tab->capacity += tab->grow;
 }
 
-const struct STable *stable_init(const size_t initial, const size_t grow) {
+const struct STable *stable_init(const size_t initial, const size_t grow, const bool case_insensitive) {
 	if (initial == 0 || grow == 0)
 		return NULL;
 
 	struct STable *tab = calloc(1, sizeof(struct STable));
 	tab->capacity = initial;
 	tab->grow = grow;
+	if (case_insensitive) {
+		tab->cmp = strcasecmp;
+	} else {
+		tab->cmp = strcmp;
+	}
 	tab->keys = calloc(tab->capacity, sizeof(char*));
 	tab->vals = calloc(tab->capacity, sizeof(void*));
 
@@ -109,7 +119,7 @@ const void *stable_get(const struct STable* const tab, const char* const key) {
 	for (k = tab->keys, v = tab->vals;
 			k < tab->keys + tab->size;
 			k++, v++) {
-		if (strcmp(*k, key) == 0) {
+		if (tab->cmp(*k, key) == 0) {
 			return *v;
 		}
 	}
@@ -187,7 +197,7 @@ const void *stable_put(const struct STable* const ctab, const char* const key, c
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
 		// overwrite existing values
-		if (strcmp(*k, key) == 0) {
+		if (tab->cmp(*k, key) == 0) {
 			const void *prev = *v;
 			*v = val;
 			return prev;
@@ -220,7 +230,7 @@ const void *stable_remove(const struct STable* const ctab, const char* const key
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
-		if (strcmp(*k, key) == 0) {
+		if (tab->cmp(*k, key) == 0) {
 			free((void*)*k);
 			*k = NULL;
 			const void* prev = *v;
