@@ -6,8 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fn.h"
+
 #include "slist.h"
-#include "../src/slist.c"
 
 int before_all(void **state) {
 	return 0;
@@ -25,22 +26,22 @@ int after_each(void **state) {
 	return 0;
 }
 
-void mock_free_val(void *val) {
+void mock_free_val(const void* const val) {
 	check_expected(val);
 }
 
-bool x_test(const void *data) {
+bool test_contains_x(const void *data) {
 	if (strcmp("x", data) == 0) {
 		return true;
 	}
 	return false;
 }
 
-bool false_test(const void *data) {
+bool test_false(const void *data) {
 	return false;
 }
 
-bool before_int(const void *a, const void *b) {
+bool less_than_int(const void *a, const void *b) {
 	if (a && b)
 		return (*(int*)a < *(int*)b);
 	else if (a && !b)
@@ -49,13 +50,6 @@ bool before_int(const void *a, const void *b) {
 		return false;
 	else
 		return false;
-}
-
-bool predicate_strstr(const void *val, const void *data) {
-	if (!val || !data) {
-		return false;
-	}
-	return strstr(val, data);
 }
 
 void slist_free_vals__many(void **state) {
@@ -131,7 +125,7 @@ void slist_remove_all__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 4);
 
-	slist_remove_all(&list, slist_predicate_strcmp, "x");
+	slist_remove_all(&list, fn_comp_equals_strcmp, "x");
 
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 2);
@@ -166,7 +160,7 @@ void slist_remove_all_free__some(void **state) {
 	expect_string(mock_free_val, val, "x");
 	expect_string(mock_free_val, val, "x");
 
-	slist_remove_all_free(&list, slist_predicate_strcmp, "x", mock_free_val);
+	slist_remove_all_free(&list, fn_comp_equals_strcmp, "x", mock_free_val);
 
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 2);
@@ -197,7 +191,7 @@ void slist_find__no(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_val(list, false_test);
+	void *val = slist_find_val(list, test_false);
 	assert_nul(val);
 
 	slist_free(&list);
@@ -214,7 +208,7 @@ void slist_find__yes(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_val(list, x_test);
+	void *val = slist_find_val(list, test_contains_x);
 	assert_non_nul(val);
 	assert_str_equal(val, "x");
 
@@ -232,7 +226,7 @@ void slist_find_equal_val__no(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_equal_val(list, slist_predicate_strcmp, "x");
+	void *val = slist_find_equal_val(list, fn_comp_equals_strcmp, "x");
 	assert_nul(val);
 
 	slist_free(&list);
@@ -249,7 +243,7 @@ void slist_find_equal_val__yes(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_equal_val(list, slist_predicate_strcmp, "1");
+	void *val = slist_find_equal_val(list, fn_comp_equals_strcmp, "1");
 	assert_non_nul(val);
 	assert_str_equal(val, "1");
 
@@ -264,7 +258,7 @@ void slist_equal__empty_lhs(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(NULL, rhs, slist_predicate_strcmp));
+	assert_false(slist_equal(NULL, rhs, fn_comp_equals_strcmp));
 
 	slist_free(&rhs);
 }
@@ -277,7 +271,7 @@ void slist_equal__empty_rhs(void **state) {
 	slist_append(&lhs, lvals[1]);
 	slist_append(&lhs, lvals[2]);
 
-	assert_false(slist_equal(lhs, NULL, slist_predicate_strcmp));
+	assert_false(slist_equal(lhs, NULL, fn_comp_equals_strcmp));
 
 	slist_free(&lhs);
 }
@@ -296,7 +290,7 @@ void slist_equal__equal(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_true(slist_equal(lhs, rhs, slist_predicate_strcmp));
+	assert_true(slist_equal(lhs, rhs, fn_comp_equals_strcmp));
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -316,7 +310,7 @@ void slist_equal__not_equal_start(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+	assert_false(slist_equal(lhs, rhs, fn_comp_equals_strcmp));
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -336,7 +330,7 @@ void slist_equal__not_equal_mid(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+	assert_false(slist_equal(lhs, rhs, fn_comp_equals_strcmp));
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -356,7 +350,7 @@ void slist_equal__not_equal_end(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+	assert_false(slist_equal(lhs, rhs, fn_comp_equals_strcmp));
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -375,7 +369,7 @@ void slist_equal__not_equal_lhs_size(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+	assert_false(slist_equal(lhs, rhs, fn_comp_equals_strcmp));
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -394,7 +388,7 @@ void slist_equal__not_equal_rhs_size(void **state) {
 	slist_append(&rhs, rvals[0]);
 	slist_append(&rhs, rvals[1]);
 
-	assert_false(slist_equal(lhs, rhs, slist_predicate_strcmp));
+	assert_false(slist_equal(lhs, rhs, fn_comp_equals_strcmp));
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -403,7 +397,7 @@ void slist_equal__not_equal_rhs_size(void **state) {
 void slist_sort__empty(void **state) {
 	struct SList *from = NULL;
 
-	struct SList *to = slist_sort(from, before_int);
+	struct SList *to = slist_sort(from, less_than_int);
 	assert_nul(to);
 }
 
@@ -422,7 +416,7 @@ void slist_sort__vals(void **state) {
 	slist_append(&from, &vals[5]);
 	slist_append(&from, NULL);
 
-	struct SList *to = slist_sort(from, before_int);
+	struct SList *to = slist_sort(from, less_than_int);
 	assert_non_nul(to);
 
 	assert_int_equal(slist_length(to), 10);
@@ -446,7 +440,7 @@ void slist_move__empty(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
-	slist_move(&to, &from, slist_predicate_strcmp, "x");
+	slist_move(&to, &from, fn_comp_equals_strcmp, "x");
 
 	assert_nul(to);
 	assert_nul(from);
@@ -461,7 +455,7 @@ void slist_move__empty_to(void **state) {
 	slist_append(&from, vals[1]);
 	slist_append(&from, vals[2]);
 
-	slist_move(&to, &from, slist_predicate_strcmp, "x");
+	slist_move(&to, &from, fn_comp_equals_strcmp, "x");
 
 	assert_int_equal(slist_length(to), 0);
 	assert_int_equal(slist_length(from), 3);
@@ -478,7 +472,7 @@ void slist_move__empty_from(void **state) {
 	slist_append(&to, vals[1]);
 	slist_append(&to, vals[2]);
 
-	slist_move(&to, &from, slist_predicate_strcmp, "x");
+	slist_move(&to, &from, fn_comp_equals_strcmp, "x");
 
 	assert_int_equal(slist_length(to), 3);
 	assert_int_equal(slist_length(from), 0);
@@ -500,7 +494,7 @@ void slist_move__no_match(void **state) {
 	slist_append(&from, from_vals[1]);
 	slist_append(&from, from_vals[2]);
 
-	slist_move(&to, &from, slist_predicate_strcmp, "x");
+	slist_move(&to, &from, fn_comp_equals_strcmp, "x");
 
 	assert_int_equal(slist_length(to), 3);
 	assert_int_equal(slist_length(from), 3);
@@ -525,7 +519,7 @@ void slist_move__many(void **state) {
 	slist_append(&from, from_vals[3]);
 	slist_append(&from, from_vals[4]);
 
-	slist_move(&to, &from, predicate_strstr, "x");
+	slist_move(&to, &from, fn_comp_equals_strstr, "x");
 
 	// values moved
 	assert_int_equal(slist_length(to), 6);
@@ -557,7 +551,7 @@ void slist_move__all(void **state) {
 	slist_append(&from, from_vals[0]);
 	slist_append(&from, from_vals[1]);
 
-	slist_move(&to, &from, predicate_strstr, "x");
+	slist_move(&to, &from, fn_comp_equals_strstr, "x");
 
 	// values moved
 	assert_int_equal(slist_length(to), 4);

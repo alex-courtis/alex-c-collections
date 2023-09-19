@@ -5,8 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fn.h"
+
 #include "oset.h"
-#include "../src/oset.c"
 
 int before_all(void **state) {
 	return 0;
@@ -24,7 +25,7 @@ int after_each(void **state) {
 	return 0;
 }
 
-void mock_free_val(const void *val) {
+void mock_free_val(const void* const val) {
 	check_expected(val);
 }
 
@@ -35,8 +36,7 @@ void oset_init__size(void **state) {
 
 	assert_int_equal(oset_size(set), 0);
 
-	assert_int_equal(set->capacity, 5);
-	assert_int_equal(set->grow, 50);
+	assert_int_equal(oset_capacity(set), 5);
 
 	oset_free(set);
 }
@@ -137,7 +137,7 @@ void oset_add__grow(void **state) {
 	assert_true(oset_add(set, initial[1]));
 
 	assert_int_equal(oset_size(set), 2);
-	assert_int_equal(set->capacity, 2);
+	assert_int_equal(oset_capacity(set), 2);
 
 	assert_true(oset_contains(set, initial[0]));
 	assert_true(oset_contains(set, initial[1]));
@@ -145,19 +145,19 @@ void oset_add__grow(void **state) {
 	void *grow[] = { "2", "3", };
 	assert_true(oset_add(set, grow[0]));
 	assert_int_equal(oset_size(set), 3);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(oset_capacity(set), 7);
 	assert_true(oset_contains(set, grow[0]));
 
 	assert_true(oset_add(set, grow[1]));
 	assert_int_equal(oset_size(set), 4);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(oset_capacity(set), 7);
 	assert_true(oset_contains(set, grow[1]));
 
 	void *subsequent[] = { "4", "5", };
 	assert_true(oset_add(set, subsequent[0]));
 	assert_true(oset_add(set, subsequent[1]));
 	assert_int_equal(oset_size(set), 6);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(oset_capacity(set), 7);
 
 	assert_true(oset_contains(set, subsequent[0]));
 	assert_true(oset_contains(set, subsequent[1]));
@@ -312,6 +312,87 @@ void oset_add__again(void **state) {
 	oset_free(set);
 }
 
+void oset_equal__length_different(void **state) {
+	const struct OSet *a = oset_init(5, 5);
+	const struct OSet *b = oset_init(5, 5);
+
+	assert_true(oset_add(a, "0"));
+
+	assert_true(oset_add(b, "0"));
+	assert_true(oset_add(b, "1"));
+
+	assert_false(oset_equal(a, b, NULL));
+
+	oset_free(a);
+	oset_free(b);
+}
+
+void oset_equal__pointers_ok(void **state) {
+	const struct OSet *a = oset_init(5, 5);
+	const struct OSet *b = oset_init(5, 5);
+
+	void *vals[] = { "0", "1", };
+	assert_true(oset_add(a, vals[0]));
+	assert_true(oset_add(a, vals[1]));
+
+	assert_true(oset_add(b, vals[0]));
+	assert_true(oset_add(b, vals[1]));
+
+	assert_true(oset_equal(a, b, NULL));
+
+	oset_free(a);
+	oset_free(b);
+}
+
+void oset_equal__pointers_different(void **state) {
+	const struct OSet *a = oset_init(5, 5);
+	const struct OSet *b = oset_init(5, 5);
+
+	void *vals[] = { "0", "1", "2", };
+	assert_true(oset_add(a, vals[0]));
+	assert_true(oset_add(a, vals[1]));
+
+	assert_true(oset_add(b, vals[0]));
+	assert_true(oset_add(b, vals[2]));
+
+	assert_false(oset_equal(a, b, NULL));
+
+	oset_free(a);
+	oset_free(b);
+}
+
+void oset_equal__comparison_ok(void **state) {
+	const struct OSet *a = oset_init(5, 5);
+	const struct OSet *b = oset_init(5, 5);
+
+	assert_true(oset_add(a, "0"));
+	assert_true(oset_add(a, "1"));
+
+	assert_true(oset_add(b, "0"));
+	assert_true(oset_add(b, "1"));
+
+	assert_true(oset_equal(a, b, fn_comp_equals_strcmp));
+
+	oset_free(a);
+	oset_free(b);
+}
+
+void oset_equal__comparison_different(void **state) {
+	const struct OSet *a = oset_init(5, 5);
+	const struct OSet *b = oset_init(5, 5);
+
+	assert_true(oset_add(a, "0"));
+	assert_true(oset_add(a, "1"));
+
+	assert_true(oset_add(b, "0"));
+	assert_true(oset_add(b, "2"));
+
+	assert_false(oset_equal(a, b, fn_comp_equals_strcmp));
+
+	oset_free(a);
+	oset_free(b);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(oset_init__size),
@@ -333,6 +414,12 @@ int main(void) {
 		TEST(oset_iter__cleared),
 
 		TEST(oset_add__again),
+
+		TEST(oset_equal__length_different),
+		TEST(oset_equal__pointers_ok),
+		TEST(oset_equal__pointers_different),
+		TEST(oset_equal__comparison_ok),
+		TEST(oset_equal__comparison_different),
 	};
 
 	return RUN(tests);

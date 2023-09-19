@@ -6,8 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fn.h"
+
 #include "stable.h"
-#include "../src/stable.c"
 
 int before_all(void **state) {
 	return 0;
@@ -25,7 +26,7 @@ int after_each(void **state) {
 	return 0;
 }
 
-void mock_free_val(const void *val) {
+void mock_free_val(const void* const val) {
 	check_expected(val);
 }
 
@@ -35,8 +36,7 @@ void stable_init__size(void **state) {
 	assert_non_nul(tab);
 
 	assert_int_equal(stable_size(tab), 0);
-	assert_int_equal(tab->capacity, 5);
-	assert_int_equal(tab->grow, 50);
+	assert_int_equal(stable_capacity(tab), 5);
 
 	stable_free(tab);
 }
@@ -204,18 +204,18 @@ void stable_put__grow(void **state) {
 	assert_nul(stable_put(tab, "c", initial[2]));
 
 	assert_int_equal(stable_size(tab), 3);
-	assert_int_equal(tab->capacity, 3);
+	assert_int_equal(stable_capacity(tab), 3);
 
 	char *grow[] = { "3", "4", "5", };
 	assert_nul(stable_put(tab, "d", grow[0]));
 	assert_int_equal(stable_size(tab), 4);
-	assert_int_equal(tab->capacity, 8);
+	assert_int_equal(stable_capacity(tab), 8);
 
 	assert_nul(stable_put(tab, "e", grow[1]));
 	assert_nul(stable_put(tab, "f", grow[2]));
 
 	assert_int_equal(stable_size(tab), 6);
-	assert_int_equal(tab->capacity, 8);
+	assert_int_equal(stable_capacity(tab), 8);
 
 	assert_str_equal(stable_get(tab, "a"), "0");
 	assert_str_equal(stable_get(tab, "b"), "1");
@@ -430,6 +430,103 @@ void stable_remove__inexistent(void **state) {
 	stable_free(tab);
 }
 
+void stable_equal__length_different(void **state) {
+	const struct STable *a = stable_init(3, 5, false);
+	const struct STable *b = stable_init(3, 5, false);
+
+	assert_nul(stable_put(a, "a", "1"));
+	assert_nul(stable_put(a, "b", "2"));
+
+	assert_nul(stable_put(b, "a", "1"));
+
+	assert_false(stable_equal(a, b, NULL));
+
+	stable_free(a);
+	stable_free(b);
+}
+
+void stable_equal__keys_different(void **state) {
+	const struct STable *a = stable_init(3, 5, false);
+	const struct STable *b = stable_init(3, 5, false);
+
+	assert_nul(stable_put(a, "a", "0"));
+	assert_nul(stable_put(a, "b", "1"));
+
+	assert_nul(stable_put(b, "a", "0"));
+	assert_nul(stable_put(b, "c", "1"));
+
+	assert_false(stable_equal(a, b, NULL));
+
+	stable_free(a);
+	stable_free(b);
+}
+
+void stable_equal__pointers_ok(void **state) {
+	const struct STable *a = stable_init(3, 5, false);
+	const struct STable *b = stable_init(3, 5, false);
+
+	void *vals[] = { "0", "1", "2", };
+	assert_nul(stable_put(a, "a", vals[0]));
+	assert_nul(stable_put(a, "b", vals[1]));
+	assert_nul(stable_put(a, "c", vals[2]));
+
+	assert_nul(stable_put(b, "a", vals[0]));
+	assert_nul(stable_put(b, "b", vals[1]));
+	assert_nul(stable_put(b, "c", vals[2]));
+
+	assert_true(stable_equal(a, b, NULL));
+
+	stable_free(a);
+	stable_free(b);
+}
+
+void stable_equal__pointers_different(void **state) {
+	const struct STable *a = stable_init(3, 5, false);
+	const struct STable *b = stable_init(3, 5, false);
+
+	void *vals[] = { "0", "1", "2", };
+	assert_nul(stable_put(a, "a", vals[0]));
+	assert_nul(stable_put(a, "b", vals[1]));
+	assert_nul(stable_put(a, "c", vals[2]));
+
+	assert_nul(stable_put(b, "a", vals[0]));
+	assert_nul(stable_put(b, "b", vals[0]));
+	assert_nul(stable_put(b, "c", vals[0]));
+
+	assert_false(stable_equal(a, b, NULL));
+
+	stable_free(a);
+	stable_free(b);
+}
+
+void stable_equal__comparison_ok(void **state) {
+	const struct STable *a = stable_init(3, 5, false);
+	const struct STable *b = stable_init(3, 5, false);
+
+	assert_nul(stable_put(a, "a", "0"));
+
+	assert_nul(stable_put(b, "a", "0"));
+
+	assert_true(stable_equal(a, b, fn_comp_equals_strcmp));
+
+	stable_free(a);
+	stable_free(b);
+}
+
+void stable_equal__comparison_different(void **state) {
+	const struct STable *a = stable_init(3, 5, false);
+	const struct STable *b = stable_init(3, 5, false);
+
+	assert_nul(stable_put(a, "a", "0"));
+
+	assert_nul(stable_put(b, "a", "1"));
+
+	assert_false(stable_equal(a, b, fn_comp_equals_strcmp));
+
+	stable_free(a);
+	stable_free(b);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(stable_init__size),
@@ -457,6 +554,13 @@ int main(void) {
 
 		TEST(stable_remove__existing),
 		TEST(stable_remove__inexistent),
+
+		TEST(stable_equal__length_different),
+		TEST(stable_equal__keys_different),
+		TEST(stable_equal__pointers_ok),
+		TEST(stable_equal__pointers_different),
+		TEST(stable_equal__comparison_ok),
+		TEST(stable_equal__comparison_different),
 	};
 
 	return RUN(tests);

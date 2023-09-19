@@ -3,6 +3,8 @@
 #include <string.h>
 #include <strings.h>
 
+#include "fn.h"
+
 #include "stable.h"
 
 typedef int (*comparator)(const char *s1, const char *s2);
@@ -85,7 +87,7 @@ void stable_free(const void* const cvtab) {
 	free(tab);
 }
 
-void stable_free_vals(const struct STable* const tab, void (*free_val)(const void* const val)) {
+void stable_free_vals(const struct STable* const tab, fn_free_val free_val) {
 	if (!tab)
 		return;
 
@@ -179,10 +181,31 @@ const struct STableIter *stable_next(const struct STableIter* const iter) {
 }
 
 size_t stable_size(const struct STable* const tab) {
-	if (!tab)
-		return 0;
+	return tab ? tab->size : 0;
+}
 
-	return tab->size;
+size_t stable_capacity(const struct STable* const tab) {
+	return tab ? tab->capacity : 0;
+}
+
+bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equals equals) {
+	if (!a || !b || a->size != b->size)
+		return false;
+
+	const void *b_val = NULL;
+
+	for (const struct STableIter *a_iter = stable_iter(a); a_iter; a_iter = stable_next(a_iter)) {
+		b_val = stable_get(b, a_iter->key);
+		if (equals && !equals(a_iter->val, b_val)) {
+			stable_iter_free(a_iter);
+			return false;
+		} else if (a_iter->val != b_val) {
+			stable_iter_free(a_iter);
+			return false;
+		}
+	}
+
+	return true;
 }
 
 const void *stable_put(const struct STable* const ctab, const char* const key, const void* const val) {

@@ -5,8 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fn.h"
+
 #include "itable.h"
-#include "../src/itable.c"
 
 int before_all(void **state) {
 	return 0;
@@ -24,7 +25,7 @@ int after_each(void **state) {
 	return 0;
 }
 
-void mock_free_val(const void *val) {
+void mock_free_val(const void* const val) {
 	check_expected(val);
 }
 
@@ -34,8 +35,7 @@ void itable_init__size(void **state) {
 	assert_non_nul(tab);
 
 	assert_int_equal(itable_size(tab), 0);
-	assert_int_equal(tab->capacity, 5);
-	assert_int_equal(tab->grow, 50);
+	assert_int_equal(itable_capacity(tab), 5);
 
 	itable_free(tab);
 }
@@ -185,18 +185,18 @@ void itable_put__grow(void **state) {
 	assert_nul(itable_put(tab, 2, initial[2]));
 
 	assert_int_equal(itable_size(tab), 3);
-	assert_int_equal(tab->capacity, 3);
+	assert_int_equal(itable_capacity(tab), 3);
 
 	char *grow[] = { "3", "4", "5", };
 	assert_nul(itable_put(tab, 3, grow[0]));
 	assert_int_equal(itable_size(tab), 4);
-	assert_int_equal(tab->capacity, 8);
+	assert_int_equal(itable_capacity(tab), 8);
 
 	assert_nul(itable_put(tab, 4, grow[1]));
 	assert_nul(itable_put(tab, 5, grow[2]));
 
 	assert_int_equal(itable_size(tab), 6);
-	assert_int_equal(tab->capacity, 8);
+	assert_int_equal(itable_capacity(tab), 8);
 
 	assert_str_equal(itable_get(tab, 0), "0");
 	assert_str_equal(itable_get(tab, 1), "1");
@@ -382,6 +382,103 @@ void itable_remove__inexistent(void **state) {
 	itable_free(tab);
 }
 
+void itable_equal__length_different(void **state) {
+	const struct ITable *a = itable_init(3, 5);
+	const struct ITable *b = itable_init(3, 5);
+
+	assert_nul(itable_put(a, 10, "10"));
+	assert_nul(itable_put(a, 20, "20"));
+
+	assert_nul(itable_put(b, 10, "10"));
+
+	assert_false(itable_equal(a, b, NULL));
+
+	itable_free(a);
+	itable_free(b);
+}
+
+void itable_equal__keys_different(void **state) {
+	const struct ITable *a = itable_init(3, 5);
+	const struct ITable *b = itable_init(3, 5);
+
+	assert_nul(itable_put(a, 0, "0"));
+	assert_nul(itable_put(a, 1, "1"));
+
+	assert_nul(itable_put(b, 0, "0"));
+	assert_nul(itable_put(b, 2, "1"));
+
+	assert_false(itable_equal(a, b, NULL));
+
+	itable_free(a);
+	itable_free(b);
+}
+
+void itable_equal__pointers_ok(void **state) {
+	const struct ITable *a = itable_init(3, 5);
+	const struct ITable *b = itable_init(3, 5);
+
+	void *vals[] = { "0", "1", "2", };
+	assert_nul(itable_put(a, 1, vals[0]));
+	assert_nul(itable_put(a, 2, vals[1]));
+	assert_nul(itable_put(a, 3, vals[2]));
+
+	assert_nul(itable_put(b, 1, vals[0]));
+	assert_nul(itable_put(b, 2, vals[1]));
+	assert_nul(itable_put(b, 3, vals[2]));
+
+	assert_true(itable_equal(a, b, NULL));
+
+	itable_free(a);
+	itable_free(b);
+}
+
+void itable_equal__pointers_different(void **state) {
+	const struct ITable *a = itable_init(3, 5);
+	const struct ITable *b = itable_init(3, 5);
+
+	void *vals[] = { "0", "1", "2", };
+	assert_nul(itable_put(a, 1, vals[0]));
+	assert_nul(itable_put(a, 2, vals[1]));
+	assert_nul(itable_put(a, 3, vals[2]));
+
+	assert_nul(itable_put(b, 1, vals[0]));
+	assert_nul(itable_put(b, 2, vals[0]));
+	assert_nul(itable_put(b, 3, vals[0]));
+
+	assert_false(itable_equal(a, b, NULL));
+
+	itable_free(a);
+	itable_free(b);
+}
+
+void itable_equal__comparison_ok(void **state) {
+	const struct ITable *a = itable_init(3, 5);
+	const struct ITable *b = itable_init(3, 5);
+
+	assert_nul(itable_put(a, 1, "0"));
+
+	assert_nul(itable_put(b, 1, "0"));
+
+	assert_true(itable_equal(a, b, fn_comp_equals_strcmp));
+
+	itable_free(a);
+	itable_free(b);
+}
+
+void itable_equal__comparison_different(void **state) {
+	const struct ITable *a = itable_init(3, 5);
+	const struct ITable *b = itable_init(3, 5);
+
+	assert_nul(itable_put(a, 1, "0"));
+
+	assert_nul(itable_put(b, 1, "1"));
+
+	assert_false(itable_equal(a, b, fn_comp_equals_strcmp));
+
+	itable_free(a);
+	itable_free(b);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(itable_init__size),
@@ -405,6 +502,13 @@ int main(void) {
 
 		TEST(itable_remove__existing),
 		TEST(itable_remove__inexistent),
+
+		TEST(itable_equal__length_different),
+		TEST(itable_equal__keys_different),
+		TEST(itable_equal__pointers_ok),
+		TEST(itable_equal__pointers_different),
+		TEST(itable_equal__comparison_ok),
+		TEST(itable_equal__comparison_different),
 	};
 
 	return RUN(tests);

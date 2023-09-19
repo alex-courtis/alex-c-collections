@@ -1,6 +1,9 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "fn.h"
 
 #include "itable.h"
 
@@ -73,7 +76,7 @@ void itable_free(const void* const cvtab) {
 	free(tab);
 }
 
-void itable_free_vals(const struct ITable* const tab, void (*free_val)(const void* const val)) {
+void itable_free_vals(const struct ITable* const tab, fn_free_val free_val) {
 	if (!tab)
 		return;
 
@@ -167,10 +170,11 @@ const struct ITableIter *itable_next(const struct ITableIter* const iter) {
 }
 
 size_t itable_size(const struct ITable* const tab) {
-	if (!tab)
-		return 0;
+	return tab ? tab->size : 0;
+}
 
-	return tab->size;
+size_t itable_capacity(const struct ITable* const tab) {
+	return tab ? tab->capacity : 0;
 }
 
 const void *itable_put(const struct ITable* const ctab, const uint64_t key, const void* const val) {
@@ -236,5 +240,25 @@ const void *itable_remove(const struct ITable* const ctab, const uint64_t key) {
 	}
 
 	return NULL;
+}
+
+bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn_equals equals) {
+	if (!a || !b || a->size != b->size)
+		return false;
+
+	const void *b_val = NULL;
+
+	for (const struct ITableIter *a_iter = itable_iter(a); a_iter; a_iter = itable_next(a_iter)) {
+		b_val = itable_get(b, a_iter->key);
+		if (equals && !equals(a_iter->val, b_val)) {
+			itable_iter_free(a_iter);
+			return false;
+		} else if (a_iter->val != b_val) {
+			itable_iter_free(a_iter);
+			return false;
+		}
+	}
+
+	return true;
 }
 
