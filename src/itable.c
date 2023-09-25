@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "fn.h"
+#include "slist.h"
 
 #include "itable.h"
 
@@ -169,14 +170,6 @@ const struct ITableIter *itable_next(const struct ITableIter* const iter) {
 	return NULL;
 }
 
-size_t itable_size(const struct ITable* const tab) {
-	return tab ? tab->size : 0;
-}
-
-size_t itable_capacity(const struct ITable* const tab) {
-	return tab ? tab->capacity : 0;
-}
-
 const void *itable_put(const struct ITable* const ctab, const uint64_t key, const void* const val) {
 	if (!ctab)
 		return NULL;
@@ -234,6 +227,8 @@ const void *itable_remove(const struct ITable* const ctab, const uint64_t key) {
 				*mk = *(mk + 1);
 				*mv = *(mv + 1);
 			}
+			*mk = 0;
+			*mv = NULL;
 
 			return prev;
 		}
@@ -246,15 +241,24 @@ bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn
 	if (!a || !b || a->size != b->size)
 		return false;
 
-	const void *b_val = NULL;
+	uint64_t *ak, *bk;
+	const void **av, **bv;
 
-	for (const struct ITableIter *a_iter = itable_iter(a); a_iter; a_iter = itable_next(a_iter)) {
-		b_val = itable_get(b, a_iter->key);
-		if (equals && !equals(a_iter->val, b_val)) {
-			itable_iter_free(a_iter);
+	for (ak = a->keys, bk = b->keys, av = a->vals, bv = b->vals;
+			ak < a->keys + a->size;
+			ak++, bk++, av++, bv++) {
+
+		// key
+		if (*ak != *bk) {
 			return false;
-		} else if (a_iter->val != b_val) {
-			itable_iter_free(a_iter);
+		}
+
+		// value
+		if (equals) {
+			if (!equals(*av, *bv)) {
+				return false;
+			}
+		} else if (*av != *bv) {
 			return false;
 		}
 	}
@@ -262,3 +266,39 @@ bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn
 	return true;
 }
 
+struct SList *itable_keys_slist(const struct ITable* const tab) {
+	if (!tab)
+		return NULL;
+
+	struct SList *list = NULL;
+
+	uint64_t *k;
+	for (k = tab->keys; k < tab->keys + tab->size; k++) {
+		slist_append(&list, (void*)*k);
+	}
+
+	return list;
+}
+
+struct SList *itable_vals_slist(const struct ITable* const tab) {
+	if (!tab)
+		return NULL;
+
+	struct SList *list = NULL;
+
+	uint64_t *k;
+	const void **v;
+	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
+		slist_append(&list, (void*)*v);
+	}
+
+	return list;
+}
+
+size_t itable_size(const struct ITable* const tab) {
+	return tab ? tab->size : 0;
+}
+
+size_t itable_capacity(const struct ITable* const tab) {
+	return tab ? tab->capacity : 0;
+}

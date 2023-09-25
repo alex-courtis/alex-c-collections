@@ -71,6 +71,16 @@ const void *itable_remove(const struct ITable* const tab, const uint64_t key);
 bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn_equals);
 
 /*
+ * Conversion
+ */
+
+// ordered uint64_t* key pointers to table, caller frees list only
+struct SList *itable_keys_slist(const struct ITable* const tab);
+
+// ordered val pointers to table, caller frees list only
+struct SList *itable_vals_slist(const struct ITable* const tab);
+
+/*
  * Info
  */
 

@@ -5,6 +5,8 @@
 
 #include "fn.h"
 
+#include "slist.h"
+
 #include "stable.h"
 
 typedef int (*comparator)(const char *s1, const char *s2);
@@ -180,34 +182,6 @@ const struct STableIter *stable_next(const struct STableIter* const iter) {
 	return NULL;
 }
 
-size_t stable_size(const struct STable* const tab) {
-	return tab ? tab->size : 0;
-}
-
-size_t stable_capacity(const struct STable* const tab) {
-	return tab ? tab->capacity : 0;
-}
-
-bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equals equals) {
-	if (!a || !b || a->size != b->size)
-		return false;
-
-	const void *b_val = NULL;
-
-	for (const struct STableIter *a_iter = stable_iter(a); a_iter; a_iter = stable_next(a_iter)) {
-		b_val = stable_get(b, a_iter->key);
-		if (equals && !equals(a_iter->val, b_val)) {
-			stable_iter_free(a_iter);
-			return false;
-		} else if (a_iter->val != b_val) {
-			stable_iter_free(a_iter);
-			return false;
-		}
-	}
-
-	return true;
-}
-
 const void *stable_put(const struct STable* const ctab, const char* const key, const void* const val) {
 	if (!ctab || !key)
 		return NULL;
@@ -275,5 +249,77 @@ const void *stable_remove(const struct STable* const ctab, const char* const key
 	}
 
 	return NULL;
+}
+
+bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equals equals) {
+	if (!a || !b || a->size != b->size)
+		return false;
+
+	const char **ak, **bk;
+	const void **av, **bv;
+
+	for (ak = a->keys, bk = b->keys, av = a->vals, bv = b->vals;
+			ak < a->keys + a->size;
+			ak++, bk++, av++, bv++) {
+
+		// key
+		if (a->cmp == strcasecmp || b->cmp == strcasecmp) {
+			if (strcasecmp(*ak, *bk) != 0) {
+				return false;
+			}
+		} else {
+			if (strcmp(*ak, *bk) != 0) {
+				return false;
+			}
+		}
+
+		// value
+		if (equals) {
+			if (!equals(*av, *bv)) {
+				return false;
+			}
+		} else if (*av != *bv) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+struct SList *stable_keys_slist(const struct STable* const tab) {
+	if (!tab)
+		return NULL;
+
+	struct SList *list = NULL;
+
+	const char **k;
+	for (k = tab->keys; k < tab->keys + tab->size; k++) {
+		slist_append(&list, (void*)*k);
+	}
+
+	return list;
+}
+
+struct SList *stable_vals_slist(const struct STable* const tab) {
+	if (!tab)
+		return NULL;
+
+	struct SList *list = NULL;
+
+	const char **k;
+	const void **v;
+	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
+		slist_append(&list, (void*)*v);
+	}
+
+	return list;
+}
+
+size_t stable_size(const struct STable* const tab) {
+	return tab ? tab->size : 0;
+}
+
+size_t stable_capacity(const struct STable* const tab) {
+	return tab ? tab->capacity : 0;
 }
 

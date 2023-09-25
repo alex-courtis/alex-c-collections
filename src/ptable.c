@@ -40,14 +40,6 @@ const struct PTableIter *ptable_next(const struct PTableIter* const iter) {
 	return (struct PTableIter*)itable_next((struct ITableIter* const)iter);
 }
 
-size_t ptable_size(const struct PTable* const tab) {
-	return itable_size((struct ITable* const)tab);
-}
-
-size_t ptable_capacity(const struct PTable* const tab) {
-	return itable_capacity((struct ITable* const)tab);
-}
-
 const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val) {
 	return itable_put((const struct ITable* const)tab, (const uint64_t)key, val);
 }
@@ -58,5 +50,21 @@ const void *ptable_remove(const struct PTable* const tab, const void* const key)
 
 bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equals equals) {
 	return itable_equal((const struct ITable* const)a, (const struct ITable* const)b, equals);
+}
+
+struct SList *ptable_keys_slist(const struct PTable* const tab) {
+	return itable_keys_slist((const struct ITable* const)tab);
+}
+
+struct SList *ptable_vals_slist(const struct PTable* const tab) {
+	return itable_vals_slist((const struct ITable* const)tab);
+}
+
+size_t ptable_size(const struct PTable* const tab) {
+	return itable_size((struct ITable* const)tab);
+}
+
+size_t ptable_capacity(const struct PTable* const tab) {
+	return itable_capacity((struct ITable* const)tab);
 }
 

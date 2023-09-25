@@ -39,4 +39,4 @@ cppcheck: $(INC_H) $(SRC_C) $(TST_H) $(TST_C)
 
 .PHONY: all clean test test-vg $(TST_T) iwyu cppcheck
 
-.NOTPARALLEL:
+.NOTPARALLEL: iwyu test test-vg

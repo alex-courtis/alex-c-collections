@@ -3,9 +3,11 @@
 
 #include <cmocka.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "fn.h"
+#include "slist.h"
 
 #include "oset.h"
 
@@ -38,7 +40,7 @@ void oset_init__size(void **state) {
 
 	assert_int_equal(oset_capacity(set), 5);
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_init__invalid(void **state) {
@@ -82,7 +84,7 @@ void oset_free_vals__free_val(void **state) {
 void oset_add__new(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", };
+	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(oset_add(set, vals[0]));
 	assert_true(oset_add(set, vals[1]));
 
@@ -90,13 +92,13 @@ void oset_add__new(void **state) {
 	assert_true(oset_contains(set, vals[0]));
 	assert_true(oset_contains(set, vals[1]));
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_add__existing(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", };
+	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(oset_add(set, vals[0]));
 	assert_true(oset_add(set, vals[1]));
 
@@ -109,13 +111,13 @@ void oset_add__existing(void **state) {
 
 	assert_int_equal(oset_size(set), 2);
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_add__null(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", };
+	void *vals[] = { strdup("0"), };
 	assert_true(oset_add(set, vals[0]));
 
 	assert_int_equal(oset_size(set), 1);
@@ -126,13 +128,13 @@ void oset_add__null(void **state) {
 
 	assert_int_equal(oset_size(set), 1);
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_add__grow(void **state) {
 	const struct OSet *set = oset_init(2, 5);
 
-	void *initial[] = { "0", "1", };
+	void *initial[] = { strdup("0"), strdup("1"), };
 	assert_true(oset_add(set, initial[0]));
 	assert_true(oset_add(set, initial[1]));
 
@@ -142,7 +144,7 @@ void oset_add__grow(void **state) {
 	assert_true(oset_contains(set, initial[0]));
 	assert_true(oset_contains(set, initial[1]));
 
-	void *grow[] = { "2", "3", };
+	void *grow[] = { strdup("2"), strdup("3"), };
 	assert_true(oset_add(set, grow[0]));
 	assert_int_equal(oset_size(set), 3);
 	assert_int_equal(oset_capacity(set), 7);
@@ -153,7 +155,7 @@ void oset_add__grow(void **state) {
 	assert_int_equal(oset_capacity(set), 7);
 	assert_true(oset_contains(set, grow[1]));
 
-	void *subsequent[] = { "4", "5", };
+	void *subsequent[] = { strdup("4"), strdup("5"), };
 	assert_true(oset_add(set, subsequent[0]));
 	assert_true(oset_add(set, subsequent[1]));
 	assert_int_equal(oset_size(set), 6);
@@ -162,13 +164,13 @@ void oset_add__grow(void **state) {
 	assert_true(oset_contains(set, subsequent[0]));
 	assert_true(oset_contains(set, subsequent[1]));
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_remove__existing(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", "2", };
+	void *vals[] = { strdup("0"), strdup("2"), };
 	assert_true(oset_add(set, vals[0]));
 	assert_true(oset_add(set, vals[1]));
 
@@ -190,13 +192,16 @@ void oset_remove__existing(void **state) {
 	assert_false(oset_contains(set, vals[0]));
 	assert_false(oset_contains(set, vals[1]));
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
+
+	free(vals[0]);
+	free(vals[1]);
 }
 
 void oset_remove__inexistent(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", };
+	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(oset_add(set, vals[0]));
 	assert_true(oset_add(set, vals[1]));
 
@@ -211,7 +216,7 @@ void oset_remove__inexistent(void **state) {
 	assert_true(oset_contains(set, vals[0]));
 	assert_true(oset_contains(set, vals[1]));
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_iter__empty(void **state) {
@@ -221,13 +226,13 @@ void oset_iter__empty(void **state) {
 
 	assert_nul(oset_iter(set));
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_iter__vals(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", };
+	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(oset_add(set, vals[0]));
 	assert_true(oset_add(set, vals[1]));
 
@@ -244,13 +249,13 @@ void oset_iter__vals(void **state) {
 	iter = oset_next(iter);
 	assert_nul(iter);
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_iter__cleared(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", };
+	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(oset_add(set, vals[0]));
 	assert_true(oset_add(set, vals[1]));
 
@@ -263,13 +268,16 @@ void oset_iter__cleared(void **state) {
 
 	assert_nul(oset_iter(set));
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
+
+	free(vals[0]);
+	free(vals[1]);
 }
 
 void oset_add__again(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", "2", "3", };
+	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), strdup("3"), };
 	assert_true(oset_add(set, vals[0]));
 	assert_true(oset_add(set, vals[1]));
 	assert_true(oset_add(set, vals[2]));
@@ -309,29 +317,31 @@ void oset_add__again(void **state) {
 	iter = oset_next(iter);
 	assert_nul(iter);
 
-	oset_free(set);
+	oset_free_vals(set, NULL);
 }
 
 void oset_equal__length_different(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
-	assert_true(oset_add(a, "0"));
+	void *vals[] = { strdup("0"), strdup("1"), };
 
-	assert_true(oset_add(b, "0"));
-	assert_true(oset_add(b, "1"));
+	assert_true(oset_add(a, vals[0]));
+
+	assert_true(oset_add(b, vals[0]));
+	assert_true(oset_add(b, vals[1]));
 
 	assert_false(oset_equal(a, b, NULL));
 
 	oset_free(a);
-	oset_free(b);
+	oset_free_vals(b, NULL);
 }
 
 void oset_equal__pointers_ok(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", };
+	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(oset_add(a, vals[0]));
 	assert_true(oset_add(a, vals[1]));
 
@@ -340,7 +350,7 @@ void oset_equal__pointers_ok(void **state) {
 
 	assert_true(oset_equal(a, b, NULL));
 
-	oset_free(a);
+	oset_free_vals(a, NULL);
 	oset_free(b);
 }
 
@@ -348,7 +358,7 @@ void oset_equal__pointers_different(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
-	void *vals[] = { "0", "1", "2", };
+	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
 	assert_true(oset_add(a, vals[0]));
 	assert_true(oset_add(a, vals[1]));
 
@@ -357,40 +367,74 @@ void oset_equal__pointers_different(void **state) {
 
 	assert_false(oset_equal(a, b, NULL));
 
-	oset_free(a);
+	oset_free_vals(a, NULL);
 	oset_free(b);
+
+	free(vals[2]);
 }
 
 void oset_equal__comparison_ok(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
-	assert_true(oset_add(a, "0"));
-	assert_true(oset_add(a, "1"));
+	void *vals[] = { strdup("0"), strdup("1"), };
 
-	assert_true(oset_add(b, "0"));
-	assert_true(oset_add(b, "1"));
+	assert_true(oset_add(a, vals[0]));
+	assert_true(oset_add(a, vals[1]));
+
+	assert_true(oset_add(b, vals[0]));
+	assert_true(oset_add(b, vals[1]));
 
 	assert_true(oset_equal(a, b, fn_comp_equals_strcmp));
 
 	oset_free(a);
-	oset_free(b);
+	oset_free_vals(b, NULL);
 }
 
 void oset_equal__comparison_different(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
-	assert_true(oset_add(a, "0"));
-	assert_true(oset_add(a, "1"));
+	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
 
-	assert_true(oset_add(b, "0"));
-	assert_true(oset_add(b, "2"));
+	assert_true(oset_add(a, vals[0]));
+	assert_true(oset_add(a, vals[1]));
+
+	assert_true(oset_add(b, vals[0]));
+	assert_true(oset_add(b, vals[2]));
 
 	assert_false(oset_equal(a, b, fn_comp_equals_strcmp));
 
-	oset_free(a);
+	oset_free_vals(a, NULL);
 	oset_free(b);
+
+	free(vals[2]);
+}
+
+void oset_vals_slist__empty(void **state) {
+	const struct OSet *set = oset_init(3, 5);
+
+	assert_nul(oset_vals_slist(set));
+
+	oset_free_vals(set, NULL);
+}
+
+void oset_vals_slist__many(void **state) {
+	const struct OSet *tab = oset_init(3, 5);
+
+	void *vals[] = { strdup("0"), strdup("1"), };
+
+	assert_true(oset_add(tab, vals[0]));
+	assert_true(oset_add(tab, vals[1]));
+
+	struct SList *list = oset_vals_slist(tab);
+
+	assert_int_equal(slist_length(list), 2);
+	assert_str_equal(slist_at(list, 0), "0");
+	assert_str_equal(slist_at(list, 1), "1");
+
+	slist_free(&list);
+	oset_free_vals(tab, NULL);
 }
 
 int main(void) {
@@ -420,6 +464,9 @@ int main(void) {
 		TEST(oset_equal__pointers_different),
 		TEST(oset_equal__comparison_ok),
 		TEST(oset_equal__comparison_different),
+
+		TEST(oset_vals_slist__empty),
+		TEST(oset_vals_slist__many),
 	};
 
 	return RUN(tests);

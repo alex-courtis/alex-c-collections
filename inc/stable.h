@@ -70,6 +70,16 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
 bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equals);
 
 /*
+ * Conversion
+ */
+
+// ordered key pointers to table, caller frees list only
+struct SList *stable_keys_slist(const struct STable* const tab);
+
+// ordered val pointers to table, caller frees list only
+struct SList *stable_vals_slist(const struct STable* const tab);
+
+/*
  * Info
  */
 

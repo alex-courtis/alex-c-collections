@@ -68,6 +68,13 @@ bool oset_remove(const struct OSet* const set, const void* const val);
 bool oset_equal(const struct OSet* const a, const struct OSet* const b, bool (*equal)(const void *a, const void *b));
 
 /*
+ * Conversion
+ */
+
+// ordered val pointers to table, caller frees list only
+struct SList *oset_vals_slist(const struct OSet* const set);
+
+/*
  * Info
  */
 

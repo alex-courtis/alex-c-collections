@@ -66,6 +66,16 @@ const void *ptable_remove(const struct PTable* const tab, const void* const key)
 bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equals);
 
 /*
+ * Conversion
+ */
+
+// ordered key pointers to table, caller frees list only
+struct SList *ptable_keys_slist(const struct PTable* const tab);
+
+// ordered val pointers to table, caller frees list only
+struct SList *ptable_vals_slist(const struct PTable* const tab);
+
+/*
  * Info
  */
 
