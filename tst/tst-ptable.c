@@ -66,16 +66,17 @@ void ptable_free_vals__null(void **state) {
 void ptable_free_vals__free_val(void **state) {
 	const struct PTable *tab = ptable_init(3, 5);
 
-	char *keys[] = { "a", "b", };
-	char *vals[] = { "0", "1", };
+	char *keys[] = { "a", "b", "c", };
+	char *vals[] = { "0", "1", NULL, };
 
 	expect_value(mock_free_val, val, "0");
 	expect_value(mock_free_val, val, "1");
 
 	ptable_put(tab, keys[0], vals[0]);
 	ptable_put(tab, keys[1], vals[1]);
+	ptable_put(tab, keys[2], vals[2]);
 
-	assert_int_equal(ptable_size(tab), 2);
+	assert_int_equal(ptable_size(tab), 3);
 
 	ptable_free_vals(tab, mock_free_val);
 }
@@ -234,17 +235,21 @@ void ptable_iter__empty(void **state) {
 void ptable_iter__vals(void **state) {
 	const struct PTable *tab = ptable_init(3, 5);
 
-	char *keys[] = { "a", "b", "c", };
+	char *keys[] = { "a", "b", "c", "d", "e", };
 
-	assert_nul(ptable_put(tab, keys[0], strdup("0")));
+	assert_nul(ptable_put(tab, keys[0], NULL));
 	assert_nul(ptable_put(tab, keys[1], strdup("1")));
-	assert_nul(ptable_put(tab, keys[2], strdup("2")));
+	assert_nul(ptable_put(tab, keys[2], NULL));
+	assert_nul(ptable_put(tab, keys[3], strdup("3")));
+	assert_nul(ptable_put(tab, keys[4], NULL));
+
+	assert_int_equal(ptable_size(tab), 5);
 
 	// zero
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
 	assert_int_equal(iter->key, keys[0]);
-	assert_str_equal(iter->val, "0");
+	assert_nul(iter->val);
 
 	// one
 	iter = ptable_next(iter);
@@ -256,7 +261,19 @@ void ptable_iter__vals(void **state) {
 	iter = ptable_next(iter);
 	assert_non_nul(iter);
 	assert_int_equal(iter->key, keys[2]);
-	assert_str_equal(iter->val, "2");
+	assert_nul(iter->val);
+
+	// three
+	iter = ptable_next(iter);
+	assert_non_nul(iter);
+	assert_int_equal(iter->key, keys[3]);
+	assert_str_equal(iter->val, "3");
+
+	// four
+	iter = ptable_next(iter);
+	assert_non_nul(iter);
+	assert_int_equal(iter->key, keys[4]);
+	assert_nul(iter->val);
 
 	// end
 	iter = ptable_next(iter);

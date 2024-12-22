@@ -74,8 +74,9 @@ void stable_free_vals__free_val(void **state) {
 
 	stable_put(tab, "a", vals[0]);
 	stable_put(tab, "b", vals[1]);
+	stable_put(tab, "c", NULL);
 
-	assert_int_equal(stable_size(tab), 2);
+	assert_int_equal(stable_size(tab), 3);
 
 	stable_free_vals(tab, mock_free_val);
 }
@@ -148,7 +149,7 @@ void stable_put__overwrite(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__null_val(void **state) {
+void stable_put__null_key(void **state) {
 	const struct STable *tab = stable_init(5, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -167,7 +168,7 @@ void stable_put__null_val(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__null_key(void **state) {
+void stable_put__null_val(void **state) {
 	const struct STable *tab = stable_init(5, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -245,15 +246,19 @@ void stable_iter__empty(void **state) {
 void stable_iter__vals(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
+	assert_nul(stable_put(tab, "a", NULL));
 	assert_nul(stable_put(tab, "b", strdup("1")));
-	assert_nul(stable_put(tab, "c", strdup("2")));
+	assert_nul(stable_put(tab, "c", NULL));
+	assert_nul(stable_put(tab, "d", strdup("3")));
+	assert_nul(stable_put(tab, "e", NULL));
 
-	// a 0
+	assert_int_equal(stable_size(tab), 5);
+
+	// a NULL
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "a");
-	assert_str_equal(iter->val, "0");
+	assert_nul(iter->val);
 
 	// b 1
 	iter = stable_next(iter);
@@ -261,11 +266,23 @@ void stable_iter__vals(void **state) {
 	assert_str_equal(iter->key, "b");
 	assert_str_equal(iter->val, "1");
 
-	// c 2
+	// c NULL
 	iter = stable_next(iter);
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "c");
-	assert_str_equal(iter->val, "2");
+	assert_nul(iter->val);
+
+	// d 3
+	iter = stable_next(iter);
+	assert_non_nul(iter);
+	assert_str_equal(iter->key, "d");
+	assert_str_equal(iter->val, "3");
+
+	// e NULL
+	iter = stable_next(iter);
+	assert_non_nul(iter);
+	assert_str_equal(iter->key, "e");
+	assert_nul(iter->val);
 
 	// end
 	iter = stable_next(iter);
