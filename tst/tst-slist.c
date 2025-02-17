@@ -4,6 +4,7 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "fn.h"
@@ -567,6 +568,29 @@ void slist_move__all(void **state) {
 	slist_free(&from);
 }
 
+void slist_str__null(void **state) {
+	assert_nul(slist_str(NULL));
+}
+
+void slist_str__string_vals(void **state) {
+	struct SList *list = NULL;
+
+	slist_append(&list, "zero");
+	slist_append(&list, "one");
+	slist_append(&list, "two");
+
+	char *str = slist_str(list);
+	assert_str_equal(str,
+			"zero\n"
+			"one\n"
+			"two"
+			);
+
+	free(str);
+	slist_free(&list);
+}
+
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(slist_free_vals__many),
@@ -600,6 +624,9 @@ int main(void) {
 		TEST(slist_move__no_match),
 		TEST(slist_move__many),
 		TEST(slist_move__all),
+
+		TEST(slist_str__null),
+		TEST(slist_str__string_vals),
 	};
 
 	return RUN(tests);
