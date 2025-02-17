@@ -437,6 +437,38 @@ void oset_vals_slist__many(void **state) {
 	oset_free_vals(tab, NULL);
 }
 
+void oset_str__null(void **state) {
+	assert_nul(oset_str(NULL));
+}
+
+void oset_str__empty(void **state) {
+	const struct OSet *set = oset_init(5, 5);
+
+	char *str = oset_str(set);
+	assert_str_equal(str, "");
+
+	free(str);
+	oset_free_vals(set, NULL);
+}
+
+void oset_str__string_vals(void **state) {
+	const struct OSet *set = oset_init(5, 5);
+
+	assert_true(oset_add(set, "ONE"));
+	assert_true(oset_add(set, "TWO"));
+	assert_true(oset_add(set, "THREE"));
+
+	char *str = oset_str(set);
+	assert_str_equal(str,
+			"ONE\n"
+			"TWO\n"
+			"THREE"
+			);
+
+	free(str);
+	oset_free(set);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(oset_init__size),
@@ -467,6 +499,10 @@ int main(void) {
 
 		TEST(oset_vals_slist__empty),
 		TEST(oset_vals_slist__many),
+
+		TEST(oset_str__null),
+		TEST(oset_str__empty),
+		TEST(oset_str__string_vals),
 	};
 
 	return RUN(tests);
