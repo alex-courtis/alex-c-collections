@@ -647,6 +647,39 @@ void stable_vals_slist__many(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
+void stable_str__null(void **state) {
+	assert_nul(stable_str(NULL));
+}
+
+void stable_str__empty(void **state) {
+	const struct STable *tab = stable_init(3, 5, false);
+
+	char *str = stable_str(tab);
+	assert_str_equal(str, "");
+
+	free(str);
+	stable_free_vals(tab, NULL);
+}
+
+void stable_str__string_vals(void **state) {
+	const struct STable *tab = stable_init(3, 5, false);
+
+	// large value to ensure a realloc
+	stable_put(tab, "a", strdup("1"));
+	stable_put(tab, "b", NULL);
+	stable_put(tab, "c", strdup("3"));
+
+	char *str = stable_str(tab);
+	assert_str_equal(str,
+			"a = 1\n"
+			"b = (null)\n"
+			"c = 3"
+			);
+
+	free(str);
+	stable_free_vals(tab, NULL);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(stable_init__size),
@@ -689,6 +722,10 @@ int main(void) {
 
 		TEST(stable_vals_slist__empty),
 		TEST(stable_vals_slist__many),
+
+		TEST(stable_str__null),
+		TEST(stable_str__empty),
+		TEST(stable_str__string_vals),
 	};
 
 	return RUN(tests);
