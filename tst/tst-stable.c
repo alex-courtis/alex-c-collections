@@ -664,7 +664,6 @@ void stable_str__empty(void **state) {
 void stable_str__string_vals(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
-	// large value to ensure a realloc
 	stable_put(tab, "a", strdup("1"));
 	stable_put(tab, "b", NULL);
 	stable_put(tab, "c", strdup("3"));
