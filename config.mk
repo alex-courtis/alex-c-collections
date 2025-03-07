@@ -5,11 +5,12 @@ CPPFLAGS += $(INCS)
 OFLAGS = -O3
 WFLAGS = -pedantic -Wall -Wextra -Werror -Wno-unused-parameter
 DFLAGS = -g
-COMPFLAGS = $(WFLAGS) $(OFLAGS) $(DFLAGS)
+MFLAGS =
+COMPFLAGS = $(WFLAGS) $(OFLAGS) $(DFLAGS) $(MFLAGS)
 
 CFLAGS += $(COMPFLAGS) -std=gnu17 -Wold-style-definition -Wstrict-prototypes
 
-LDFLAGS +=
+LDFLAGS += $(MFLAGS)
 
 CC = clang
 

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "fn.h"
 #include "slist.h"
@@ -314,7 +315,7 @@ char *itable_str(const struct ITable* const tab) {
 	char *buf = (char*)calloc(len, sizeof(char));
 	char *bufp = buf;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		bufp += snprintf(bufp, len - (bufp - buf), "%lu = %s\n", *k, *v ? (char*)*v : "(null)");
+		bufp += snprintf(bufp, len - (bufp - buf), "%"PRIu64" = %s\n", *k, *v ? (char*)*v : "(null)");
 	}
 
 	// strip trailing newline
