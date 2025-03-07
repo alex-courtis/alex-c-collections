@@ -69,13 +69,13 @@ void itable_str__empty(void **state) {
 void itable_str__string_vals(void **state) {
 	const struct ITable *tab = itable_init(3, 5);
 
-	itable_put(tab, 10, strdup("1"));
+	itable_put(tab, -1, strdup("1"));
 	itable_put(tab, 20, NULL);
 	itable_put(tab, 30, strdup("3"));
 
 	char *str = itable_str(tab);
 	assert_str_equal(str,
-			"10 = 1\n"
+			"18446744073709551615 = 1\n"
 			"20 = (null)\n"
 			"30 = 3"
 			);
