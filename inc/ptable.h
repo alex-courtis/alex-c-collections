@@ -15,8 +15,8 @@ struct PTable;
  * Entry iterator.
  */
 struct PTableIter {
-	const void *key;
-	const void *val;
+	const void* const key;
+	const void* const val;
 };
 
 /*

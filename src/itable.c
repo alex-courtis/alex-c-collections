@@ -30,7 +30,7 @@ struct ITableIterP {
 	 */
 	const struct ITable *tab;
 	const uint64_t *k;
-	const void **v;
+	const void* const *v;
 };
 
 // grow to capacity + grow
@@ -305,7 +305,7 @@ char *itable_str(const struct ITable* const tab) {
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 		len +=
-			20 +                    // longest uint32_t
+			20 +                    // longest uint64_t printed with PRIu64
 			3 +                     // " = "
 			(*v ? strlen(*v) : 6) + // value or "(null)"
 			1;                      // "\n"
