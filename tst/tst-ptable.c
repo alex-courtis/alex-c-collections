@@ -81,7 +81,7 @@ void ptable_free_vals__free_val(void **state) {
 	ptable_free_vals(tab, mock_free_val);
 }
 
-void free_val_itable(const void *val) {
+void free_val_ptable(const void *val) {
 	ptable_free_vals(val, mock_free_val);
 }
 
@@ -108,7 +108,7 @@ void ptable_free_vals__free_val_reentrant(void **state) {
 
 	assert_int_equal(ptable_size(outer), 2);
 
-	ptable_free_vals(outer, free_val_itable);
+	ptable_free_vals(outer, free_val_ptable);
 }
 
 void ptable_put__new(void **state) {
@@ -600,6 +600,47 @@ void ptable_vals_slist__many(void **state) {
 	ptable_free_vals(tab, NULL);
 }
 
+void ptable_str__null(void **state) {
+	assert_nul(ptable_str(NULL));
+}
+
+void ptable_str__empty(void **state) {
+	const struct PTable *tab = ptable_init(3, 5);
+
+	char *str = ptable_str(tab);
+	assert_str_equal(str, "");
+
+	free(str);
+	ptable_free(tab);
+}
+
+void ptable_str__string_vals(void **state) {
+	const struct PTable *tab = ptable_init(3, 5);
+
+	char *keys[] = { "a", "b", "c", };
+	char *vals[] = { "1", NULL, "3", };
+
+	ptable_put(tab, keys[0], vals[0]);
+	ptable_put(tab, keys[1], vals[1]);
+	ptable_put(tab, keys[2], vals[2]);
+
+	char expected[2048];
+	snprintf(expected, sizeof(expected),
+			"%p = 1\n"
+			"%p = (null)\n"
+			"%p = 3",
+			(void*)keys[0],
+			(void*)keys[1],
+			(void*)keys[2]
+			);
+
+	char *actual = ptable_str(tab);
+	assert_str_equal(expected, actual);
+
+	free(actual);
+	ptable_free(tab);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(ptable_init__size),
@@ -636,6 +677,10 @@ int main(void) {
 
 		TEST(ptable_vals_slist__empty),
 		TEST(ptable_vals_slist__many),
+
+		TEST(ptable_str__null),
+		TEST(ptable_str__empty),
+		TEST(ptable_str__string_vals),
 	};
 
 	return RUN(tests);

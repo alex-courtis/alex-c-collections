@@ -303,7 +303,7 @@ char *ptable_str(const struct PTable* const tab) {
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 		len +=
-			20 +                    // longest uint32_t
+			14 +                    // longest %p
 			3 +                     // " = "
 			(*v ? strlen(*v) : 6) + // value or "(null)"
 			1;                      // "\n"

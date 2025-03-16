@@ -79,7 +79,8 @@ struct SList *oset_vals_slist(const struct OSet* const set);
  */
 
 // to string, user frees
-// values must be char*, printed using %s
+// lines with format "%s"
+// values must be char*
 char *oset_str(const struct OSet* const set);
 
 // number of values
