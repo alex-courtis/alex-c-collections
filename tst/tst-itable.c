@@ -12,6 +12,12 @@
 
 #include "itable.h"
 
+/*
+   diff -u \
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) \
+   <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' tst/tst-ptable.c)
+   */
+
 static uint64_t KEYS[] = { 1, 2, 3, 4, 5, 6 };
 
 int before_all(void **state) {

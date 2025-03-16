@@ -8,6 +8,12 @@
 
 #include "ptable.h"
 
+/*
+   diff -u \
+   <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) \
+   <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' src/ptable.c)
+   */
+
 struct PTable {
 	const void **keys;
 	const void **vals;

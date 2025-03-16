@@ -11,6 +11,12 @@
 
 #include "ptable.h"
 
+/*
+   diff -u \
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) \
+   <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' tst/tst-ptable.c)
+   */
+
 static char *KEYS[] = { "a", "b", "c", "d", "e", "f", };
 
 int before_all(void **state) {
