@@ -32,8 +32,8 @@ struct STableIterP {
 	 * Private
 	 */
 	const struct STable *tab;
-	const char **k;
-	const void **v;
+	const char* const *k;
+	const void* const *v;
 };
 
 // grow to capacity + grow

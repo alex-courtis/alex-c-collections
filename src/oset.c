@@ -25,7 +25,7 @@ struct OSetIterP {
 	 * Private
 	 */
 	const struct OSet *set;
-	const void **v;
+	const void * const *v;
 };
 
 // grow to capacity + grow
