@@ -32,7 +32,7 @@ struct PTableIterP {
 };
 
 // grow to capacity + grow
-void grow_ptable(struct PTable *tab) {
+static void grow_ptable(struct PTable *tab) {
 
 	// grow new arrays
 	const void **new_keys = calloc(tab->capacity + tab->grow, sizeof(void*));

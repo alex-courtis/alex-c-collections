@@ -224,6 +224,23 @@ void itable_iter__empty(void **state) {
 	itable_free_vals(tab, NULL);
 }
 
+void itable_iter__free(void **state) {
+	const struct ITable *tab = itable_init(3, 5);
+
+	assert_nul(itable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(itable_put(tab, KEYS[1], strdup("1")));
+
+	const struct ITableIter *iter = itable_iter(tab);
+	assert_non_nul(iter);
+	assert_int_equal(iter->key, KEYS[0]);
+	assert_str_equal(iter->val, "0");
+
+	// not much we can do here but valgrind
+	itable_iter_free(iter);
+
+	itable_free_vals(tab, NULL);
+}
+
 void itable_iter__vals(void **state) {
 	const struct ITable *tab = itable_init(3, 5);
 
@@ -625,6 +642,7 @@ int main(void) {
 		TEST(itable_put__grow),
 
 		TEST(itable_iter__empty),
+		TEST(itable_iter__free),
 		TEST(itable_iter__vals),
 		TEST(itable_iter__removed),
 

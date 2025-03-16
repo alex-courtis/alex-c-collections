@@ -223,6 +223,23 @@ void ptable_iter__empty(void **state) {
 	ptable_free_vals(tab, NULL);
 }
 
+void ptable_iter__free(void **state) {
+	const struct PTable *tab = ptable_init(3, 5);
+
+	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
+
+	const struct PTableIter *iter = ptable_iter(tab);
+	assert_non_nul(iter);
+	assert_int_equal(iter->key, KEYS[0]);
+	assert_str_equal(iter->val, "0");
+
+	// not much we can do here but valgrind
+	ptable_iter_free(iter);
+
+	ptable_free_vals(tab, NULL);
+}
+
 void ptable_iter__vals(void **state) {
 	const struct PTable *tab = ptable_init(3, 5);
 
@@ -624,6 +641,7 @@ int main(void) {
 		TEST(ptable_put__grow),
 
 		TEST(ptable_iter__empty),
+		TEST(ptable_iter__free),
 		TEST(ptable_iter__vals),
 		TEST(ptable_iter__removed),
 

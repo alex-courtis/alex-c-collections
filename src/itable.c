@@ -33,7 +33,7 @@ struct ITableIterP {
 };
 
 // grow to capacity + grow
-void grow_itable(struct ITable *tab) {
+static void grow_itable(struct ITable *tab) {
 
 	// grow new arrays
 	uint64_t *new_keys = calloc(tab->capacity + tab->grow, sizeof(uint64_t));

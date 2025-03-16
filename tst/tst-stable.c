@@ -243,6 +243,22 @@ void stable_iter__empty(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
+void stable_iter__free(void **state) {
+	const struct STable *tab = stable_init(3, 5, false);
+
+	assert_nul(stable_put(tab, "a", strdup("0")));
+	assert_nul(stable_put(tab, "b", strdup("1")));
+
+	const struct STableIter *iter = stable_iter(tab);
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "0");
+
+	// not much we can do here but valgrind
+	stable_iter_free(iter);
+
+	stable_free_vals(tab, NULL);
+}
+
 void stable_iter__vals(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
@@ -696,6 +712,7 @@ int main(void) {
 		TEST(stable_put__grow),
 
 		TEST(stable_iter__empty),
+		TEST(stable_iter__free),
 		TEST(stable_iter__vals),
 		TEST(stable_iter__removed),
 

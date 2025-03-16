@@ -37,7 +37,7 @@ struct STableIterP {
 };
 
 // grow to capacity + grow
-void grow_stable(struct STable *tab) {
+static void grow_stable(struct STable *tab) {
 
 	// grow new arrays
 	const char **new_keys = calloc(tab->capacity + tab->grow, sizeof(char*));
