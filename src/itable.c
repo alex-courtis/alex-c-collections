@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -272,7 +271,7 @@ struct SList *itable_keys_slist(const struct ITable* const tab) {
 
 	uint64_t *k;
 	for (k = tab->keys; k < tab->keys + tab->size; k++) {
-		slist_append(&list, (void*)*k);
+		slist_append(&list, (uint64_t*)k);
 	}
 
 	return list;

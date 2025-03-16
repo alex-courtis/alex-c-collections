@@ -84,7 +84,7 @@ struct SList *stable_vals_slist(const struct STable* const tab);
  */
 
 // to string, user frees
-// values must be char*, printed using %s, NULL printed as "(null)"
+// values must be char*, printed using %s, NULL printed as literal "(null)"
 char *stable_str(const struct STable* const tab);
 
 // number of entries

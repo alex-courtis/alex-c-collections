@@ -45,8 +45,8 @@ void itable_keys_slist__many(void **state) {
 	struct SList *list = itable_keys_slist(tab);
 
 	assert_int_equal(slist_length(list), 2);
-	assert_int_equal((uint64_t)slist_at(list, 0), 1);
-	assert_int_equal((uint64_t)slist_at(list, 1), 2);
+	assert_int_equal(*(uint64_t*)slist_at(list, 0), 1);
+	assert_int_equal(*(uint64_t*)slist_at(list, 1), 2);
 
 	slist_free(&list);
 	itable_free_vals(tab, NULL);
