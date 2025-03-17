@@ -26,6 +26,14 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: validate debug
+        run: |
+          cat /etc/profile.d/debuginfod.sh
+
+      - name: validate env
+        run: |
+          env
+
       - name: test gcc
         run: make CC=gcc               clean test
 
@@ -42,7 +50,7 @@ jobs:
         run: make CC=clang MFLAGS=-m32 clean test
 
       - name: valgrind gcc
-        run: make CC=gcc               clean test-vg
+        run: /etc/profile.d/debuginfod.sh ; make CC=gcc               clean test-vg
 
       - name: valgrind clang
         run: make CC=clang             clean test-vg
