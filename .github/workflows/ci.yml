@@ -1,0 +1,64 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - master
+jobs:
+  all:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:multilib-devel
+
+    steps:
+      - name: deps
+        run: |
+          pacman --noconfirm -Sy
+
+          pacman --noconfirm -S \
+            clang \
+            cmocka \
+            lib32-cmocka \
+            cppcheck \
+            valgrind
+
+      - uses: actions/checkout@v4
+
+      - name: test gcc
+        run: make CC=gcc               clean test
+
+      - name: test clang
+        run: make CC=clang             clean test
+
+      - name: cppcheck
+        run: make                      cppcheck
+
+      - name: test gcc 32-bit
+        run: make CC=gcc   MFLAGS=-m32 clean test
+
+      - name: test clang 32-bit
+        run: make CC=clang MFLAGS=-m32 clean test
+
+      - name: valgrind gcc
+        run: |
+          . /etc/profile.d/debuginfod.sh
+          make CC=gcc                  clean test-vg
+
+      - name: valgrind clang
+        run: |
+          . /etc/profile.d/debuginfod.sh
+          make CC=clang                clean test-vg
+
+      - name: valgrind gcc 32-bit
+        run: |
+          . /etc/profile.d/debuginfod.sh
+          make CC=gcc   MFLAGS=-m32    clean test-vg
+
+      - name: valgrind clang 32-bit
+        run: |
+          . /etc/profile.d/debuginfod.sh
+          make CC=clang MFLAGS=-m32    clean test-vg
+
