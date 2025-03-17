@@ -19,14 +19,16 @@ jobs:
           pacman --noconfirm -Sy
 
           pacman --noconfirm -S \
-            clang \
-            cmake \
-            cmocka \
-            lib32-cmocka \
-            cppcheck \
-            git \
-            valgrind
-      - name: build iwyu
+          clang \
+          cmake \
+          cmocka \
+          llvm-libs \
+          lib32-cmocka \
+          cppcheck \
+          git \
+          valgrind
+
+      - name: build/install iwyu
         run: |
           git clone https://github.com/include-what-you-use/include-what-you-use.git
           cd include-what-you-use
