@@ -16,10 +16,12 @@ jobs:
       volumes:
         - my_docker_volume:/volume_mount
     steps:
-      - name: Check for dockerenv file
-        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+      - name: .dockerenv
+        run: cat /.dockerenv
       - name: foobar
         run: echo "foo=$FOO"
+      - name: uname
+        run: uname -a
   # all:
   #   runs-on: ubuntu-latest
   #   steps:
