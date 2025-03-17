@@ -24,6 +24,9 @@ jobs:
             cppcheck \
             include-what-you-use \
             valgrind
+          git clone "https://aur.archlinux.org/include-what-you-use.git"
+          cd include-what-you-use
+          makepkg -sri
 
       - uses: actions/checkout@v4
 
