@@ -31,8 +31,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: test
-        with:
-          luaVersion: ${{ matrix.compiler }}
         run: make CC=${{ matrix.compiler }} clean test
 
       - name: cppcheck
