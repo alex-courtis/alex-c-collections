@@ -28,7 +28,7 @@ jobs:
 
           git clone "https://aur.archlinux.org/include-what-you-use.git"
           cd include-what-you-use
-          makepkg -sri
+          sudo -u nobody makepkg -si
 
       - uses: actions/checkout@v4
 
