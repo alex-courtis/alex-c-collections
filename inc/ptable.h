@@ -15,8 +15,8 @@ struct PTable;
  * Entry iterator.
  */
 struct PTableIter {
-	const void *key;
-	const void *val;
+	const void* const key;
+	const void* const val;
 };
 
 /*
@@ -78,6 +78,11 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
 /*
  * Info
  */
+
+// to string, user frees
+// lines with format "%p = %s"
+// values must be char*, NULL printed as "(null)"
+char *ptable_str(const struct PTable* const tab);
 
 // number of entries with val
 size_t ptable_size(const struct PTable* const tab);

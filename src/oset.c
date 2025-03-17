@@ -25,11 +25,11 @@ struct OSetIterP {
 	 * Private
 	 */
 	const struct OSet *set;
-	const void **v;
+	const void * const *v;
 };
 
 // grow to capacity + grow
-void grow_oset(struct OSet *set) {
+static void grow_oset(struct OSet *set) {
 
 	// grow new arrays
 	const void **new_vals = calloc(set->capacity + set->grow, sizeof(void*));

@@ -47,10 +47,10 @@ size_t slist_remove_all_free(struct SList **head, fn_equals, const void *b, fn_f
 // val at position
 void *slist_at(struct SList *head, size_t index);
 
-// find
+// find, NULL when fn_test is NULL
 struct SList *slist_find(struct SList *head, fn_test);
 
-// find a val
+// find a val, NULL when fn_test is NULL
 void *slist_find_val(struct SList *head, fn_test);
 
 // find, NULL fn_equals is val pointer comparison

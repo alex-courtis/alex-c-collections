@@ -1,2 +1,7 @@
 unusedFunction:src/ptable.c
 unusedFunction:tst/asserts.h
+
+staticFunction:tst/*c
+
+# this is just not practical
+nullPointerOutOfMemory

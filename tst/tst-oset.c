@@ -229,6 +229,24 @@ void oset_iter__empty(void **state) {
 	oset_free_vals(set, NULL);
 }
 
+void oset_iter__free(void **state) {
+	const struct OSet *set = oset_init(3, 5);
+
+	void *vals[] = { strdup("0"), strdup("1"), };
+	assert_true(oset_add(set, vals[0]));
+	assert_true(oset_add(set, vals[1]));
+
+	const struct OSetIter *iter = oset_iter(set);
+	assert_non_nul(iter);
+	assert_str_equal(iter->val, "0");
+
+	// not much we can do here but valgrind
+	oset_iter_free(iter);
+
+	oset_free_vals(set, NULL);
+}
+
+
 void oset_iter__vals(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
@@ -486,6 +504,7 @@ int main(void) {
 		TEST(oset_remove__inexistent),
 
 		TEST(oset_iter__empty),
+		TEST(oset_iter__free),
 		TEST(oset_iter__vals),
 		TEST(oset_iter__cleared),
 
