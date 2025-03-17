@@ -24,6 +24,11 @@ jobs:
             lib32-cmocka \
             cppcheck \
             valgrind
+      - name: build iwyu
+        run: |
+          git clone https://github.com/include-what-you-use/include-what-you-use.git
+          cd include-what-you-use
+          make install
 
       - uses: actions/checkout@v4
 
@@ -62,3 +67,5 @@ jobs:
           . /etc/profile.d/debuginfod.sh
           make CC=clang MFLAGS=-m32    clean test-vg
 
+      - name: iwyu
+        run: make                      iwyu
