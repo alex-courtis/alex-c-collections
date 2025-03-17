@@ -49,17 +49,11 @@ jobs:
       - name: test clang 32-bit
         run: make CC=clang MFLAGS=-m32 clean test
 
-      - name: valgrind gcc
+      - name: valgrind
         run: |
           . /etc/profile.d/debuginfod.sh
           make CC=gcc               clean test-vg
-
-      - name: valgrind clang
-        run: |
           make CC=clang             clean test-vg
+          make CC=gcc   MFLAGS=-m32 clean test-vg
+          make CC=clang MFLAGS=-m32 clean test-vg
 
-      - name: valgrind gcc 32-bit
-        run: make CC=gcc   MFLAGS=-m32 clean test-vg
-
-      - name: valgrind clang 32-bit
-        run: make CC=clang MFLAGS=-m32 clean test-vg
