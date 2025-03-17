@@ -1,18 +1,16 @@
 clang
 
 -Iinc
--Ipro
 -Itst
--Ilib/alex-c-collections/inc
 
 -D_GNU_SOURCE
 
 -pedantic
 -Wall
 -Wextra
+-Wimplicit-fallthrough
+-Wold-style-definition
+-Wstrict-prototypes
 -Wno-unused-parameter
 
-%c -Wold-style-definition
-%c -Wstrict-prototypes
-
-%c -std=gnu17
+-std=gnu17

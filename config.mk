@@ -3,12 +3,19 @@ INCS = -Iinc
 CPPFLAGS += $(INCS)
 
 OFLAGS = -O3
-WFLAGS = -pedantic -Wall -Wextra -Werror -Wno-unused-parameter
+WFLAGS = -Werror \
+		 -pedantic \
+		 -Wall \
+		 -Wextra \
+		 -Wimplicit-fallthrough \
+		 -Wold-style-definition \
+		 -Wstrict-prototypes \
+		 -Wno-unused-parameter
 DFLAGS = -g
 MFLAGS =
 COMPFLAGS = $(WFLAGS) $(OFLAGS) $(DFLAGS) $(MFLAGS)
 
-CFLAGS += $(COMPFLAGS) -std=gnu17 -Wold-style-definition -Wstrict-prototypes
+CFLAGS += $(COMPFLAGS) -std=gnu17 
 
 LDFLAGS += $(MFLAGS)
 
