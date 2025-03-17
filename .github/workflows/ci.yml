@@ -16,6 +16,7 @@ jobs:
       volumes:
         - my_docker_volume:/volume_mount
     steps:
+      - uses: actions/checkout@v4
       - name: .dockerenv
         run: cat /.dockerenv
       - name: foobar
