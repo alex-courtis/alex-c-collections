@@ -22,6 +22,7 @@ jobs:
             cmocka \
             lib32-cmocka \
             cppcheck \
+            include-what-you-use \
             valgrind
 
       - uses: actions/checkout@v4
@@ -49,11 +50,27 @@ jobs:
       - name: test clang 32-bit
         run: make CC=clang MFLAGS=-m32 clean test
 
-      - name: valgrind
+      - name: valgrind gcc
         run: |
           . /etc/profile.d/debuginfod.sh
-          make CC=gcc               clean test-vg
-          make CC=clang             clean test-vg
-          make CC=gcc   MFLAGS=-m32 clean test-vg
-          make CC=clang MFLAGS=-m32 clean test-vg
+          make CC=gcc                  clean test-vg
+
+      - name: valgrind clang
+        run: |
+          . /etc/profile.d/debuginfod.sh
+          make CC=gcc                  clean test-vg
+          make CC=clang                clean test-vg
+
+      - name: valgrind gcc 32-bit
+        run: |
+          . /etc/profile.d/debuginfod.sh
+          make CC=gcc   MFLAGS=-m32    clean test-vg
+
+      - name: valgrind clang 32-bit
+        run: |
+          . /etc/profile.d/debuginfod.sh
+          make CC=clang MFLAGS=-m32    clean test-vg
+
+      - name: iwyu
+        run: make                      iwyu
 
