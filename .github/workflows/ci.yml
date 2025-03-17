@@ -29,16 +29,6 @@ jobs:
           git \
           valgrind
 
-      - name: build/install iwyu
-        run: |
-          git clone https://github.com/include-what-you-use/include-what-you-use.git
-          cd include-what-you-use
-          git checkout 0.23
-          mkdir build
-          cd build
-          cmake ..
-          make install
-
       - uses: actions/checkout@v4
 
       - name: test gcc
@@ -75,6 +65,16 @@ jobs:
         run: |
           . /etc/profile.d/debuginfod.sh
           make CC=clang MFLAGS=-m32    clean test-vg
+
+      - name: build/install iwyu
+        run: |
+          git clone https://github.com/include-what-you-use/include-what-you-use.git
+          cd include-what-you-use
+          git checkout 0.23
+          mkdir build
+          cd build
+          cmake ..
+          make install
 
       - name: iwyu
         run: make                      iwyu
