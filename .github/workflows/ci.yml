@@ -18,6 +18,7 @@ jobs:
         run: |
           pacman -Sy
           pacman -S --noconfirm \
+            clang \
             cmocka \
             lib32-cmocka \
             valgrind
