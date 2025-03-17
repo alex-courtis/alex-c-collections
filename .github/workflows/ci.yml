@@ -20,6 +20,10 @@ jobs:
         run: cat /.dockerenv
       - name: foobar
         run: echo "foo=$FOO"
+      - name: pwd
+        run: pwd
+      - name: find
+        run: find .
       - name: gcc test
         run: make CC=gcc   clean test
   # all:
