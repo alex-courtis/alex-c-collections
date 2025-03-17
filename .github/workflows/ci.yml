@@ -16,7 +16,8 @@ jobs:
     steps:
       - name: deps
         run: |
-          pacman -S cmocka
+          pacman -Sy
+          pacman -S cmocka valgrind
 
       - uses: actions/checkout@v4
 
