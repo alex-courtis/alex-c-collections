@@ -1,0 +1,36 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - master
+jobs:
+  container-test-job:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:multilib-devel
+      env:
+        FOO: bar
+      volumes:
+        - my_docker_volume:/volume_mount
+    steps:
+      - name: Check for dockerenv file
+        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+      - name: foobar
+        run: echo "foo=$FOO"
+  # all:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: deps
+  #     run: |
+  #       sudo add-apt-repository universe
+  #       sudo apt install gcc-multilib g++-multilib clang wayland-protocols libwlroots-dev libyaml-cpp-dev libcmocka-dev cppcheck valgrind -y
+  #   - name: gcc test
+  #     run: make CC=gcc   clean test
+  #   - name: clang test
+  #     run: make CC=clang clean test
+  #   - name: cppcheck
+  #     run: make          clean cppcheck
