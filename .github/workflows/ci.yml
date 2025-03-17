@@ -17,7 +17,10 @@ jobs:
       - name: deps
         run: |
           pacman -Sy
-          pacman -S cmocka valgrind
+          pacman -S --noconfirm \
+            cmocka \
+            lib32-cmocka \
+            valgrind
 
       - uses: actions/checkout@v4
 
