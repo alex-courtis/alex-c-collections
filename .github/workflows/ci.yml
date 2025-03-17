@@ -23,6 +23,7 @@ jobs:
             cmocka \
             lib32-cmocka \
             cppcheck \
+            git \
             valgrind
       - name: build iwyu
         run: |
