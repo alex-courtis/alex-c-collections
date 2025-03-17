@@ -62,6 +62,3 @@ jobs:
           . /etc/profile.d/debuginfod.sh
           make CC=clang MFLAGS=-m32    clean test-vg
 
-      - name: iwyu
-        run: make                      iwyu
-
