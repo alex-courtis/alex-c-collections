@@ -16,13 +16,14 @@ jobs:
     steps:
       - name: deps
         run: |
-          pacman -Sy
+          pacman --noconfirm -Sy
 
-          pacman -S --noconfirm \
+          pacman --noconfirm -S \
             clang \
             cmocka \
             lib32-cmocka \
             cppcheck \
+            git \
             valgrind
 
           git clone "https://aur.archlinux.org/include-what-you-use.git"
