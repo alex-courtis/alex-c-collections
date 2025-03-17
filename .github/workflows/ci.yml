@@ -23,22 +23,9 @@ jobs:
             cmocka \
             lib32-cmocka \
             cppcheck \
-            git \
             valgrind
 
-          git clone "https://aur.archlinux.org/include-what-you-use.git"
-          cd include-what-you-use
-          sudo -u nobody makepkg -si
-
       - uses: actions/checkout@v4
-
-      - name: validate debug
-        run: |
-          cat /etc/profile.d/debuginfod.sh
-
-      - name: validate env
-        run: |
-          env
 
       - name: test gcc
         run: make CC=gcc               clean test
@@ -63,7 +50,6 @@ jobs:
       - name: valgrind clang
         run: |
           . /etc/profile.d/debuginfod.sh
-          make CC=gcc                  clean test-vg
           make CC=clang                clean test-vg
 
       - name: valgrind gcc 32-bit
