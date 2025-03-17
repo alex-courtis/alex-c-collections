@@ -20,8 +20,8 @@ jobs:
         run: cat /.dockerenv
       - name: foobar
         run: echo "foo=$FOO"
-      - name: uname
-        run: uname -a
+      - name: find
+        run: find /
   # all:
   #   runs-on: ubuntu-latest
   #   steps:
