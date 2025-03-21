@@ -13,12 +13,25 @@ jobs:
     container:
       image: archlinux:multilib-devel
 
-    steps:
-      - name: deps
-        run: |
-          pacman --noconfirm -Sy
+    defaults:
+      run:
+        shell: sh -ec "runuser runner {0}" # assume the runner user except where overridden by root
 
-          pacman --noconfirm -S \
+    env:
+      DEBUGINFOD_URLS: "https://debuginfod.archlinux.org" # profile thus debuginfod.sh is not executed
+
+    steps:
+      - name: create user
+        shell: sh -e {0}
+        # magic numbers and names not available in environment
+        run: |
+          groupadd --gid 118 docker
+          useradd -m -s /bin/sh --uid 1001 --gid docker runner
+
+      - name: install packages
+        shell: sh -e {0}
+        run: |
+          pacman --noconfirm -Sy \
           clang \
           cmake \
           cmocka \
@@ -31,50 +44,22 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: test gcc
-        run: make CC=gcc               clean test
+      - run: make CC=gcc               clean test
+      - run: make CC=clang             clean test
+      - run: make                      clean cppcheck
+      - run: make CC=gcc   MFLAGS=-m32 clean test
+      - run: make CC=clang MFLAGS=-m32 clean test
+      - run: make CC=gcc               clean test-vg
+      - run: make CC=clang             clean test-vg
+      - run: make CC=gcc   MFLAGS=-m32 clean test-vg
+      - run: make CC=clang MFLAGS=-m32 clean test-vg
 
-      - name: test clang
-        run: make CC=clang             clean test
-
-      - name: cppcheck
-        run: make                      cppcheck
-
-      - name: test gcc 32-bit
-        run: make CC=gcc   MFLAGS=-m32 clean test
-
-      - name: test clang 32-bit
-        run: make CC=clang MFLAGS=-m32 clean test
-
-      - name: valgrind gcc
+      - name: build include-what-you-use package
         run: |
-          . /etc/profile.d/debuginfod.sh
-          make CC=gcc                  clean test-vg
+          git clone https://aur.archlinux.org/include-what-you-use.git /tmp/include-what-you-use
+          makepkg OPTIONS=-debug PKGEXT='.pkg.tar' --dir /tmp/include-what-you-use
+      - name: install include-what-you-use package
+        run: pacman -U --noconfirm /tmp/include-what-you-use/*.pkg.tar
+        shell: sh -e {0}
 
-      - name: valgrind clang
-        run: |
-          . /etc/profile.d/debuginfod.sh
-          make CC=clang                clean test-vg
-
-      - name: valgrind gcc 32-bit
-        run: |
-          . /etc/profile.d/debuginfod.sh
-          make CC=gcc   MFLAGS=-m32    clean test-vg
-
-      - name: valgrind clang 32-bit
-        run: |
-          . /etc/profile.d/debuginfod.sh
-          make CC=clang MFLAGS=-m32    clean test-vg
-
-      - name: build/install iwyu
-        run: |
-          git clone https://github.com/include-what-you-use/include-what-you-use.git
-          cd include-what-you-use
-          git checkout 0.23
-          mkdir build
-          cd build
-          cmake ..
-          make install
-
-      - name: iwyu
-        run: make                      iwyu
+      - run: make clean iwyu
