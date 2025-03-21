@@ -35,11 +35,12 @@ jobs:
           clang \
           cmake \
           cmocka \
-          llvm \
-          llvm-libs \
-          lib32-cmocka \
           cppcheck \
           git \
+          lib32-cmocka \
+          llvm \
+          llvm-libs \
+          ninja \
           valgrind
 
       - uses: actions/checkout@v4
