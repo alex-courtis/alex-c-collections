@@ -7,15 +7,23 @@
 
 #include "slist.h"
 
-struct SList *slist_shallow_clone(struct SList *head) {
+struct SList *slist_clone(struct SList *head, fn_clone_val clone_val) {
 	struct SList *c, *i;
 
 	c = NULL;
 	for (i = head; i; i = i->nex) {
-		slist_append(&c, i->val);
+		if (clone_val) {
+			slist_append(&c, clone_val(i->val));
+		} else {
+			slist_append(&c, i->val);
+		}
 	}
 
 	return c;
+}
+
+struct SList *slist_shallow_clone(struct SList *head) {
+	return slist_clone(head, NULL);
 }
 
 void slist_free(struct SList **head) {
@@ -115,6 +123,27 @@ size_t slist_remove_all_free(struct SList **head, fn_equals equals, const void *
 		}
 		slist_remove(head, &i);
 		removed++;
+	}
+
+	return removed;
+}
+
+size_t slist_xor_free(struct SList **head1, struct SList *head2, fn_equals equals, fn_free_val free_val, fn_clone_val clone_val) {
+	struct SList *i = head2;
+	size_t removed = 0;
+
+	while (i) {
+		size_t removed = slist_remove_all_free(head1, equals, i->val, free_val);
+
+		if (!removed) {
+			if (clone_val) {
+				slist_append(head1, clone_val(i->val));
+			} else {
+				slist_append(head1, i->val);
+			}
+		}
+
+		i = i->nex;
 	}
 
 	return removed;
