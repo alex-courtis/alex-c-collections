@@ -591,6 +591,28 @@ void slist_move__all(void **state) {
 	slist_free(&from);
 }
 
+void slist_clone__empty(void **state) {
+	assert_nul(slist_clone(NULL, fn_clone_strdup));
+}
+
+void slist_clone__vals(void **state) {
+	struct SList *list = NULL;
+
+	void *vals[] = { "0", "1", };
+	slist_append(&list, vals[0]);
+	slist_append(&list, vals[1]);
+
+	struct SList *cloned = slist_clone(list, fn_clone_strdup);
+
+	assert_non_nul(cloned);
+
+	assert_str_equal(slist_at(cloned, 0), "0");
+	assert_str_equal(slist_at(cloned, 1), "1");
+
+	slist_free(&list);
+	slist_free_vals(&cloned, NULL);
+}
+
 void slist_shallow_clone__empty(void **state) {
 	assert_nul(slist_shallow_clone(NULL));
 }
@@ -765,6 +787,9 @@ int main(void) {
 		TEST(slist_move__no_match),
 		TEST(slist_move__many),
 		TEST(slist_move__all),
+
+		TEST(slist_clone__empty),
+		TEST(slist_clone__vals),
 
 		TEST(slist_shallow_clone__empty),
 		TEST(slist_shallow_clone__vals),
