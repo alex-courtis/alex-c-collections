@@ -655,29 +655,6 @@ void slist_str__string_vals(void **state) {
 	slist_free(&list);
 }
 
-static bool string_list_equal(struct SList *a, struct SList *b) {
-	struct SList *i, *j;
-	size_t a_count = 0, b_count = 0;
-
-	for (i = a; i; i = i->nex) a_count++;
-	for (j = b; j; j = j->nex) b_count++;
-
-	if (a_count != b_count) return false;
-
-	for (i = a; i; i = i->nex) {
-		bool found = false;
-		for (j = b; j; j = j->nex) {
-			if (fn_comp_equals_strcmp(i->val, j->val)) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) return false;
-	}
-
-	return true;
-}
-
 void slist_xor_free__empty_lists(void **state) {
 	struct State *s = *state;
 
@@ -697,7 +674,7 @@ void slist_xor_free__first_list_empty(void **state) {
 
 	slist_xor_free(&s->list1, s->list2, fn_comp_equals_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(string_list_equal(s->list1, s->expected));
+	assert_true(slist_equal(s->list1, s->expected, fn_comp_equals_strcmp));
 }
 
 void slist_xor_free__second_list_empty(void **state) {
@@ -711,7 +688,7 @@ void slist_xor_free__second_list_empty(void **state) {
 
 	slist_xor_free(&s->list1, s->list2, fn_comp_equals_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(string_list_equal(s->list1, s->expected));
+	assert_true(slist_equal(s->list1, s->expected, fn_comp_equals_strcmp));
 }
 
 void slist_xor_free__toggle_items(void **state) {
@@ -730,7 +707,7 @@ void slist_xor_free__toggle_items(void **state) {
 
 	slist_xor_free(&s->list1, s->list2, fn_comp_equals_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(string_list_equal(s->list1, s->expected));
+	assert_true(slist_equal(s->list1, s->expected, fn_comp_equals_strcmp));
 }
 
 void slist_xor_free__duplicate_items(void **state) {
@@ -746,7 +723,7 @@ void slist_xor_free__duplicate_items(void **state) {
 
 	slist_xor_free(&s->list1, s->list2, fn_comp_equals_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(string_list_equal(s->list1, s->expected));
+	assert_true(slist_equal(s->list1, s->expected, fn_comp_equals_strcmp));
 }
 
 
