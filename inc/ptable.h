@@ -14,10 +14,7 @@ struct PTable;
 /*
  * Entry iterator.
  */
-struct PTableIter {
-	const void* const key;
-	const void* const val;
-};
+struct PTableIter;
 
 /*
  * Lifecycle
@@ -45,8 +42,14 @@ const void *ptable_get(const struct PTable* const tab, const void* const key);
 // create an iterator, caller must ptable_iter_free or invoke ptable_next until NULL
 const struct PTableIter *ptable_iter(const struct PTable* const tab);
 
-// next iterator value, NULL at end of list
-const struct PTableIter *ptable_next(const struct PTableIter* const iter);
+// next iterator value, NULL at end of table
+const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);
+
+// iterator key, NULL on NULL iter
+const void *ptable_iter_key(const struct PTableIter* const iter);
+
+// iterator value, NULL on NULL iter
+const void *ptable_iter_val(const struct PTableIter* const iter);
 
 /*
  * Mutate

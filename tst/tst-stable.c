@@ -251,7 +251,7 @@ void stable_iter__free(void **state) {
 
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "0");
+	assert_str_equal(stable_iter_val(iter), "0");
 
 	// not much we can do here but valgrind
 	stable_iter_free(iter);
@@ -262,7 +262,7 @@ void stable_iter__free(void **state) {
 void stable_iter__vals(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
-	assert_nul(stable_put(tab, "a", NULL));
+	assert_nul(stable_put(tab, "a", strdup("0")));
 	assert_nul(stable_put(tab, "b", strdup("1")));
 	assert_nul(stable_put(tab, "c", NULL));
 	assert_nul(stable_put(tab, "d", strdup("3")));
@@ -270,38 +270,38 @@ void stable_iter__vals(void **state) {
 
 	assert_int_equal(stable_size(tab), 5);
 
-	// a NULL
+	// a 0
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "a");
-	assert_nul(iter->val);
+	assert_str_equal(stable_iter_key(iter), "a");
+	assert_str_equal(stable_iter_val(iter), "0");
 
 	// b 1
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "b");
-	assert_str_equal(iter->val, "1");
+	assert_str_equal(stable_iter_key(iter), "b");
+	assert_str_equal(stable_iter_val(iter), "1");
 
 	// c NULL
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "c");
-	assert_nul(iter->val);
+	assert_str_equal(stable_iter_key(iter), "c");
+	assert_nul(stable_iter_val(iter));
 
 	// d 3
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "d");
-	assert_str_equal(iter->val, "3");
+	assert_str_equal(stable_iter_key(iter), "d");
+	assert_str_equal(stable_iter_val(iter), "3");
 
 	// e NULL
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "e");
-	assert_nul(iter->val);
+	assert_str_equal(stable_iter_key(iter), "e");
+	assert_nul(stable_iter_val(iter));
 
 	// end
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_nul(iter);
 
 	stable_free_vals(tab, NULL);
@@ -334,17 +334,17 @@ void stable_iter__removed(void **state) {
 	// b 1
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "b");
-	assert_str_equal(iter->val, "1");
+	assert_str_equal(stable_iter_key(iter), "b");
+	assert_str_equal(stable_iter_val(iter), "1");
 
 	// d 3
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "d");
-	assert_str_equal(iter->val, "3");
+	assert_str_equal(stable_iter_key(iter), "d");
+	assert_str_equal(stable_iter_val(iter), "3");
 
 	// end
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_nul(iter);
 
 	stable_free_vals(tab, NULL);
@@ -376,17 +376,17 @@ void stable_put__again(void **state) {
 	// b 1
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "b");
-	assert_str_equal(iter->val, "1");
+	assert_str_equal(stable_iter_key(iter), "b");
+	assert_str_equal(stable_iter_val(iter), "1");
 
 	// a 0 moved later
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "a");
-	assert_str_equal(iter->val, "0");
+	assert_str_equal(stable_iter_key(iter), "a");
+	assert_str_equal(stable_iter_val(iter), "0");
 
 	// end
-	iter = stable_next(iter);
+	iter = stable_iter_next(iter);
 	assert_nul(iter);
 
 	stable_free_vals(tab, NULL);

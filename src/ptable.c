@@ -22,19 +22,11 @@ struct PTable {
 	size_t size;
 };
 
-struct PTableIterP {
-	/*
-	 * Public, removed const
-	 */
+struct PTableIter {
 	const void *key;
 	const void *val;
-
-	/*
-	 * Private
-	 */
 	const struct PTable *tab;
-	const void * const *k;
-	const void * const *v;
+	size_t position;
 };
 
 // grow to capacity + grow
@@ -126,50 +118,46 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 }
 
 const struct PTableIter *ptable_iter(const struct PTable* const tab) {
-	if (!tab)
+	if (!tab || tab->size == 0)
 		return NULL;
 
-	// loop over keys and vals
-	const void **k;
-	const void **v;
-	for (k = tab->keys, v = tab->vals;
-			v < tab->vals + tab->size && k < tab->keys + tab->size;
-			k++, v++) {
-		struct PTableIterP *iterp = calloc(1, sizeof(struct PTableIterP));
+	// first key/val
+	struct PTableIter *i = calloc(1, sizeof(struct PTableIter));
+	i->tab = tab;
+	i->key = *(tab->keys);
+	i->val = *(tab->vals);
+	i->position = 0;
 
-		iterp->tab = tab;
-		iterp->key = *k;
-		iterp->val = *v;
-		iterp->k = k;
-		iterp->v = v;
-
-		return (struct PTableIter*)iterp;
-	}
-
-	return NULL;
+	return i;
 }
 
-const struct PTableIter *ptable_next(const struct PTableIter* const iter) {
+const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
 	if (!iter)
 		return NULL;
 
-	struct PTableIterP *iterp = (struct PTableIterP*)iter;
+	struct PTableIter *i = (struct PTableIter*)iter;
 
-	if (!iterp || !iterp->tab) {
-		ptable_iter_free(iter);
+	if (!i->tab) {
+		ptable_iter_free(i);
 		return NULL;
 	}
 
-	// loop over keys and vals
-	while (++iterp->v < iterp->tab->vals + iterp->tab->size &&
-			++iterp->k < iterp->tab->keys + iterp->tab->size) {
-		iterp->key = *(iterp->k);
-		iterp->val = *(iterp->v);
-		return iter;
+	if (++i->position < i->tab->size) {
+		i->key = *(i->tab->keys + i->position);
+		i->val = *(i->tab->vals + i->position);
+		return i;
+	} else {
+		ptable_iter_free(i);
+		return NULL;
 	}
+}
 
-	ptable_iter_free(iter);
-	return NULL;
+const void *ptable_iter_key(const struct PTableIter* const iter) {
+	return iter ? iter->key : NULL;
+}
+
+const void *ptable_iter_val(const struct PTableIter* const iter) {
+	return iter ? iter->val : NULL;
 }
 
 const void *ptable_put(const struct PTable* const ctab, const void* const key, const void* const val) {
