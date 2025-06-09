@@ -49,10 +49,10 @@ const struct STableIter *stable_iter(const struct STable* const tab);
 // next iterator entry, NULL at end of list
 const struct STableIter *stable_iter_next(const struct STableIter* const iter);
 
-// iterator key
+// iterator key, NULL on NULL iter
 const char *stable_iter_key(const struct STableIter* const iter);
 
-// iterator value
+// iterator value, NULL on NULL iter
 const void *stable_iter_val(const struct STableIter* const iter);
 
 /*

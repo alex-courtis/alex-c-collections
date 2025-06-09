@@ -45,10 +45,10 @@ const struct PTableIter *ptable_iter(const struct PTable* const tab);
 // next iterator value, NULL at end of list
 const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);
 
-// iterator key
+// iterator key, NULL on NULL iter
 const void *ptable_iter_key(const struct PTableIter* const iter);
 
-// iterator value
+// iterator value, NULL on NULL iter
 const void *ptable_iter_val(const struct PTableIter* const iter);
 
 /*

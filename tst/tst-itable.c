@@ -238,8 +238,8 @@ void itable_iter__free(void **state) {
 
 	const struct ITableIter *iter = itable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[0]);
-	assert_str_equal(iter->val, "0");
+	assert_int_equal(itable_iter_key(iter), KEYS[0]);
+	assert_str_equal(itable_iter_val(iter), "0");
 
 	// not much we can do here but valgrind
 	itable_iter_free(iter);
@@ -261,35 +261,35 @@ void itable_iter__vals(void **state) {
 	// zero
 	const struct ITableIter *iter = itable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[0]);
-	assert_nul(iter->val);
+	assert_int_equal(itable_iter_key(iter), KEYS[0]);
+	assert_nul(itable_iter_val(iter));
 
 	// one
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[1]);
-	assert_str_equal(iter->val, "1");
+	assert_int_equal(itable_iter_key(iter), KEYS[1]);
+	assert_str_equal(itable_iter_val(iter), "1");
 
 	// two
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[2]);
-	assert_nul(iter->val);
+	assert_int_equal(itable_iter_key(iter), KEYS[2]);
+	assert_nul(itable_iter_val(iter));
 
 	// three
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[3]);
-	assert_str_equal(iter->val, "3");
+	assert_int_equal(itable_iter_key(iter), KEYS[3]);
+	assert_str_equal(itable_iter_val(iter), "3");
 
 	// four
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[4]);
-	assert_nul(iter->val);
+	assert_int_equal(itable_iter_key(iter), KEYS[4]);
+	assert_nul(itable_iter_val(iter));
 
 	// end
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_nul(iter);
 
 	itable_free_vals(tab, NULL);
@@ -323,17 +323,17 @@ void itable_iter__removed(void **state) {
 	// one
 	const struct ITableIter *iter = itable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[1]);
-	assert_str_equal(iter->val, "1");
+	assert_int_equal(itable_iter_key(iter), KEYS[1]);
+	assert_str_equal(itable_iter_val(iter), "1");
 
 	// three
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[3]);
-	assert_str_equal(iter->val, "3");
+	assert_int_equal(itable_iter_key(iter), KEYS[3]);
+	assert_str_equal(itable_iter_val(iter), "3");
 
 	// end
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_nul(iter);
 
 	itable_free_vals(tab, NULL);
@@ -365,17 +365,17 @@ void itable_put__again(void **state) {
 	// one
 	const struct ITableIter *iter = itable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[1]);
-	assert_str_equal(iter->val, "1");
+	assert_int_equal(itable_iter_key(iter), KEYS[1]);
+	assert_str_equal(itable_iter_val(iter), "1");
 
 	// zero moved later
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(iter->key, KEYS[0]);
-	assert_str_equal(iter->val, "0");
+	assert_int_equal(itable_iter_key(iter), KEYS[0]);
+	assert_str_equal(itable_iter_val(iter), "0");
 
 	// end
-	iter = itable_next(iter);
+	iter = itable_iter_next(iter);
 	assert_nul(iter);
 
 	itable_free_vals(tab, NULL);
