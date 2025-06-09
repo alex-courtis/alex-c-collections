@@ -128,7 +128,7 @@ const struct PTableIter *ptable_iter(const struct PTable* const tab) {
 	i->val = *(tab->vals);
 	i->position = 0;
 
-	return (struct PTableIter*)i;
+	return i;
 }
 
 const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {

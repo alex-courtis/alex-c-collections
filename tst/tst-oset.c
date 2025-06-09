@@ -238,7 +238,7 @@ void oset_iter__free(void **state) {
 
 	const struct OSetIter *iter = oset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "0");
+	assert_str_equal(oset_iter_val(iter), "0");
 
 	// not much we can do here but valgrind
 	oset_iter_free(iter);
@@ -258,13 +258,13 @@ void oset_iter__vals(void **state) {
 
 	const struct OSetIter *iter = oset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "0");
+	assert_str_equal(oset_iter_val(iter), "0");
 
-	iter = oset_next(iter);
+	iter = oset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "1");
+	assert_str_equal(oset_iter_val(iter), "1");
 
-	iter = oset_next(iter);
+	iter = oset_iter_next(iter);
 	assert_nul(iter);
 
 	oset_free_vals(set, NULL);
@@ -314,25 +314,25 @@ void oset_add__again(void **state) {
 	// 0
 	const struct OSetIter *iter = oset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "0");
+	assert_str_equal(oset_iter_val(iter), "0");
 
 	// 2
-	iter = oset_next(iter);
+	iter = oset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "2");
+	assert_str_equal(oset_iter_val(iter), "2");
 
 	// 3
-	iter = oset_next(iter);
+	iter = oset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "3");
+	assert_str_equal(oset_iter_val(iter), "3");
 
 	// 0 moved later
-	iter = oset_next(iter);
+	iter = oset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->val, "1");
+	assert_str_equal(oset_iter_val(iter), "1");
 
 	// end
-	iter = oset_next(iter);
+	iter = oset_iter_next(iter);
 	assert_nul(iter);
 
 	oset_free_vals(set, NULL);

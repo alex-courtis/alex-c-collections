@@ -129,7 +129,7 @@ const struct ITableIter *itable_iter(const struct ITable* const tab) {
 	i->val = *(tab->vals);
 	i->position = 0;
 
-	return (struct ITableIter*)i;
+	return i;
 }
 
 const struct ITableIter *itable_iter_next(const struct ITableIter* const iter) {

@@ -135,7 +135,7 @@ const struct STableIter *stable_iter(const struct STable* const tab) {
 	i->val = *(tab->vals);
 	i->position = 0;
 
-	return (struct STableIter*)i;
+	return i;
 }
 
 const struct STableIter *stable_iter_next(const struct STableIter* const iter) {

@@ -15,17 +15,10 @@ struct OSet {
 	size_t size;
 };
 
-struct OSetIterP {
-	/*
-	 * Public, removed const
-	 */
+struct OSetIter {
 	const void* val;
-
-	/*
-	 * Private
-	 */
 	const struct OSet *set;
-	const void * const *v;
+	size_t position;
 };
 
 // grow to capacity + grow
@@ -90,7 +83,7 @@ void oset_iter_free(const struct OSetIter* const iter) {
 	if (!iter)
 		return;
 
-	free((struct OSetIterP*)iter);
+	free((void*)iter);
 }
 
 bool oset_contains(const struct OSet* const set, const void* const val) {
@@ -108,46 +101,40 @@ bool oset_contains(const struct OSet* const set, const void* const val) {
 }
 
 const struct OSetIter *oset_iter(const struct OSet* const set) {
-	if (!set)
+	if (!set || set->size == 0)
 		return NULL;
 
-	// loop over vals
-	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (*v) {
-			struct OSetIterP *iterp = calloc(1, sizeof(struct OSetIterP));
+	// first entry
+	struct OSetIter *i = calloc(1, sizeof(struct OSetIter));
+	i->set = set;
+	i->val = *(set->vals);
+	i->position = 0;
 
-			iterp->set = set;
-			iterp->val = *v;
-			iterp->v = v;
-
-			return (struct OSetIter*)iterp;
-		}
-	}
-
-	return NULL;
+	return i;
 }
 
-const struct OSetIter *oset_next(const struct OSetIter* const iter) {
+const struct OSetIter *oset_iter_next(const struct OSetIter* const iter) {
 	if (!iter)
 		return NULL;
 
-	struct OSetIterP *iterp = (struct OSetIterP*)iter;
+	struct OSetIter *i = (struct OSetIter*)iter;
 
-	if (!iterp || !iterp->set) {
-		oset_iter_free(iter);
+	if (!i->set) {
+		oset_iter_free(i);
 		return NULL;
 	}
 
-	// loop over vals
-	while (++iterp->v < iterp->set->vals + iterp->set->size) {
-		if (*iterp->v) {
-			iterp->val = *(iterp->v);
-			return iter;
-		}
+	if (++i->position < i->set->size) {
+		i->val = *(i->set->vals + i->position);
+		return i;
+	} else {
+		oset_iter_free(i);
+		return NULL;
 	}
+}
 
-	oset_iter_free(iter);
-	return NULL;
+const void *oset_iter_val(const struct OSetIter* const iter) {
+	return iter ? iter->val : NULL;
 }
 
 bool oset_add(const struct OSet* const cset, const void* const val) {
