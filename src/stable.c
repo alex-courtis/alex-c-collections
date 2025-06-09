@@ -32,8 +32,7 @@ struct STableIterP {
 	 * Private
 	 */
 	const struct STable *tab;
-	const char* const *k;
-	const void* const *v;
+	size_t position;
 };
 
 // grow to capacity + grow
@@ -141,8 +140,7 @@ const struct STableIter *stable_iter(const struct STable* const tab) {
 	iterp->tab = tab;
 	iterp->key = *(tab->keys);
 	iterp->val = *(tab->vals);
-	iterp->k = tab->keys;
-	iterp->v = tab->vals;
+	iterp->position = 0;
 
 	return (struct STableIter*)iterp;
 }
@@ -158,14 +156,9 @@ const struct STableIter *stable_next(const struct STableIter* const iter) {
 		return NULL;
 	}
 
-	// maybe next
-	iterp->k++;
-	iterp->v++;
-
-	// assume keys and vals are the same size
-	if (iterp->k < iterp->tab->keys + iterp->tab->size) {
-		iterp->key = *(iterp->k);
-		iterp->val = *(iterp->v);
+	if (++iterp->position < iterp->tab->size) {
+		iterp->key = *(iterp->tab->keys + iterp->position);
+		iterp->val = *(iterp->tab->vals + iterp->position);
 		return iter;
 	}
 
