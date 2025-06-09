@@ -129,13 +129,13 @@ const struct STableIter *stable_iter(const struct STable* const tab) {
 		return NULL;
 
 	// first key/val
-	struct STableIter *iter = calloc(1, sizeof(struct STableIter));
-	iter->tab = tab;
-	iter->key = *(tab->keys);
-	iter->val = *(tab->vals);
-	iter->position = 0;
+	struct STableIter *i = calloc(1, sizeof(struct STableIter));
+	i->tab = tab;
+	i->key = *(tab->keys);
+	i->val = *(tab->vals);
+	i->position = 0;
 
-	return (struct STableIter*)iter;
+	return (struct STableIter*)i;
 }
 
 const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
@@ -144,7 +144,7 @@ const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
 
 	struct STableIter *i = (struct STableIter*)iter;
 
-	if (!i || !i->tab) {
+	if (!i->tab) {
 		stable_iter_free(i);
 		return NULL;
 	}
@@ -153,26 +153,18 @@ const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
 		i->key = *(i->tab->keys + i->position);
 		i->val = *(i->tab->vals + i->position);
 		return i;
+	} else {
+		stable_iter_free(i);
+		return NULL;
 	}
-
-	stable_iter_free(i);
-	return NULL;
 }
 
-// iterator key
 const char *stable_iter_key(const struct STableIter* const iter) {
-	if (!iter)
-		return NULL;
-
-	return ((struct STableIter*)iter)->key;
+	return iter ? iter->key : NULL;
 }
 
-// iterator value
 const void *stable_iter_val(const struct STableIter* const iter) {
-	if (!iter)
-		return NULL;
-
-	return ((struct STableIter*)iter)->val;
+	return iter ? iter->val : NULL;
 }
 
 const void *stable_put(const struct STable* const ctab, const char* const key, const void* const val) {
