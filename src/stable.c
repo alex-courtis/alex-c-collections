@@ -21,16 +21,9 @@ struct STable {
 	comparator cmp;
 };
 
-struct STableIterP {
-	/*
-	 * Public, removed const
-	 */
+struct STableIter {
 	const char *key;
 	const void *val;
-
-	/*
-	 * Private
-	 */
 	const struct STable *tab;
 	size_t position;
 };
@@ -136,34 +129,50 @@ const struct STableIter *stable_iter(const struct STable* const tab) {
 		return NULL;
 
 	// first key/val
-	struct STableIterP *iterp = calloc(1, sizeof(struct STableIterP));
-	iterp->tab = tab;
-	iterp->key = *(tab->keys);
-	iterp->val = *(tab->vals);
-	iterp->position = 0;
+	struct STableIter *iter = calloc(1, sizeof(struct STableIter));
+	iter->tab = tab;
+	iter->key = *(tab->keys);
+	iter->val = *(tab->vals);
+	iter->position = 0;
 
-	return (struct STableIter*)iterp;
+	return (struct STableIter*)iter;
 }
 
-const struct STableIter *stable_next(const struct STableIter* const iter) {
+const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
 	if (!iter)
 		return NULL;
 
-	struct STableIterP *iterp = (struct STableIterP*)iter;
+	struct STableIter *i = (struct STableIter*)iter;
 
-	if (!iterp || !iterp->tab) {
-		stable_iter_free(iter);
+	if (!i || !i->tab) {
+		stable_iter_free(i);
 		return NULL;
 	}
 
-	if (++iterp->position < iterp->tab->size) {
-		iterp->key = *(iterp->tab->keys + iterp->position);
-		iterp->val = *(iterp->tab->vals + iterp->position);
-		return iter;
+	if (++i->position < i->tab->size) {
+		i->key = *(i->tab->keys + i->position);
+		i->val = *(i->tab->vals + i->position);
+		return i;
 	}
 
-	stable_iter_free(iter);
+	stable_iter_free(i);
 	return NULL;
+}
+
+// iterator key
+const char *stable_iter_key(const struct STableIter* const iter) {
+	if (!iter)
+		return NULL;
+
+	return ((struct STableIter*)iter)->key;
+}
+
+// iterator value
+const void *stable_iter_val(const struct STableIter* const iter) {
+	if (!iter)
+		return NULL;
+
+	return ((struct STableIter*)iter)->val;
 }
 
 const void *stable_put(const struct STable* const ctab, const char* const key, const void* const val) {
