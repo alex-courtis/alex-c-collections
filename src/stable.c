@@ -133,27 +133,18 @@ const void *stable_get(const struct STable* const tab, const char* const key) {
 }
 
 const struct STableIter *stable_iter(const struct STable* const tab) {
-	if (!tab)
+	if (!tab || tab->size == 0)
 		return NULL;
 
-	// loop over keys and vals
-	const char **k;
-	const void **v;
-	for (k = tab->keys, v = tab->vals;
-			v < tab->vals + tab->size && k < tab->keys + tab->size;
-			k++, v++) {
-		struct STableIterP *iterp = calloc(1, sizeof(struct STableIterP));
+	// first key/val
+	struct STableIterP *iterp = calloc(1, sizeof(struct STableIterP));
+	iterp->tab = tab;
+	iterp->key = *(tab->keys);
+	iterp->val = *(tab->vals);
+	iterp->k = tab->keys;
+	iterp->v = tab->vals;
 
-		iterp->tab = tab;
-		iterp->key = *k;
-		iterp->val = *v;
-		iterp->k = k;
-		iterp->v = v;
-
-		return (struct STableIter*)iterp;
-	}
-
-	return NULL;
+	return (struct STableIter*)iterp;
 }
 
 const struct STableIter *stable_next(const struct STableIter* const iter) {
@@ -167,9 +158,12 @@ const struct STableIter *stable_next(const struct STableIter* const iter) {
 		return NULL;
 	}
 
-	// loop over keys and vals
-	while (++iterp->v < iterp->tab->vals + iterp->tab->size &&
-			++iterp->k < iterp->tab->keys + iterp->tab->size) {
+	// maybe next
+	iterp->k++;
+	iterp->v++;
+
+	// assume keys and vals are the same size
+	if (iterp->k < iterp->tab->keys + iterp->tab->size) {
 		iterp->key = *(iterp->k);
 		iterp->val = *(iterp->v);
 		return iter;

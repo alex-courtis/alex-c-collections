@@ -262,7 +262,7 @@ void stable_iter__free(void **state) {
 void stable_iter__vals(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
-	assert_nul(stable_put(tab, "a", NULL));
+	assert_nul(stable_put(tab, "a", strdup("0")));
 	assert_nul(stable_put(tab, "b", strdup("1")));
 	assert_nul(stable_put(tab, "c", NULL));
 	assert_nul(stable_put(tab, "d", strdup("3")));
@@ -270,11 +270,11 @@ void stable_iter__vals(void **state) {
 
 	assert_int_equal(stable_size(tab), 5);
 
-	// a NULL
+	// a 0
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "a");
-	assert_nul(iter->val);
+	assert_str_equal(iter->val, "0");
 
 	// b 1
 	iter = stable_next(iter);
