@@ -26,3 +26,6 @@ PKG_CONFIG ?= pkg-config
 CFLAGS += $(foreach p,$(PKGS),$(shell $(PKG_CONFIG) --cflags $(p)))
 LDLIBS += $(foreach p,$(PKGS),$(shell $(PKG_CONFIG) --libs $(p)))
 
+ifneq (,$(findstring -m32,$(MFLAGS)))
+	VG_SUPP = --suppressions=.vg.cmocka.32.supp
+endif
