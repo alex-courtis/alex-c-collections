@@ -29,6 +29,7 @@ clean:
 	--leak-check=full \
 	--show-leak-kinds=all \
 	--errors-for-leak-kinds=all \
+	$(VG_SUPP) \
 	--gen-suppressions=all
 %-vg: % ;
 
