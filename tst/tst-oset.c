@@ -1,8 +1,8 @@
 #include "tst.h"
 #include "asserts.h"
+#include "expects.h"
 
 #include <cmocka.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -28,7 +28,7 @@ int after_each(void **state) {
 }
 
 void mock_free_val(const void* const val) {
-	check_expected(val);
+	check_expected_ptr(val);
 }
 
 void oset_init__size(void **state) {
@@ -75,8 +75,8 @@ void oset_free_vals__free_val(void **state) {
 	assert_true(oset_contains(set, vals[0]));
 	assert_true(oset_contains(set, vals[1]));
 
-	expect_value(mock_free_val, val, vals[0]);
-	expect_value(mock_free_val, val, vals[1]);
+	expect_str(mock_free_val, val, vals[0]);
+	expect_str(mock_free_val, val, vals[1]);
 
 	oset_free_vals(set, mock_free_val);
 }

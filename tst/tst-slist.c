@@ -1,9 +1,9 @@
 #include "tst.h"
 #include "asserts.h"
+#include "expects.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -28,7 +28,7 @@ int after_each(void **state) {
 }
 
 void mock_free_val(const void* const val) {
-	check_expected(val);
+	check_expected_ptr(val);
 }
 
 bool test_contains_x(const void *data) {
@@ -64,9 +64,9 @@ void slist_free_vals__many(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	expect_string(mock_free_val, val, "0");
-	expect_string(mock_free_val, val, "1");
-	expect_string(mock_free_val, val, "2");
+	expect_str(mock_free_val, val, "0");
+	expect_str(mock_free_val, val, "1");
+	expect_str(mock_free_val, val, "2");
 
 	slist_free_vals(&list, mock_free_val);
 
@@ -158,8 +158,8 @@ void slist_remove_all_free__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 4);
 
-	expect_string(mock_free_val, val, "x");
-	expect_string(mock_free_val, val, "x");
+	expect_str(mock_free_val, val, "x");
+	expect_str(mock_free_val, val, "x");
 
 	slist_remove_all_free(&list, fn_comp_equals_strcmp, "x", mock_free_val);
 
