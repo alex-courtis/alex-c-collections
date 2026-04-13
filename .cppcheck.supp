@@ -1,6 +1,8 @@
 unusedFunction:src/ptable.c
-unusedFunction:tst/asserts.h
 
+unusedFunction:tst/asserts.h
+unusedFunction:tst/expects.h
+unusedFunction:tst/wrap-*.c
 staticFunction:tst/*c
 
 # this is just not practical

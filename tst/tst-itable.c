@@ -1,5 +1,6 @@
 #include "tst.h"
 #include "asserts.h"
+#include "expects.h"
 
 #include <cmocka.h>
 #include <inttypes.h>
@@ -37,7 +38,7 @@ int after_each(void **state) {
 }
 
 void mock_free_val(const void* const val) {
-	check_expected(val);
+	check_expected_ptr(val);
 }
 
 void itable_init__size(void **state) {
@@ -75,8 +76,8 @@ void itable_free_vals__free_val(void **state) {
 
 	char *vals[] = { "0", "1", NULL, };
 
-	expect_value(mock_free_val, val, "0");
-	expect_value(mock_free_val, val, "1");
+	expect_str(mock_free_val, val, "0");
+	expect_str(mock_free_val, val, "1");
 
 	itable_put(tab, KEYS[0], vals[0]);
 	itable_put(tab, KEYS[1], vals[1]);
@@ -98,10 +99,10 @@ void itable_free_vals__free_val_reentrant(void **state) {
 
 	char *vals[] = { "11", "12", "21", "22", };
 
-	expect_value(mock_free_val, val, "11");
-	expect_value(mock_free_val, val, "12");
-	expect_value(mock_free_val, val, "21");
-	expect_value(mock_free_val, val, "22");
+	expect_str(mock_free_val, val, "11");
+	expect_str(mock_free_val, val, "12");
+	expect_str(mock_free_val, val, "21");
+	expect_str(mock_free_val, val, "22");
 
 	itable_put(inner1, KEYS[0], vals[0]);
 	itable_put(inner1, KEYS[1], vals[1]);

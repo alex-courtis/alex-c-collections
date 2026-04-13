@@ -1,9 +1,9 @@
 #include "tst.h"
 #include "asserts.h"
+#include "expects.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -29,7 +29,7 @@ int after_each(void **state) {
 }
 
 void mock_free_val(const void* const val) {
-	check_expected(val);
+	check_expected_ptr(val);
 }
 
 void stable_init__size(void **state) {
@@ -69,8 +69,8 @@ void stable_free_vals__free_val(void **state) {
 
 	char *vals[] = { "0", "1", };
 
-	expect_value(mock_free_val, val, "0");
-	expect_value(mock_free_val, val, "1");
+	expect_str(mock_free_val, val, "0");
+	expect_str(mock_free_val, val, "1");
 
 	stable_put(tab, "a", vals[0]);
 	stable_put(tab, "b", vals[1]);
@@ -92,10 +92,10 @@ void stable_free_vals__free_val_reentrant(void **state) {
 
 	char *vals[] = { "11", "12", "21", "22", };
 
-	expect_value(mock_free_val, val, "11");
-	expect_value(mock_free_val, val, "12");
-	expect_value(mock_free_val, val, "21");
-	expect_value(mock_free_val, val, "22");
+	expect_str(mock_free_val, val, "11");
+	expect_str(mock_free_val, val, "12");
+	expect_str(mock_free_val, val, "21");
+	expect_str(mock_free_val, val, "22");
 
 	stable_put(inner1, "a1", vals[0]);
 	stable_put(inner1, "b1", vals[1]);
