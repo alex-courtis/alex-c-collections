@@ -1,13 +1,15 @@
-# Alex C Collections
+# Alex C Library
 
-## OSet
+## Collections
+
+### OSet
 
 * Array backed ordered set.
 * Operations linearly traverse values.
 * NULL not permitted.
 * Not thread safe.
 
-## STable
+### STable
 
 * Array backed string indexed table.
 * Entries preserve insertion order.
@@ -15,7 +17,7 @@
 * NULL values permitted.
 * Not thread safe.
 
-## ITable
+### ITable
 
 * Array backed integer indexed table.
 * Entries preserve insertion order.
@@ -23,13 +25,16 @@
 * NULL values permitted.
 * Not thread safe.
 
-## PTable
+### PTable
 
 * ITable convenience wrapper with pointer key.
 
-## SList
+### SList
 
 * Containerless singly linked list.
 * Not thread safe.
 * NULL values permitted.
 
+## Strings
+
+libc string helpers 
