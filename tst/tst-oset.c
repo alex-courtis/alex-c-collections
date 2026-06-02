@@ -31,7 +31,7 @@ void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
 }
 
-void oset_init__size(void **state) {
+static void oset_init__size(void **state) {
 	const struct OSet *set = oset_init(5, 50);
 
 	assert_non_nul(set);
@@ -43,13 +43,13 @@ void oset_init__size(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_init__invalid(void **state) {
+static void oset_init__invalid(void **state) {
 	const struct OSet *set = oset_init(0, 0);
 
 	assert_nul(set);
 }
 
-void oset_free_vals__null(void **state) {
+static void oset_free_vals__null(void **state) {
 	const struct OSet *set = oset_init(3, 5);
 
 	char *vals[] = { strdup("0"), strdup("1"), };
@@ -64,7 +64,7 @@ void oset_free_vals__null(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_free_vals__free_val(void **state) {
+static void oset_free_vals__free_val(void **state) {
 	const struct OSet *set = oset_init(3, 5);
 
 	char *vals[] = { "0", "1", };
@@ -81,7 +81,7 @@ void oset_free_vals__free_val(void **state) {
 	oset_free_vals(set, mock_free_val);
 }
 
-void oset_add__new(void **state) {
+static void oset_add__new(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -95,7 +95,7 @@ void oset_add__new(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_add__existing(void **state) {
+static void oset_add__existing(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -114,7 +114,7 @@ void oset_add__existing(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_add__null(void **state) {
+static void oset_add__null(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), };
@@ -131,7 +131,7 @@ void oset_add__null(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_add__grow(void **state) {
+static void oset_add__grow(void **state) {
 	const struct OSet *set = oset_init(2, 5);
 
 	void *initial[] = { strdup("0"), strdup("1"), };
@@ -167,7 +167,7 @@ void oset_add__grow(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_remove__existing(void **state) {
+static void oset_remove__existing(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("2"), };
@@ -198,7 +198,7 @@ void oset_remove__existing(void **state) {
 	free(vals[1]);
 }
 
-void oset_remove__inexistent(void **state) {
+static void oset_remove__inexistent(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -219,7 +219,7 @@ void oset_remove__inexistent(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_iter__empty(void **state) {
+static void oset_iter__empty(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	assert_int_equal(oset_size(set), 0);
@@ -229,7 +229,7 @@ void oset_iter__empty(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_iter__free(void **state) {
+static void oset_iter__free(void **state) {
 	const struct OSet *set = oset_init(3, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -247,7 +247,7 @@ void oset_iter__free(void **state) {
 }
 
 
-void oset_iter__vals(void **state) {
+static void oset_iter__vals(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -270,7 +270,7 @@ void oset_iter__vals(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_iter__cleared(void **state) {
+static void oset_iter__cleared(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -292,7 +292,7 @@ void oset_iter__cleared(void **state) {
 	free(vals[1]);
 }
 
-void oset_add__again(void **state) {
+static void oset_add__again(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), strdup("3"), };
@@ -338,7 +338,7 @@ void oset_add__again(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_equal__length_different(void **state) {
+static void oset_equal__length_different(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
@@ -355,7 +355,7 @@ void oset_equal__length_different(void **state) {
 	oset_free_vals(b, NULL);
 }
 
-void oset_equal__pointers_ok(void **state) {
+static void oset_equal__pointers_ok(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
@@ -372,7 +372,7 @@ void oset_equal__pointers_ok(void **state) {
 	oset_free(b);
 }
 
-void oset_equal__pointers_different(void **state) {
+static void oset_equal__pointers_different(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
@@ -391,7 +391,7 @@ void oset_equal__pointers_different(void **state) {
 	free(vals[2]);
 }
 
-void oset_equal__comparison_ok(void **state) {
+static void oset_equal__comparison_ok(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
@@ -409,7 +409,7 @@ void oset_equal__comparison_ok(void **state) {
 	oset_free_vals(b, NULL);
 }
 
-void oset_equal__comparison_different(void **state) {
+static void oset_equal__comparison_different(void **state) {
 	const struct OSet *a = oset_init(5, 5);
 	const struct OSet *b = oset_init(5, 5);
 
@@ -429,7 +429,7 @@ void oset_equal__comparison_different(void **state) {
 	free(vals[2]);
 }
 
-void oset_vals_slist__empty(void **state) {
+static void oset_vals_slist__empty(void **state) {
 	const struct OSet *set = oset_init(3, 5);
 
 	assert_nul(oset_vals_slist(set));
@@ -437,7 +437,7 @@ void oset_vals_slist__empty(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_vals_slist__many(void **state) {
+static void oset_vals_slist__many(void **state) {
 	const struct OSet *tab = oset_init(3, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -455,11 +455,11 @@ void oset_vals_slist__many(void **state) {
 	oset_free_vals(tab, NULL);
 }
 
-void oset_str__null(void **state) {
+static void oset_str__null(void **state) {
 	assert_nul(oset_str(NULL));
 }
 
-void oset_str__empty(void **state) {
+static void oset_str__empty(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	char *str = oset_str(set);
@@ -469,7 +469,7 @@ void oset_str__empty(void **state) {
 	oset_free_vals(set, NULL);
 }
 
-void oset_str__string_vals(void **state) {
+static void oset_str__string_vals(void **state) {
 	const struct OSet *set = oset_init(5, 5);
 
 	assert_true(oset_add(set, "ONE"));

@@ -32,7 +32,7 @@ void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
 }
 
-void stable_init__size(void **state) {
+static void stable_init__size(void **state) {
 	const struct STable *tab = stable_init(5, 50, false);
 
 	assert_non_nul(tab);
@@ -43,13 +43,13 @@ void stable_init__size(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_init__invalid(void **state) {
+static void stable_init__invalid(void **state) {
 	const struct STable *tab = stable_init(0, 0, false);
 
 	stable_free_vals(tab, NULL);
 }
 
-void stable_free_vals__null(void **state) {
+static void stable_free_vals__null(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	char *key = strdup("a");
@@ -64,7 +64,7 @@ void stable_free_vals__null(void **state) {
 	free(key);
 }
 
-void stable_free_vals__free_val(void **state) {
+static void stable_free_vals__free_val(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	char *vals[] = { "0", "1", };
@@ -81,11 +81,11 @@ void stable_free_vals__free_val(void **state) {
 	stable_free_vals(tab, mock_free_val);
 }
 
-void free_val_stable(const void *val) {
+static void free_val_stable(const void *val) {
 	stable_free_vals(val, mock_free_val);
 }
 
-void stable_free_vals__free_val_reentrant(void **state) {
+static void stable_free_vals__free_val_reentrant(void **state) {
 	const struct STable *outer = stable_init(3, 5, false);
 	const struct STable *inner1 = stable_init(3, 5, false);
 	const struct STable *inner2 = stable_init(3, 5, false);
@@ -110,7 +110,7 @@ void stable_free_vals__free_val_reentrant(void **state) {
 	stable_free_vals(outer, free_val_stable);
 }
 
-void stable_put__new(void **state) {
+static void stable_put__new(void **state) {
 	const struct STable *tab = stable_init(5, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -123,7 +123,7 @@ void stable_put__new(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__overwrite(void **state) {
+static void stable_put__overwrite(void **state) {
 	const struct STable *tab = stable_init(5, 5, false);
 	char *replaced;
 
@@ -149,7 +149,7 @@ void stable_put__overwrite(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__null_key(void **state) {
+static void stable_put__null_key(void **state) {
 	const struct STable *tab = stable_init(5, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -168,7 +168,7 @@ void stable_put__null_key(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__null_val(void **state) {
+static void stable_put__null_val(void **state) {
 	const struct STable *tab = stable_init(5, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -187,7 +187,7 @@ void stable_put__null_val(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__null_overwrite(void **state) {
+static void stable_put__null_overwrite(void **state) {
 	const struct STable *tab = stable_init(5, 5, false);
 	char *replaced = NULL;
 
@@ -204,7 +204,7 @@ void stable_put__null_overwrite(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__grow(void **state) {
+static void stable_put__grow(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -235,7 +235,7 @@ void stable_put__grow(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_iter__empty(void **state) {
+static void stable_iter__empty(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	assert_nul(stable_iter(tab));
@@ -243,7 +243,7 @@ void stable_iter__empty(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_iter__free(void **state) {
+static void stable_iter__free(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -259,7 +259,7 @@ void stable_iter__free(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_iter__vals(void **state) {
+static void stable_iter__vals(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -307,7 +307,7 @@ void stable_iter__vals(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_iter__removed(void **state) {
+static void stable_iter__removed(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 	char *replaced = NULL;
 
@@ -350,7 +350,7 @@ void stable_iter__removed(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__again(void **state) {
+static void stable_put__again(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 	char *removed = NULL;
 
@@ -392,7 +392,7 @@ void stable_put__again(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_put__case_insensitive(void **state) {
+static void stable_put__case_insensitive(void **state) {
 	const struct STable *tab = stable_init(5, 5, true);
 	char *replaced = NULL;
 
@@ -412,7 +412,7 @@ void stable_put__case_insensitive(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_remove__case_insensitive(void **state) {
+static void stable_remove__case_insensitive(void **state) {
 	const struct STable *tab = stable_init(5, 5, true);
 
 	assert_nul(stable_put(tab, "a", "1"));
@@ -426,7 +426,7 @@ void stable_remove__case_insensitive(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_remove__existing(void **state) {
+static void stable_remove__existing(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	void *vals[] = { "0", "1", "2", };
@@ -463,7 +463,7 @@ void stable_remove__existing(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_remove__inexistent(void **state) {
+static void stable_remove__inexistent(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	assert_nul(stable_put(tab, "a", strdup("0")));
@@ -482,7 +482,7 @@ void stable_remove__inexistent(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_equal__length_different(void **state) {
+static void stable_equal__length_different(void **state) {
 	const struct STable *a = stable_init(3, 5, false);
 	const struct STable *b = stable_init(3, 5, false);
 
@@ -497,7 +497,7 @@ void stable_equal__length_different(void **state) {
 	stable_free_vals(b, NULL);
 }
 
-void stable_equal__keys_different(void **state) {
+static void stable_equal__keys_different(void **state) {
 	const struct STable *a = stable_init(3, 5, false);
 	const struct STable *b = stable_init(3, 5, false);
 
@@ -515,7 +515,7 @@ void stable_equal__keys_different(void **state) {
 	stable_free_vals(b, NULL);
 }
 
-void stable_equal__keys_insensitive_a(void **state) {
+static void stable_equal__keys_insensitive_a(void **state) {
 	const struct STable *a = stable_init(3, 5, true);
 	const struct STable *b = stable_init(3, 5, false);
 
@@ -531,7 +531,7 @@ void stable_equal__keys_insensitive_a(void **state) {
 	stable_free(b);
 }
 
-void stable_equal__keys_insensitive_b(void **state) {
+static void stable_equal__keys_insensitive_b(void **state) {
 	const struct STable *a = stable_init(3, 5, false);
 	const struct STable *b = stable_init(3, 5, true);
 
@@ -547,7 +547,7 @@ void stable_equal__keys_insensitive_b(void **state) {
 	stable_free(b);
 }
 
-void stable_equal__pointers_ok(void **state) {
+static void stable_equal__pointers_ok(void **state) {
 	const struct STable *a = stable_init(3, 5, false);
 	const struct STable *b = stable_init(3, 5, false);
 
@@ -566,7 +566,7 @@ void stable_equal__pointers_ok(void **state) {
 	stable_free_vals(b, NULL);
 }
 
-void stable_equal__pointers_different(void **state) {
+static void stable_equal__pointers_different(void **state) {
 	const struct STable *a = stable_init(3, 5, false);
 	const struct STable *b = stable_init(3, 5, false);
 
@@ -585,7 +585,7 @@ void stable_equal__pointers_different(void **state) {
 	stable_free(b);
 }
 
-void stable_equal__comparison_ok(void **state) {
+static void stable_equal__comparison_ok(void **state) {
 	const struct STable *a = stable_init(3, 5, false);
 	const struct STable *b = stable_init(3, 5, false);
 
@@ -599,7 +599,7 @@ void stable_equal__comparison_ok(void **state) {
 	stable_free_vals(b, NULL);
 }
 
-void stable_equal__comparison_different(void **state) {
+static void stable_equal__comparison_different(void **state) {
 	const struct STable *a = stable_init(3, 5, false);
 	const struct STable *b = stable_init(3, 5, false);
 
@@ -613,7 +613,7 @@ void stable_equal__comparison_different(void **state) {
 	stable_free_vals(b, NULL);
 }
 
-void stable_keys_slist__empty(void **state) {
+static void stable_keys_slist__empty(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	assert_nul(stable_keys_slist(tab));
@@ -621,7 +621,7 @@ void stable_keys_slist__empty(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_keys_slist__many(void **state) {
+static void stable_keys_slist__many(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	stable_put(tab, "a", strdup("1"));
@@ -637,7 +637,7 @@ void stable_keys_slist__many(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_vals_slist__empty(void **state) {
+static void stable_vals_slist__empty(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	assert_nul(stable_vals_slist(tab));
@@ -645,7 +645,7 @@ void stable_vals_slist__empty(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_vals_slist__many(void **state) {
+static void stable_vals_slist__many(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	stable_put(tab, "a", strdup("1"));
@@ -663,11 +663,11 @@ void stable_vals_slist__many(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_str__null(void **state) {
+static void stable_str__null(void **state) {
 	assert_nul(stable_str(NULL));
 }
 
-void stable_str__empty(void **state) {
+static void stable_str__empty(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	char *str = stable_str(tab);
@@ -677,7 +677,7 @@ void stable_str__empty(void **state) {
 	stable_free_vals(tab, NULL);
 }
 
-void stable_str__string_vals(void **state) {
+static void stable_str__string_vals(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	stable_put(tab, "a", strdup("1"));

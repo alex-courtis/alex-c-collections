@@ -31,18 +31,18 @@ void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
 }
 
-bool test_contains_x(const void *data) {
+static bool test_contains_x(const void *data) {
 	if (strcmp("x", data) == 0) {
 		return true;
 	}
 	return false;
 }
 
-bool test_false(const void *data) {
+static bool test_false(const void *data) {
 	return false;
 }
 
-bool less_than_int(const void *a, const void *b) {
+static bool less_than_int(const void *a, const void *b) {
 	if (a && b)
 		return (*(int*)a < *(int*)b);
 	else if (a && !b)
@@ -53,7 +53,7 @@ bool less_than_int(const void *a, const void *b) {
 		return false;
 }
 
-void slist_free_vals__many(void **state) {
+static void slist_free_vals__many(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", "2", };
@@ -73,7 +73,7 @@ void slist_free_vals__many(void **state) {
 	assert_nul(list);
 }
 
-void slist_remove__every(void **state) {
+static void slist_remove__every(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", "2", };
@@ -114,7 +114,7 @@ void slist_remove__every(void **state) {
 	slist_free(&list);
 }
 
-void slist_remove_all__some(void **state) {
+static void slist_remove_all__some(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "x", "2", "x", };
@@ -146,7 +146,7 @@ void slist_remove_all__some(void **state) {
 	slist_free(&list);
 }
 
-void slist_remove_all_free__some(void **state) {
+static void slist_remove_all_free__some(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "x", "2", "x", };
@@ -181,7 +181,7 @@ void slist_remove_all_free__some(void **state) {
 	slist_free(&list);
 }
 
-void slist_find__no(void **state) {
+static void slist_find__no(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", "2", };
@@ -201,7 +201,7 @@ void slist_find__no(void **state) {
 	slist_free(&list);
 }
 
-void slist_find__yes(void **state) {
+static void slist_find__yes(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "x", "2", };
@@ -223,7 +223,7 @@ void slist_find__yes(void **state) {
 	slist_free(&list);
 }
 
-void slist_find_equal_val__no(void **state) {
+static void slist_find_equal_val__no(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", "2", };
@@ -243,7 +243,7 @@ void slist_find_equal_val__no(void **state) {
 	slist_free(&list);
 }
 
-void slist_find_equal_val__yes(void **state) {
+static void slist_find_equal_val__yes(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", "2", };
@@ -265,7 +265,7 @@ void slist_find_equal_val__yes(void **state) {
 	slist_free(&list);
 }
 
-void slist_equal__empty_lhs(void **state) {
+static void slist_equal__empty_lhs(void **state) {
 	struct SList *rhs = NULL;
 
 	void *rvals[] = { "0", "1", "2", };
@@ -280,7 +280,7 @@ void slist_equal__empty_lhs(void **state) {
 	slist_free(&rhs);
 }
 
-void slist_equal__empty_rhs(void **state) {
+static void slist_equal__empty_rhs(void **state) {
 	struct SList *lhs = NULL;
 
 	void *lvals[] = { "0", "1", "2", };
@@ -295,7 +295,7 @@ void slist_equal__empty_rhs(void **state) {
 	slist_free(&lhs);
 }
 
-void slist_equal__equal(void **state) {
+static void slist_equal__equal(void **state) {
 	struct SList *lhs = NULL;
 	struct SList *rhs = NULL;
 
@@ -315,7 +315,7 @@ void slist_equal__equal(void **state) {
 	slist_free(&rhs);
 }
 
-void slist_equal__not_equal_start(void **state) {
+static void slist_equal__not_equal_start(void **state) {
 	struct SList *lhs = NULL;
 	struct SList *rhs = NULL;
 
@@ -336,7 +336,7 @@ void slist_equal__not_equal_start(void **state) {
 	slist_free(&rhs);
 }
 
-void slist_equal__not_equal_mid(void **state) {
+static void slist_equal__not_equal_mid(void **state) {
 	struct SList *lhs = NULL;
 	struct SList *rhs = NULL;
 
@@ -357,7 +357,7 @@ void slist_equal__not_equal_mid(void **state) {
 	slist_free(&rhs);
 }
 
-void slist_equal__not_equal_end(void **state) {
+static void slist_equal__not_equal_end(void **state) {
 	struct SList *lhs = NULL;
 	struct SList *rhs = NULL;
 
@@ -378,7 +378,7 @@ void slist_equal__not_equal_end(void **state) {
 	slist_free(&rhs);
 }
 
-void slist_equal__not_equal_lhs_size(void **state) {
+static void slist_equal__not_equal_lhs_size(void **state) {
 	struct SList *lhs = NULL;
 	struct SList *rhs = NULL;
 
@@ -398,7 +398,7 @@ void slist_equal__not_equal_lhs_size(void **state) {
 	slist_free(&rhs);
 }
 
-void slist_equal__not_equal_rhs_size(void **state) {
+static void slist_equal__not_equal_rhs_size(void **state) {
 	struct SList *lhs = NULL;
 	struct SList *rhs = NULL;
 
@@ -418,14 +418,14 @@ void slist_equal__not_equal_rhs_size(void **state) {
 	slist_free(&rhs);
 }
 
-void slist_sort__empty(void **state) {
+static void slist_sort__empty(void **state) {
 	struct SList *from = NULL;
 
 	const struct SList *to = slist_sort(from, less_than_int);
 	assert_nul(to);
 }
 
-void slist_sort__vals(void **state) {
+static void slist_sort__vals(void **state) {
 	struct SList *from = NULL;
 
 	int vals[] = { 3, 2, 5, 4, 1, 0 };
@@ -460,7 +460,7 @@ void slist_sort__vals(void **state) {
 	slist_free(&to);
 }
 
-void slist_move__empty(void **state) {
+static void slist_move__empty(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
@@ -470,7 +470,7 @@ void slist_move__empty(void **state) {
 	assert_nul(from);
 }
 
-void slist_move__empty_to(void **state) {
+static void slist_move__empty_to(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
@@ -487,7 +487,7 @@ void slist_move__empty_to(void **state) {
 	slist_free(&from);
 }
 
-void slist_move__empty_from(void **state) {
+static void slist_move__empty_from(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
@@ -504,7 +504,7 @@ void slist_move__empty_from(void **state) {
 	slist_free(&to);
 }
 
-void slist_move__no_match(void **state) {
+static void slist_move__no_match(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
@@ -527,7 +527,7 @@ void slist_move__no_match(void **state) {
 	slist_free(&from);
 }
 
-void slist_move__many(void **state) {
+static void slist_move__many(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
@@ -563,7 +563,7 @@ void slist_move__many(void **state) {
 	slist_free(&from);
 }
 
-void slist_move__all(void **state) {
+static void slist_move__all(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
@@ -591,11 +591,11 @@ void slist_move__all(void **state) {
 	slist_free(&from);
 }
 
-void slist_clone__empty(void **state) {
+static void slist_clone__empty(void **state) {
 	assert_nul(slist_clone(NULL, fn_clone_strdup));
 }
 
-void slist_clone__vals(void **state) {
+static void slist_clone__vals(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", };
@@ -613,11 +613,11 @@ void slist_clone__vals(void **state) {
 	slist_free_vals(&cloned, NULL);
 }
 
-void slist_shallow_clone__empty(void **state) {
+static void slist_shallow_clone__empty(void **state) {
 	assert_nul(slist_shallow_clone(NULL));
 }
 
-void slist_shallow_clone__vals(void **state) {
+static void slist_shallow_clone__vals(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", };
@@ -635,11 +635,11 @@ void slist_shallow_clone__vals(void **state) {
 	slist_free(&cloned);
 }
 
-void slist_str__null(void **state) {
+static void slist_str__null(void **state) {
 	assert_nul(slist_str(NULL));
 }
 
-void slist_str__string_vals(void **state) {
+static void slist_str__string_vals(void **state) {
 	struct SList *list = NULL;
 
 	slist_append(&list, "zero");
@@ -657,7 +657,7 @@ void slist_str__string_vals(void **state) {
 	slist_free(&list);
 }
 
-void slist_xor_free__empty_lists(void **state) {
+static void slist_xor_free__empty_lists(void **state) {
 	struct SList *list1 = NULL;
 	struct SList *list2 = NULL;
 
@@ -666,7 +666,7 @@ void slist_xor_free__empty_lists(void **state) {
 	assert_int_equal(slist_length(list1), 0);
 }
 
-void slist_xor_free__first_list_empty(void **state) {
+static void slist_xor_free__first_list_empty(void **state) {
 	struct SList *list1 = NULL;
 	struct SList *list2 = NULL;
 	struct SList *expected = NULL;
@@ -686,7 +686,7 @@ void slist_xor_free__first_list_empty(void **state) {
 	slist_free_vals(&expected, NULL);
 }
 
-void slist_xor_free__second_list_empty(void **state) {
+static void slist_xor_free__second_list_empty(void **state) {
 	struct SList *list1 = NULL;
 	struct SList *list2 = NULL;
 	struct SList *expected = NULL;
@@ -706,7 +706,7 @@ void slist_xor_free__second_list_empty(void **state) {
 	slist_free_vals(&expected, NULL);
 }
 
-void slist_xor_free__toggle_items(void **state) {
+static void slist_xor_free__toggle_items(void **state) {
 	struct SList *list1 = NULL;
 	struct SList *list2 = NULL;
 	struct SList *expected = NULL;
@@ -731,7 +731,7 @@ void slist_xor_free__toggle_items(void **state) {
 	slist_free_vals(&expected, NULL);
 }
 
-void slist_xor_free__duplicate_items(void **state) {
+static void slist_xor_free__duplicate_items(void **state) {
 	struct SList *list1 = NULL;
 	struct SList *list2 = NULL;
 	struct SList *expected = NULL;
