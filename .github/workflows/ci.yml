@@ -36,9 +36,9 @@ jobs:
         run: chown -R runner:docker .
         shell: sh -e {0}
 
-      - name: install packages
+      - name: install arch packages
         shell: sh -e {0}
-        run: .github/workflows/packages/base/install.sh
+        run: bld/docker-install-arch.sh
 
       - run: make                      clean
       - run: make CC=gcc               all
@@ -60,10 +60,8 @@ jobs:
       - run: make CC=clang MFLAGS=-m32 test
       - run: make CC=clang MFLAGS=-m32 test-vg
 
-      - name: build include-what-you-use package
-        run: .github/workflows/packages/include-what-you-use/build.sh
-      - name: install include-what-you-use package
-        run: .github/workflows/packages/include-what-you-use/install.sh
+      - name: build and install include-what-you-use
+        run: bld/docker-install-iwyu.sh
         shell: sh -e {0}
 
       - run: make clean iwyu
