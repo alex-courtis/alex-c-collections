@@ -4,16 +4,19 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-// vsprintf to a malloc'd buffer, does not mutate __args
-char *vsprintf_alloc(const char *__restrict __format, va_list __args);
+// __args never mutated
+// __maxlen is for the total returned string
 
-// vsnprintf to a malloc'd buffer, does not mutate __args
-char *vsnprintf_alloc(size_t __maxlen, const char *__restrict __format, va_list __args);
-
-// sprintf to a malloc'd buffer
+// printf to a malloc'd buffer
 char *sprintf_alloc(const char *__restrict __format, ...) __attribute__ ((__format__ (__printf__, 1, 2)));
+char *snprintf_alloc(size_t __maxlen, const char *__restrict __format, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
+char *vsprintf_alloc(const char *__restrict __format, va_list __args);
+char *vsnprintf_alloc(size_t __maxlen, const char *__restrict __format, va_list __args);
 
 // append to nullable s, returning a malloc'd buffer, freeing s
 char *sprintf_append(char *__restrict s, const char *__restrict __format, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
+char *snprintf_append(char *__restrict s, size_t __maxlen, const char *__restrict __format, ...) __attribute__ ((__format__ (__printf__, 3, 4)));
+char *vsprintf_append(char *__restrict s, const char *__restrict __format, va_list __args);
+char *vsnprintf_append(char *__restrict s, size_t __maxlen, const char *__restrict __format, va_list __args);
 
 #endif // STR_H
