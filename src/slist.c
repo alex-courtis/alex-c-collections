@@ -27,11 +27,9 @@ struct SList *slist_shallow_clone(struct SList *head) {
 }
 
 void slist_free(struct SList **head) {
-	struct SList *i, *f;
-
-	i = *head;
+	struct SList *i = *head;
 	while (i) {
-		f = i;
+		struct SList *f = i;
 		i = i->nex;
 		free(f);
 	}
@@ -73,7 +71,6 @@ void *slist_remove(struct SList **head, struct SList **item) {
 	struct SList *i, *f, *p;
 	void *removed = NULL;
 
-	i = *head;
 	p = NULL;
 	f = NULL;
 
@@ -128,14 +125,11 @@ size_t slist_remove_all_free(struct SList **head, fn_equals equals, const void *
 	return removed;
 }
 
-size_t slist_xor_free(struct SList **head1, struct SList *head2, fn_equals equals, fn_free_val free_val, fn_clone_val clone_val) {
+void slist_xor_free(struct SList **head1, struct SList *head2, fn_equals equals, fn_free_val free_val, fn_clone_val clone_val) {
 	struct SList *i = head2;
-	size_t removed = 0;
 
 	while (i) {
-		size_t removed = slist_remove_all_free(head1, equals, i->val, free_val);
-
-		if (!removed) {
+		if (!slist_remove_all_free(head1, equals, i->val, free_val)) {
 			if (clone_val) {
 				slist_append(head1, clone_val(i->val));
 			} else {
@@ -145,8 +139,6 @@ size_t slist_xor_free(struct SList **head1, struct SList *head2, fn_equals equal
 
 		i = i->nex;
 	}
-
-	return removed;
 }
 
 void *slist_at(struct SList *head, size_t index) {
@@ -251,12 +243,12 @@ struct SList *slist_sort(struct SList *head, fn_less_than less_than) {
 
 	struct SList *sorting = slist_shallow_clone(head);
 
-	struct SList *sorting_head  = sorting;
-	struct SList **sorted_trail = &sorted;
+	struct SList *sorting_head;
 
 	while (sorting != NULL) {
+		struct SList **sorted_trail = &sorted;
+
 		sorting_head = sorting;
-		sorted_trail = &sorted;
 
 		sorting = sorting->nex;
 
