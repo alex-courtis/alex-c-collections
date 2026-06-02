@@ -64,28 +64,6 @@ cppcheck: $(INC_H) $(SRC_C) $(TST_H) $(TST_C)
 		--error-exitcode=1 \
 		$(CPPFLAGS)
 
-#
-# local docker dev
-#
-docker-build:
-	docker build --tag "alex-c-collections:latest" .
-
-docker-stop:
-	docker rm -f alex-c-collections || true
-
-docker-run: docker-stop
-	docker run \
-		--name="alex-c-collections" \
-		--volume "${PWD}:/alex-c-collections" \
-		--workdir="/alex-c-collections" \
-		--user "`id -u`:`id -g`" \
-		--detach \
-		"alex-c-collections:latest"
-
-docker-packages:
-	docker exec                    alex-c-collections .github/workflows/packages/include-what-you-use/build.sh
-	docker exec --user "root:root" alex-c-collections .github/workflows/packages/include-what-you-use/install.sh
-
 .PHONY: all clean test test-vg $(TST_T) iwyu cppcheck
 
 .NOTPARALLEL: iwyu test test-vg
