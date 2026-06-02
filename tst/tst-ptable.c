@@ -60,7 +60,7 @@ void ptable_init__invalid(void **state) {
 void ptable_free_vals__null(void **state) {
 	const struct PTable *tab = ptable_init(3, 5);
 
-	char *val = strdup("0");
+	const char *val = strdup("0");
 
 	ptable_put(tab, KEYS[0], val);
 
@@ -178,7 +178,7 @@ void ptable_put__null(void **state) {
 void ptable_put__null_overwrite(void **state) {
 	const struct PTable *tab = ptable_init(5, 5);
 
-	char *zero = "0";
+	const char *zero = "0";
 	assert_nul(ptable_put(tab, KEYS[0], zero));
 
 	assert_str_equal(ptable_get(tab, KEYS[0]), "0");

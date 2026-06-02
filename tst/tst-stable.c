@@ -53,7 +53,7 @@ void stable_free_vals__null(void **state) {
 	const struct STable *tab = stable_init(3, 5, false);
 
 	char *key = strdup("a");
-	char *val = strdup("0");
+	const char *val = strdup("0");
 
 	stable_put(tab, key, val);
 

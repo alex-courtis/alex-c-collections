@@ -51,7 +51,7 @@ void slist_xor_free(struct SList **head1, struct SList *head2, fn_equals, fn_fre
  */
 
 // val at position
-void *slist_at(struct SList *head, size_t index);
+void *slist_at(const struct SList *head, size_t index);
 
 // find
 struct SList *slist_find(struct SList *head, fn_test);
@@ -91,10 +91,10 @@ void slist_move(struct SList **to, struct SList **from, fn_equals, const void *b
 
 // to string, user frees
 // values must be char*, printed using %s
-char *slist_str(struct SList *head);
+char *slist_str(const struct SList *head);
 
 // length
-size_t slist_length(struct SList *head);
+size_t slist_length(const struct SList *head);
 
 #endif // SLIST_H
 

@@ -61,7 +61,7 @@ void itable_init__invalid(void **state) {
 void itable_free_vals__null(void **state) {
 	const struct ITable *tab = itable_init(3, 5);
 
-	char *val = strdup("0");
+	const char *val = strdup("0");
 
 	itable_put(tab, KEYS[0], val);
 
@@ -179,7 +179,7 @@ void itable_put__null(void **state) {
 void itable_put__null_overwrite(void **state) {
 	const struct ITable *tab = itable_init(5, 5);
 
-	char *zero = "0";
+	const char *zero = "0";
 	assert_nul(itable_put(tab, KEYS[0], zero));
 
 	assert_str_equal(itable_get(tab, KEYS[0]), "0");

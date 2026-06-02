@@ -209,7 +209,7 @@ void oset_remove__inexistent(void **state) {
 	assert_true(oset_contains(set, vals[0]));
 	assert_true(oset_contains(set, vals[1]));
 
-	void *inexistent = "inexistent";
+	const void *inexistent = "inexistent";
 	assert_false(oset_remove(set, inexistent));
 
 	assert_int_equal(oset_size(set), 2);

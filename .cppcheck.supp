@@ -7,3 +7,6 @@ staticFunction:tst/*c
 
 # this is just not practical
 nullPointerOutOfMemory
+
+# does not identify correctly
+unusedStructMember

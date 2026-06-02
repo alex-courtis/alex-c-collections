@@ -141,9 +141,9 @@ void slist_xor_free(struct SList **head1, struct SList *head2, fn_equals equals,
 	}
 }
 
-void *slist_at(struct SList *head, size_t index) {
+void *slist_at(const struct SList *head, size_t index) {
 	size_t c = 0;
-	for (struct SList *i = head; i; i = i->nex, c++) {
+	for (const struct SList *i = head; i; i = i->nex, c++) {
 		if (c == index) {
 			return i->val;
 		}
@@ -168,7 +168,7 @@ struct SList *slist_find(struct SList *head, fn_test test) {
 }
 
 void *slist_find_val(struct SList *head, fn_test test) {
-	struct SList *f = slist_find(head, test);
+	const struct SList *f = slist_find(head, test);
 	if (f)
 		return f->val;
 	else
@@ -192,7 +192,7 @@ struct SList *slist_find_equal(struct SList *head, fn_equals equals, const void 
 }
 
 void *slist_find_equal_val(struct SList *head, fn_equals equals, const void *b) {
-	struct SList *f = slist_find_equal(head, equals, b);
+	const struct SList *f = slist_find_equal(head, equals, b);
 	if (f)
 		return f->val;
 	else
@@ -219,10 +219,10 @@ bool slist_equal(struct SList *a, struct SList *b, fn_equals equals) {
 	return true;
 }
 
-size_t slist_length(struct SList *head) {
+size_t slist_length(const struct SList *head) {
 	size_t length = 0;
 
-	for (struct SList *i = head; i; i = i->nex) {
+	for (const struct SList *i = head; i; i = i->nex) {
 		length++;
 	}
 
@@ -280,7 +280,7 @@ void slist_move(struct SList **to, struct SList **from, fn_equals equals, const 
 	}
 }
 
-char *slist_str(struct SList *head) {
+char *slist_str(const struct SList *head) {
 	if (!head)
 		return NULL;
 
@@ -288,14 +288,14 @@ char *slist_str(struct SList *head) {
 
 	// calculate length
 	// slower but simpler than realloc, which can set off scanners/checkers
-	for (struct SList *i = head; i; i = i->nex) {
+	for (const struct SList *i = head; i; i = i->nex) {
 		len += strlen(i->val) + 1;
 	}
 
 	// render
 	char *buf = (char*)calloc(len, sizeof(char));
 	char *bufp = buf;
-	for (struct SList *i = head; i; i = i->nex) {
+	for (const struct SList *i = head; i; i = i->nex) {
 		bufp += snprintf(bufp, len - (bufp - buf), "%s\n", (char*)i->val);
 	}
 

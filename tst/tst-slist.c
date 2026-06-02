@@ -131,7 +131,7 @@ void slist_remove_all__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 2);
 
-	struct SList *i = list;
+	const struct SList *i = list;
 	assert_str_equal(i->val, "0");
 	assert_str_equal(slist_at(list, 0), "0");
 
@@ -166,7 +166,7 @@ void slist_remove_all_free__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 2);
 
-	struct SList *i = list;
+	const struct SList *i = list;
 	assert_str_equal(i->val, "0");
 	assert_str_equal(slist_at(list, 0), "0");
 
@@ -192,10 +192,10 @@ void slist_find__no(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_val(list, test_false);
+	const void *val = slist_find_val(list, test_false);
 	assert_nul(val);
 
-	struct SList *i = slist_find(list, test_false);
+	const struct SList *i = slist_find(list, test_false);
 	assert_nul(i);
 
 	slist_free(&list);
@@ -212,11 +212,11 @@ void slist_find__yes(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_val(list, test_contains_x);
+	const void *val = slist_find_val(list, test_contains_x);
 	assert_non_nul(val);
 	assert_str_equal(val, "x");
 
-	struct SList *i = slist_find(list, test_contains_x);
+	const struct SList *i = slist_find(list, test_contains_x);
 	assert_non_nul(i);
 	assert_str_equal(i->val, "x");
 
@@ -234,10 +234,10 @@ void slist_find_equal_val__no(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_equal_val(list, fn_comp_equals_strcmp, "x");
+	const void *val = slist_find_equal_val(list, fn_comp_equals_strcmp, "x");
 	assert_nul(val);
 
-	struct SList *i = slist_find_equal(list, fn_comp_equals_strcmp, "x");
+	const struct SList *i = slist_find_equal(list, fn_comp_equals_strcmp, "x");
 	assert_nul(i);
 
 	slist_free(&list);
@@ -254,11 +254,11 @@ void slist_find_equal_val__yes(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	void *val = slist_find_equal_val(list, fn_comp_equals_strcmp, "1");
+	const void *val = slist_find_equal_val(list, fn_comp_equals_strcmp, "1");
 	assert_non_nul(val);
 	assert_str_equal(val, "1");
 
-	struct SList *i = slist_find_equal(list, fn_comp_equals_strcmp, "1");
+	const struct SList *i = slist_find_equal(list, fn_comp_equals_strcmp, "1");
 	assert_non_nul(i);
 	assert_str_equal(i->val, "1");
 
@@ -421,7 +421,7 @@ void slist_equal__not_equal_rhs_size(void **state) {
 void slist_sort__empty(void **state) {
 	struct SList *from = NULL;
 
-	struct SList *to = slist_sort(from, less_than_int);
+	const struct SList *to = slist_sort(from, less_than_int);
 	assert_nul(to);
 }
 
