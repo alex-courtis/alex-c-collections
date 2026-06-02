@@ -58,7 +58,7 @@ iwyu: clean $(SRC_O) $(TST_O)
 #
 cppcheck: $(INC_H) $(SRC_C) $(TST_H) $(TST_C)
 	cppcheck $(^) \
-		--enable=warning,unusedFunction,performance,portability \
+		--enable=warning,unusedFunction,performance,portability,style \
 		--check-level=exhaustive \
 		--suppressions-list=.cppcheck.supp \
 		--error-exitcode=1 \

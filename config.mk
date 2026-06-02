@@ -3,13 +3,11 @@ INCS = -Iinc
 CPPFLAGS += $(INCS)
 
 OFLAGS = -O3
-WFLAGS = -Werror \
-		 -pedantic \
+WFLAGS = -pedantic \
 		 -Wall \
 		 -Wextra \
+		 -Werror \
 		 -Wimplicit-fallthrough \
-		 -Wold-style-definition \
-		 -Wstrict-prototypes \
 		 -Wno-unused-parameter
 DFLAGS = -g
 MFLAGS =
