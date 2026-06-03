@@ -2,7 +2,6 @@
 #define ASSERTS_H
 
 #include <cmocka.h>
-#include <stdio.h>
 #include <string.h>
 
 void _assert_nul(const void *a, const char * const ae, const char * const file, const int line) {

@@ -50,7 +50,7 @@ IWYU = include-what-you-use \
 	   -Xiwyu --error=1 \
 	   -Xiwyu --verbose=3
 
-iwyu: CC = $(IWYU) -Xiwyu --check_also="inc/*h"
+iwyu: CC = $(IWYU) -Xiwyu --check_also="inc/*h" -Xiwyu --check_also="tst/*h"
 iwyu: clean $(SRC_O) $(TST_O)
 
 #

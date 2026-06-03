@@ -1,11 +1,6 @@
 #ifndef TST_H
 #define TST_H
 
-#include <setjmp.h>
-#include <stdarg.h>
-#include <stdint.h>
-#include <stddef.h>
-
 #include <cmocka.h>
 
 //
