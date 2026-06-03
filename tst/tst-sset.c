@@ -419,30 +419,30 @@ static void sset_equal__case_insensitive(void **state) {
 	sset_free(b);
 }
 
-static void sset_vals_slist__empty(void **state) {
+static void sset_slist__empty(void **state) {
 	const struct SSet *set = sset_init_with(3, 5, false);
 
-	assert_nul(sset_vals_slist(set));
+	assert_nul(sset_slist(set));
 
 	sset_free(set);
 }
 
-static void sset_vals_slist__many(void **state) {
-	const struct SSet *tab = sset_init_with(3, 5, false);
+static void sset_slist__many(void **state) {
+	const struct SSet *set = sset_init_with(3, 5, false);
 
 	void *vals[] = { "0", "1", };
 
-	assert_true(sset_add(tab, vals[0]));
-	assert_true(sset_add(tab, vals[1]));
+	assert_true(sset_add(set, vals[0]));
+	assert_true(sset_add(set, vals[1]));
 
-	struct SList *list = sset_vals_slist(tab);
+	struct SList *list = sset_slist(set);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "0");
 	assert_str_equal(slist_at(list, 1), "1");
 
-	slist_free(&list);
-	sset_free(tab);
+	slist_free_vals(&list, NULL);
+	sset_free(set);
 }
 
 static void sset_str__null(void **state) {
@@ -506,8 +506,8 @@ int main(void) {
 		TEST(sset_equal__comparison_different),
 		TEST(sset_equal__case_insensitive),
 
-		TEST(sset_vals_slist__empty),
-		TEST(sset_vals_slist__many),
+		TEST(sset_slist__empty),
+		TEST(sset_slist__many),
 
 		TEST(sset_str__null),
 		TEST(sset_str__empty),
