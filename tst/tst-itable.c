@@ -620,7 +620,7 @@ static void itable_str__string_vals(void **state) {
 	snprintf(expected, sizeof(expected),
 			"%"PRIu64" = 1\n"
 			"%"PRIu64" = (null)\n"
-			"%"PRIu64" = 3",
+			"%"PRIu64" = 3\n",
 			KEYS[0],
 			KEYS[1],
 			KEYS[2]

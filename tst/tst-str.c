@@ -26,92 +26,147 @@ int after_each(void **state) {
 
 static void sprintf_alloc__ok(void **state) {
 
-	char *actual = sprintf_alloc("%d %s", 1, "bar");
+	char *actual = sprintf_alloc("%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "1 bar");
+	assert_str_equal(actual, "1_bar");
 
 	free(actual);
 }
 
 static void snprintf_alloc__longer(void **state) {
-	char *actual = snprintf_alloc(10, "%d %s", 1, "bar");
+	char *actual = snprintf_alloc(10, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "1 bar");
+	assert_str_equal(actual, "1_bar");
 
 	free(actual);
 }
 
 static void snprintf_alloc__shorter(void **state) {
-	char *actual = snprintf_alloc(3, "%d %s", 1, "bar");
+	char *actual = snprintf_alloc(3, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "1 b");
+	assert_str_equal(actual, "1_b");
 
 	free(actual);
 }
 
 static void snprintf_alloc__equal(void **state) {
-	char *actual = snprintf_alloc(5, "%d %s", 1, "bar");
+	char *actual = snprintf_alloc(5, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "1 bar");
+	assert_str_equal(actual, "1_bar");
+
+	free(actual);
+}
+
+static void snprintf_alloc__zero(void **state) {
+	char *actual = snprintf_alloc(0, "%d_%s", 1, "bar");
+
+	assert_str_equal(actual, "");
 
 	free(actual);
 }
 
 static void sprintf_append__ok(void **state) {
-	char *actual = strdup("foo ");
+	char *actual = strdup("foo-");
 
-	actual = sprintf_append(actual, "%d %s", 1, "bar");
+	actual = sprintf_append(actual, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "foo 1 bar");
+	assert_str_equal(actual, "foo-1_bar");
 
 	free(actual);
 }
 
 static void sprintf_append__null(void **state) {
-	char *actual = sprintf_append(NULL, "%d %s", 1, "bar");
+	char *actual = sprintf_append(NULL, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "1 bar");
+	assert_str_equal(actual, "1_bar");
 
 	free(actual);
 }
 
 static void snprintf_append__longer(void **state) {
-	char *actual = strdup("foo ");
+	char *actual = strdup("foo-");
 
-	actual = snprintf_append(actual, 100, "%d %s", 1, "bar");
+	actual = snprintf_append(actual, 100, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "foo 1 bar");
+	assert_str_equal(actual, "foo-1_bar");
 
 	free(actual);
 }
 
-static void snprintf_append__shorter(void **state) {
-	char *actual = strdup("foo ");
+static void snprintf_append__shorter_left(void **state) {
+	char *actual = strdup("foo-");
 
-	actual = snprintf_append(actual, 2, "%d %s", 1, "bar");
+	actual = snprintf_append(actual, 2, "%d_%s", 1, "bar");
 
 	assert_str_equal(actual, "fo");
 
 	free(actual);
 }
 
-static void snprintf_append__equal(void **state) {
-	char *actual = strdup("foo ");
+static void snprintf_append__shorter_right(void **state) {
+	char *actual = strdup("foo-");
 
-	actual = snprintf_append(actual, 9, "%d %s", 1, "bar");
+	actual = snprintf_append(actual, 6, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "foo 1 bar");
+	assert_str_equal(actual, "foo-1_");
+
+	free(actual);
+}
+
+static void snprintf_append__equal_total(void **state) {
+	char *actual = strdup("foo-");
+
+	actual = snprintf_append(actual, 9, "%d_%s", 1, "bar");
+
+	assert_str_equal(actual, "foo-1_bar");
+
+	free(actual);
+}
+
+static void snprintf_append__equal_left(void **state) {
+	char *actual = strdup("foo-");
+
+	actual = snprintf_append(actual, 4, "%d_%s", 1, "bar");
+
+	assert_str_equal(actual, "foo-");
+
+	free(actual);
+}
+
+static void snprintf_append__zero(void **state) {
+	char *actual = strdup("foo-");
+
+	actual = snprintf_append(actual, 0, "%d_%s", 1, "bar");
+
+	assert_str_equal(actual, "");
 
 	free(actual);
 }
 
 static void snprintf_append__null(void **state) {
-	char *actual = snprintf_append(NULL, 10, "%d %s", 1, "bar");
+	char *actual = snprintf_append(NULL, 10, "%d_%s", 1, "bar");
 
-	assert_str_equal(actual, "1 bar");
+	assert_str_equal(actual, "1_bar");
 
 	free(actual);
 }
+
+static void snprintf_append__null_shorter(void **state) {
+	char *actual = snprintf_append(NULL, 3, "%d_%s", 1, "bar");
+
+	assert_str_equal(actual, "1_b");
+
+	free(actual);
+}
+
+static void snprintf_append__null_zero(void **state) {
+	char *actual = snprintf_append(NULL, 0, "%d_%s", 1, "bar");
+
+	assert_str_equal(actual, "");
+
+	free(actual);
+}
+
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
@@ -178,6 +233,7 @@ int main(void) {
 		TEST(snprintf_alloc__shorter),
 		TEST(snprintf_alloc__equal),
 		TEST(snprintf_alloc__empty),
+		TEST(snprintf_alloc__zero),
 
 		// tests vs versions
 		TEST(sprintf_append__ok),
@@ -186,10 +242,15 @@ int main(void) {
 
 		// tests vsn versions
 		TEST(snprintf_append__longer),
-		TEST(snprintf_append__shorter),
-		TEST(snprintf_append__equal),
+		TEST(snprintf_append__shorter_left),
+		TEST(snprintf_append__shorter_right),
+		TEST(snprintf_append__equal_total),
+		TEST(snprintf_append__equal_left),
 		TEST(snprintf_append__empty),
+		TEST(snprintf_append__zero),
 		TEST(snprintf_append__null),
+		TEST(snprintf_append__null_shorter),
+		TEST(snprintf_append__null_zero),
 	};
 
 	return RUN(tests);

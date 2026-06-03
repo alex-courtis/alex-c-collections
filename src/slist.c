@@ -1,9 +1,9 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "fn.h"
+#include "str.h"
 
 #include "slist.h"
 
@@ -284,26 +284,12 @@ char *slist_str(const struct SList *head) {
 	if (!head)
 		return NULL;
 
-	size_t len = 1;
+	char *str = strdup("");
 
-	// calculate length
-	// slower but simpler than realloc, which can set off scanners/checkers
 	for (const struct SList *i = head; i; i = i->nex) {
-		len += strlen(i->val) + 1;
+		str = sprintf_append(str, "%s\n", (char*)i->val);
 	}
 
-	// render
-	char *buf = (char*)calloc(len, sizeof(char));
-	char *bufp = buf;
-	for (const struct SList *i = head; i; i = i->nex) {
-		bufp += snprintf(bufp, len - (bufp - buf), "%s\n", (char*)i->val);
-	}
-
-	// strip trailing newline
-	if (bufp > buf) {
-		*(bufp - 1) = '\0';
-	}
-
-	return buf;
+	return str;
 }
 

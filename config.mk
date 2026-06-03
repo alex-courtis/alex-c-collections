@@ -8,9 +8,9 @@ WFLAGS = -pedantic \
 		 -Wextra \
 		 -Werror \
 		 -Wimplicit-fallthrough \
-		 -Wno-unused-parameter \
 		 -Wold-style-definition \
-		 -Wstrict-prototypes
+		 -Wstrict-prototypes \
+		 -Wno-unused-parameter
 DFLAGS = -g
 MFLAGS =
 COMPFLAGS = $(WFLAGS) $(OFLAGS) $(DFLAGS) $(MFLAGS)

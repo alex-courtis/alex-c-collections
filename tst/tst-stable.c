@@ -688,7 +688,7 @@ static void stable_str__string_vals(void **state) {
 	assert_str_equal(str,
 			"a = 1\n"
 			"b = (null)\n"
-			"c = 3"
+			"c = 3\n"
 			);
 
 	free(str);

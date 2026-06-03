@@ -54,36 +54,36 @@ char *snprintf_alloc(size_t __maxlen, const char *__restrict __format, ...) {
 
 char *vsnprintf_append(char *__restrict s, size_t __maxlen, const char *__restrict __format, va_list __args) {
 
-	char *full = vsprintf_append(s, __format, __args);
+	size_t l_left = MIN(s ? strlen(s) : 0, __maxlen);
+	size_t l_right = 0;
 
-	char *str = strndup(full, __maxlen);
+	if (l_left < __maxlen) {
+		va_list args;
+		va_copy(args, __args);
+		l_right = vsnprintf(NULL, 0, __format, args);
+		l_right = MIN(l_right, __maxlen - l_left);
+		va_end(args);
+	}
 
-	free(full);
+	char *str = calloc(l_left + l_right + 1, sizeof(char));
+
+	char *right = stpncpy(str, s, l_left);
+
+	if (l_right) {
+		va_list args;
+		va_copy(args, __args);
+		vsnprintf(right, l_right + 1, __format, args);
+		va_end(args);
+	}
+
+	if (s)
+		free(s);
 
 	return str;
 }
 
 char *vsprintf_append(char *__restrict s, const char *__restrict __format, va_list __args) {
-
-	size_t l_left = s ? strlen(s) : 0;
-
-	va_list args;
-	va_copy(args, __args);
-	size_t l_right = vsnprintf(NULL, 0, __format, args);
-	va_end(args);
-
-	char *left = calloc(l_left + l_right + 1, sizeof(char));
-
-	char *right = l_left ? stpncpy(left, s, l_left + 1) : left;
-
-	va_copy(args, __args);
-	vsnprintf(right, l_right + 1, __format, args);
-	va_end(args);
-
-	if (s)
-		free(s);
-
-	return left;
+	return vsnprintf_append(s, SIZE_MAX, __format, __args);
 }
 
 char *sprintf_append(char *__restrict s, const char *__restrict __format, ...) {
@@ -91,7 +91,7 @@ char *sprintf_append(char *__restrict s, const char *__restrict __format, ...) {
 	va_list args;
 	va_start(args, __format);
 
-	char *str = vsprintf_append(s, __format, args);
+	char *str = vsnprintf_append(s, SIZE_MAX, __format, args);
 
 	va_end(args);
 

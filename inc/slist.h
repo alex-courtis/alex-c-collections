@@ -90,7 +90,8 @@ void slist_move(struct SList **to, struct SList **from, fn_equals, const void *b
  */
 
 // to string, user frees
-// values must be char*, printed using %s
+// lines with format "%s\n"
+// values must be char*
 char *slist_str(const struct SList *head);
 
 // length

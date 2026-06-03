@@ -80,7 +80,7 @@ struct SList *oset_vals_slist(const struct OSet* const set);
  */
 
 // to string, user frees
-// lines with format "%s"
+// lines with format "%s\n"
 // values must be char*
 char *oset_str(const struct OSet* const set);
 

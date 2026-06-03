@@ -1,10 +1,10 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "fn.h"
 #include "slist.h"
+#include "str.h"
 
 #include "ptable.h"
 
@@ -289,33 +289,15 @@ char *ptable_str(const struct PTable* const tab) {
 	if (!tab)
 		return NULL;
 
-	size_t len = 1;
+	char *str = strdup("");
 
-	// calculate length
-	// slower but simpler than realloc, which can set off scanners/checkers
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		len +=
-			14 +                    // longest %p
-			3 +                     // " = "
-			(*v ? strlen(*v) : 6) + // value or "(null)"
-			1;                      // "\n"
+		str = sprintf_append(str, "%p = %s\n", *k, *v ? (char*)*v : "(null)");
 	}
 
-	// render
-	char *buf = (char*)calloc(len, sizeof(char));
-	char *bufp = buf;
-	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		bufp += snprintf(bufp, len - (bufp - buf), "%p = %s\n", *k, *v ? (char*)*v : "(null)");
-	}
-
-	// strip trailing newline
-	if (bufp > buf) {
-		*(bufp - 1) = '\0';
-	}
-
-	return buf;
+	return str;
 }
 
 size_t ptable_size(const struct PTable* const tab) {
