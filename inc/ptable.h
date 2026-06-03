@@ -20,8 +20,11 @@ struct PTableIter; // IWYU pragma: keep
  * Lifecycle
  */
 
+// construct a table with initial size 10, growing by 10 as necessary
+const struct PTable *ptable_init(void);
+
 // construct a table with initial size, growing as necessary, NULL on zero param
-const struct PTable *ptable_init(const size_t initial, const size_t grow);
+const struct PTable *ptable_init_with(const size_t initial, const size_t grow);
 
 // free table
 void ptable_free(const void* const tab);

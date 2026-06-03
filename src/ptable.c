@@ -50,7 +50,11 @@ static void grow_ptable(struct PTable *tab) {
 	tab->capacity += tab->grow;
 }
 
-const struct PTable *ptable_init(const size_t initial, const size_t grow) {
+const struct PTable *ptable_init(void) {
+	return ptable_init_with(10, 10);
+}
+
+const struct PTable *ptable_init_with(const size_t initial, const size_t grow) {
 	if (initial == 0 || grow == 0)
 		return NULL;
 

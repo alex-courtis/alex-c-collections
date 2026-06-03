@@ -23,8 +23,11 @@ struct PSetIter; // IWYU pragma: keep
  * Lifecycle
  */
 
+// construct a set with initial size 10, growing by 10 as necessary
+const struct PSet *ptable_init(void);
+
 // construct a set with initial size, grow as needed, NULL on zero param
-const struct PSet *pset_init(const size_t initial, const size_t grow);
+const struct PSet *pset_init_with(const size_t initial, const size_t grow);
 
 // free set
 void pset_free(const void* const set);

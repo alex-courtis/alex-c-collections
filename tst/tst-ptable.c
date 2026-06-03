@@ -41,7 +41,7 @@ void mock_free_val(const void* const val) {
 }
 
 static void ptable_init__size(void **state) {
-	const struct PTable *tab = ptable_init(5, 50);
+	const struct PTable *tab = ptable_init_with(5, 50);
 
 	assert_non_nul(tab);
 
@@ -52,13 +52,13 @@ static void ptable_init__size(void **state) {
 }
 
 static void ptable_init__invalid(void **state) {
-	const struct PTable *tab = ptable_init(0, 0);
+	const struct PTable *tab = ptable_init_with(0, 0);
 
 	assert_nul(tab);
 }
 
 static void ptable_free_vals__null(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	const char *val = strdup("0");
 
@@ -71,7 +71,7 @@ static void ptable_free_vals__null(void **state) {
 }
 
 static void ptable_free_vals__free_val(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	char *vals[] = { "0", "1", NULL, };
 
@@ -92,9 +92,9 @@ static void free_val_ptable(const void *val) {
 }
 
 static void ptable_free_vals__free_val_reentrant(void **state) {
-	const struct PTable *outer = ptable_init(3, 5);
-	const struct PTable *inner1 = ptable_init(3, 5);
-	const struct PTable *inner2 = ptable_init(3, 5);
+	const struct PTable *outer = ptable_init_with(3, 5);
+	const struct PTable *inner1 = ptable_init_with(3, 5);
+	const struct PTable *inner2 = ptable_init_with(3, 5);
 
 	char *vals[] = { "11", "12", "21", "22", };
 
@@ -117,7 +117,7 @@ static void ptable_free_vals__free_val_reentrant(void **state) {
 }
 
 static void ptable_put__new(void **state) {
-	const struct PTable *tab = ptable_init(5, 5);
+	const struct PTable *tab = ptable_init_with(5, 5);
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
@@ -130,7 +130,7 @@ static void ptable_put__new(void **state) {
 }
 
 static void ptable_put__overwrite(void **state) {
-	const struct PTable *tab = ptable_init(5, 5);
+	const struct PTable *tab = ptable_init_with(5, 5);
 
 	char *replaced = NULL;
 
@@ -157,7 +157,7 @@ static void ptable_put__overwrite(void **state) {
 }
 
 static void ptable_put__null(void **state) {
-	const struct PTable *tab = ptable_init(5, 5);
+	const struct PTable *tab = ptable_init_with(5, 5);
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_int_equal(ptable_size(tab), 1);
@@ -176,7 +176,7 @@ static void ptable_put__null(void **state) {
 }
 
 static void ptable_put__null_overwrite(void **state) {
-	const struct PTable *tab = ptable_init(5, 5);
+	const struct PTable *tab = ptable_init_with(5, 5);
 
 	const char *zero = "0";
 	assert_nul(ptable_put(tab, KEYS[0], zero));
@@ -192,7 +192,7 @@ static void ptable_put__null_overwrite(void **state) {
 }
 
 static void ptable_put__grow(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
@@ -223,7 +223,7 @@ static void ptable_put__grow(void **state) {
 }
 
 static void ptable_iter__empty(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	assert_nul(ptable_iter(tab));
 
@@ -231,7 +231,7 @@ static void ptable_iter__empty(void **state) {
 }
 
 static void ptable_iter__free(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
@@ -248,7 +248,7 @@ static void ptable_iter__free(void **state) {
 }
 
 static void ptable_iter__vals(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(tab, KEYS[0], NULL));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
@@ -296,7 +296,7 @@ static void ptable_iter__vals(void **state) {
 }
 
 static void ptable_iter__removed(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	char *removed = NULL;
 
@@ -340,7 +340,7 @@ static void ptable_iter__removed(void **state) {
 }
 
 static void ptable_put__again(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 	char *removed;
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
@@ -382,7 +382,7 @@ static void ptable_put__again(void **state) {
 }
 
 static void ptable_remove__existing(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 	char *removed;
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
@@ -425,7 +425,7 @@ static void ptable_remove__existing(void **state) {
 }
 
 static void ptable_remove__inexistent(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
@@ -444,8 +444,8 @@ static void ptable_remove__inexistent(void **state) {
 }
 
 static void ptable_equal__length_different(void **state) {
-	const struct PTable *a = ptable_init(3, 5);
-	const struct PTable *b = ptable_init(3, 5);
+	const struct PTable *a = ptable_init_with(3, 5);
+	const struct PTable *b = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(a, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(a, KEYS[1], strdup("1")));
@@ -459,8 +459,8 @@ static void ptable_equal__length_different(void **state) {
 }
 
 static void ptable_equal__keys_different(void **state) {
-	const struct PTable *a = ptable_init(3, 5);
-	const struct PTable *b = ptable_init(3, 5);
+	const struct PTable *a = ptable_init_with(3, 5);
+	const struct PTable *b = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(a, KEYS[0], NULL));
 	assert_nul(ptable_put(a, KEYS[1], NULL));
@@ -475,8 +475,8 @@ static void ptable_equal__keys_different(void **state) {
 }
 
 static void ptable_equal__pointers_ok(void **state) {
-	const struct PTable *a = ptable_init(3, 5);
-	const struct PTable *b = ptable_init(3, 5);
+	const struct PTable *a = ptable_init_with(3, 5);
+	const struct PTable *b = ptable_init_with(3, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
 
@@ -495,8 +495,8 @@ static void ptable_equal__pointers_ok(void **state) {
 }
 
 static void ptable_equal__pointers_different(void **state) {
-	const struct PTable *a = ptable_init(3, 5);
-	const struct PTable *b = ptable_init(3, 5);
+	const struct PTable *a = ptable_init_with(3, 5);
+	const struct PTable *b = ptable_init_with(3, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
 
@@ -515,8 +515,8 @@ static void ptable_equal__pointers_different(void **state) {
 }
 
 static void ptable_equal__comparison_ok(void **state) {
-	const struct PTable *a = ptable_init(3, 5);
-	const struct PTable *b = ptable_init(3, 5);
+	const struct PTable *a = ptable_init_with(3, 5);
+	const struct PTable *b = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(a, KEYS[0], strdup("1")));
 
@@ -529,8 +529,8 @@ static void ptable_equal__comparison_ok(void **state) {
 }
 
 static void ptable_equal__comparison_different(void **state) {
-	const struct PTable *a = ptable_init(3, 5);
-	const struct PTable *b = ptable_init(3, 5);
+	const struct PTable *a = ptable_init_with(3, 5);
+	const struct PTable *b = ptable_init_with(3, 5);
 
 	assert_nul(ptable_put(a, KEYS[0], strdup("0")));
 
@@ -543,7 +543,7 @@ static void ptable_equal__comparison_different(void **state) {
 }
 
 static void ptable_keys_slist__empty(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	assert_nul(ptable_keys_slist(tab));
 
@@ -551,7 +551,7 @@ static void ptable_keys_slist__empty(void **state) {
 }
 
 static void ptable_keys_slist__many(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	ptable_put(tab, KEYS[0], strdup("0"));
 	ptable_put(tab, KEYS[1], strdup("1"));
@@ -567,7 +567,7 @@ static void ptable_keys_slist__many(void **state) {
 }
 
 static void ptable_vals_slist__empty(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	assert_nul(ptable_vals_slist(tab));
 
@@ -575,7 +575,7 @@ static void ptable_vals_slist__empty(void **state) {
 }
 
 static void ptable_vals_slist__many(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	ptable_put(tab, KEYS[0], strdup("1"));
 	ptable_put(tab, KEYS[1], NULL);
@@ -597,7 +597,7 @@ static void ptable_str__null(void **state) {
 }
 
 static void ptable_str__empty(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	char *str = ptable_str(tab);
 	assert_str_equal(str, "");
@@ -607,7 +607,7 @@ static void ptable_str__empty(void **state) {
 }
 
 static void ptable_str__string_vals(void **state) {
-	const struct PTable *tab = ptable_init(3, 5);
+	const struct PTable *tab = ptable_init_with(3, 5);
 
 	char *vals[] = { "1", NULL, "3", };
 
