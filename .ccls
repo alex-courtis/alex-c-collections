@@ -11,5 +11,6 @@ clang
 -Wimplicit-fallthrough
 -Wold-style-definition
 -Wstrict-prototypes
+-Wno-unused-parameter
 
 -std=gnu17
