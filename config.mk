@@ -6,8 +6,11 @@ OFLAGS = -O3
 WFLAGS = -pedantic \
 		 -Wall \
 		 -Wextra \
+		 -Werror \
 		 -Wimplicit-fallthrough \
-		 -Wno-unused-parameter
+		 -Wno-unused-parameter \
+		 -Wold-style-definition \
+		 -Wstrict-prototypes
 DFLAGS = -g
 MFLAGS =
 COMPFLAGS = $(WFLAGS) $(OFLAGS) $(DFLAGS) $(MFLAGS)
