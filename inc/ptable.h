@@ -83,7 +83,7 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
  */
 
 // to string, user frees
-// lines with format "%p = %s"
+// lines with format "%p = %s\n"
 // values must be char*, NULL printed as "(null)"
 char *ptable_str(const struct PTable* const tab);
 

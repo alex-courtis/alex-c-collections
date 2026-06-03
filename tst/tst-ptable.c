@@ -619,7 +619,7 @@ static void ptable_str__string_vals(void **state) {
 	snprintf(expected, sizeof(expected),
 			"%p = 1\n"
 			"%p = (null)\n"
-			"%p = 3",
+			"%p = 3\n",
 			(void*)KEYS[0],
 			(void*)KEYS[1],
 			(void*)KEYS[2]

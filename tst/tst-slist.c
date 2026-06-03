@@ -650,7 +650,7 @@ static void slist_str__string_vals(void **state) {
 	assert_str_equal(str,
 			"zero\n"
 			"one\n"
-			"two"
+			"two\n"
 			);
 
 	free(str);

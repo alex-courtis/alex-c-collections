@@ -480,7 +480,7 @@ static void oset_str__string_vals(void **state) {
 	assert_str_equal(str,
 			"ONE\n"
 			"TWO\n"
-			"THREE"
+			"THREE\n"
 			);
 
 	free(str);
