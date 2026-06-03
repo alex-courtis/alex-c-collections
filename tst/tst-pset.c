@@ -11,6 +11,12 @@
 
 #include "pset.h"
 
+/*
+   diff -u \
+   <(sed -e 's/pset/xtable/g ; s/pset/XTable/g' tst/tst-pset.c) \
+   <(sed -e 's/sset/xtable/g ; s/sset/XTable/g' tst/tst-sset.c)
+   */
+
 static int before_all(void **state) {
 	return 0;
 }

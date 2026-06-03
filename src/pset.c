@@ -8,6 +8,12 @@
 
 #include "pset.h"
 
+/*
+   diff -u \
+   <(sed -e ' s/pset/xset/g ; s/PSet/XSet/g ' src/pset.c) \
+   <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' src/sset.c)
+   */
+
 struct PSet {
 	const void **vals;
 	size_t capacity;

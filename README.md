@@ -2,6 +2,19 @@
 
 ## Collections
 
+### SList
+
+* Containerless singly linked list.
+* Not thread safe.
+* NULL values permitted.
+
+### SSet
+
+* Array backed ordered string set.
+* Operations linearly traverse values.
+* NULL not permitted.
+* Not thread safe.
+
 ### PSet
 
 * Array backed ordered pointer set.
@@ -28,12 +41,6 @@
 ### PTable
 
 * ITable convenience wrapper with pointer key.
-
-### SList
-
-* Containerless singly linked list.
-* Not thread safe.
-* NULL values permitted.
 
 ## Strings
 
