@@ -2,9 +2,9 @@
 
 ## Collections
 
-### OSet
+### PSet
 
-* Array backed ordered set.
+* Array backed ordered pointer set.
 * Operations linearly traverse values.
 * NULL not permitted.
 * Not thread safe.

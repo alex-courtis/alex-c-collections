@@ -9,12 +9,12 @@
 /*
  * ITable convenience wrapper with pointer key.
  */
-struct PTable;
+struct PTable; // IWYU pragma: keep
 
 /*
  * Entry iterator.
  */
-struct PTableIter;
+struct PTableIter; // IWYU pragma: keep
 
 /*
  * Lifecycle
