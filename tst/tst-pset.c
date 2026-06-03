@@ -56,7 +56,7 @@ static void pset_init__invalid(void **state) {
 }
 
 static void pset_free_vals__null(void **state) {
-	const struct PSet *set = pset_init_with(3, 5);
+	const struct PSet *set = pset_init();
 
 	char *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(set, vals[0]));

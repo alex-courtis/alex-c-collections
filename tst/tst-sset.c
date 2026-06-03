@@ -1,12 +1,10 @@
 #include "tst.h"
 #include "asserts.h"
-#include "expects.h"
 
 #include <cmocka.h>
+#include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "fn.h"
 #include "slist.h"
 
 #include "sset.h"
@@ -52,7 +50,7 @@ static void sset_init__invalid(void **state) {
 }
 
 static void sset_free__ok(void **state) {
-	const struct SSet *set = sset_init_with(3, 5, false);
+	const struct SSet *set = sset_init();
 
 	char *vals[] = { "0", "1", };
 	assert_true(sset_add(set, vals[0]));

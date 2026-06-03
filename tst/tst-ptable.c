@@ -58,7 +58,7 @@ static void ptable_init__invalid(void **state) {
 }
 
 static void ptable_free_vals__null(void **state) {
-	const struct PTable *tab = ptable_init_with(3, 5);
+	const struct PTable *tab = ptable_init();
 
 	const char *val = strdup("0");
 

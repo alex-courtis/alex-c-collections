@@ -59,7 +59,7 @@ static void itable_init__invalid(void **state) {
 }
 
 static void itable_free_vals__null(void **state) {
-	const struct ITable *tab = itable_init_with(3, 5);
+	const struct ITable *tab = itable_init();
 
 	const char *val = strdup("0");
 

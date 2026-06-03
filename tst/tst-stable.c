@@ -50,7 +50,7 @@ static void stable_init__invalid(void **state) {
 }
 
 static void stable_free_vals__null(void **state) {
-	const struct STable *tab = stable_init_with(3, 5, false);
+	const struct STable *tab = stable_init();
 
 	char *key = strdup("a");
 	const char *val = strdup("0");
