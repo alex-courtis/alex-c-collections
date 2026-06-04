@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
+#include "fn.h"
 #include "slist.h"
 #include "str.h"
 
@@ -218,7 +218,6 @@ bool sset_equal(const struct SSet* const a, const struct SSet* const b) {
 		return false;
 
 	for (const char **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
-
 		if (!a->equal(*av, *bv)) {
 			return false;
 		}

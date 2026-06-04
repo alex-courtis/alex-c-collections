@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <string.h>
+#include <strings.h>
 
 #include "fn.h"
 

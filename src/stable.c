@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include "fn.h"
 #include "str.h"
@@ -250,14 +249,8 @@ bool stable_equal(const struct STable* const a, const struct STable* const b, fn
 			ak++, bk++, av++, bv++) {
 
 		// key
-		if (a->equal == fn_equal_strcasecmp || b->equal == fn_equal_strcasecmp) {
-			if (strcasecmp(*ak, *bk) != 0) {
-				return false;
-			}
-		} else {
-			if (strcmp(*ak, *bk) != 0) {
-				return false;
-			}
+		if (!a->equal(*ak, *bk)) {
+			return false;
 		}
 
 		// value

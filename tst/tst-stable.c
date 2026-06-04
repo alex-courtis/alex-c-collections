@@ -515,7 +515,7 @@ static void stable_equal__keys_different(void **state) {
 	stable_free_vals(b, NULL);
 }
 
-static void stable_equal__keys_insensitive_a(void **state) {
+static void stable_equal__keys_insensitive(void **state) {
 	const struct STable *a = stable_init_with(3, 5, true);
 	const struct STable *b = stable_init_with(3, 5, false);
 
@@ -526,22 +526,7 @@ static void stable_equal__keys_insensitive_a(void **state) {
 	assert_nul(stable_put(b, "A", vals[0]));
 
 	assert_true(stable_equal(a, b, fn_equal_strcmp));
-
-	stable_free_vals(a, NULL);
-	stable_free(b);
-}
-
-static void stable_equal__keys_insensitive_b(void **state) {
-	const struct STable *a = stable_init_with(3, 5, false);
-	const struct STable *b = stable_init_with(3, 5, true);
-
-	void *vals[] = { strdup("0"), };
-
-	assert_nul(stable_put(a, "a", vals[0]));
-
-	assert_nul(stable_put(b, "A", vals[0]));
-
-	assert_true(stable_equal(a, b, fn_equal_strcmp));
+	assert_false(stable_equal(b, a, fn_equal_strcmp));
 
 	stable_free_vals(a, NULL);
 	stable_free(b);
@@ -726,8 +711,7 @@ int main(void) {
 
 		TEST(stable_equal__length_different),
 		TEST(stable_equal__keys_different),
-		TEST(stable_equal__keys_insensitive_a),
-		TEST(stable_equal__keys_insensitive_b),
+		TEST(stable_equal__keys_insensitive),
 		TEST(stable_equal__pointers_ok),
 		TEST(stable_equal__pointers_different),
 		TEST(stable_equal__comparison_ok),
