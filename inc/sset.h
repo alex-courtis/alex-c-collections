@@ -62,6 +62,9 @@ bool sset_add(const struct SSet* const set, const char* const val);
 // true if this set contained the element
 bool sset_remove(const struct SSet* const set, const char* const val);
 
+// sort in place
+void sset_sort(const struct SSet* const set);
+
 /*
  * Comparison
  */

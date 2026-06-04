@@ -22,6 +22,12 @@ bool fn_equal_strstr(const void* const a, const void* const b);
 //
 typedef bool (*fn_less_than)(const void* const a, const void* const b);
 
+// strcmp(a, b) <= 0
+bool fn_less_than_strcmp(const void* const a, const void* const b);
+
+// strcasecmp(a, b) < 0
+bool fn_less_than_strcasecmp(const void* const a, const void* const b);
+
 //
 // arbitrary test
 //

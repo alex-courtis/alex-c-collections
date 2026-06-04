@@ -344,6 +344,59 @@ static void pset_add__again(void **state) {
 	pset_free_vals(set, NULL);
 }
 
+static void pset_sort__empty(void **state) {
+	const struct PSet *actual = pset_init();
+
+	const struct PSet *expected = pset_init();
+
+	pset_sort(actual, fn_less_than_strcmp);
+
+	assert_int_equal(pset_size(actual), 0);
+
+	assert_true(pset_equal(actual, expected, fn_equal_strcmp));
+
+	pset_free_vals(actual, NULL);
+	pset_free(expected);
+}
+
+static void pset_sort__one(void **state) {
+	const struct PSet *actual = pset_init();
+
+	assert_true(pset_add(actual, strdup("A")));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, strdup("A")));
+
+	pset_sort(actual, fn_less_than_strcmp);
+
+	assert_true(pset_equal(actual, expected, fn_equal_strcmp));
+
+	pset_free_vals(actual, NULL);
+	pset_free_vals(expected, NULL);
+}
+
+static void pset_sort__many(void **state) {
+	const struct PSet *actual = pset_init();
+
+	assert_true(pset_add(actual, "3"));
+	assert_true(pset_add(actual, "1"));
+	assert_true(pset_add(actual, "0"));
+	assert_true(pset_add(actual, "2"));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, "0"));
+	assert_true(pset_add(expected, "1"));
+	assert_true(pset_add(expected, "2"));
+	assert_true(pset_add(expected, "3"));
+
+	pset_sort(actual, fn_less_than_strcmp);
+
+	assert_true(pset_equal(actual, expected, fn_equal_strcmp));
+
+	pset_free(actual);
+	pset_free(expected);
+}
+
 static void pset_equal__length_different(void **state) {
 	const struct PSet *a = pset_init_with(5, 5);
 	const struct PSet *b = pset_init_with(5, 5);
@@ -515,6 +568,10 @@ int main(void) {
 		TEST(pset_iter__cleared),
 
 		TEST(pset_add__again),
+
+		TEST(pset_sort__empty),
+		TEST(pset_sort__one),
+		TEST(pset_sort__many),
 
 		TEST(pset_equal__length_different),
 		TEST(pset_equal__pointers_ok),

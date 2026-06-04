@@ -20,6 +20,7 @@ struct SSet {
 	size_t grow;
 	size_t size;
 	fn_equal equal;
+	fn_less_than less_than;
 };
 
 struct SSetIter {
@@ -59,8 +60,10 @@ const struct SSet *sset_init_with(const size_t initial, const size_t grow, const
 	set->vals = calloc(set->capacity, sizeof(void*));
 	if (case_insensitive) {
 		set->equal = fn_equal_strcasecmp;
+		set->less_than = fn_less_than_strcasecmp;
 	} else {
 		set->equal = fn_equal_strcmp;
+		set->less_than = fn_less_than_strcmp;
 	}
 
 	return set;
@@ -212,7 +215,23 @@ bool sset_remove(const struct SSet* const cset, const char* const val) {
 	return false;
 }
 
-// TODO use a or b case insensitive cmp
+void sset_sort(const struct SSet* const set) {
+	if (!set)
+		return;
+
+	size_t i = 1;
+	while (i < set->size) {
+		size_t j = i;
+		while (j > 0 && set->less_than(set->vals[j], set->vals[j - 1])) {
+			const void *tmp = set->vals[j];
+			set->vals[j] = set->vals[j - 1];
+			set->vals[j - 1] = tmp;
+			j = j - 1;
+		}
+		i++;
+	}
+}
+
 bool sset_equal(const struct SSet* const a, const struct SSet* const b) {
 	if (!a || !b || a->size != b->size)
 		return false;

@@ -34,6 +34,26 @@ bool fn_equal_strstr(const void* const a, const void* const b) {
 	return strstr(a, b);
 }
 
+bool fn_less_than_strcmp(const void* const a, const void* const b) {
+	if (a == b)
+		return true;
+
+	if (!a || !b)
+		return false;
+
+	return strcmp(a, b) < 0;
+}
+
+bool fn_less_than_strcasecmp(const void* const a, const void* const b) {
+	if (a == b)
+		return true;
+
+	if (!a || !b)
+		return false;
+
+	return strcasecmp(a, b) < 0;
+}
+
 void *fn_clone_strdup(const void* const val) {
 	if (val == NULL)
 		return NULL;

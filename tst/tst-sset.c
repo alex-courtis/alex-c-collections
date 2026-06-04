@@ -405,6 +405,81 @@ static void sset_add__again(void **state) {
 	sset_free(set);
 }
 
+static void sset_sort__empty(void **state) {
+	const struct SSet *actual = sset_init();
+
+	const struct SSet *expected = sset_init();
+
+	sset_sort(actual);
+
+	assert_int_equal(sset_size(actual), 0);
+
+	assert_true(sset_equal(actual, expected));
+
+	sset_free(actual);
+	sset_free(expected);
+}
+
+static void sset_sort__one(void **state) {
+	const struct SSet *actual = sset_init();
+
+	assert_true(sset_add(actual, "A"));
+
+	const struct SSet *expected = sset_init();
+	assert_true(sset_add(expected, "A"));
+
+	sset_sort(actual);
+
+	assert_true(sset_equal(actual, expected));
+
+	sset_free(actual);
+	sset_free(expected);
+}
+
+static void sset_sort__many(void **state) {
+	const struct SSet *actual = sset_init();
+
+	assert_true(sset_add(actual, "3"));
+	assert_true(sset_add(actual, "1"));
+	assert_true(sset_add(actual, "0"));
+	assert_true(sset_add(actual, "2"));
+
+	const struct SSet *expected = sset_init();
+	assert_true(sset_add(expected, "0"));
+	assert_true(sset_add(expected, "1"));
+	assert_true(sset_add(expected, "2"));
+	assert_true(sset_add(expected, "3"));
+
+	sset_sort(actual);
+
+	assert_true(sset_equal(actual, expected));
+
+	sset_free(actual);
+	sset_free(expected);
+}
+
+static void sset_sort__many_case_insensitive(void **state) {
+	const struct SSet *actual = sset_init_with(5, 5, true);
+
+	assert_true(sset_add(actual, "Bb3"));
+	assert_true(sset_add(actual, "aa1"));
+	assert_true(sset_add(actual, "Aa0"));
+	assert_true(sset_add(actual, "bb2"));
+
+	const struct SSet *expected = sset_init();
+	assert_true(sset_add(expected, "Aa0"));
+	assert_true(sset_add(expected, "aa1"));
+	assert_true(sset_add(expected, "Bb2"));
+	assert_true(sset_add(expected, "bb3"));
+
+	sset_sort(actual);
+
+	assert_true(sset_equal(actual, expected));
+
+	sset_free(actual);
+	sset_free(expected);
+}
+
 static void sset_equal__length_different(void **state) {
 	const struct SSet *a = sset_init_with(5, 5, false);
 	const struct SSet *b = sset_init_with(5, 5, false);
@@ -560,6 +635,11 @@ int main(void) {
 		TEST(sset_iter__cleared),
 
 		TEST(sset_add__again),
+
+		TEST(sset_sort__empty),
+		TEST(sset_sort__one),
+		TEST(sset_sort__many),
+		TEST(sset_sort__many_case_insensitive),
 
 		TEST(sset_equal__length_different),
 		TEST(sset_equal__comparison_ok),

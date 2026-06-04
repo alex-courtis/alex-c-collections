@@ -203,6 +203,23 @@ bool pset_remove(const struct PSet* const cset, const void* const val) {
 	return false;
 }
 
+void pset_sort(const struct PSet* const set, fn_less_than less_than) {
+	if (!set)
+		return;
+
+	size_t i = 1;
+	while (i < set->size) {
+		size_t j = i;
+		while (j > 0 && less_than(set->vals[j], set->vals[j - 1])) {
+			const void *tmp = set->vals[j];
+			set->vals[j] = set->vals[j - 1];
+			set->vals[j - 1] = tmp;
+			j = j - 1;
+		}
+		i++;
+	}
+}
+
 bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal equals) {
 	if (!a || !b || a->size != b->size)
 		return false;
