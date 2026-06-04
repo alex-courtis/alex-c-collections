@@ -32,8 +32,8 @@ const struct PSet *pset_init_with(const size_t initial, const size_t grow);
 // free set
 void pset_free(const void* const set);
 
-// free set and vals, NULL fn_free_val uses free()
-void pset_free_vals(const struct PSet* const set, fn_free_val);
+// free set and vals, NULL fn_free uses free()
+void pset_free_vals(const struct PSet* const set, fn_free);
 
 // free iter
 void pset_iter_free(const struct PSetIter* const iter);
@@ -75,7 +75,7 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b, bool (*e
  * Conversion
  */
 
-// ordered val pointers to set, caller frees list only
+// ordered val pointers, caller frees list only
 struct SList *pset_vals_slist(const struct PSet* const set);
 
 /*

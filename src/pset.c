@@ -71,7 +71,7 @@ void pset_free(const void* const cvset) {
 	free(set);
 }
 
-void pset_free_vals(const struct PSet* const set, fn_free_val free_val) {
+void pset_free_vals(const struct PSet* const set, fn_free free_val) {
 	if (!set)
 		return;
 
@@ -203,7 +203,7 @@ bool pset_remove(const struct PSet* const cset, const void* const val) {
 	return false;
 }
 
-bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equals equals) {
+bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal equals) {
 	if (!a || !b || a->size != b->size)
 		return false;
 

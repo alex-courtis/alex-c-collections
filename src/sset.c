@@ -14,14 +14,12 @@
    <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' src/sset.c)
    */
 
-typedef int (*comparator)(const char *s1, const char *s2);
-
 struct SSet {
 	const char **vals;
 	size_t capacity;
 	size_t grow;
 	size_t size;
-	comparator cmp;
+	fn_equal equal;
 };
 
 struct SSetIter {
@@ -60,9 +58,9 @@ const struct SSet *sset_init_with(const size_t initial, const size_t grow, const
 	set->grow = grow;
 	set->vals = calloc(set->capacity, sizeof(void*));
 	if (case_insensitive) {
-		set->cmp = strcasecmp;
+		set->equal = fn_equal_strcasecmp;
 	} else {
-		set->cmp = strcmp;
+		set->equal = fn_equal_strcmp;
 	}
 
 	return set;
@@ -95,7 +93,7 @@ const struct SSet *sset_clone(const struct SSet* const set) {
 	if (!set)
 		return NULL;
 
-	const struct SSet *clone = sset_init_with(set->capacity, set->grow, set->cmp == strcasecmp);
+	const struct SSet *clone = sset_init_with(set->capacity, set->grow, set->equal == fn_equal_strcasecmp);
 
 	// loop over vals
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
@@ -111,7 +109,7 @@ bool sset_contains(const struct SSet* const set, const char* const val) {
 
 	// loop over vals
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->cmp(*v, val) == 0) {
+		if (set->equal(*v, val)) {
 			return true;
 		}
 	}
@@ -167,7 +165,7 @@ bool sset_add(const struct SSet* const cset, const char* const val) {
 	for (v = set->vals; v < set->vals + set->size; v++) {
 
 		// already present
-		if (set->cmp(*v, val) == 0) {
+		if (set->equal(*v, val)) {
 			return false;
 		}
 	}
@@ -193,7 +191,7 @@ bool sset_remove(const struct SSet* const cset, const char* const val) {
 
 	// loop over vals
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->cmp(*v, val) == 0 ) {
+		if (set->equal(*v, val)) {
 
 			free((void*)*v);
 
@@ -214,13 +212,14 @@ bool sset_remove(const struct SSet* const cset, const char* const val) {
 	return false;
 }
 
+// TODO use a or b case insensitive cmp
 bool sset_equal(const struct SSet* const a, const struct SSet* const b) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
 	for (const char **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
 
-		if (a->cmp(*av, *bv) != 0) {
+		if (!a->equal(*av, *bv)) {
 			return false;
 		}
 	}

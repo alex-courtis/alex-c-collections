@@ -30,7 +30,7 @@ const struct PTable *ptable_init_with(const size_t initial, const size_t grow);
 void ptable_free(const void* const tab);
 
 // free table and vals, null fn_free_val uses free()
-void ptable_free_vals(const struct PTable* const tab, fn_free_val);
+void ptable_free_vals(const struct PTable* const tab, fn_free);
 
 // free iter
 void ptable_iter_free(const struct PTableIter* const iter);
@@ -69,7 +69,7 @@ const void *ptable_remove(const struct PTable* const tab, const void* const key)
  */
 
 // same length, keys and vals equal in order, NULL equal compares pointers
-bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equals);
+bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal);
 
 /*
  * Conversion

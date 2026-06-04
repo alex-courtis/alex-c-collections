@@ -522,7 +522,7 @@ static void ptable_equal__comparison_ok(void **state) {
 
 	assert_nul(ptable_put(b, KEYS[0], strdup("1")));
 
-	assert_true(ptable_equal(a, b, fn_comp_equals_strcmp));
+	assert_true(ptable_equal(a, b, fn_equal_strcmp));
 
 	ptable_free_vals(a, NULL);
 	ptable_free_vals(b, NULL);
@@ -536,7 +536,7 @@ static void ptable_equal__comparison_different(void **state) {
 
 	assert_nul(ptable_put(b, KEYS[0], strdup("1")));
 
-	assert_false(ptable_equal(a, b, fn_comp_equals_strcmp));
+	assert_false(ptable_equal(a, b, fn_equal_strcmp));
 
 	ptable_free_vals(a, NULL);
 	ptable_free_vals(b, NULL);

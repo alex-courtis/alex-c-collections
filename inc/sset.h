@@ -73,7 +73,7 @@ bool sset_equal(const struct SSet* const a, const struct SSet* const b);
  * Conversion
  */
 
-// ordered values set, caller frees list and contents
+// ordered strings, caller frees list and contents
 struct SList *sset_slist(const struct SSet* const set);
 
 /*

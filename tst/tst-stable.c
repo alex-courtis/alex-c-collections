@@ -525,7 +525,7 @@ static void stable_equal__keys_insensitive_a(void **state) {
 
 	assert_nul(stable_put(b, "A", vals[0]));
 
-	assert_true(stable_equal(a, b, fn_comp_equals_strcmp));
+	assert_true(stable_equal(a, b, fn_equal_strcmp));
 
 	stable_free_vals(a, NULL);
 	stable_free(b);
@@ -541,7 +541,7 @@ static void stable_equal__keys_insensitive_b(void **state) {
 
 	assert_nul(stable_put(b, "A", vals[0]));
 
-	assert_true(stable_equal(a, b, fn_comp_equals_strcmp));
+	assert_true(stable_equal(a, b, fn_equal_strcmp));
 
 	stable_free_vals(a, NULL);
 	stable_free(b);
@@ -593,7 +593,7 @@ static void stable_equal__comparison_ok(void **state) {
 
 	assert_nul(stable_put(b, "a", strdup("1")));
 
-	assert_true(stable_equal(a, b, fn_comp_equals_strcmp));
+	assert_true(stable_equal(a, b, fn_equal_strcmp));
 
 	stable_free_vals(a, NULL);
 	stable_free_vals(b, NULL);
@@ -607,7 +607,7 @@ static void stable_equal__comparison_different(void **state) {
 
 	assert_nul(stable_put(b, "a", strdup("1")));
 
-	assert_false(stable_equal(a, b, fn_comp_equals_strcmp));
+	assert_false(stable_equal(a, b, fn_equal_strcmp));
 
 	stable_free_vals(a, NULL);
 	stable_free_vals(b, NULL);

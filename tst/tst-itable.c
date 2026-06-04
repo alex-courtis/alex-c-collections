@@ -523,7 +523,7 @@ static void itable_equal__comparison_ok(void **state) {
 
 	assert_nul(itable_put(b, KEYS[0], strdup("1")));
 
-	assert_true(itable_equal(a, b, fn_comp_equals_strcmp));
+	assert_true(itable_equal(a, b, fn_equal_strcmp));
 
 	itable_free_vals(a, NULL);
 	itable_free_vals(b, NULL);
@@ -537,7 +537,7 @@ static void itable_equal__comparison_different(void **state) {
 
 	assert_nul(itable_put(b, KEYS[0], strdup("1")));
 
-	assert_false(itable_equal(a, b, fn_comp_equals_strcmp));
+	assert_false(itable_equal(a, b, fn_equal_strcmp));
 
 	itable_free_vals(a, NULL);
 	itable_free_vals(b, NULL);

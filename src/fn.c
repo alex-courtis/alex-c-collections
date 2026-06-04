@@ -3,7 +3,7 @@
 
 #include "fn.h"
 
-bool fn_comp_equals_strcmp(const void* const a, const void* const b) {
+bool fn_equal_strcmp(const void* const a, const void* const b) {
 	if (a == b)
 		return true;
 
@@ -13,7 +13,17 @@ bool fn_comp_equals_strcmp(const void* const a, const void* const b) {
 	return strcmp(a, b) == 0;
 }
 
-bool fn_comp_equals_strstr(const void* const a, const void* const b) {
+bool fn_equal_strcasecmp(const void* const a, const void* const b) {
+	if (a == b)
+		return true;
+
+	if (!a || !b)
+		return false;
+
+	return strcasecmp(a, b) == 0;
+}
+
+bool fn_equal_strstr(const void* const a, const void* const b) {
 	if (a == b)
 		return true;
 

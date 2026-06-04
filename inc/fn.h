@@ -6,16 +6,16 @@
 //
 // a is generally the value from the collection, b is user supplied
 //
-typedef bool (*fn_equals)(const void* const a, const void* const b);
+typedef bool (*fn_equal)(const void* const a, const void* const b);
 
 // true if both NULL or strcmp(a, b) == 0
-bool fn_comp_equals_strcmp(const void* const a, const void* const b);
+bool fn_equal_strcmp(const void* const a, const void* const b);
+
+// true if both NULL or strcasecmp(a, b) == 0
+bool fn_equal_strcasecmp(const void* const a, const void* const b);
 
 // true if both NULL or strstr(a, b)
-bool fn_comp_equals_strstr(const void* const a, const void* const b);
-
-// copies a string using strdup, if val is NULL, returns NULL
-void *fn_clone_strdup(const void* const val);
+bool fn_equal_strstr(const void* const a, const void* const b);
 
 //
 // a < b
@@ -30,11 +30,14 @@ typedef bool (*fn_test)(const void* const val);
 //
 // free
 //
-typedef void (*fn_free_val)(const void* const val);
+typedef void (*fn_free)(const void* const val);
 
 //
 // clone
 //
-typedef void* (*fn_clone_val)(const void* const val);
+typedef void* (*fn_clone)(const void* const val);
+
+// copies a string using strdup, if val is NULL, returns NULL
+void *fn_clone_strdup(const void* const val);
 
 #endif // FN_H

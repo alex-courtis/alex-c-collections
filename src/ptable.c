@@ -79,7 +79,7 @@ void ptable_free(const void* const cvtab) {
 	free(tab);
 }
 
-void ptable_free_vals(const struct PTable* const tab, fn_free_val free_val) {
+void ptable_free_vals(const struct PTable* const tab, fn_free free_val) {
 	if (!tab)
 		return;
 
@@ -231,7 +231,7 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 	return NULL;
 }
 
-bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equals equals) {
+bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal equal) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
@@ -248,8 +248,8 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn
 		}
 
 		// value
-		if (equals) {
-			if (!equals(*av, *bv)) {
+		if (equal) {
+			if (!equal(*av, *bv)) {
 				return false;
 			}
 		} else if (*av != *bv) {

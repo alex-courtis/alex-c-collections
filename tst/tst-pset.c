@@ -409,7 +409,7 @@ static void pset_equal__comparison_ok(void **state) {
 	assert_true(pset_add(b, vals[0]));
 	assert_true(pset_add(b, vals[1]));
 
-	assert_true(pset_equal(a, b, fn_comp_equals_strcmp));
+	assert_true(pset_equal(a, b, fn_equal_strcmp));
 
 	pset_free(a);
 	pset_free_vals(b, NULL);
@@ -427,7 +427,7 @@ static void pset_equal__comparison_different(void **state) {
 	assert_true(pset_add(b, vals[0]));
 	assert_true(pset_add(b, vals[2]));
 
-	assert_false(pset_equal(a, b, fn_comp_equals_strcmp));
+	assert_false(pset_equal(a, b, fn_equal_strcmp));
 
 	pset_free_vals(a, NULL);
 	pset_free(b);
