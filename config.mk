@@ -15,7 +15,7 @@ DFLAGS = -g
 MFLAGS =
 COMPFLAGS = $(WFLAGS) $(OFLAGS) $(DFLAGS) $(MFLAGS)
 
-CFLAGS += $(COMPFLAGS) -std=gnu17 
+CFLAGS += $(COMPFLAGS) -std=gnu17
 
 LDFLAGS += $(MFLAGS)
 
@@ -29,3 +29,5 @@ LDLIBS += $(foreach p,$(PKGS),$(shell $(PKG_CONFIG) --libs $(p)))
 ifneq (,$(findstring -m32,$(MFLAGS)))
 	VG_SUPP = --suppressions=.vg.cmocka.32.supp
 endif
+
+CC = gcc

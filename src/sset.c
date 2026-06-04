@@ -91,6 +91,20 @@ void sset_iter_free(const struct SSetIter* const iter) {
 	free((void*)iter);
 }
 
+const struct SSet *sset_clone(const struct SSet* const set) {
+	if (!set)
+		return NULL;
+
+	const struct SSet *clone = sset_init_with(set->capacity, set->grow, set->cmp == strcasecmp);
+
+	// loop over vals
+	for (const char **v = set->vals; v < set->vals + set->size; v++) {
+		sset_add(clone, *v);
+	}
+
+	return clone;
+}
+
 bool sset_contains(const struct SSet* const set, const char* const val) {
 	if (!set || !val)
 		return false;

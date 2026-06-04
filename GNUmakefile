@@ -39,6 +39,7 @@ clean:
 test: $(TST_T)
 test-vg: $(TST_T)
 
+$(TST_T): override CFLAGS += -Wno-unused-function
 $(TST_T): $(TST_E)
 	$(VALGRIND) ./$(patsubst test-%,tst-%,$(@))
 

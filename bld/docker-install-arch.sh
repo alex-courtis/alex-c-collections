@@ -14,6 +14,4 @@ pacman --noconfirm -Syu \
 	git \
 	lib32-cmocka \
 	llvm \
-	llvm-libs \
-	ninja \
 	valgrind

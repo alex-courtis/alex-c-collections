@@ -27,6 +27,9 @@ const struct SSet *sset_init(void);
 // construct a set with initial size, grow as needed, NULL on zero param
 const struct SSet *sset_init_with(const size_t initial, const size_t grow, const bool case_insensitive);
 
+// deep clone
+const struct SSet *sset_clone(const struct SSet* const set);
+
 // free set and vals
 void sset_free(const struct SSet* const set);
 

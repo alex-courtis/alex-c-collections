@@ -49,6 +49,61 @@ static void sset_init__invalid(void **state) {
 	assert_nul(set);
 }
 
+static void sset_clone__null(void **state) {
+	assert_nul(sset_clone(NULL));
+}
+
+static void sset_clone__empty(void **state) {
+	const struct SSet *set = sset_init();
+
+	const struct SSet *clone = sset_clone(set);
+
+	assert_non_nul(clone);
+
+	assert_int_equal(sset_size(clone), 0);
+
+	sset_free(set);
+	sset_free(clone);
+}
+
+static void sset_clone__params(void **state) {
+	const struct SSet *set = sset_init_with(3, 4, true);
+
+	const struct SSet *clone = sset_clone(set);
+
+	assert_non_nul(clone);
+
+	assert_int_equal(sset_size(clone), 0);
+
+	assert_int_equal(sset_capacity(clone), 3);
+
+	assert_true(sset_add(set, "A"));
+	assert_false(sset_add(set, "a"));
+
+	sset_free(set);
+	sset_free(clone);
+}
+
+static void sset_clone__vals(void **state) {
+	const struct SSet *set = sset_init();
+
+	assert_true(sset_add(set, "ONE"));
+	assert_true(sset_add(set, "TWO"));
+
+	const struct SSet *clone = sset_clone(set);
+
+	assert_int_equal(sset_size(clone), 2);
+
+	assert_true(sset_contains(clone, "ONE"));
+	assert_true(sset_contains(clone, "TWO"));
+
+	assert_true(sset_equal(set, clone));
+	assert_true(sset_equal(clone, set));
+
+	sset_free(clone);
+	sset_free(set);
+}
+
 static void sset_free__ok(void **state) {
 	const struct SSet *set = sset_init();
 
@@ -459,7 +514,7 @@ static void sset_str__empty(void **state) {
 	sset_free(set);
 }
 
-static void sset_str__string_vals(void **state) {
+static void sset_str__vals(void **state) {
 	const struct SSet *set = sset_init_with(5, 5, false);
 
 	assert_true(sset_add(set, "ONE"));
@@ -481,6 +536,11 @@ int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(sset_init__size),
 		TEST(sset_init__invalid),
+
+		TEST(sset_clone__null),
+		TEST(sset_clone__empty),
+		TEST(sset_clone__params),
+		TEST(sset_clone__vals),
 
 		TEST(sset_free__ok),
 
@@ -511,7 +571,7 @@ int main(void) {
 
 		TEST(sset_str__null),
 		TEST(sset_str__empty),
-		TEST(sset_str__string_vals),
+		TEST(sset_str__vals),
 	};
 
 	return RUN(tests);
