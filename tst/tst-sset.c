@@ -97,8 +97,8 @@ static void sset_clone__vals(void **state) {
 	assert_true(sset_contains(clone, "ONE"));
 	assert_true(sset_contains(clone, "TWO"));
 
-	assert_true(sset_equal(set, clone));
-	assert_true(sset_equal(clone, set));
+	assert_sset_equal(set, clone);
+	assert_sset_equal(clone, set);
 
 	sset_free(clone);
 	sset_free(set);
@@ -414,7 +414,7 @@ static void sset_sort__empty(void **state) {
 
 	assert_int_equal(sset_size(actual), 0);
 
-	assert_true(sset_equal(actual, expected));
+	assert_sset_equal(actual, expected);
 
 	sset_free(actual);
 	sset_free(expected);
@@ -430,7 +430,7 @@ static void sset_sort__one(void **state) {
 
 	sset_sort(actual);
 
-	assert_true(sset_equal(actual, expected));
+	assert_sset_equal(actual, expected);
 
 	sset_free(actual);
 	sset_free(expected);
@@ -452,7 +452,7 @@ static void sset_sort__many(void **state) {
 
 	sset_sort(actual);
 
-	assert_true(sset_equal(actual, expected));
+	assert_sset_equal(actual, expected);
 
 	sset_free(actual);
 	sset_free(expected);
@@ -474,7 +474,7 @@ static void sset_sort__many_case_insensitive(void **state) {
 
 	sset_sort(actual);
 
-	assert_true(sset_equal(actual, expected));
+	assert_sset_equal(actual, expected);
 
 	sset_free(actual);
 	sset_free(expected);
@@ -491,7 +491,7 @@ static void sset_equal__length_different(void **state) {
 	assert_true(sset_add(b, vals[0]));
 	assert_true(sset_add(b, vals[1]));
 
-	assert_false(sset_equal(a, b));
+	assert_sset_not_equal(a, b);
 
 	sset_free(a);
 	sset_free(b);
@@ -508,7 +508,7 @@ static void sset_equal__comparison_ok(void **state) {
 	assert_true(sset_add(b, vals[0]));
 	assert_true(sset_add(b, vals[1]));
 
-	assert_true(sset_equal(a, b));
+	assert_sset_equal(a, b);
 
 	sset_free(a);
 	sset_free(b);
@@ -526,7 +526,7 @@ static void sset_equal__comparison_different(void **state) {
 	assert_true(sset_add(b, vals[0]));
 	assert_true(sset_add(b, vals[2]));
 
-	assert_false(sset_equal(a, b));
+	assert_sset_not_equal(a, b);
 
 	sset_free(a);
 	sset_free(b);
@@ -542,8 +542,8 @@ static void sset_equal__case_insensitive(void **state) {
 	assert_true(sset_add(b, "A"));
 	assert_true(sset_add(b, "b"));
 
-	assert_true(sset_equal(a, b));
-	assert_false(sset_equal(b, a));
+	assert_sset_equal(a, b);
+	assert_sset_not_equal(b, a);
 
 	sset_free(a);
 	sset_free(b);

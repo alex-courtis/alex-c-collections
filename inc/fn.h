@@ -46,4 +46,9 @@ typedef void* (*fn_clone)(const void* const val);
 // copies a string using strdup, if val is NULL, returns NULL
 void *fn_clone_strdup(const void* const val);
 
+//
+// to string, caller frees
+//
+typedef char* (*fn_str)(const void* const val);
+
 #endif // FN_H

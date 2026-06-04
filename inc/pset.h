@@ -87,8 +87,8 @@ struct SList *pset_vals_slist(const struct PSet* const set);
 
 // to string, user frees
 // lines with format "%s\n"
-// values must be char*
-char *pset_str(const struct PSet* const set);
+// fn_str NULL for char* vals
+char *pset_str(const struct PSet* const set, fn_str);
 
 // number of values
 size_t pset_size(const struct PSet* const set);

@@ -252,17 +252,23 @@ struct SList *pset_vals_slist(const struct PSet* const set) {
 	return list;
 }
 
-char *pset_str(const struct PSet* const set) {
+char *pset_str(const struct PSet* const set, fn_str str) {
 	if (!set)
 		return NULL;
 
-	char *str = strdup("");
+	char *out = strdup("");
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		str = sprintf_append(str, "%s\n", (char*)*v);
+		if (str) {
+			char *val_str = str(*v);
+			out = sprintf_append(out, "%s\n", val_str);
+			free(val_str);
+		} else {
+			out = sprintf_append(out, "%s\n", (char*)*v);
+		}
 	}
 
-	return str;
+	return out;
 }
 size_t pset_size(const struct PSet* const set) {
 	return set ? set->size : 0;
