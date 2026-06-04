@@ -91,8 +91,8 @@ void slist_move(struct SList **to, struct SList **from, fn_equal, const void *b)
 
 // to string, user frees
 // lines with format "%s\n"
-// values must be char*
-char *slist_str(const struct SList *head);
+// fn_str NULL for char* vals
+char *slist_str(const struct SList *head, fn_str);
 
 // length
 size_t slist_length(const struct SList *head);

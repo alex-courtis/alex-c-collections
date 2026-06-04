@@ -280,16 +280,22 @@ void slist_move(struct SList **to, struct SList **from, fn_equal equal, const vo
 	}
 }
 
-char *slist_str(const struct SList *head) {
+char *slist_str(const struct SList *head, fn_str str) {
 	if (!head)
 		return NULL;
 
-	char *str = strdup("");
+	char *out = strdup("");
 
 	for (const struct SList *i = head; i; i = i->nex) {
-		str = sprintf_append(str, "%s\n", (char*)i->val);
+		if (str) {
+			char *val_str = str(i->val);
+			out = sprintf_append(out, "%s\n", val_str);
+			free(val_str);
+		} else {
+			out = sprintf_append(out, "%s\n", (char*)i->val);
+		}
 	}
 
-	return str;
+	return out;
 }
 

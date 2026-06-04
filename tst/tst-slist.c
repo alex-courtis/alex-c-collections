@@ -31,6 +31,10 @@ static void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
 }
 
+static char* fn_str_first(const void *val) {
+	return strndup(val, 1);
+}
+
 static bool test_contains_x(const void *data) {
 	if (strcmp("x", data) == 0) {
 		return true;
@@ -273,9 +277,9 @@ static void slist_equal__empty_lhs(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(NULL, rhs, fn_equal_strcmp));
+	assert_slist_not_equal(NULL, rhs, fn_equal_strcmp, NULL);
 
-	assert_false(slist_equal(NULL, rhs, NULL));
+	assert_slist_not_equal(NULL, rhs, NULL, NULL);
 
 	slist_free(&rhs);
 }
@@ -288,9 +292,9 @@ static void slist_equal__empty_rhs(void **state) {
 	slist_append(&lhs, lvals[1]);
 	slist_append(&lhs, lvals[2]);
 
-	assert_false(slist_equal(lhs, NULL, fn_equal_strcmp));
+	assert_slist_not_equal(lhs, NULL, fn_equal_strcmp, NULL);
 
-	assert_false(slist_equal(lhs, NULL, NULL));
+	assert_slist_not_equal(lhs, NULL, NULL, NULL);
 
 	slist_free(&lhs);
 }
@@ -309,7 +313,7 @@ static void slist_equal__equal(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_true(slist_equal(lhs, rhs, fn_equal_strcmp));
+	assert_slist_equal(lhs, rhs, fn_equal_strcmp, NULL);
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -329,8 +333,8 @@ static void slist_equal__not_equal_start(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, fn_equal_strcmp));
-	assert_false(slist_equal(lhs, rhs, NULL));
+	assert_slist_not_equal(lhs, rhs, fn_equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -350,8 +354,8 @@ static void slist_equal__not_equal_mid(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, fn_equal_strcmp));
-	assert_false(slist_equal(lhs, rhs, NULL));
+	assert_slist_not_equal(lhs, rhs, fn_equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -371,8 +375,8 @@ static void slist_equal__not_equal_end(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, fn_equal_strcmp));
-	assert_false(slist_equal(lhs, rhs, NULL));
+	assert_slist_not_equal(lhs, rhs, fn_equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -391,8 +395,8 @@ static void slist_equal__not_equal_lhs_size(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_false(slist_equal(lhs, rhs, fn_equal_strcmp));
-	assert_false(slist_equal(lhs, rhs, NULL));
+	assert_slist_not_equal(lhs, rhs, fn_equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -411,8 +415,8 @@ static void slist_equal__not_equal_rhs_size(void **state) {
 	slist_append(&rhs, rvals[0]);
 	slist_append(&rhs, rvals[1]);
 
-	assert_false(slist_equal(lhs, rhs, fn_equal_strcmp));
-	assert_false(slist_equal(lhs, rhs, NULL));
+	assert_slist_not_equal(lhs, rhs, fn_equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -636,7 +640,7 @@ static void slist_shallow_clone__vals(void **state) {
 }
 
 static void slist_str__null(void **state) {
-	assert_nul(slist_str(NULL));
+	assert_nul(slist_str(NULL, NULL));
 }
 
 static void slist_str__string_vals(void **state) {
@@ -646,11 +650,29 @@ static void slist_str__string_vals(void **state) {
 	slist_append(&list, "one");
 	slist_append(&list, "two");
 
-	char *str = slist_str(list);
+	char *str = slist_str(list, NULL);
 	assert_str_equal(str,
 			"zero\n"
 			"one\n"
 			"two\n"
+			);
+
+	free(str);
+	slist_free(&list);
+}
+
+static void slist_str__fn_str(void **state) {
+	struct SList *list = NULL;
+
+	slist_append(&list, "zero");
+	slist_append(&list, "one");
+	slist_append(&list, "two");
+
+	char *str = slist_str(list, fn_str_first);
+	assert_str_equal(str,
+			"z\n"
+			"o\n"
+			"t\n"
 			);
 
 	free(str);
@@ -679,7 +701,7 @@ static void slist_xor_free__first_list_empty(void **state) {
 
 	slist_xor_free(&list1, list2, fn_equal_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(slist_equal(list1, expected, fn_equal_strcmp));
+	assert_slist_equal(list1, expected, fn_equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -699,7 +721,7 @@ static void slist_xor_free__second_list_empty(void **state) {
 
 	slist_xor_free(&list1, list2, fn_equal_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(slist_equal(list1, expected, fn_equal_strcmp));
+	assert_slist_equal(list1, expected, fn_equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -724,7 +746,7 @@ static void slist_xor_free__toggle_items(void **state) {
 
 	slist_xor_free(&list1, list2, fn_equal_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(slist_equal(list1, expected, fn_equal_strcmp));
+	assert_slist_equal(list1, expected, fn_equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -746,7 +768,7 @@ static void slist_xor_free__duplicate_items(void **state) {
 
 	slist_xor_free(&list1, list2, fn_equal_strcmp, NULL, fn_clone_strdup);
 
-	assert_true(slist_equal(list1, expected, fn_equal_strcmp));
+	assert_slist_equal(list1, expected, fn_equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -796,6 +818,7 @@ int main(void) {
 
 		TEST(slist_str__null),
 		TEST(slist_str__string_vals),
+		TEST(slist_str__fn_str),
 
 		TEST(slist_xor_free__empty_lists),
 		TEST(slist_xor_free__first_list_empty),
