@@ -13,8 +13,8 @@
 
 /*
    diff -u \
-   <(sed -e 's/pset/xtable/g ; s/pset/XTable/g' tst/tst-pset.c) \
-   <(sed -e 's/sset/xtable/g ; s/sset/XTable/g' tst/tst-sset.c)
+   <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) \
+   <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' tst/tst-sset.c)
    */
 
 static int before_all(void **state) {
@@ -532,7 +532,7 @@ static void pset_str__empty(void **state) {
 	pset_free_vals(set, NULL);
 }
 
-static void pset_str__string_vals(void **state) {
+static void pset_str__vals(void **state) {
 	const struct PSet *set = pset_init_with(5, 5);
 
 	assert_true(pset_add(set, "ONE"));
@@ -606,7 +606,7 @@ int main(void) {
 
 		TEST(pset_str__null),
 		TEST(pset_str__empty),
-		TEST(pset_str__string_vals),
+		TEST(pset_str__vals),
 		TEST(pset_str__fn_str),
 	};
 

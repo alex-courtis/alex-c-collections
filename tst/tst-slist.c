@@ -649,12 +649,14 @@ static void slist_str__string_vals(void **state) {
 	slist_append(&list, "zero");
 	slist_append(&list, "one");
 	slist_append(&list, "two");
+	slist_append(&list, NULL);
 
 	char *str = slist_str(list, NULL);
 	assert_str_equal(str,
 			"zero\n"
 			"one\n"
 			"two\n"
+			"(null)\n"
 			);
 
 	free(str);
@@ -667,12 +669,14 @@ static void slist_str__fn_str(void **state) {
 	slist_append(&list, "zero");
 	slist_append(&list, "one");
 	slist_append(&list, "two");
+	slist_append(&list, NULL);
 
 	char *str = slist_str(list, fn_str_first);
 	assert_str_equal(str,
 			"z\n"
 			"o\n"
 			"t\n"
+			"(null)\n"
 			);
 
 	free(str);

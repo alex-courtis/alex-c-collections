@@ -90,7 +90,7 @@ void slist_move(struct SList **to, struct SList **from, fn_equal, const void *b)
  */
 
 // to string, user frees
-// lines with format "%s\n"
+// lines with format "%s\n", NULL printed as "(null)\n"
 // fn_str NULL for char* vals
 char *slist_str(const struct SList *head, fn_str);
 

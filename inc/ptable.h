@@ -87,8 +87,9 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
 
 // to string, user frees
 // lines with format "%p = %s\n"
-// values must be char*, NULL printed as "(null)"
-char *ptable_str(const struct PTable* const tab);
+// NULL vals printed as "(null)"
+// fn_str NULL for char* vals
+char *ptable_str(const struct PTable* const tab, fn_str);
 
 // number of entries with val
 size_t ptable_size(const struct PTable* const tab);

@@ -289,19 +289,29 @@ struct SList *ptable_vals_slist(const struct PTable* const tab) {
 	return list;
 }
 
-char *ptable_str(const struct PTable* const tab) {
+char *ptable_str(const struct PTable* const tab, fn_str str) {
 	if (!tab)
 		return NULL;
 
-	char *str = strdup("");
+	char *out = strdup("");
 
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		str = sprintf_append(str, "%p = %s\n", *k, *v ? (char*)*v : "(null)");
+		if (*v) {
+			if (str) {
+				char *val_str = str(*v);
+				out = sprintf_append(out, "%p = %s\n", *k, val_str);
+				free(val_str);
+			} else {
+				out = sprintf_append(out, "%p = %s\n", *k, (char*)*v);
+			}
+		} else {
+			out = sprintf_append(out, "%p = (null)\n", *k);
+		}
 	}
 
-	return str;
+	return out;
 }
 
 size_t ptable_size(const struct PTable* const tab) {

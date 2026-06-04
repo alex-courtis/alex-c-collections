@@ -12,6 +12,12 @@
 
 #include "stable.h"
 
+/*
+   diff -u \
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) \
+   <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c)
+   */
+
 static int before_all(void **state) {
 	return 0;
 }
@@ -30,6 +36,10 @@ static int after_each(void **state) {
 
 static void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
+}
+
+static char* fn_str_first(const void *val) {
+	return strndup(val, 1);
 }
 
 static void stable_init__size(void **state) {
@@ -649,13 +659,13 @@ static void stable_vals_slist__many(void **state) {
 }
 
 static void stable_str__null(void **state) {
-	assert_nul(stable_str(NULL));
+	assert_nul(stable_str(NULL, NULL));
 }
 
 static void stable_str__empty(void **state) {
 	const struct STable *tab = stable_init_with(3, 5, false);
 
-	char *str = stable_str(tab);
+	char *str = stable_str(tab, NULL);
 	assert_str_equal(str, "");
 
 	free(str);
@@ -669,7 +679,25 @@ static void stable_str__string_vals(void **state) {
 	stable_put(tab, "b", NULL);
 	stable_put(tab, "c", strdup("3"));
 
-	char *str = stable_str(tab);
+	char *str = stable_str(tab, NULL);
+	assert_str_equal(str,
+			"a = 1\n"
+			"b = (null)\n"
+			"c = 3\n"
+			);
+
+	free(str);
+	stable_free_vals(tab, NULL);
+}
+
+static void stable_str__fn_str(void **state) {
+	const struct STable *tab = stable_init_with(3, 5, false);
+
+	stable_put(tab, "a", strdup("1a"));
+	stable_put(tab, "b", NULL);
+	stable_put(tab, "c", strdup("3a"));
+
+	char *str = stable_str(tab, fn_str_first);
 	assert_str_equal(str,
 			"a = 1\n"
 			"b = (null)\n"
@@ -726,6 +754,7 @@ int main(void) {
 		TEST(stable_str__null),
 		TEST(stable_str__empty),
 		TEST(stable_str__string_vals),
+		TEST(stable_str__fn_str),
 	};
 
 	return RUN(tests);

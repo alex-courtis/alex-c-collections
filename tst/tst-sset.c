@@ -11,8 +11,8 @@
 
 /*
    diff -u \
-   <(sed -e 's/pset/xtable/g ; s/pset/XTable/g' tst/tst-pset.c) \
-   <(sed -e 's/sset/xtable/g ; s/sset/XTable/g' tst/tst-sset.c)
+   <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) \
+   <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' tst/tst-sset.c)
    */
 
 static int before_all(void **state) {

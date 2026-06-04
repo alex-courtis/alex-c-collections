@@ -40,6 +40,10 @@ void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
 }
 
+static char* fn_str_first(const void *val) {
+	return strndup(val, 1);
+}
+
 static void ptable_init__size(void **state) {
 	const struct PTable *tab = ptable_init_with(5, 50);
 
@@ -593,13 +597,13 @@ static void ptable_vals_slist__many(void **state) {
 }
 
 static void ptable_str__null(void **state) {
-	assert_nul(ptable_str(NULL));
+	assert_nul(ptable_str(NULL, NULL));
 }
 
 static void ptable_str__empty(void **state) {
 	const struct PTable *tab = ptable_init_with(3, 5);
 
-	char *str = ptable_str(tab);
+	char *str = ptable_str(tab, NULL);
 	assert_str_equal(str, "");
 
 	free(str);
@@ -625,7 +629,33 @@ static void ptable_str__string_vals(void **state) {
 			(void*)KEYS[2]
 			);
 
-	char *actual = ptable_str(tab);
+	char *actual = ptable_str(tab, NULL);
+	assert_str_equal(expected, actual);
+
+	free(actual);
+	ptable_free(tab);
+}
+
+static void ptable_str__fn_str(void **state) {
+	const struct PTable *tab = ptable_init_with(3, 5);
+
+	char *vals[] = { "11", NULL, "33", };
+
+	ptable_put(tab, KEYS[0], vals[0]);
+	ptable_put(tab, KEYS[1], vals[1]);
+	ptable_put(tab, KEYS[2], vals[2]);
+
+	char expected[2048];
+	snprintf(expected, sizeof(expected),
+			"%p = 1\n"
+			"%p = (null)\n"
+			"%p = 3\n",
+			(void*)KEYS[0],
+			(void*)KEYS[1],
+			(void*)KEYS[2]
+			);
+
+	char *actual = ptable_str(tab, fn_str_first);
 	assert_str_equal(expected, actual);
 
 	free(actual);
@@ -673,6 +703,7 @@ int main(void) {
 		TEST(ptable_str__null),
 		TEST(ptable_str__empty),
 		TEST(ptable_str__string_vals),
+		TEST(ptable_str__fn_str),
 	};
 
 	return RUN(tests);
