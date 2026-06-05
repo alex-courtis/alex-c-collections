@@ -60,6 +60,24 @@ const struct PSet *pset_init_with(const size_t initial, const size_t grow) {
 	return set;
 }
 
+const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone) {
+	if (!set)
+		return NULL;
+
+	const struct PSet *cloned = pset_init_with(set->capacity, set->grow);
+
+	// loop over vals
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
+		if (clone) {
+			pset_add(cloned, clone(*v));
+		} else {
+			pset_add(cloned, *v);
+		}
+	}
+
+	return cloned;
+}
+
 void pset_free(const void* const cvset) {
 	if (!cvset)
 		return;
@@ -76,7 +94,7 @@ void pset_free_vals(const struct PSet* const set, fn_free free_val) {
 		return;
 
 	// loop over vals
-	for (const void **v = set->vals; v < set->vals + set->capacity; v++) {
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (*v) {
 			if (free_val) {
 				free_val(*v);
@@ -96,14 +114,20 @@ void pset_iter_free(const struct PSetIter* const iter) {
 	free((void*)iter);
 }
 
-bool pset_contains(const struct PSet* const set, const void* const val) {
+bool pset_contains(const struct PSet* const set, const void* const val, fn_equal equal) {
 	if (!set || !val)
 		return false;
 
 	// loop over vals
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (*v == val) {
-			return true;
+		if (equal) {
+			if (equal(*v, val)) {
+				return true;
+			}
+		} else {
+			if (*v == val) {
+				return true;
+			}
 		}
 	}
 
@@ -147,6 +171,7 @@ const void *pset_iter_val(const struct PSetIter* const iter) {
 	return iter ? iter->val : NULL;
 }
 
+// TODO needs an equality
 bool pset_add(const struct PSet* const cset, const void* const val) {
 	if (!cset || !val)
 		return false;
@@ -225,8 +250,6 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal
 		return false;
 
 	for (const void **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
-
-		// value
 		if (equals) {
 			if (!equals(*av, *bv)) {
 				return false;
@@ -239,7 +262,7 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal
 	return true;
 }
 
-struct SList *pset_vals_slist(const struct PSet* const set) {
+struct SList *pset_slist(const struct PSet* const set) {
 	if (!set)
 		return NULL;
 

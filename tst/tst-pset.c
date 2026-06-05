@@ -59,6 +59,79 @@ static void pset_init__invalid(void **state) {
 	assert_nul(set);
 }
 
+static void pset_clone__null(void **state) {
+	assert_nul(pset_clone(NULL, NULL));
+}
+
+static void pset_clone__empty(void **state) {
+	const struct PSet *set = pset_init();
+
+	const struct PSet *clone = pset_clone(set, NULL);
+
+	assert_non_nul(clone);
+
+	assert_int_equal(pset_size(clone), 0);
+
+	pset_free_vals(set, NULL);
+	pset_free_vals(clone, NULL);
+}
+
+static void pset_clone__params(void **state) {
+	const struct PSet *set = pset_init_with(3, 4);
+
+	const struct PSet *clone = pset_clone(set, NULL);
+
+	assert_non_nul(clone);
+
+	assert_int_equal(pset_size(clone), 0);
+
+	assert_int_equal(pset_capacity(clone), 3);
+
+	pset_free_vals(set, NULL);
+	pset_free_vals(clone, NULL);
+}
+
+static void pset_clone__shallow_many(void **state) {
+	const struct PSet *set = pset_init();
+
+	char *vals[] = { strdup("0"), strdup("1"), };
+	assert_true(pset_add(set, vals[0]));
+	assert_true(pset_add(set, vals[1]));
+
+	const struct PSet *clone = pset_clone(set, NULL);
+
+	assert_int_equal(pset_size(clone), 2);
+
+	assert_true(pset_contains(clone, vals[0], NULL));
+	assert_true(pset_contains(clone, vals[1], NULL));
+
+	assert_pset_equal(set, clone, NULL, NULL);
+	assert_pset_equal(clone, set, NULL, NULL);
+
+	pset_free_vals(clone, NULL);
+	pset_free(set);
+}
+
+static void pset_clone__deep_many(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_true(pset_add(set, strdup("0")));
+	assert_true(pset_add(set, strdup("1")));
+
+	const struct PSet *clone = pset_clone(set, fn_clone_strdup);
+
+	assert_int_equal(pset_size(clone), 2);
+
+	assert_true(pset_contains(clone, "0", fn_equal_strcmp));
+	assert_true(pset_contains(clone, "1", fn_equal_strcmp));
+
+	assert_pset_equal(set, clone, fn_equal_strcmp, NULL);
+	assert_pset_equal(clone, set, fn_equal_strcmp, NULL);
+
+	pset_free_vals(clone, NULL);
+	pset_free_vals(set, NULL);
+}
+
 static void pset_free_vals__null(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -67,8 +140,8 @@ static void pset_free_vals__null(void **state) {
 	assert_true(pset_add(set, vals[1]));
 
 	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_true(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	// not much we can do here but valgrind
 	pset_free_vals(set, NULL);
@@ -82,8 +155,8 @@ static void pset_free_vals__free_val(void **state) {
 	assert_true(pset_add(set, vals[1]));
 
 	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_true(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	expect_str(mock_free_val, val, vals[0]);
 	expect_str(mock_free_val, val, vals[1]);
@@ -99,8 +172,8 @@ static void pset_add__new(void **state) {
 	assert_true(pset_add(set, vals[1]));
 
 	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_true(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	pset_free_vals(set, NULL);
 }
@@ -113,8 +186,8 @@ static void pset_add__existing(void **state) {
 	assert_true(pset_add(set, vals[1]));
 
 	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_true(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	assert_false(pset_add(set, vals[0]));
 	assert_false(pset_add(set, vals[1]));
@@ -132,9 +205,9 @@ static void pset_add__null(void **state) {
 
 	assert_int_equal(pset_size(set), 1);
 
-	assert_false(pset_contains(set, NULL));
+	assert_false(pset_contains(set, NULL, NULL));
 	assert_false(pset_add(set, NULL));
-	assert_false(pset_contains(set, NULL));
+	assert_false(pset_contains(set, NULL, NULL));
 
 	assert_int_equal(pset_size(set), 1);
 
@@ -151,19 +224,19 @@ static void pset_add__grow(void **state) {
 	assert_int_equal(pset_size(set), 2);
 	assert_int_equal(pset_capacity(set), 2);
 
-	assert_true(pset_contains(set, initial[0]));
-	assert_true(pset_contains(set, initial[1]));
+	assert_true(pset_contains(set, initial[0], NULL));
+	assert_true(pset_contains(set, initial[1], NULL));
 
 	void *grow[] = { strdup("2"), strdup("3"), };
 	assert_true(pset_add(set, grow[0]));
 	assert_int_equal(pset_size(set), 3);
 	assert_int_equal(pset_capacity(set), 7);
-	assert_true(pset_contains(set, grow[0]));
+	assert_true(pset_contains(set, grow[0], NULL));
 
 	assert_true(pset_add(set, grow[1]));
 	assert_int_equal(pset_size(set), 4);
 	assert_int_equal(pset_capacity(set), 7);
-	assert_true(pset_contains(set, grow[1]));
+	assert_true(pset_contains(set, grow[1], NULL));
 
 	void *subsequent[] = { strdup("4"), strdup("5"), };
 	assert_true(pset_add(set, subsequent[0]));
@@ -171,8 +244,8 @@ static void pset_add__grow(void **state) {
 	assert_int_equal(pset_size(set), 6);
 	assert_int_equal(pset_capacity(set), 7);
 
-	assert_true(pset_contains(set, subsequent[0]));
-	assert_true(pset_contains(set, subsequent[1]));
+	assert_true(pset_contains(set, subsequent[0], NULL));
+	assert_true(pset_contains(set, subsequent[1], NULL));
 
 	pset_free_vals(set, NULL);
 }
@@ -185,22 +258,22 @@ static void pset_remove__existing(void **state) {
 	assert_true(pset_add(set, vals[1]));
 
 	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_true(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	// 0
 	assert_true(pset_remove(set, vals[0]));
 
 	assert_int_equal(pset_size(set), 1);
-	assert_false(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_false(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	// 1
 	assert_true(pset_remove(set, vals[1]));
 
 	assert_int_equal(pset_size(set), 0);
-	assert_false(pset_contains(set, vals[0]));
-	assert_false(pset_contains(set, vals[1]));
+	assert_false(pset_contains(set, vals[0], NULL));
+	assert_false(pset_contains(set, vals[1], NULL));
 
 	pset_free_vals(set, NULL);
 
@@ -216,15 +289,15 @@ static void pset_remove__inexistent(void **state) {
 	assert_true(pset_add(set, vals[1]));
 
 	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_true(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	const void *inexistent = "inexistent";
 	assert_false(pset_remove(set, inexistent));
 
 	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, vals[0]));
-	assert_true(pset_contains(set, vals[1]));
+	assert_true(pset_contains(set, vals[0], NULL));
+	assert_true(pset_contains(set, vals[1], NULL));
 
 	pset_free_vals(set, NULL);
 }
@@ -257,7 +330,7 @@ static void pset_iter__free(void **state) {
 }
 
 
-static void pset_iter__vals(void **state) {
+static void pset_iter__many(void **state) {
 	const struct PSet *set = pset_init_with(5, 5);
 
 	void *vals[] = { strdup("0"), strdup("1"), };
@@ -495,7 +568,7 @@ static void pset_equal__comparison_different(void **state) {
 static void pset_vals_slist__empty(void **state) {
 	const struct PSet *set = pset_init_with(3, 5);
 
-	assert_nul(pset_vals_slist(set));
+	assert_nul(pset_slist(set));
 
 	pset_free_vals(set, NULL);
 }
@@ -508,7 +581,7 @@ static void pset_vals_slist__many(void **state) {
 	assert_true(pset_add(tab, vals[0]));
 	assert_true(pset_add(tab, vals[1]));
 
-	struct SList *list = pset_vals_slist(tab);
+	struct SList *list = pset_slist(tab);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "0");
@@ -532,7 +605,7 @@ static void pset_str__empty(void **state) {
 	pset_free_vals(set, NULL);
 }
 
-static void pset_str__vals(void **state) {
+static void pset_str__many(void **state) {
 	const struct PSet *set = pset_init_with(5, 5);
 
 	assert_true(pset_add(set, "ONE"));
@@ -573,6 +646,12 @@ int main(void) {
 		TEST(pset_init__size),
 		TEST(pset_init__invalid),
 
+		TEST(pset_clone__null),
+		TEST(pset_clone__empty),
+		TEST(pset_clone__params),
+		TEST(pset_clone__shallow_many),
+		TEST(pset_clone__deep_many),
+
 		TEST(pset_free_vals__null),
 		TEST(pset_free_vals__free_val),
 
@@ -586,7 +665,7 @@ int main(void) {
 
 		TEST(pset_iter__empty),
 		TEST(pset_iter__free),
-		TEST(pset_iter__vals),
+		TEST(pset_iter__many),
 		TEST(pset_iter__cleared),
 
 		TEST(pset_add__again),
@@ -606,7 +685,7 @@ int main(void) {
 
 		TEST(pset_str__null),
 		TEST(pset_str__empty),
-		TEST(pset_str__vals),
+		TEST(pset_str__many),
 		TEST(pset_str__fn_str),
 	};
 

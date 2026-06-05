@@ -29,6 +29,9 @@ const struct PSet *pset_init(void);
 // construct a set with initial size, grow as needed, NULL on zero param
 const struct PSet *pset_init_with(const size_t initial, const size_t grow);
 
+// clone a set, fn_clone for deep clone, NULL fn_clone for shallow clone setting pointers only
+const struct PSet *pset_clone(const struct PSet* const set, fn_clone);
+
 // free set
 void pset_free(const void* const set);
 
@@ -42,8 +45,8 @@ void pset_iter_free(const struct PSetIter* const iter);
  * Access
  */
 
-// true if this set contains the specified element
-bool pset_contains(const struct PSet* const set, const void* const val);
+// true if this set contains the specified element, null fn_equal to compare pointers
+bool pset_contains(const struct PSet* const set, const void* const val, fn_equal);
 
 // create an iterator, caller must pset_iter_free or invoke pset_next until NULL
 const struct PSetIter *pset_iter(const struct PSet* const set);
@@ -79,7 +82,7 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b, bool (*e
  */
 
 // ordered val pointers, caller frees list only
-struct SList *pset_vals_slist(const struct PSet* const set);
+struct SList *pset_slist(const struct PSet* const set);
 
 /*
  * Info

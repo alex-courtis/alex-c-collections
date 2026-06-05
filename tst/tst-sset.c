@@ -84,7 +84,7 @@ static void sset_clone__params(void **state) {
 	sset_free(clone);
 }
 
-static void sset_clone__vals(void **state) {
+static void sset_clone__many(void **state) {
 	const struct SSet *set = sset_init();
 
 	assert_true(sset_add(set, "ONE"));
@@ -317,7 +317,7 @@ static void sset_iter__free(void **state) {
 }
 
 
-static void sset_iter__vals(void **state) {
+static void sset_iter__many(void **state) {
 	const struct SSet *set = sset_init_with(5, 5, false);
 
 	void *vals[] = { "0", "1", };
@@ -589,7 +589,7 @@ static void sset_str__empty(void **state) {
 	sset_free(set);
 }
 
-static void sset_str__vals(void **state) {
+static void sset_str__many(void **state) {
 	const struct SSet *set = sset_init_with(5, 5, false);
 
 	assert_true(sset_add(set, "ONE"));
@@ -615,7 +615,7 @@ int main(void) {
 		TEST(sset_clone__null),
 		TEST(sset_clone__empty),
 		TEST(sset_clone__params),
-		TEST(sset_clone__vals),
+		TEST(sset_clone__many),
 
 		TEST(sset_free__ok),
 
@@ -631,7 +631,7 @@ int main(void) {
 
 		TEST(sset_iter__empty),
 		TEST(sset_iter__free),
-		TEST(sset_iter__vals),
+		TEST(sset_iter__many),
 		TEST(sset_iter__cleared),
 
 		TEST(sset_add__again),
@@ -651,7 +651,7 @@ int main(void) {
 
 		TEST(sset_str__null),
 		TEST(sset_str__empty),
-		TEST(sset_str__vals),
+		TEST(sset_str__many),
 	};
 
 	return RUN(tests);

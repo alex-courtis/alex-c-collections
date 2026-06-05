@@ -15,11 +15,8 @@ struct SList {
  * Lifecycle
  */
 
-// deep clone the list, cloning values with fn_clone, NULL means shallow copy
+// clone a list, fn_clone for deep clone, NULL fn_clone for shallow clone setting pointers only
 struct SList *slist_clone(struct SList *head, fn_clone);
-
-// clone the list, setting val pointers
-struct SList *slist_shallow_clone(struct SList *head);
 
 // free list
 void slist_free(struct SList **head);

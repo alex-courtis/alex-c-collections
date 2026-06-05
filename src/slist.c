@@ -22,10 +22,6 @@ struct SList *slist_clone(struct SList *head, fn_clone clone) {
 	return c;
 }
 
-struct SList *slist_shallow_clone(struct SList *head) {
-	return slist_clone(head, NULL);
-}
-
 void slist_free(struct SList **head) {
 	struct SList *i = *head;
 	while (i) {
@@ -241,7 +237,7 @@ struct SList *slist_sort(struct SList *head, fn_less_than less_than) {
 		return sorted;
 	}
 
-	struct SList *sorting = slist_shallow_clone(head);
+	struct SList *sorting = slist_clone(head, NULL);
 
 	struct SList *sorting_head;
 

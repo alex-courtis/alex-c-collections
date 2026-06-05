@@ -595,11 +595,11 @@ static void slist_move__all(void **state) {
 	slist_free(&from);
 }
 
-static void slist_clone__empty(void **state) {
+static void slist_clone__deep_empty(void **state) {
 	assert_nul(slist_clone(NULL, fn_clone_strdup));
 }
 
-static void slist_clone__vals(void **state) {
+static void slist_clone__deep_vals(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", };
@@ -617,18 +617,18 @@ static void slist_clone__vals(void **state) {
 	slist_free_vals(&cloned, NULL);
 }
 
-static void slist_shallow_clone__empty(void **state) {
-	assert_nul(slist_shallow_clone(NULL));
+static void slist_clone__shallow_empty(void **state) {
+	assert_nul(slist_clone(NULL, NULL));
 }
 
-static void slist_shallow_clone__vals(void **state) {
+static void slist_clone__shallow_vals(void **state) {
 	struct SList *list = NULL;
 
 	void *vals[] = { "0", "1", };
 	slist_append(&list, vals[0]);
 	slist_append(&list, vals[1]);
 
-	struct SList *cloned = slist_shallow_clone(list);
+	struct SList *cloned = slist_clone(list, NULL);
 
 	assert_non_nul(cloned);
 
@@ -814,11 +814,11 @@ int main(void) {
 		TEST(slist_move__many),
 		TEST(slist_move__all),
 
-		TEST(slist_clone__empty),
-		TEST(slist_clone__vals),
+		TEST(slist_clone__deep_empty),
+		TEST(slist_clone__deep_vals),
 
-		TEST(slist_shallow_clone__empty),
-		TEST(slist_shallow_clone__vals),
+		TEST(slist_clone__shallow_empty),
+		TEST(slist_clone__shallow_vals),
 
 		TEST(slist_str__null),
 		TEST(slist_str__string_vals),

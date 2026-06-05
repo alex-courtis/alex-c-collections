@@ -69,12 +69,25 @@ const struct SSet *sset_init_with(const size_t initial, const size_t grow, const
 	return set;
 }
 
+const struct SSet *sset_clone(const struct SSet* const set) {
+	if (!set)
+		return NULL;
+
+	const struct SSet *cloned = sset_init_with(set->capacity, set->grow, set->equal == fn_equal_strcasecmp);
+
+	for (const char **v = set->vals; v < set->vals + set->size; v++) {
+		sset_add(cloned, *v);
+	}
+
+	return cloned;
+}
+
 void sset_free(const struct SSet* const set) {
 	if (!set)
 		return;
 
 	// loop over vals
-	for (const char **v = set->vals; v < set->vals + set->capacity; v++) {
+	for (const char **v = set->vals; v < set->vals + set->size; v++) {
 		if (*v) {
 			free((void*)*v);
 		}
@@ -92,25 +105,10 @@ void sset_iter_free(const struct SSetIter* const iter) {
 	free((void*)iter);
 }
 
-const struct SSet *sset_clone(const struct SSet* const set) {
-	if (!set)
-		return NULL;
-
-	const struct SSet *clone = sset_init_with(set->capacity, set->grow, set->equal == fn_equal_strcasecmp);
-
-	// loop over vals
-	for (const char **v = set->vals; v < set->vals + set->size; v++) {
-		sset_add(clone, *v);
-	}
-
-	return clone;
-}
-
 bool sset_contains(const struct SSet* const set, const char* const val) {
 	if (!set || !val)
 		return false;
 
-	// loop over vals
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
 		if (set->equal(*v, val)) {
 			return true;
