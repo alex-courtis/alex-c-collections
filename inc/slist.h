@@ -73,7 +73,7 @@ bool slist_equal(struct SList *a, struct SList *b, fn_equal);
  * Utility
  */
 
-// sort into a new list
+// insertion sort into a new list
 struct SList *slist_sort(struct SList *head, fn_less_than);
 
 // move items between lists where from value equals b, NULL fn_equal does nothing

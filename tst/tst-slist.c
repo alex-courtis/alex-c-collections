@@ -3,6 +3,7 @@
 #include "expects.h"
 
 #include <cmocka.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,9 @@
 #include "fn.h"
 
 #include "slist.h"
+
+#include "data/words-sorted.c"
+#include "data/words-unsorted.c"
 
 static int before_all(void **state) {
 	return 0;
@@ -464,6 +468,29 @@ static void slist_sort__vals(void **state) {
 	slist_free(&to);
 }
 
+static void slist_sort__words(void **state) {
+	struct SList *from = NULL;
+	for (size_t i = 0; i < sizeof(words_unsorted) / sizeof(words_unsorted[0]); i++) {
+		slist_append(&from, (void*)words_unsorted[i]);
+	}
+
+	struct SList *actual = slist_sort(from, fn_less_than_strcmp);
+	assert_non_nul(actual);
+
+	assert_int_equal(slist_length(actual), slist_length(from));
+
+	struct SList *expected = NULL;
+	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++) {
+		slist_append(&expected, (void*)words_sorted[i]);
+	}
+
+	assert_slist_equal(actual, expected, fn_equal_strcmp, NULL);
+
+	slist_free(&from);
+	slist_free(&actual);
+	slist_free(&expected);
+}
+
 static void slist_move__empty(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
@@ -806,6 +833,7 @@ int main(void) {
 
 		TEST(slist_sort__empty),
 		TEST(slist_sort__vals),
+		TEST(slist_sort__words),
 
 		TEST(slist_move__empty),
 		TEST(slist_move__empty_to),
