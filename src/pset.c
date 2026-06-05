@@ -69,9 +69,9 @@ const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone) {
 	// loop over vals
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (clone) {
-			pset_add(cloned, clone(*v));
+			pset_add(cloned, clone(*v), NULL);
 		} else {
-			pset_add(cloned, *v);
+			pset_add(cloned, *v, NULL);
 		}
 	}
 
@@ -171,8 +171,7 @@ const void *pset_iter_val(const struct PSetIter* const iter) {
 	return iter ? iter->val : NULL;
 }
 
-// TODO needs an equality
-bool pset_add(const struct PSet* const cset, const void* const val) {
+bool pset_add(const struct PSet* const cset, const void* const val, fn_equal equal) {
 	if (!cset || !val)
 		return false;
 
@@ -182,9 +181,14 @@ bool pset_add(const struct PSet* const cset, const void* const val) {
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
 
-		// already present
-		if (*v == val) {
-			return false;
+		if (equal) {
+			if (equal(*v, val)) {
+				return false;
+			}
+		} else {
+			if (*v == val) {
+				return false;
+			}
 		}
 	}
 
@@ -201,15 +205,24 @@ bool pset_add(const struct PSet* const cset, const void* const val) {
 	return true;
 }
 
-bool pset_remove(const struct PSet* const cset, const void* const val) {
+const void *pset_remove(const struct PSet* const cset, const void* const val, fn_equal equal) {
 	if (!cset || !val)
-		return false;
+		return NULL;
 
 	struct PSet *set = (struct PSet*)cset;
 
 	// loop over vals
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (*v == val) {
+		bool present = false;
+		if (equal) {
+			present = equal(*v, val);
+		} else {
+			present = *v == val;
+		}
+
+		if (present) {
+
+			const void *removed = *v;
 
 			*v = NULL;
 			set->size--;
@@ -221,11 +234,11 @@ bool pset_remove(const struct PSet* const cset, const void* const val) {
 			}
 			*m = NULL;
 
-			return true;
+			return removed;
 		}
 	}
 
-	return false;
+	return NULL;
 }
 
 void pset_sort(const struct PSet* const set, fn_less_than less_than) {

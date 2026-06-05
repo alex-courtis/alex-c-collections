@@ -61,11 +61,11 @@ const void *pset_iter_val(const struct PSetIter* const iter);
  * Mutate
  */
 
-// true if this set did not already contain the specified element
-bool pset_add(const struct PSet* const set, const void* const val);
+// true if this set did not already contain the specified element, NULL fn_equal compares pointer
+bool pset_add(const struct PSet* const set, const void* const val, fn_equal);
 
-// true if this set contained the element
-bool pset_remove(const struct PSet* const set, const void* const val);
+// true if this set contained the element, NULL fn_equal compares pointer
+const void *pset_remove(const struct PSet* const set, const void* const val, fn_equal);
 
 // insertion sort in place
 void pset_sort(const struct PSet* const set, fn_less_than);
