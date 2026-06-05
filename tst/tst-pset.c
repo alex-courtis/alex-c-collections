@@ -1,5 +1,6 @@
 #include "tst.h"
 #include "asserts.h"
+#include "assert-pset.h"
 #include "expects.h"
 
 #include <cmocka.h>
