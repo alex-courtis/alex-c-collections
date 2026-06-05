@@ -1,6 +1,6 @@
 **/*.o
 
-/tst-*
+tst/tst-*
 
 actual.*
 expected.*
