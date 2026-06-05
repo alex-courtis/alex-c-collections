@@ -9,6 +9,9 @@
 
 #include "sset.h"
 
+#include "data/words-sorted.c"
+#include "data/words-unsorted.c"
+
 /*
    diff -u \
    <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) \
@@ -458,6 +461,27 @@ static void sset_sort__many(void **state) {
 	sset_free(expected);
 }
 
+static void sset_sort__words(void **state) {
+	const struct SSet *actual = sset_init_with(1000, 1000, false);
+
+	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
+		assert_true(sset_add(actual, words_unsorted[i - 1]));
+	}
+
+	const struct SSet *expected = sset_init_with(1000, 1000, false);
+
+	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
+		assert_true(sset_add(expected, words_sorted[i]));
+	}
+
+	sset_sort(actual);
+
+	assert_sset_equal(actual, expected);
+
+	sset_free(actual);
+	sset_free(expected);
+}
+
 static void sset_sort__many_case_insensitive(void **state) {
 	const struct SSet *actual = sset_init_with(5, 5, true);
 
@@ -639,6 +663,7 @@ int main(void) {
 		TEST(sset_sort__empty),
 		TEST(sset_sort__one),
 		TEST(sset_sort__many),
+		TEST(sset_sort__words),
 		TEST(sset_sort__many_case_insensitive),
 
 		TEST(sset_equal__length_different),

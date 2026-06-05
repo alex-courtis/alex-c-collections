@@ -4,6 +4,8 @@
 #include <cmocka.h>
 #include <string.h>
 
+#include "util-file.h"
+
 #include "fn.h"
 #include "pset.h"
 #include "slist.h"
@@ -65,6 +67,8 @@ void _assert_slist_not_equal(struct SList *a, struct SList *b, fn_equal equal, f
 
 void _assert_sset_equal(const struct SSet *a, const struct SSet *b, const char * const file, const int line) {
 	if (!sset_equal(a, b)) {
+		write_file("actual.set", sset_str(a));
+		write_file("expected.set", sset_str(b));
 		cmocka_print_error("\n%s != \n%s", sset_str(a), sset_str(b));
 		_fail(file, line);
 	}
@@ -73,6 +77,8 @@ void _assert_sset_equal(const struct SSet *a, const struct SSet *b, const char *
 
 void _assert_sset_not_equal(const struct SSet *a, const struct SSet *b, const char * const file, const int line) {
 	if (sset_equal(a, b)) {
+		write_file("actual.set", sset_str(a));
+		write_file("expected.set", sset_str(b));
 		cmocka_print_error("\n%s == \n%s", sset_str(a), sset_str(b));
 		_fail(file, line);
 	}
@@ -81,6 +87,8 @@ void _assert_sset_not_equal(const struct SSet *a, const struct SSet *b, const ch
 
 void _assert_pset_equal(const struct PSet *a, const struct PSet *b, fn_equal equal, fn_str str, const char * const file, const int line) {
 	if (!pset_equal(a, b, equal)) {
+		write_file("actual.set", pset_str(a, str));
+		write_file("expected.set", pset_str(a, str));
 		cmocka_print_error("\n%s != \n%s", pset_str(a, str), pset_str(b, str));
 		_fail(file, line);
 	}
@@ -89,6 +97,8 @@ void _assert_pset_equal(const struct PSet *a, const struct PSet *b, fn_equal equ
 
 void _assert_pset_not_equal(const struct PSet *a, const struct PSet *b, fn_equal equal, fn_str str, const char * const file, const int line) {
 	if (pset_equal(a, b, equal)) {
+		write_file("actual.set", pset_str(a, str));
+		write_file("expected.set", pset_str(a, str));
 		cmocka_print_error("\n%s == \n%s", pset_str(a, str), pset_str(b, str));
 		_fail(file, line);
 	}

@@ -11,6 +11,9 @@
 
 #include "pset.h"
 
+#include "data/words-sorted.c"
+#include "data/words-unsorted.c"
+
 /*
    diff -u \
    <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) \
@@ -505,6 +508,27 @@ static void pset_sort__many(void **state) {
 	pset_free(expected);
 }
 
+static void pset_sort__words(void **state) {
+	const struct PSet *actual = pset_init_with(1000, 1000);
+
+	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
+		assert_true(pset_add(actual, words_unsorted[i - 1], NULL));
+	}
+
+	const struct PSet *expected = pset_init_with(1000, 1000);
+
+	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
+		assert_true(pset_add(expected, words_sorted[i], NULL));
+	}
+
+	pset_sort(actual, fn_less_than_strcmp);
+
+	assert_pset_equal(actual, expected, fn_equal_strcmp, NULL);
+
+	pset_free(actual);
+	pset_free(expected);
+}
+
 static void pset_equal__length_different(void **state) {
 	const struct PSet *a = pset_init_with(5, 5);
 	const struct PSet *b = pset_init_with(5, 5);
@@ -705,6 +729,7 @@ int main(void) {
 		TEST(pset_sort__empty),
 		TEST(pset_sort__one),
 		TEST(pset_sort__many),
+		TEST(pset_sort__words),
 
 		TEST(pset_equal__length_different),
 		TEST(pset_equal__pointers_ok),

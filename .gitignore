@@ -2,4 +2,7 @@
 
 /tst-*
 
+actual.set
+expected.set
+
 /.ccls-cache

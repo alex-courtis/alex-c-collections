@@ -1,7 +1,8 @@
 unusedFunction:tst/asserts.h
 unusedFunction:tst/expects.h
 
-unusedFunction:tst/util-file.c
+# todo move this back to tst
+unusedFunction:src/util-file.c
 
 # this is just not practical
 nullPointerOutOfMemory
