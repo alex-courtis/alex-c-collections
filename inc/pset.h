@@ -67,7 +67,7 @@ bool pset_add(const struct PSet* const set, const void* const val, fn_equal);
 // true if this set contained the element, NULL fn_equal compares pointer
 const void *pset_remove(const struct PSet* const set, const void* const val, fn_equal);
 
-// insertion sort in place
+// shell sort in place
 void pset_sort(const struct PSet* const set, fn_less_than);
 
 /*

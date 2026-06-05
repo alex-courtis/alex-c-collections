@@ -245,16 +245,17 @@ void pset_sort(const struct PSet* const set, fn_less_than less_than) {
 	if (!set)
 		return;
 
-	size_t i = 1;
-	while (i < set->size) {
-		size_t j = i;
-		while (j > 0 && less_than(set->vals[j], set->vals[j - 1])) {
-			const void *tmp = set->vals[j];
-			set->vals[j] = set->vals[j - 1];
-			set->vals[j - 1] = tmp;
-			j = j - 1;
+	static const size_t gaps[] = { 701, 301, 132, 57, 23, 10, 4, 1, 0 }; // Ciura gap sequence
+
+	for (const size_t *gap = gaps; *gap > 0; gap++) {
+		for (size_t i = *gap; i < set->size; i++) {
+			const void *tmp = set->vals[i];
+			size_t j;
+			for (j = i; (j >= *gap) && less_than(tmp, set->vals[j - *gap]); j -= *gap) {
+				set->vals[j] = set->vals[j - *gap];
+			}
+			set->vals[j] = tmp;
 		}
-		i++;
 	}
 }
 
