@@ -510,13 +510,13 @@ static void pset_sort__many(void **state) {
 }
 
 static void pset_sort__words(void **state) {
-	const struct PSet *actual = pset_init_with(1000, 1000);
+	const struct PSet *actual = pset_init_with(400, 400);
 
 	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
 		assert_true(pset_add(actual, words_unsorted[i - 1], NULL));
 	}
 
-	const struct PSet *expected = pset_init_with(1000, 1000);
+	const struct PSet *expected = pset_init_with(400, 400);
 
 	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
 		assert_true(pset_add(expected, words_sorted[i], NULL));

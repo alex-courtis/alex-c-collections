@@ -463,13 +463,13 @@ static void sset_sort__many(void **state) {
 }
 
 static void sset_sort__words(void **state) {
-	const struct SSet *actual = sset_init_with(1000, 1000, false);
+	const struct SSet *actual = sset_init_with(400, 400, false);
 
 	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
 		assert_true(sset_add(actual, words_unsorted[i - 1]));
 	}
 
-	const struct SSet *expected = sset_init_with(1000, 1000, false);
+	const struct SSet *expected = sset_init_with(400, 400, false);
 
 	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
 		assert_true(sset_add(expected, words_sorted[i]));
