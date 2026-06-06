@@ -19,15 +19,20 @@ CFLAGS += $(COMPFLAGS) -std=gnu17
 
 LDFLAGS += $(MFLAGS)
 
-CC = clang
-
 PKGS += cmocka
 PKG_CONFIG ?= pkg-config
 CFLAGS += $(foreach p,$(PKGS),$(shell $(PKG_CONFIG) --cflags $(p)))
 LDLIBS += $(foreach p,$(PKGS),$(shell $(PKG_CONFIG) --libs $(p)))
 
-ifneq (,$(findstring -m32,$(MFLAGS)))
-	VG_SUPP = --suppressions=.vg.cmocka.32.supp
-endif
-
 CC = gcc
+
+VALGRIND = valgrind \
+		   --error-exitcode=1 \
+		   --leak-check=full \
+		   --show-leak-kinds=all \
+		   --errors-for-leak-kinds=all \
+		   --gen-suppressions=all
+
+ifneq (,$(findstring -m32,$(MFLAGS)))
+	VALGRIND += --suppressions=.vg.cmocka.32.supp
+endif

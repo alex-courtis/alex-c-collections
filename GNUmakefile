@@ -8,8 +8,9 @@ SRC_O = $(SRC_C:.c=.o)
 TST_H = $(wildcard tst/*.h)
 TST_C = $(wildcard tst/*.c)
 TST_O = $(TST_C:.c=.o)
-TST_U = $(filter-out tst/tst%,$(TST_O))
 TST_E = $(filter tst/tst%,$(TST_O:.o=))
+
+UTL_O = $(filter-out tst/tst%,$(TST_O))
 
 all: $(SRC_O)
 
@@ -24,40 +25,32 @@ $(SRC_O): $(INC_H) config.mk GNUmakefile
 #
 # test
 #
+
 $(TST_O): $(TST_H) $(SRC_O) config.mk GNUmakefile
 
-$(TST_E): $(SRC_O) $(TST_U)
+$(TST_E): $(SRC_O) $(UTL_O)
 
+#
+# link test-x targets to tst/tst-x and execute them
+#
+test: $(patsubst tst/tst%,test%,$(TST_E))
 test-%: tst/tst-%
 	./$(^)
 
+test-vg: $(patsubst tst/tst%,test%-vg,$(TST_E))
 test-%-vg: tst/tst-%
 	$(VALGRIND) ./$(^)
-
-test: $(patsubst tst/tst%,test%,$(TST_E))
-
-test-vg: $(patsubst tst/tst%,test%-vg,$(TST_E))
-
-#
-# valgrind
-#
-VALGRIND = valgrind \
-		   --error-exitcode=1 \
-		   --leak-check=full \
-		   --show-leak-kinds=all \
-		   --errors-for-leak-kinds=all \
-		   $(VG_SUPP) \
-		   --gen-suppressions=all
 
 #
 # iwyu
 #
-IWYU = include-what-you-use \
-	   -Xiwyu --no_fwd_decls \
-	   -Xiwyu --error=1 \
-	   -Xiwyu --verbose=3
-
-iwyu: CC = $(IWYU) -Xiwyu --check_also="inc/*h" -Xiwyu --check_also="tst/*h"
+iwyu: override CC = include-what-you-use \
+	-Xiwyu --no_fwd_decls \
+	-Xiwyu --error=1 \
+	-Xiwyu --verbose=3 \
+	-Xiwyu --mapping_file=.iwyu.imp \
+	-Xiwyu --check_also="inc/*h" \
+	-Xiwyu --check_also="tst/*h"
 iwyu: clean $(SRC_O) $(TST_O)
 
 #
