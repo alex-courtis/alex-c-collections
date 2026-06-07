@@ -10,8 +10,6 @@ TST_C = $(wildcard tst/*.c)
 TST_O = $(TST_C:.c=.o)
 TST_E = $(filter tst/tst%,$(TST_O:.o=))
 
-UTL_O = $(filter-out tst/tst%,$(TST_O))
-
 all: $(SRC_O)
 
 clean:
@@ -28,18 +26,22 @@ $(SRC_O): $(INC_H) config.mk GNUmakefile
 
 $(TST_O): $(TST_H) $(SRC_O) config.mk GNUmakefile
 
-$(TST_E): $(SRC_O) $(UTL_O)
+# test executables exclude: other tst-x.o
+$(TST_E): $(SRC_O) $(filter-out tst/tst%,$(TST_O))
 
-#
-# link test-x targets to tst/tst-x and execute them
-#
+# test-x builds tst/tst-x and executes it
 test: $(patsubst tst/tst%,test%,$(TST_E))
 test-%: tst/tst-%
 	./$(^)
 
+# test-x-vg builds tst/tst-x and executes it with valgrind
 test-vg: $(patsubst tst/tst%,test%-vg,$(TST_E))
 test-%-vg: tst/tst-%
 	$(VALGRIND) ./$(^)
+
+ifneq (,$(or $(findstring test,$(MAKECMDGOALS)), $(findstring tst/tst,$(MAKECMDGOALS))))
+CFLAGS += -Wno-unused-function
+endif
 
 #
 # iwyu
