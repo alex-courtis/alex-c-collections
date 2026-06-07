@@ -22,7 +22,7 @@ struct STableIter {
 	const struct PTableIter *pit;
 };
 
-static char *fn_str_key(const void* const val) {
+static char *fn_str_str(const void* const val) {
 	return sprintf_alloc("%s", val ? (char*)val : "(null)");
 }
 
@@ -35,7 +35,7 @@ const struct STable *stable_init_with(const size_t initial, const size_t grow, c
 			case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
 			(fn_alloc)strdup,
 			(fn_free)free,
-			fn_str_key,
+			fn_str_str,
 			initial, grow);
 
 	if (!ptab)

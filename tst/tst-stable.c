@@ -14,7 +14,11 @@
 
 #include "stable.h"
 
-/* full test for ptable */
+/*
+   diff -u \
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) \
+   <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c)
+   */
 
 static char *KEYS[] = { "a", "b", "c", "d", "e", "f", };
 
