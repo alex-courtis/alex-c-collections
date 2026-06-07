@@ -1,5 +1,6 @@
 #include "tst.h"
 #include "asserts.h"
+#include "assert-stable.h"
 #include "expects.h"
 
 #include <cmocka.h>
@@ -503,7 +504,7 @@ static void stable_equal__length_different(void **state) {
 
 	assert_nul(stable_put(b, KEYS[1], strdup("11")));
 
-	assert_false(stable_equal(a, b, NULL));
+	assert_stable_not_equal(a, b, NULL, NULL);
 
 	stable_free_vals(a, NULL);
 	stable_free_vals(b, NULL);
@@ -519,7 +520,7 @@ static void stable_equal__keys_different(void **state) {
 	assert_nul(stable_put(b, KEYS[0], NULL));
 	assert_nul(stable_put(b, KEYS[2], NULL));
 
-	assert_false(stable_equal(a, b, NULL));
+	assert_stable_not_equal(a, b, NULL, NULL);
 
 	stable_free_vals(a, NULL);
 	stable_free(b);
@@ -535,7 +536,7 @@ static void stable_equal__keys_insensitive(void **state) {
 
 	assert_nul(stable_put(b, "A", vals[0]));
 
-	assert_true(stable_equal(a, b, fn_equal_strcmp));
+	assert_stable_equal(a, b, fn_equal_strcmp, NULL);
 	assert_false(stable_equal(b, a, fn_equal_strcmp));
 
 	stable_free(a);
@@ -555,7 +556,7 @@ static void stable_equal__pointers_ok(void **state) {
 	assert_nul(stable_put(b, KEYS[1], vals[1]));
 	assert_nul(stable_put(b, KEYS[2], vals[2]));
 
-	assert_true(stable_equal(a, b, NULL));
+	assert_stable_equal(a, b, NULL, NULL);
 
 	stable_free(a);
 	stable_free_vals(b, NULL);
@@ -574,7 +575,7 @@ static void stable_equal__pointers_different(void **state) {
 	assert_nul(stable_put(b, KEYS[1], vals[0]));
 	assert_nul(stable_put(b, KEYS[2], vals[0]));
 
-	assert_false(stable_equal(a, b, NULL));
+	assert_stable_not_equal(a, b, NULL, NULL);
 
 	stable_free_vals(a, NULL);
 	stable_free(b);
@@ -588,7 +589,7 @@ static void stable_equal__comparison_ok(void **state) {
 
 	assert_nul(stable_put(b, KEYS[0], strdup("1")));
 
-	assert_true(stable_equal(a, b, fn_equal_strcmp));
+	assert_stable_equal(a, b, fn_equal_strcmp, NULL);
 
 	stable_free_vals(a, NULL);
 	stable_free_vals(b, NULL);

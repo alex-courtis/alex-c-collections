@@ -1,5 +1,6 @@
 #include "tst.h"
 #include "asserts.h"
+#include "assert-ptable.h"
 #include "expects.h"
 
 #include <cmocka.h>
@@ -450,7 +451,7 @@ static void ptable_equal__length_different(void **state) {
 
 	assert_nul(ptable_put(b, KEYS[1], strdup("11")));
 
-	assert_false(ptable_equal(a, b, NULL));
+	assert_ptable_not_equal(a, b, NULL, NULL);
 
 	ptable_free_vals(a, NULL);
 	ptable_free_vals(b, NULL);
@@ -466,7 +467,7 @@ static void ptable_equal__keys_different(void **state) {
 	assert_nul(ptable_put(b, KEYS[0], NULL));
 	assert_nul(ptable_put(b, KEYS[2], NULL));
 
-	assert_false(ptable_equal(a, b, NULL));
+	assert_ptable_not_equal(a, b, NULL, NULL);
 
 	ptable_free_vals(a, NULL);
 	ptable_free(b);
@@ -486,7 +487,7 @@ static void ptable_equal__pointers_ok(void **state) {
 	assert_nul(ptable_put(b, KEYS[1], vals[1]));
 	assert_nul(ptable_put(b, KEYS[2], vals[2]));
 
-	assert_true(ptable_equal(a, b, NULL));
+	assert_ptable_equal(a, b, NULL, NULL);
 
 	ptable_free(a);
 	ptable_free_vals(b, NULL);
@@ -505,7 +506,7 @@ static void ptable_equal__pointers_different(void **state) {
 	assert_nul(ptable_put(b, KEYS[1], vals[0]));
 	assert_nul(ptable_put(b, KEYS[2], vals[0]));
 
-	assert_false(ptable_equal(a, b, NULL));
+	assert_ptable_not_equal(a, b, NULL, NULL);
 
 	ptable_free_vals(a, NULL);
 	ptable_free(b);
@@ -519,7 +520,7 @@ static void ptable_equal__comparison_ok(void **state) {
 
 	assert_nul(ptable_put(b, KEYS[0], strdup("1")));
 
-	assert_true(ptable_equal(a, b, fn_equal_strcmp));
+	assert_ptable_equal(a, b, fn_equal_strcmp, NULL);
 
 	ptable_free_vals(a, NULL);
 	ptable_free_vals(b, NULL);
