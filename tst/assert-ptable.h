@@ -1,5 +1,5 @@
-#ifndef ASSERT_ptable_H
-#define ASSERT_ptable_H
+#ifndef ASSERT_PTABLE_H
+#define ASSERT_PTABLE_H
 
 #include <cmocka.h>
 
@@ -28,4 +28,4 @@ void _assert_ptable_not_equal(const struct PTable *a, const struct PTable *b, fn
 }
 #define assert_ptable_not_equal(a, b, equal, str) _assert_ptable_not_equal(a, b, equal, str, __FILE__, __LINE__)
 
-#endif // ASSERT_ptable_H
+#endif // ASSERT_PTABLE_H
