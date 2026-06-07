@@ -30,17 +30,13 @@
 * NULL values permitted.
 * Not thread safe.
 
-### ITable
+### PTable
 
-* Array backed integer indexed table.
+* Array backed pointer indexed table.
 * Entries preserve insertion order.
 * Operations linearly traverse keys.
 * NULL values permitted.
 * Not thread safe.
-
-### PTable
-
-* ITable convenience wrapper with pointer key.
 
 ## Strings
 

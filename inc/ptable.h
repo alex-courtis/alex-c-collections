@@ -7,7 +7,11 @@
 #include "fn.h"
 
 /*
- * ITable convenience wrapper with pointer key.
+ * Array backed pointer indexed table.
+ * Entries preserve insertion order.
+ * Operations linearly traverse keys.
+ * NULL values permitted.
+ * Not thread safe.
  */
 struct PTable; // IWYU pragma: keep
 

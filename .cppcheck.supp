@@ -1,7 +1,6 @@
 unusedFunction:tst/asserts.h
 unusedFunction:tst/expects.h
 
-# todo move this back to tst
 unusedFunction:tst/util-file.c
 
 # this is just not practical
