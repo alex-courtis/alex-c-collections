@@ -16,8 +16,8 @@
 
 /*
    diff -u \
-   <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) \
-   <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' tst/tst-ptable.c)
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) \
+   <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c)
    */
 
 static char *KEYS[] = { "a", "b", "c", "d", "e", "f", };
@@ -537,7 +537,7 @@ static void stable_equal__keys_insensitive(void **state) {
 	assert_nul(stable_put(b, "A", vals[0]));
 
 	assert_stable_equal(a, b, fn_equal_strcmp, NULL);
-	assert_false(stable_equal(b, a, fn_equal_strcmp));
+	assert_stable_not_equal(b, a, fn_equal_strcmp, NULL);
 
 	stable_free(a);
 	stable_free_vals(b, NULL);
@@ -629,7 +629,7 @@ static void stable_keys_slist__many(void **state) {
 	assert_str_equal(slist_at(list, 0), KEYS[0]);
 	assert_str_equal(slist_at(list, 1), KEYS[1]);
 
-	slist_free_vals(&list, NULL);
+	slist_free(&list);
 	stable_free_vals(tab, NULL);
 }
 

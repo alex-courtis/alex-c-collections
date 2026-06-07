@@ -34,6 +34,11 @@ bool fn_less_than_strcasecmp(const void* const a, const void* const b);
 typedef bool (*fn_test)(const void* const val);
 
 //
+// alloc from data
+//
+typedef const void* (*fn_alloc)(const void* const val);
+
+//
 // free
 //
 typedef void (*fn_free)(const void* const val);
@@ -47,7 +52,7 @@ typedef void* (*fn_clone)(const void* const val);
 void *fn_clone_strdup(const void* const val);
 
 //
-// to string, caller frees
+// to string, caller frees, may return NULL
 //
 typedef char* (*fn_str)(const void* const val);
 

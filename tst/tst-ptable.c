@@ -46,7 +46,7 @@ static char* fn_str_first(const void *val) {
 }
 
 static void ptable_init__size(void **state) {
-	const struct PTable *tab = ptable_init_with(5, 50);
+	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 5, 50);
 
 	assert_non_nul(tab);
 
@@ -57,7 +57,7 @@ static void ptable_init__size(void **state) {
 }
 
 static void ptable_init__invalid(void **state) {
-	const struct PTable *tab = ptable_init_with(0, 0);
+	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 0, 0);
 
 	assert_nul(tab);
 }
@@ -195,7 +195,7 @@ static void ptable_put__null_overwrite(void **state) {
 }
 
 static void ptable_put__grow(void **state) {
-	const struct PTable *tab = ptable_init_with(3, 5);
+	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 3, 5);
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));

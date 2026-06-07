@@ -20,6 +20,10 @@ struct PTable {
 	size_t capacity;
 	size_t grow;
 	size_t size;
+	fn_equal equal_key;
+	fn_alloc alloc_key;
+	fn_free free_key;
+	fn_str str_key;
 };
 
 struct PTableIter {
@@ -51,10 +55,10 @@ static void grow_ptable(struct PTable *tab) {
 }
 
 const struct PTable *ptable_init(void) {
-	return ptable_init_with(10, 10);
+	return ptable_init_with(NULL, NULL, NULL, NULL, 10, 10);
 }
 
-const struct PTable *ptable_init_with(const size_t initial, const size_t grow) {
+const struct PTable *ptable_init_with(fn_equal equal_key, fn_alloc alloc_key, fn_free free_key, fn_str str_key, const size_t initial, const size_t grow) {
 	if (initial == 0 || grow == 0)
 		return NULL;
 
@@ -63,6 +67,10 @@ const struct PTable *ptable_init_with(const size_t initial, const size_t grow) {
 	tab->grow = grow;
 	tab->keys = calloc(tab->capacity, sizeof(void*));
 	tab->vals = calloc(tab->capacity, sizeof(void*));
+	tab->equal_key = equal_key;
+	tab->alloc_key = alloc_key;
+	tab->free_key = free_key;
+	tab->str_key = str_key;
 
 	return tab;
 }
@@ -72,6 +80,12 @@ void ptable_free(const void* const cvtab) {
 		return;
 
 	struct PTable *tab = (struct PTable*)cvtab;
+
+	if (tab->free_key) {
+		for (const void **k = tab->keys; k < tab->keys + tab->capacity; k++) {
+			tab->free_key(*k);
+		}
+	}
 
 	free(tab->keys);
 	free(tab->vals);
@@ -113,7 +127,7 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 	for (k = tab->keys, v = tab->vals;
 			k < tab->keys + tab->size;
 			k++, v++) {
-		if (*k == key) {
+		if (tab->equal_key ? tab->equal_key(*k, key) : *k == key) {
 			return *v;
 		}
 	}
@@ -126,32 +140,32 @@ const struct PTableIter *ptable_iter(const struct PTable* const tab) {
 		return NULL;
 
 	// first key/val
-	struct PTableIter *i = calloc(1, sizeof(struct PTableIter));
-	i->tab = tab;
-	i->key = *(tab->keys);
-	i->val = *(tab->vals);
-	i->position = 0;
+	struct PTableIter *it = calloc(1, sizeof(struct PTableIter));
+	it->tab = tab;
+	it->key = *(tab->keys);
+	it->val = *(tab->vals);
+	it->position = 0;
 
-	return i;
+	return it;
 }
 
 const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
 	if (!iter)
 		return NULL;
 
-	struct PTableIter *i = (struct PTableIter*)iter;
+	struct PTableIter *it = (struct PTableIter*)iter;
 
-	if (!i->tab) {
-		ptable_iter_free(i);
+	if (!it->tab) {
+		ptable_iter_free(it);
 		return NULL;
 	}
 
-	if (++i->position < i->tab->size) {
-		i->key = *(i->tab->keys + i->position);
-		i->val = *(i->tab->vals + i->position);
-		return i;
+	if (++it->position < it->tab->size) {
+		it->key = *(it->tab->keys + it->position);
+		it->val = *(it->tab->vals + it->position);
+		return it;
 	} else {
-		ptable_iter_free(i);
+		ptable_iter_free(it);
 		return NULL;
 	}
 }
@@ -165,7 +179,7 @@ const void *ptable_iter_val(const struct PTableIter* const iter) {
 }
 
 const void *ptable_put(const struct PTable* const ctab, const void* const key, const void* const val) {
-	if (!ctab)
+	if (!ctab || !key)
 		return NULL;
 
 	struct PTable *tab = (struct PTable*)ctab;
@@ -176,7 +190,7 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
 		// overwrite existing values
-		if (*k == key) {
+		if (tab->equal_key ? tab->equal_key(*k, key) : *k == key) {
 			const void *prev = *v;
 			*v = val;
 			return prev;
@@ -191,7 +205,11 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	}
 
 	// new
-	*k = key;
+	if (tab->alloc_key) {
+		*k = tab->alloc_key(key);
+	} else {
+		*k = key;
+	}
 	*v = val;
 	tab->size++;
 
@@ -209,7 +227,11 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
-		if (*k == key) {
+		if (tab->equal_key ? tab->equal_key(*k, key) : *k == key) {
+			if (tab->free_key) {
+				tab->free_key((void*)*k);
+			}
+			*k = NULL;
 			const void* prev = *v;
 			*v = NULL;
 			tab->size--;
@@ -221,7 +243,7 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 				*mk = *(mk + 1);
 				*mv = *(mv + 1);
 			}
-			*mk = 0;
+			*mk = NULL;
 			*mv = NULL;
 
 			return prev;
@@ -243,7 +265,7 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn
 			ak++, bk++, av++, bv++) {
 
 		// key
-		if (*ak != *bk) {
+		if (!(a->equal_key ? a->equal_key(*ak, *bk) : *ak == *bk)) {
 			return false;
 		}
 
@@ -289,7 +311,7 @@ struct SList *ptable_vals_slist(const struct PTable* const tab) {
 	return list;
 }
 
-char *ptable_str(const struct PTable* const tab, fn_str str) {
+char *ptable_str(const struct PTable* const tab, fn_str str_val) {
 	if (!tab)
 		return NULL;
 
@@ -298,16 +320,25 @@ char *ptable_str(const struct PTable* const tab, fn_str str) {
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
+
+		if (tab->str_key) {
+			char *key = tab->str_key(*k);
+			out = sprintf_append(out, "%s = ", key ? key : "???");
+			free(key);
+		} else {
+			out = sprintf_append(out, "%p = ", *k ? *k : "(null)");
+		}
+
 		if (*v) {
-			if (str) {
-				char *val_str = str(*v);
-				out = sprintf_append(out, "%p = %s\n", *k, val_str);
-				free(val_str);
+			if (str_val) {
+				char *val = str_val(*v);
+				out = sprintf_append(out, "%s\n", val);
+				free(val);
 			} else {
-				out = sprintf_append(out, "%p = %s\n", *k, (char*)*v);
+				out = sprintf_append(out, "%s\n", (char*)*v);
 			}
 		} else {
-			out = sprintf_append(out, "%p = (null)\n", *k);
+			out = sprintf_append(out, "%s", "(null)\n");
 		}
 	}
 
