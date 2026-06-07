@@ -19,7 +19,21 @@
    <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' tst/tst-ptable.c)
    */
 
-static char *KEYS[] = { "a", "b", "c", "d", "e", "f", };
+static int keys[6] = { 10, 11, 12, 13, 14, 15 };
+static void *K0 = &keys[0];
+static void *K1 = &keys[1];
+static void *K2 = &keys[2];
+static void *K3 = &keys[3];
+static void *K4 = &keys[4];
+static void *K5 = &keys[5];
+
+static int vals[6] = { 20, 21, 22, 23, 24, 25, };
+static void *V0 = &vals[0];
+static void *V1 = &vals[1];
+static void *V2 = &vals[2];
+static void *V3 = &vals[3];
+static void *V4 = &vals[4];
+static void *V5 = &vals[5];
 
 static int before_all(void **state) {
 	return 0;
@@ -53,7 +67,7 @@ static void ptable_init__size(void **state) {
 	assert_int_equal(ptable_size(tab), 0);
 	assert_int_equal(ptable_capacity(tab), 5);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_init__invalid(void **state) {
@@ -62,167 +76,159 @@ static void ptable_init__invalid(void **state) {
 	assert_nul(tab);
 }
 
-static void ptable_free_vals__null(void **state) {
+static void ptable_free_vals__null_fn_free(void **state) {
 	const struct PTable *tab = ptable_init();
 
 	const char *val = strdup("0");
 
-	ptable_put(tab, KEYS[0], val);
+	ptable_put(tab, K0, val);
 
 	assert_int_equal(ptable_size(tab), 1);
 
-	// not much we can do here but valgrind
+	// valgrind will indicate that val has been free'd
 	ptable_free_vals(tab, NULL);
 }
 
-static void ptable_free_vals__free_val(void **state) {
+static void ptable_free_vals__fn_free(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	char *vals[] = { "0", "1", NULL, };
-
-	expect_str(mock_free_val, val, "0");
-	expect_str(mock_free_val, val, "1");
-
-	ptable_put(tab, KEYS[0], vals[0]);
-	ptable_put(tab, KEYS[1], vals[1]);
-	ptable_put(tab, KEYS[2], vals[2]);
+	ptable_put(tab, K0, V0);
+	ptable_put(tab, K1, NULL);
+	ptable_put(tab, K2, V2);
 
 	assert_int_equal(ptable_size(tab), 3);
+
+	expect_ptr(mock_free_val, val, V0);
+	expect_ptr(mock_free_val, val, V2);
 
 	ptable_free_vals(tab, mock_free_val);
 }
 
-static void free_val_ptable(const void *val) {
+static void fn_free_ptable(const void *val) {
 	ptable_free_vals(val, mock_free_val);
 }
 
-static void ptable_free_vals__free_val_reentrant(void **state) {
+static void ptable_free_vals__fn_free_hierarchical(void **state) {
 	const struct PTable *outer = ptable_init();
 	const struct PTable *inner1 = ptable_init();
 	const struct PTable *inner2 = ptable_init();
 
-	char *vals[] = { "11", "12", "21", "22", };
+	ptable_put(outer, K0, (void*)inner1);
+	ptable_put(outer, K1, (void*)inner2);
 
-	expect_str(mock_free_val, val, "11");
-	expect_str(mock_free_val, val, "12");
-	expect_str(mock_free_val, val, "21");
-	expect_str(mock_free_val, val, "22");
+	ptable_put(inner1, K2, V2);
+	ptable_put(inner1, K3, V3);
 
-	ptable_put(inner1, KEYS[0], vals[0]);
-	ptable_put(inner1, KEYS[1], vals[1]);
-	ptable_put(inner2, KEYS[0], vals[2]);
-	ptable_put(inner2, KEYS[1], vals[3]);
-
-	ptable_put(outer, KEYS[0], (void*)inner1);
-	ptable_put(outer, KEYS[1], (void*)inner2);
+	ptable_put(inner2, K4, V4);
+	ptable_put(inner2, K5, V5);
 
 	assert_int_equal(ptable_size(outer), 2);
 
-	ptable_free_vals(outer, free_val_ptable);
+	expect_ptr(mock_free_val, val, V2);
+	expect_ptr(mock_free_val, val, V3);
+	expect_ptr(mock_free_val, val, V4);
+	expect_ptr(mock_free_val, val, V5);
+
+	ptable_free_vals(outer, fn_free_ptable);
 }
 
 static void ptable_put__new(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
 
 	assert_int_equal(ptable_size(tab), 2);
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_str_equal(ptable_get(tab, KEYS[1]), "1");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V1);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_put__overwrite(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
-	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
-	assert_nul(ptable_put(tab, KEYS[3], strdup("3")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
+	assert_nul(ptable_put(tab, K2, V2));
+	assert_nul(ptable_put(tab, K3, V3));
 
-	char *replaced = (char*)ptable_put(tab, KEYS[1], strdup("10"));
-	assert_str_equal(replaced, "1");
-	free(replaced);
+	assert_ptr_equal(ptable_put(tab, K1, V4), V1);
 
-	replaced = (char*)ptable_put(tab, KEYS[3], strdup("13"));
-	assert_str_equal(replaced, "3");
-	free(replaced);
+	assert_ptr_equal(ptable_put(tab, K3, V5), V3);
 
 	assert_int_equal(ptable_size(tab), 4);
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_str_equal(ptable_get(tab, KEYS[1]), "10");
-	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
-	assert_str_equal(ptable_get(tab, KEYS[3]), "13");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V4);
+	assert_ptr_equal(ptable_get(tab, K2), V2);
+	assert_ptr_equal(ptable_get(tab, K3), V5);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_put__null(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(ptable_put(tab, K0, V0));
 	assert_int_equal(ptable_size(tab), 1);
 
-	assert_nul(ptable_put(tab, KEYS[1], NULL));
+	assert_nul(ptable_put(tab, K1, NULL));
 	assert_int_equal(ptable_size(tab), 2);
 
-	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
+	assert_nul(ptable_put(tab, K2, V2));
 	assert_int_equal(ptable_size(tab), 3);
 
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_nul(ptable_get(tab, KEYS[1]));
-	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_nul(ptable_get(tab, K1));
+	assert_ptr_equal(ptable_get(tab, K2), V2);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_put__null_overwrite(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	const char *zero = "0";
-	assert_nul(ptable_put(tab, KEYS[0], zero));
+	assert_nul(ptable_put(tab, K0, V0));
 
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
 
-	assert_str_equal(ptable_put(tab, KEYS[0], NULL), "0");
+	assert_ptr_equal(ptable_put(tab, K0, NULL), V0);
 
 	assert_int_equal(ptable_size(tab), 1);
-	assert_nul(ptable_get(tab, KEYS[0]));
+	assert_nul(ptable_get(tab, K0));
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_put__grow(void **state) {
 	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 3, 5);
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
-	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
+	assert_nul(ptable_put(tab, K2, V2));
 
 	assert_int_equal(ptable_size(tab), 3);
 	assert_int_equal(ptable_capacity(tab), 3);
 
-	assert_nul(ptable_put(tab, KEYS[3], strdup("3")));
+	assert_nul(ptable_put(tab, K3, V3));
 	assert_int_equal(ptable_size(tab), 4);
 	assert_int_equal(ptable_capacity(tab), 8);
 
-	assert_nul(ptable_put(tab, KEYS[4], strdup("4")));
-	assert_nul(ptable_put(tab, KEYS[5], strdup("5")));
+	assert_nul(ptable_put(tab, K4, V4));
+	assert_nul(ptable_put(tab, K5, V5));
 
 	assert_int_equal(ptable_size(tab), 6);
 	assert_int_equal(ptable_capacity(tab), 8);
 
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_str_equal(ptable_get(tab, KEYS[1]), "1");
-	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V1);
+	assert_ptr_equal(ptable_get(tab, K2), V2);
 
-	assert_str_equal(ptable_get(tab, KEYS[3]), "3");
-	assert_str_equal(ptable_get(tab, KEYS[4]), "4");
-	assert_str_equal(ptable_get(tab, KEYS[5]), "5");
+	assert_ptr_equal(ptable_get(tab, K3), V3);
+	assert_ptr_equal(ptable_get(tab, K4), V4);
+	assert_ptr_equal(ptable_get(tab, K5), V5);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_iter__empty(void **state) {
@@ -230,246 +236,231 @@ static void ptable_iter__empty(void **state) {
 
 	assert_nul(ptable_iter(tab));
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_iter__free(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
 
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[0]);
-	assert_str_equal(ptable_iter_val(iter), "0");
+	assert_ptr_equal(ptable_iter_key(iter), K0);
+	assert_ptr_equal(ptable_iter_val(iter), V0);
 
-	// not much we can do here but valgrind
+	// valgrind will indicate that iter has been free'd
 	ptable_iter_free(iter);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_iter__vals(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], NULL));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
-	assert_nul(ptable_put(tab, KEYS[2], NULL));
-	assert_nul(ptable_put(tab, KEYS[3], strdup("3")));
-	assert_nul(ptable_put(tab, KEYS[4], NULL));
+	assert_nul(ptable_put(tab, K0, NULL));
+	assert_nul(ptable_put(tab, K1, V1));
+	assert_nul(ptable_put(tab, K2, NULL));
+	assert_nul(ptable_put(tab, K3, V3));
+	assert_nul(ptable_put(tab, K4, NULL));
 
 	assert_int_equal(ptable_size(tab), 5);
 
 	// zero
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[0]);
+	assert_ptr_equal(ptable_iter_key(iter), K0);
 	assert_nul(ptable_iter_val(iter));
 
 	// one
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[1]);
-	assert_str_equal(ptable_iter_val(iter), "1");
+	assert_ptr_equal(ptable_iter_key(iter), K1);
+	assert_ptr_equal(ptable_iter_val(iter), V1);
 
 	// two
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[2]);
+	assert_ptr_equal(ptable_iter_key(iter), K2);
 	assert_nul(ptable_iter_val(iter));
 
 	// three
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[3]);
-	assert_str_equal(ptable_iter_val(iter), "3");
+	assert_ptr_equal(ptable_iter_key(iter), K3);
+	assert_ptr_equal(ptable_iter_val(iter), V3);
 
 	// four
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[4]);
+	assert_ptr_equal(ptable_iter_key(iter), K4);
 	assert_nul(ptable_iter_val(iter));
 
 	// end
 	iter = ptable_iter_next(iter);
 	assert_nul(iter);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_iter__removed(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
-	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
-	assert_nul(ptable_put(tab, KEYS[3], strdup("3")));
-	assert_nul(ptable_put(tab, KEYS[4], strdup("4")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
+	assert_nul(ptable_put(tab, K2, V2));
+	assert_nul(ptable_put(tab, K3, V3));
+	assert_nul(ptable_put(tab, K4, V4));
 
-	char *removed = (char*)ptable_remove(tab, KEYS[0]);
-	assert_str_equal(removed, "0");
-	free(removed);
+	assert_ptr_equal(ptable_remove(tab, K0), V0);
 
-	removed = (char*)ptable_remove(tab, KEYS[2]);
-	assert_str_equal(removed, "2");
-	free(removed);
+	assert_ptr_equal(ptable_remove(tab, K2), V2);
 
-	removed = (char*)ptable_remove(tab, KEYS[4]);
-	assert_str_equal(removed, "4");
-	free(removed);
+	assert_ptr_equal(ptable_remove(tab, K4), V4);
 
 	assert_int_equal(ptable_size(tab), 2);
 
 	// one
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[1]);
-	assert_str_equal(ptable_iter_val(iter), "1");
+	assert_ptr_equal(ptable_iter_key(iter), K1);
+	assert_ptr_equal(ptable_iter_val(iter), V1);
 
 	// three
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[3]);
-	assert_str_equal(ptable_iter_val(iter), "3");
+	assert_ptr_equal(ptable_iter_key(iter), K3);
+	assert_ptr_equal(ptable_iter_val(iter), V3);
 
 	// end
 	iter = ptable_iter_next(iter);
 	assert_nul(iter);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_put__again(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
 
 	assert_int_equal(ptable_size(tab), 2);
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_str_equal(ptable_get(tab, KEYS[1]), "1");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V1);
 
 	// remove zero
-	char *removed = (char*)ptable_remove(tab, KEYS[0]);
-	assert_str_equal(removed, "0");
-	free(removed);
+	assert_ptr_equal(ptable_remove(tab, K0), V0);
 
 	assert_int_equal(ptable_size(tab), 1);
-	assert_nul(ptable_get(tab, KEYS[0]));
+	assert_nul(ptable_get(tab, K0));
 
 	// put zero again afterwards
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(ptable_put(tab, K0, V0));
 	assert_int_equal(ptable_size(tab), 2);
 
 	// one
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[1]);
-	assert_str_equal(ptable_iter_val(iter), "1");
+	assert_ptr_equal(ptable_iter_key(iter), K1);
+	assert_ptr_equal(ptable_iter_val(iter), V1);
 
 	// zero moved later
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), KEYS[0]);
-	assert_str_equal(ptable_iter_val(iter), "0");
+	assert_ptr_equal(ptable_iter_key(iter), K0);
+	assert_ptr_equal(ptable_iter_val(iter), V0);
 
 	// end
 	iter = ptable_iter_next(iter);
 	assert_nul(iter);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_remove__existing(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
-	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
+	assert_nul(ptable_put(tab, K2, V2));
 
 	assert_int_equal(ptable_size(tab), 3);
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_str_equal(ptable_get(tab, KEYS[1]), "1");
-	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V1);
+	assert_ptr_equal(ptable_get(tab, K2), V2);
 
-	// 1
-	char *removed = (char*)ptable_remove(tab, KEYS[1]);
-	assert_str_equal(removed, "1");
-	free(removed);
+	// K1
+	assert_ptr_equal(ptable_remove(tab, K1), V1);
 	assert_int_equal(ptable_size(tab), 2);
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_nul(ptable_get(tab, KEYS[1]));
-	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_nul(ptable_get(tab, K1));
+	assert_ptr_equal(ptable_get(tab, K2), V2);
 
-	// 2
-	removed = (char*)ptable_remove(tab, KEYS[2]);
-	assert_str_equal(removed, "2");
-	free(removed);
+	// K2
+	assert_ptr_equal(ptable_remove(tab, K2), V2);
 	assert_int_equal(ptable_size(tab), 1);
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_nul(ptable_get(tab, KEYS[1]));
-	assert_nul(ptable_get(tab, KEYS[2]));
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_nul(ptable_get(tab, K1));
+	assert_nul(ptable_get(tab, K2));
 
-	// 0
-	removed = (char*)ptable_remove(tab, KEYS[0]);
-	assert_str_equal(removed, "0");
-	free(removed);
+	// K0
+	assert_ptr_equal(ptable_remove(tab, K0), V0);
 	assert_int_equal(ptable_size(tab), 0);
-	assert_nul(ptable_get(tab, KEYS[0]));
-	assert_nul(ptable_get(tab, KEYS[1]));
-	assert_nul(ptable_get(tab, KEYS[2]));
+	assert_nul(ptable_get(tab, K0));
+	assert_nul(ptable_get(tab, K1));
+	assert_nul(ptable_get(tab, K2));
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_remove__inexistent(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
-	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
+	assert_nul(ptable_put(tab, K2, V2));
 
 	assert_int_equal(ptable_size(tab), 3);
-	assert_str_equal(ptable_get(tab, KEYS[0]), "0");
-	assert_str_equal(ptable_get(tab, KEYS[1]), "1");
-	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V1);
+	assert_ptr_equal(ptable_get(tab, K2), V2);
 
-	// not present
-	assert_nul(ptable_remove(tab, KEYS[3]));
+	assert_nul(ptable_remove(tab, K3));
 	assert_int_equal(ptable_size(tab), 3);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_equal__length_different(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
-	assert_nul(ptable_put(a, KEYS[0], strdup("0")));
-	assert_nul(ptable_put(a, KEYS[1], strdup("1")));
+	assert_nul(ptable_put(a, K0, V0));
+	assert_nul(ptable_put(a, K1, V1));
 
-	assert_nul(ptable_put(b, KEYS[1], strdup("11")));
+	assert_nul(ptable_put(b, K1, V2));
 
 	assert_ptable_not_equal(a, b, NULL, NULL);
 
-	ptable_free_vals(a, NULL);
-	ptable_free_vals(b, NULL);
+	ptable_free(a);
+	ptable_free(b);
 }
 
 static void ptable_equal__keys_different(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
-	assert_nul(ptable_put(a, KEYS[0], NULL));
-	assert_nul(ptable_put(a, KEYS[1], NULL));
+	assert_nul(ptable_put(a, K0, NULL));
+	assert_nul(ptable_put(a, K1, NULL));
 
-	assert_nul(ptable_put(b, KEYS[0], NULL));
-	assert_nul(ptable_put(b, KEYS[2], NULL));
+	assert_nul(ptable_put(b, K0, NULL));
+	assert_nul(ptable_put(b, K2, NULL));
 
 	assert_ptable_not_equal(a, b, NULL, NULL);
 
-	ptable_free_vals(a, NULL);
+	ptable_free(a);
 	ptable_free(b);
 }
 
@@ -477,38 +468,35 @@ static void ptable_equal__pointers_ok(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
-	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
+	assert_nul(ptable_put(a, K0, V0));
+	assert_nul(ptable_put(a, K1, V1));
+	assert_nul(ptable_put(a, K2, V2));
 
-	assert_nul(ptable_put(a, KEYS[0], vals[0]));
-	assert_nul(ptable_put(a, KEYS[1], vals[1]));
-	assert_nul(ptable_put(a, KEYS[2], vals[2]));
-
-	assert_nul(ptable_put(b, KEYS[0], vals[0]));
-	assert_nul(ptable_put(b, KEYS[1], vals[1]));
-	assert_nul(ptable_put(b, KEYS[2], vals[2]));
+	assert_nul(ptable_put(b, K0, V0));
+	assert_nul(ptable_put(b, K1, V1));
+	assert_nul(ptable_put(b, K2, V2));
 
 	assert_ptable_equal(a, b, NULL, NULL);
 
 	ptable_free(a);
-	ptable_free_vals(b, NULL);
+	ptable_free(b);
 }
 
 static void ptable_equal__pointers_different(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
-	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
-	assert_nul(ptable_put(a, KEYS[0], vals[0]));
-	assert_nul(ptable_put(a, KEYS[1], vals[1]));
-	assert_nul(ptable_put(a, KEYS[2], vals[2]));
+	assert_nul(ptable_put(a, K0, V0));
+	assert_nul(ptable_put(a, K1, V1));
+	assert_nul(ptable_put(a, K2, V2));
 
-	assert_nul(ptable_put(b, KEYS[0], vals[0]));
-	assert_nul(ptable_put(b, KEYS[1], vals[0]));
-	assert_nul(ptable_put(b, KEYS[2], vals[0]));
+	assert_nul(ptable_put(b, K0, V0));
+	assert_nul(ptable_put(b, K1, V0));
+	assert_nul(ptable_put(b, K2, V0));
 
 	assert_ptable_not_equal(a, b, NULL, NULL);
 
-	ptable_free_vals(a, NULL);
+	ptable_free(a);
 	ptable_free(b);
 }
 
@@ -516,28 +504,28 @@ static void ptable_equal__comparison_ok(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
-	assert_nul(ptable_put(a, KEYS[0], strdup("1")));
+	assert_nul(ptable_put(a, K0, "a"));
 
-	assert_nul(ptable_put(b, KEYS[0], strdup("1")));
+	assert_nul(ptable_put(b, K0, "a"));
 
 	assert_ptable_equal(a, b, fn_equal_strcmp, NULL);
 
-	ptable_free_vals(a, NULL);
-	ptable_free_vals(b, NULL);
+	ptable_free(a);
+	ptable_free(b);
 }
 
 static void ptable_equal__comparison_different(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
-	assert_nul(ptable_put(a, KEYS[0], strdup("0")));
+	assert_nul(ptable_put(a, K0, "a"));
 
-	assert_nul(ptable_put(b, KEYS[0], strdup("1")));
+	assert_nul(ptable_put(b, K0, "b"));
 
 	assert_false(ptable_equal(a, b, fn_equal_strcmp));
 
-	ptable_free_vals(a, NULL);
-	ptable_free_vals(b, NULL);
+	ptable_free(a);
+	ptable_free(b);
 }
 
 static void ptable_keys_slist__empty(void **state) {
@@ -545,23 +533,23 @@ static void ptable_keys_slist__empty(void **state) {
 
 	assert_nul(ptable_keys_slist(tab));
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_keys_slist__many(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	ptable_put(tab, KEYS[0], strdup("0"));
-	ptable_put(tab, KEYS[1], strdup("1"));
+	ptable_put(tab, K0, V0);
+	ptable_put(tab, K1, V1);
 
 	struct SList *list = ptable_keys_slist(tab);
 
 	assert_int_equal(slist_length(list), 2);
-	assert_ptr_equal(slist_at(list, 0), KEYS[0]);
-	assert_ptr_equal(slist_at(list, 1), KEYS[1]);
+	assert_ptr_equal(slist_at(list, 0), K0);
+	assert_ptr_equal(slist_at(list, 1), K1);
 
 	slist_free(&list);
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_vals_slist__empty(void **state) {
@@ -569,25 +557,25 @@ static void ptable_vals_slist__empty(void **state) {
 
 	assert_nul(ptable_vals_slist(tab));
 
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_vals_slist__many(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	ptable_put(tab, KEYS[0], strdup("1"));
-	ptable_put(tab, KEYS[1], NULL);
-	ptable_put(tab, KEYS[2], strdup("3"));
+	ptable_put(tab, K0, V1);
+	ptable_put(tab, K1, NULL);
+	ptable_put(tab, K2, V3);
 
 	struct SList *list = ptable_vals_slist(tab);
 
 	assert_int_equal(slist_length(list), 3);
-	assert_str_equal(slist_at(list, 0), "1");
+	assert_ptr_equal(slist_at(list, 0), V1);
 	assert_nul(slist_at(list, 1));
-	assert_str_equal(slist_at(list, 2), "3");
+	assert_ptr_equal(slist_at(list, 2), V3);
 
 	slist_free(&list);
-	ptable_free_vals(tab, NULL);
+	ptable_free(tab);
 }
 
 static void ptable_str__null(void **state) {
@@ -597,34 +585,33 @@ static void ptable_str__null(void **state) {
 static void ptable_str__empty(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	char *str = ptable_str(tab, NULL);
-	assert_str_equal(str, "");
+	char *actual = ptable_str(tab, NULL);
+	assert_str_equal(actual, "");
 
-	free(str);
-	ptable_free_vals(tab, NULL);
+	free(actual);
+	ptable_free(tab);
 }
 
-static void ptable_str__string_vals(void **state) {
+static void ptable_str__pointers(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	char *vals[] = { "1", NULL, "3", };
-
-	ptable_put(tab, KEYS[0], vals[0]);
-	ptable_put(tab, KEYS[1], vals[1]);
-	ptable_put(tab, KEYS[2], vals[2]);
+	ptable_put(tab, K0, V0);
+	ptable_put(tab, K1, NULL);
+	ptable_put(tab, K2, V2);
 
 	char expected[2048];
 	snprintf(expected, sizeof(expected),
-			"%p = 1\n"
+			"%p = %p\n"
 			"%p = (null)\n"
-			"%p = 3\n",
-			(void*)KEYS[0],
-			(void*)KEYS[1],
-			(void*)KEYS[2]
+			"%p = %p\n",
+			K0, V0,
+			K1,
+			K2, V2
 			);
 
 	char *actual = ptable_str(tab, NULL);
-	assert_str_equal(expected, actual);
+
+	assert_str_equal(actual, expected);
 
 	free(actual);
 	ptable_free(tab);
@@ -633,24 +620,22 @@ static void ptable_str__string_vals(void **state) {
 static void ptable_str__fn_str(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	char *vals[] = { "11", NULL, "33", };
-
-	ptable_put(tab, KEYS[0], vals[0]);
-	ptable_put(tab, KEYS[1], vals[1]);
-	ptable_put(tab, KEYS[2], vals[2]);
+	ptable_put(tab, K0, "AAA");
+	ptable_put(tab, K1, NULL);
+	ptable_put(tab, K2, "BBB");
 
 	char expected[2048];
 	snprintf(expected, sizeof(expected),
-			"%p = 1\n"
+			"%p = A\n"
 			"%p = (null)\n"
-			"%p = 3\n",
-			(void*)KEYS[0],
-			(void*)KEYS[1],
-			(void*)KEYS[2]
+			"%p = B\n",
+			K0,
+			K1,
+			K2
 			);
 
 	char *actual = ptable_str(tab, fn_str_first);
-	assert_str_equal(expected, actual);
+	assert_str_equal(actual, expected);
 
 	free(actual);
 	ptable_free(tab);
@@ -661,9 +646,9 @@ int main(void) {
 		TEST(ptable_init__size),
 		TEST(ptable_init__invalid),
 
-		TEST(ptable_free_vals__null),
-		TEST(ptable_free_vals__free_val),
-		TEST(ptable_free_vals__free_val_reentrant),
+		TEST(ptable_free_vals__null_fn_free),
+		TEST(ptable_free_vals__fn_free),
+		TEST(ptable_free_vals__fn_free_hierarchical),
 
 		TEST(ptable_put__new),
 		TEST(ptable_put__overwrite),
@@ -696,7 +681,7 @@ int main(void) {
 
 		TEST(ptable_str__null),
 		TEST(ptable_str__empty),
-		TEST(ptable_str__string_vals),
+		TEST(ptable_str__pointers),
 		TEST(ptable_str__fn_str),
 	};
 
