@@ -136,14 +136,12 @@ static void ptable_put__new(void **state) {
 static void ptable_put__overwrite(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	char *replaced = NULL;
-
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
 	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
 	assert_nul(ptable_put(tab, KEYS[3], strdup("3")));
 
-	replaced = (char*)ptable_put(tab, KEYS[1], strdup("10"));
+	char *replaced = (char*)ptable_put(tab, KEYS[1], strdup("10"));
 	assert_str_equal(replaced, "1");
 	free(replaced);
 
@@ -242,7 +240,7 @@ static void ptable_iter__free(void **state) {
 
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[0]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[0]);
 	assert_str_equal(ptable_iter_val(iter), "0");
 
 	// not much we can do here but valgrind
@@ -265,31 +263,31 @@ static void ptable_iter__vals(void **state) {
 	// zero
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[0]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[0]);
 	assert_nul(ptable_iter_val(iter));
 
 	// one
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[1]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[1]);
 	assert_str_equal(ptable_iter_val(iter), "1");
 
 	// two
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[2]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[2]);
 	assert_nul(ptable_iter_val(iter));
 
 	// three
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[3]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[3]);
 	assert_str_equal(ptable_iter_val(iter), "3");
 
 	// four
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[4]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[4]);
 	assert_nul(ptable_iter_val(iter));
 
 	// end
@@ -302,15 +300,13 @@ static void ptable_iter__vals(void **state) {
 static void ptable_iter__removed(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	char *removed = NULL;
-
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
 	assert_nul(ptable_put(tab, KEYS[2], strdup("2")));
 	assert_nul(ptable_put(tab, KEYS[3], strdup("3")));
 	assert_nul(ptable_put(tab, KEYS[4], strdup("4")));
 
-	removed = (char*)ptable_remove(tab, KEYS[0]);
+	char *removed = (char*)ptable_remove(tab, KEYS[0]);
 	assert_str_equal(removed, "0");
 	free(removed);
 
@@ -327,13 +323,13 @@ static void ptable_iter__removed(void **state) {
 	// one
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[1]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[1]);
 	assert_str_equal(ptable_iter_val(iter), "1");
 
 	// three
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[3]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[3]);
 	assert_str_equal(ptable_iter_val(iter), "3");
 
 	// end
@@ -368,13 +364,13 @@ static void ptable_put__again(void **state) {
 	// one
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[1]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[1]);
 	assert_str_equal(ptable_iter_val(iter), "1");
 
 	// zero moved later
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(ptable_iter_key(iter), KEYS[0]);
+	assert_ptr_equal(ptable_iter_key(iter), KEYS[0]);
 	assert_str_equal(ptable_iter_val(iter), "0");
 
 	// end
@@ -386,7 +382,6 @@ static void ptable_put__again(void **state) {
 
 static void ptable_remove__existing(void **state) {
 	const struct PTable *tab = ptable_init();
-	char *removed;
 
 	assert_nul(ptable_put(tab, KEYS[0], strdup("0")));
 	assert_nul(ptable_put(tab, KEYS[1], strdup("1")));
@@ -398,7 +393,7 @@ static void ptable_remove__existing(void **state) {
 	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
 
 	// 1
-	removed = (char*)ptable_remove(tab, KEYS[1]);
+	char *removed = (char*)ptable_remove(tab, KEYS[1]);
 	assert_str_equal(removed, "1");
 	free(removed);
 	assert_int_equal(ptable_size(tab), 2);
@@ -439,7 +434,7 @@ static void ptable_remove__inexistent(void **state) {
 	assert_str_equal(ptable_get(tab, KEYS[1]), "1");
 	assert_str_equal(ptable_get(tab, KEYS[2]), "2");
 
-	// 1
+	// not present
 	assert_nul(ptable_remove(tab, KEYS[3]));
 	assert_int_equal(ptable_size(tab), 3);
 
@@ -502,7 +497,6 @@ static void ptable_equal__pointers_different(void **state) {
 	const struct PTable *b = ptable_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
-
 	assert_nul(ptable_put(a, KEYS[0], vals[0]));
 	assert_nul(ptable_put(a, KEYS[1], vals[1]));
 	assert_nul(ptable_put(a, KEYS[2], vals[2]));
@@ -606,7 +600,7 @@ static void ptable_str__empty(void **state) {
 	assert_str_equal(str, "");
 
 	free(str);
-	ptable_free(tab);
+	ptable_free_vals(tab, NULL);
 }
 
 static void ptable_str__string_vals(void **state) {

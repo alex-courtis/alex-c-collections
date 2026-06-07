@@ -4,6 +4,7 @@
 
 #include <cmocka.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,6 +18,8 @@
    <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) \
    <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' tst/tst-ptable.c)
    */
+
+static char *KEYS[] = { "a", "b", "c", "d", "e", "f", };
 
 static int before_all(void **state) {
 	return 0;
@@ -62,29 +65,27 @@ static void stable_init__invalid(void **state) {
 static void stable_free_vals__null(void **state) {
 	const struct STable *tab = stable_init();
 
-	char *key = strdup("a");
 	const char *val = strdup("0");
 
-	stable_put(tab, key, val);
+	stable_put(tab, KEYS[0], val);
 
 	assert_int_equal(stable_size(tab), 1);
 
 	// not much we can do here but valgrind
 	stable_free_vals(tab, NULL);
-	free(key);
 }
 
 static void stable_free_vals__free_val(void **state) {
 	const struct STable *tab = stable_init();
 
-	char *vals[] = { "0", "1", };
+	char *vals[] = { "0", "1", NULL, };
 
 	expect_str(mock_free_val, val, "0");
 	expect_str(mock_free_val, val, "1");
 
-	stable_put(tab, "a", vals[0]);
-	stable_put(tab, "b", vals[1]);
-	stable_put(tab, "c", NULL);
+	stable_put(tab, KEYS[0], vals[0]);
+	stable_put(tab, KEYS[1], vals[1]);
+	stable_put(tab, KEYS[2], vals[2]);
 
 	assert_int_equal(stable_size(tab), 3);
 
@@ -107,13 +108,13 @@ static void stable_free_vals__free_val_reentrant(void **state) {
 	expect_str(mock_free_val, val, "21");
 	expect_str(mock_free_val, val, "22");
 
-	stable_put(inner1, "a1", vals[0]);
-	stable_put(inner1, "b1", vals[1]);
-	stable_put(inner2, "a2", vals[2]);
-	stable_put(inner2, "b2", vals[3]);
+	stable_put(inner1, KEYS[0], vals[0]);
+	stable_put(inner1, KEYS[1], vals[1]);
+	stable_put(inner2, KEYS[0], vals[2]);
+	stable_put(inner2, KEYS[1], vals[3]);
 
-	stable_put(outer, "a", (void*)inner1);
-	stable_put(outer, "b", (void*)inner2);
+	stable_put(outer, KEYS[0], (void*)inner1);
+	stable_put(outer, KEYS[1], (void*)inner2);
 
 	assert_int_equal(stable_size(outer), 2);
 
@@ -123,38 +124,37 @@ static void stable_free_vals__free_val_reentrant(void **state) {
 static void stable_put__new(void **state) {
 	const struct STable *tab = stable_init();
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
 
 	assert_int_equal(stable_size(tab), 2);
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_str_equal(stable_get(tab, "b"), "1");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_str_equal(stable_get(tab, KEYS[1]), "1");
 
 	stable_free_vals(tab, NULL);
 }
 
 static void stable_put__overwrite(void **state) {
 	const struct STable *tab = stable_init();
-	char *replaced;
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
-	assert_nul(stable_put(tab, "c", strdup("2")));
-	assert_nul(stable_put(tab, "d", strdup("3")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(stable_put(tab, KEYS[2], strdup("2")));
+	assert_nul(stable_put(tab, KEYS[3], strdup("3")));
 
-	replaced = (char*)stable_put(tab, "b", strdup("10"));
+	char *replaced = (char*)stable_put(tab, KEYS[1], strdup("10"));
 	assert_str_equal(replaced, "1");
 	free(replaced);
 
-	replaced = (char*)stable_put(tab, "d", strdup("13"));
+	replaced = (char*)stable_put(tab, KEYS[3], strdup("13"));
 	assert_str_equal(replaced, "3");
 	free(replaced);
 
 	assert_int_equal(stable_size(tab), 4);
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_str_equal(stable_get(tab, "b"), "10");
-	assert_str_equal(stable_get(tab, "c"), "2");
-	assert_str_equal(stable_get(tab, "d"), "13");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_str_equal(stable_get(tab, KEYS[1]), "10");
+	assert_str_equal(stable_get(tab, KEYS[2]), "2");
+	assert_str_equal(stable_get(tab, KEYS[3]), "13");
 
 	stable_free_vals(tab, NULL);
 }
@@ -162,18 +162,18 @@ static void stable_put__overwrite(void **state) {
 static void stable_put__null_key(void **state) {
 	const struct STable *tab = stable_init();
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
 	assert_int_equal(stable_size(tab), 1);
 
 	assert_nul(stable_put(tab, NULL, NULL));
 	assert_int_equal(stable_size(tab), 1);
 
-	assert_nul(stable_put(tab, "c", strdup("2")));
+	assert_nul(stable_put(tab, KEYS[2], strdup("2")));
 	assert_int_equal(stable_size(tab), 2);
 
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_nul(stable_get(tab, "b"));
-	assert_str_equal(stable_get(tab, "c"), "2");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_nul(stable_get(tab, KEYS[1]));
+	assert_str_equal(stable_get(tab, KEYS[2]), "2");
 
 	stable_free_vals(tab, NULL);
 }
@@ -181,35 +181,34 @@ static void stable_put__null_key(void **state) {
 static void stable_put__null_val(void **state) {
 	const struct STable *tab = stable_init();
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
 	assert_int_equal(stable_size(tab), 1);
 
-	assert_nul(stable_put(tab, "b", NULL));
+	assert_nul(stable_put(tab, KEYS[1], NULL));
 	assert_int_equal(stable_size(tab), 2);
 
-	assert_nul(stable_put(tab, "c", strdup("2")));
+	assert_nul(stable_put(tab, KEYS[2], strdup("2")));
 	assert_int_equal(stable_size(tab), 3);
 
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_nul(stable_get(tab, "b"));
-	assert_str_equal(stable_get(tab, "c"), "2");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_nul(stable_get(tab, KEYS[1]));
+	assert_str_equal(stable_get(tab, KEYS[2]), "2");
 
 	stable_free_vals(tab, NULL);
 }
 
 static void stable_put__null_overwrite(void **state) {
 	const struct STable *tab = stable_init();
-	char *replaced = NULL;
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_str_equal(stable_get(tab, "a"), "0");
+	const char *zero = "0";
+	assert_nul(stable_put(tab, KEYS[0], zero));
 
-	replaced = (char*)stable_put(tab, "a", NULL);
-	assert_str_equal(replaced, "0");
-	free(replaced);
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+
+	assert_str_equal(stable_put(tab, KEYS[0], NULL), "0");
 
 	assert_int_equal(stable_size(tab), 1);
-	assert_nul(stable_get(tab, "a"));
+	assert_nul(stable_get(tab, KEYS[0]));
 
 	stable_free_vals(tab, NULL);
 }
@@ -217,30 +216,30 @@ static void stable_put__null_overwrite(void **state) {
 static void stable_put__grow(void **state) {
 	const struct STable *tab = stable_init_with(3, 5, false);
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
-	assert_nul(stable_put(tab, "c", strdup("2")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(stable_put(tab, KEYS[2], strdup("2")));
 
 	assert_int_equal(stable_size(tab), 3);
 	assert_int_equal(stable_capacity(tab), 3);
 
-	assert_nul(stable_put(tab, "d", strdup("3")));
+	assert_nul(stable_put(tab, KEYS[3], strdup("3")));
 	assert_int_equal(stable_size(tab), 4);
 	assert_int_equal(stable_capacity(tab), 8);
 
-	assert_nul(stable_put(tab, "e", strdup("4")));
-	assert_nul(stable_put(tab, "f", strdup("5")));
+	assert_nul(stable_put(tab, KEYS[4], strdup("4")));
+	assert_nul(stable_put(tab, KEYS[5], strdup("5")));
 
 	assert_int_equal(stable_size(tab), 6);
 	assert_int_equal(stable_capacity(tab), 8);
 
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_str_equal(stable_get(tab, "b"), "1");
-	assert_str_equal(stable_get(tab, "c"), "2");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_str_equal(stable_get(tab, KEYS[1]), "1");
+	assert_str_equal(stable_get(tab, KEYS[2]), "2");
 
-	assert_str_equal(stable_get(tab, "d"), "3");
-	assert_str_equal(stable_get(tab, "e"), "4");
-	assert_str_equal(stable_get(tab, "f"), "5");
+	assert_str_equal(stable_get(tab, KEYS[3]), "3");
+	assert_str_equal(stable_get(tab, KEYS[4]), "4");
+	assert_str_equal(stable_get(tab, KEYS[5]), "5");
 
 	stable_free_vals(tab, NULL);
 }
@@ -256,11 +255,12 @@ static void stable_iter__empty(void **state) {
 static void stable_iter__free(void **state) {
 	const struct STable *tab = stable_init();
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
 
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
+	assert_str_equal(stable_iter_key(iter), KEYS[0]);
 	assert_str_equal(stable_iter_val(iter), "0");
 
 	// not much we can do here but valgrind
@@ -272,42 +272,42 @@ static void stable_iter__free(void **state) {
 static void stable_iter__vals(void **state) {
 	const struct STable *tab = stable_init();
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
-	assert_nul(stable_put(tab, "c", NULL));
-	assert_nul(stable_put(tab, "d", strdup("3")));
-	assert_nul(stable_put(tab, "e", NULL));
+	assert_nul(stable_put(tab, KEYS[0], NULL));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(stable_put(tab, KEYS[2], NULL));
+	assert_nul(stable_put(tab, KEYS[3], strdup("3")));
+	assert_nul(stable_put(tab, KEYS[4], NULL));
 
 	assert_int_equal(stable_size(tab), 5);
 
-	// a 0
+	// zero
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "a");
-	assert_str_equal(stable_iter_val(iter), "0");
-
-	// b 1
-	iter = stable_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "b");
-	assert_str_equal(stable_iter_val(iter), "1");
-
-	// c NULL
-	iter = stable_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "c");
+	assert_str_equal(stable_iter_key(iter), KEYS[0]);
 	assert_nul(stable_iter_val(iter));
 
-	// d 3
+	// one
 	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "d");
+	assert_str_equal(stable_iter_key(iter), KEYS[1]);
+	assert_str_equal(stable_iter_val(iter), "1");
+
+	// two
+	iter = stable_iter_next(iter);
+	assert_non_nul(iter);
+	assert_str_equal(stable_iter_key(iter), KEYS[2]);
+	assert_nul(stable_iter_val(iter));
+
+	// three
+	iter = stable_iter_next(iter);
+	assert_non_nul(iter);
+	assert_str_equal(stable_iter_key(iter), KEYS[3]);
 	assert_str_equal(stable_iter_val(iter), "3");
 
-	// e NULL
+	// four
 	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "e");
+	assert_str_equal(stable_iter_key(iter), KEYS[4]);
 	assert_nul(stable_iter_val(iter));
 
 	// end
@@ -319,38 +319,37 @@ static void stable_iter__vals(void **state) {
 
 static void stable_iter__removed(void **state) {
 	const struct STable *tab = stable_init();
-	char *replaced = NULL;
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
-	assert_nul(stable_put(tab, "c", strdup("2")));
-	assert_nul(stable_put(tab, "d", strdup("3")));
-	assert_nul(stable_put(tab, "e", strdup("4")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(stable_put(tab, KEYS[2], strdup("2")));
+	assert_nul(stable_put(tab, KEYS[3], strdup("3")));
+	assert_nul(stable_put(tab, KEYS[4], strdup("4")));
 
-	replaced = (char*)stable_remove(tab, "a");
-	assert_str_equal(replaced, "0");
-	free(replaced);
+	char *removed = (char*)stable_remove(tab, KEYS[0]);
+	assert_str_equal(removed, "0");
+	free(removed);
 
-	replaced = (char*)stable_remove(tab, "c");
-	assert_str_equal(replaced, "2");
-	free(replaced);
+	removed = (char*)stable_remove(tab, KEYS[2]);
+	assert_str_equal(removed, "2");
+	free(removed);
 
-	replaced = (char*)stable_remove(tab, "e");
-	assert_str_equal(replaced, "4");
-	free(replaced);
+	removed = (char*)stable_remove(tab, KEYS[4]);
+	assert_str_equal(removed, "4");
+	free(removed);
 
 	assert_int_equal(stable_size(tab), 2);
 
-	// b 1
+	// one
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "b");
+	assert_str_equal(stable_iter_key(iter), KEYS[1]);
 	assert_str_equal(stable_iter_val(iter), "1");
 
-	// d 3
+	// three
 	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "d");
+	assert_str_equal(stable_iter_key(iter), KEYS[3]);
 	assert_str_equal(stable_iter_val(iter), "3");
 
 	// end
@@ -363,35 +362,35 @@ static void stable_iter__removed(void **state) {
 static void stable_put__again(void **state) {
 	const struct STable *tab = stable_init();
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
 
 	assert_int_equal(stable_size(tab), 2);
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_str_equal(stable_get(tab, "b"), "1");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_str_equal(stable_get(tab, KEYS[1]), "1");
 
-	// remove a 0
-	char *removed = (char*)stable_remove(tab, "a");
+	// remove zero
+	char *removed = (char*)stable_remove(tab, KEYS[0]);
 	assert_str_equal(removed, "0");
 	free(removed);
 
 	assert_int_equal(stable_size(tab), 1);
-	assert_nul(stable_get(tab, "a"));
+	assert_nul(stable_get(tab, KEYS[0]));
 
-	// put a 0
-	assert_nul(stable_put(tab, "a", strdup("0")));
+	// put zero again afterwards
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
 	assert_int_equal(stable_size(tab), 2);
 
-	// b 1
+	// one
 	const struct STableIter *iter = stable_iter(tab);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "b");
+	assert_str_equal(stable_iter_key(iter), KEYS[1]);
 	assert_str_equal(stable_iter_val(iter), "1");
 
-	// a 0 moved later
+	// zero moved later
 	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "a");
+	assert_str_equal(stable_iter_key(iter), KEYS[0]);
 	assert_str_equal(stable_iter_val(iter), "0");
 
 	// end
@@ -403,20 +402,19 @@ static void stable_put__again(void **state) {
 
 static void stable_put__case_insensitive(void **state) {
 	const struct STable *tab = stable_init_with(5, 5, true);
-	char *replaced = NULL;
 
-	assert_nul(stable_put(tab, "a", strdup("1")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("1")));
 
-	assert_str_equal(stable_get(tab, "a"), "1");
-	assert_str_equal(stable_get(tab, "A"), "1");
+	assert_str_equal(stable_get(tab, KEYS[0]), "1");
+	assert_str_equal(stable_get(tab, KEYS[0]), "1");
 
-	replaced = (char*)stable_put(tab, "a", strdup("2"));
-	assert_str_equal(replaced, "1");
-	free(replaced);
+	char *removed = (char*)stable_put(tab, KEYS[0], strdup("2"));
+	assert_str_equal(removed, "1");
+	free(removed);
 
-	replaced = (char*)stable_put(tab, "A", strdup("3"));
-	assert_str_equal(replaced, "2");
-	free(replaced);
+	removed = (char*)stable_put(tab, KEYS[0], strdup("3"));
+	assert_str_equal(removed, "2");
+	free(removed);
 
 	stable_free_vals(tab, NULL);
 }
@@ -424,13 +422,13 @@ static void stable_put__case_insensitive(void **state) {
 static void stable_remove__case_insensitive(void **state) {
 	const struct STable *tab = stable_init_with(5, 5, true);
 
-	assert_nul(stable_put(tab, "a", "1"));
+	assert_nul(stable_put(tab, KEYS[0], "1"));
 
-	assert_str_equal(stable_remove(tab, "A"), "1");
+	assert_str_equal(stable_remove(tab, KEYS[0]), "1");
 
-	assert_nul(stable_put(tab, "B", "2"));
+	assert_nul(stable_put(tab, KEYS[1], "2"));
 
-	assert_str_equal(stable_remove(tab, "b"), "2");
+	assert_str_equal(stable_remove(tab, KEYS[1]), "2");
 
 	stable_free_vals(tab, NULL);
 }
@@ -438,36 +436,41 @@ static void stable_remove__case_insensitive(void **state) {
 static void stable_remove__existing(void **state) {
 	const struct STable *tab = stable_init();
 
-	void *vals[] = { "0", "1", "2", };
-	assert_nul(stable_put(tab, "a", vals[0]));
-	assert_nul(stable_put(tab, "b", vals[1]));
-	assert_nul(stable_put(tab, "c", vals[2]));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(stable_put(tab, KEYS[2], strdup("2")));
 
 	assert_int_equal(stable_size(tab), 3);
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_str_equal(stable_get(tab, "b"), "1");
-	assert_str_equal(stable_get(tab, "c"), "2");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_str_equal(stable_get(tab, KEYS[1]), "1");
+	assert_str_equal(stable_get(tab, KEYS[2]), "2");
 
-	// b 1
-	assert_str_equal(stable_remove(tab, "b"), "1");
+	// 1
+	char *removed = (char*)stable_remove(tab, KEYS[1]);
+	assert_str_equal(removed, "1");
+	free(removed);
 	assert_int_equal(stable_size(tab), 2);
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_nul(stable_get(tab, "b"));
-	assert_str_equal(stable_get(tab, "c"), "2");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_nul(stable_get(tab, KEYS[1]));
+	assert_str_equal(stable_get(tab, KEYS[2]), "2");
 
-	// c 2
-	assert_str_equal(stable_remove(tab, "c"), "2");
+	// 2
+	removed = (char*)stable_remove(tab, KEYS[2]);
+	assert_str_equal(removed, "2");
+	free(removed);
 	assert_int_equal(stable_size(tab), 1);
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_nul(stable_get(tab, "b"));
-	assert_nul(stable_get(tab, "c"));
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_nul(stable_get(tab, KEYS[1]));
+	assert_nul(stable_get(tab, KEYS[2]));
 
-	// a 0
-	assert_str_equal(stable_remove(tab, "a"), "0");
+	// 0
+	removed = (char*)stable_remove(tab, KEYS[0]);
+	assert_str_equal(removed, "0");
+	free(removed);
 	assert_int_equal(stable_size(tab), 0);
-	assert_nul(stable_get(tab, "a"));
-	assert_nul(stable_get(tab, "b"));
-	assert_nul(stable_get(tab, "c"));
+	assert_nul(stable_get(tab, KEYS[0]));
+	assert_nul(stable_get(tab, KEYS[1]));
+	assert_nul(stable_get(tab, KEYS[2]));
 
 	stable_free_vals(tab, NULL);
 }
@@ -475,17 +478,17 @@ static void stable_remove__existing(void **state) {
 static void stable_remove__inexistent(void **state) {
 	const struct STable *tab = stable_init();
 
-	assert_nul(stable_put(tab, "a", strdup("0")));
-	assert_nul(stable_put(tab, "b", strdup("1")));
-	assert_nul(stable_put(tab, "c", strdup("2")));
+	assert_nul(stable_put(tab, KEYS[0], strdup("0")));
+	assert_nul(stable_put(tab, KEYS[1], strdup("1")));
+	assert_nul(stable_put(tab, KEYS[2], strdup("2")));
 
 	assert_int_equal(stable_size(tab), 3);
-	assert_str_equal(stable_get(tab, "a"), "0");
-	assert_str_equal(stable_get(tab, "b"), "1");
-	assert_str_equal(stable_get(tab, "c"), "2");
+	assert_str_equal(stable_get(tab, KEYS[0]), "0");
+	assert_str_equal(stable_get(tab, KEYS[1]), "1");
+	assert_str_equal(stable_get(tab, KEYS[2]), "2");
 
-	// x
-	assert_nul(stable_remove(tab, "x"));
+	// not present
+	assert_nul(stable_remove(tab, KEYS[3]));
 	assert_int_equal(stable_size(tab), 3);
 
 	stable_free_vals(tab, NULL);
@@ -495,10 +498,10 @@ static void stable_equal__length_different(void **state) {
 	const struct STable *a = stable_init();
 	const struct STable *b = stable_init();
 
-	assert_nul(stable_put(a, "a", strdup("1")));
-	assert_nul(stable_put(a, "b", strdup("2")));
+	assert_nul(stable_put(a, KEYS[0], strdup("0")));
+	assert_nul(stable_put(a, KEYS[1], strdup("1")));
 
-	assert_nul(stable_put(b, "a", strdup("1")));
+	assert_nul(stable_put(b, KEYS[1], strdup("11")));
 
 	assert_false(stable_equal(a, b, NULL));
 
@@ -510,18 +513,16 @@ static void stable_equal__keys_different(void **state) {
 	const struct STable *a = stable_init();
 	const struct STable *b = stable_init();
 
-	void *vals[] = { strdup("0"), strdup("1"), };
+	assert_nul(stable_put(a, KEYS[0], NULL));
+	assert_nul(stable_put(a, KEYS[1], NULL));
 
-	assert_nul(stable_put(a, "a", vals[0]));
-	assert_nul(stable_put(a, "b", vals[1]));
-
-	assert_nul(stable_put(b, "a", vals[0]));
-	assert_nul(stable_put(b, "B", vals[1]));
+	assert_nul(stable_put(b, KEYS[0], NULL));
+	assert_nul(stable_put(b, KEYS[2], NULL));
 
 	assert_false(stable_equal(a, b, NULL));
 
-	stable_free(a);
-	stable_free_vals(b, NULL);
+	stable_free_vals(a, NULL);
+	stable_free(b);
 }
 
 static void stable_equal__keys_insensitive(void **state) {
@@ -537,8 +538,8 @@ static void stable_equal__keys_insensitive(void **state) {
 	assert_true(stable_equal(a, b, fn_equal_strcmp));
 	assert_false(stable_equal(b, a, fn_equal_strcmp));
 
-	stable_free_vals(a, NULL);
-	stable_free(b);
+	stable_free(a);
+	stable_free_vals(b, NULL);
 }
 
 static void stable_equal__pointers_ok(void **state) {
@@ -546,13 +547,13 @@ static void stable_equal__pointers_ok(void **state) {
 	const struct STable *b = stable_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
-	assert_nul(stable_put(a, "a", vals[0]));
-	assert_nul(stable_put(a, "b", vals[1]));
-	assert_nul(stable_put(a, "c", vals[2]));
+	assert_nul(stable_put(a, KEYS[0], vals[0]));
+	assert_nul(stable_put(a, KEYS[1], vals[1]));
+	assert_nul(stable_put(a, KEYS[2], vals[2]));
 
-	assert_nul(stable_put(b, "a", vals[0]));
-	assert_nul(stable_put(b, "b", vals[1]));
-	assert_nul(stable_put(b, "c", vals[2]));
+	assert_nul(stable_put(b, KEYS[0], vals[0]));
+	assert_nul(stable_put(b, KEYS[1], vals[1]));
+	assert_nul(stable_put(b, KEYS[2], vals[2]));
 
 	assert_true(stable_equal(a, b, NULL));
 
@@ -565,13 +566,13 @@ static void stable_equal__pointers_different(void **state) {
 	const struct STable *b = stable_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
-	assert_nul(stable_put(a, "a", vals[0]));
-	assert_nul(stable_put(a, "b", vals[1]));
-	assert_nul(stable_put(a, "c", vals[2]));
+	assert_nul(stable_put(a, KEYS[0], vals[0]));
+	assert_nul(stable_put(a, KEYS[1], vals[1]));
+	assert_nul(stable_put(a, KEYS[2], vals[2]));
 
-	assert_nul(stable_put(b, "a", vals[0]));
-	assert_nul(stable_put(b, "b", vals[0]));
-	assert_nul(stable_put(b, "c", vals[0]));
+	assert_nul(stable_put(b, KEYS[0], vals[0]));
+	assert_nul(stable_put(b, KEYS[1], vals[0]));
+	assert_nul(stable_put(b, KEYS[2], vals[0]));
 
 	assert_false(stable_equal(a, b, NULL));
 
@@ -583,9 +584,9 @@ static void stable_equal__comparison_ok(void **state) {
 	const struct STable *a = stable_init();
 	const struct STable *b = stable_init();
 
-	assert_nul(stable_put(a, "a", strdup("1")));
+	assert_nul(stable_put(a, KEYS[0], strdup("1")));
 
-	assert_nul(stable_put(b, "a", strdup("1")));
+	assert_nul(stable_put(b, KEYS[0], strdup("1")));
 
 	assert_true(stable_equal(a, b, fn_equal_strcmp));
 
@@ -597,9 +598,9 @@ static void stable_equal__comparison_different(void **state) {
 	const struct STable *a = stable_init();
 	const struct STable *b = stable_init();
 
-	assert_nul(stable_put(a, "a", strdup("0")));
+	assert_nul(stable_put(a, KEYS[0], strdup("0")));
 
-	assert_nul(stable_put(b, "a", strdup("1")));
+	assert_nul(stable_put(b, KEYS[0], strdup("1")));
 
 	assert_false(stable_equal(a, b, fn_equal_strcmp));
 
@@ -618,14 +619,14 @@ static void stable_keys_slist__empty(void **state) {
 static void stable_keys_slist__many(void **state) {
 	const struct STable *tab = stable_init();
 
-	stable_put(tab, "a", strdup("1"));
-	stable_put(tab, "b", strdup("2"));
+	stable_put(tab, KEYS[0], strdup("0"));
+	stable_put(tab, KEYS[1], strdup("1"));
 
 	struct SList *list = stable_keys_slist(tab);
 
 	assert_int_equal(slist_length(list), 2);
-	assert_str_equal(slist_at(list, 0), "a");
-	assert_str_equal(slist_at(list, 1), "b");
+	assert_str_equal(slist_at(list, 0), KEYS[0]);
+	assert_str_equal(slist_at(list, 1), KEYS[1]);
 
 	slist_free_vals(&list, NULL);
 	stable_free_vals(tab, NULL);
@@ -642,9 +643,9 @@ static void stable_vals_slist__empty(void **state) {
 static void stable_vals_slist__many(void **state) {
 	const struct STable *tab = stable_init();
 
-	stable_put(tab, "a", strdup("1"));
-	stable_put(tab, "b", NULL);
-	stable_put(tab, "c", strdup("3"));
+	stable_put(tab, KEYS[0], strdup("1"));
+	stable_put(tab, KEYS[1], NULL);
+	stable_put(tab, KEYS[2], strdup("3"));
 
 	struct SList *list = stable_vals_slist(tab);
 
@@ -674,37 +675,53 @@ static void stable_str__empty(void **state) {
 static void stable_str__string_vals(void **state) {
 	const struct STable *tab = stable_init();
 
-	stable_put(tab, "a", strdup("1"));
-	stable_put(tab, "b", NULL);
-	stable_put(tab, "c", strdup("3"));
+	char *vals[] = { "1", NULL, "3", };
 
-	char *str = stable_str(tab, NULL);
-	assert_str_equal(str,
-			"a = 1\n"
-			"b = (null)\n"
-			"c = 3\n"
+	stable_put(tab, KEYS[0], vals[0]);
+	stable_put(tab, KEYS[1], vals[1]);
+	stable_put(tab, KEYS[2], vals[2]);
+
+	char expected[2048];
+	snprintf(expected, sizeof(expected),
+			"%s = 1\n"
+			"%s = (null)\n"
+			"%s = 3\n",
+			KEYS[0],
+			KEYS[1],
+			KEYS[2]
 			);
 
-	free(str);
-	stable_free_vals(tab, NULL);
+	char *actual = stable_str(tab, NULL);
+	assert_str_equal(expected, actual);
+
+	free(actual);
+	stable_free(tab);
 }
 
 static void stable_str__fn_str(void **state) {
 	const struct STable *tab = stable_init();
 
-	stable_put(tab, "a", strdup("1a"));
-	stable_put(tab, "b", NULL);
-	stable_put(tab, "c", strdup("3a"));
+	char *vals[] = { "11", NULL, "33", };
 
-	char *str = stable_str(tab, fn_str_first);
-	assert_str_equal(str,
-			"a = 1\n"
-			"b = (null)\n"
-			"c = 3\n"
+	stable_put(tab, KEYS[0], vals[0]);
+	stable_put(tab, KEYS[1], vals[1]);
+	stable_put(tab, KEYS[2], vals[2]);
+
+	char expected[2048];
+	snprintf(expected, sizeof(expected),
+			"%s = 1\n"
+			"%s = (null)\n"
+			"%s = 3\n",
+			KEYS[0],
+			KEYS[1],
+			KEYS[2]
 			);
 
-	free(str);
-	stable_free_vals(tab, NULL);
+	char *actual = stable_str(tab, fn_str_first);
+	assert_str_equal(expected, actual);
+
+	free(actual);
+	stable_free(tab);
 }
 
 int main(void) {
