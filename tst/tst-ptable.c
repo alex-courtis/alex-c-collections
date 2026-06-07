@@ -51,6 +51,9 @@ static void ptable_smoke(void **state) {
 
 	assert_ptr_equal(ptable_get(actual, &k0), &v0);
 
+	void *foo = NULL;
+	assert_nul(ptable_get(actual, &foo));
+
 	assert_ptr_equal(ptable_remove(actual, &k0), &v0);
 
 	assert_nul(ptable_get(actual, &k0));
@@ -64,12 +67,12 @@ static void ptable_smoke(void **state) {
 static void ptable_equal__(void **state) {
 
 	const struct PTable *actual = ptable_init();
-	assert_nul(ptable_put(actual, &k0, "0"));
-	assert_nul(ptable_put(actual, &k1, "1"));
+	assert_nul(ptable_put(actual, &k0, &v0));
+	assert_nul(ptable_put(actual, &k1, &v1));
 
 	const struct PTable *expected = ptable_init();
-	assert_nul(ptable_put(expected, &k0, "0"));
-	assert_nul(ptable_put(expected, &k1, "1"));
+	assert_nul(ptable_put(expected, &k0, &v0));
+	assert_nul(ptable_put(expected, &k1, &v1));
 
 	assert_ptable_equal(actual, expected, NULL, NULL);
 
