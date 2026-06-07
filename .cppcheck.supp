@@ -1,5 +1,6 @@
 unusedFunction:tst/asserts.h
 unusedFunction:tst/expects.h
+unusedFunction:tst/expect-stable.h
 
 unusedFunction:tst/util-file.c
 
