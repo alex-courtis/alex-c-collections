@@ -10,6 +10,14 @@
 
 /*
    diff -u \
+   <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) \
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+
+   diff -u \
+   <(sed -e ' s/stable/xtable/g ; s/STable/XTable/g ' inc/stable.h) \
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+
+   diff -u \
    <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) \
    <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' src/stable.c)
    */
@@ -62,6 +70,16 @@ const struct ITable *itable_init_with(const size_t initial, const size_t grow) {
 	tab->ptab = ptab;
 
 	return tab;
+}
+
+const struct ITable *itable_clone(const struct ITable* const from, fn_clone clone_val) {
+	if (!from)
+		return NULL;
+
+	struct ITable *to = calloc(1, sizeof(struct ITable));
+	to->ptab = ptable_clone(from->ptab, clone_val);
+
+	return to;
 }
 
 void itable_free(const void* const cvtab) {

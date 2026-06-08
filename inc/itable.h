@@ -31,6 +31,9 @@ const struct ITable *itable_init(void);
 // construct a table with initial size, growing as necessary, NULL on zero initial or grow
 const struct ITable *itable_init_with(const size_t initial, const size_t grow);
 
+// clone a table, NULL clone_val for shallow clone
+const struct ITable *itable_clone(const struct ITable* const from, fn_clone clone_val);
+
 // free table
 void itable_free(const void* const tab);
 
@@ -87,8 +90,7 @@ struct SList *itable_vals_slist(const struct ITable* const tab);
  * Info
  */
 
-// to string, user frees
-// lines with format "%PRIu64 = %p\n", "%s" when str_val
+// to string, user frees, format "%PRIu64 = %p\n", "%s" when str_val
 char *itable_str(const struct ITable* const tab, fn_str str_val);
 
 // number of entries

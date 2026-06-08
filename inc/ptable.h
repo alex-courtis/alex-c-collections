@@ -34,9 +34,7 @@ const struct PTable *ptable_init(void);
 // NULL str_key: "%p"
 const struct PTable *ptable_init_with(fn_equal equal_key, fn_alloc alloc_key, fn_free free_key, fn_str str_key, const size_t initial, const size_t grow);
 
-// clone a table
-// keys are duplicated using alloc_key otherwise set pointer
-// clone_val for deep clone of values, NULL clone_val for shallow clone setting pointers only
+// clone a table, NULL clone_val for shallow clone, keys are duplicated using alloc_key
 const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val);
 
 // free table
@@ -98,8 +96,7 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
  * Info
  */
 
-// to string, user frees
-// lines with format "%p = %p\n", "%s" when str_val
+// to string, user frees, format "%p = %p\n", "%s" when str_val, "%s" when str_key
 char *ptable_str(const struct PTable* const tab, fn_str str_val);
 
 // number of entries

@@ -113,6 +113,10 @@ static void stable_equal__case_sensitive(void **state) {
 
 	assert_stable_equal(actual, expected, NULL, NULL);
 
+	assert_nul(stable_put(actual, "c", V2));
+
+	assert_stable_not_equal(actual, expected, NULL, NULL);
+
 	stable_free(actual);
 	stable_free(expected);
 }
@@ -128,6 +132,10 @@ static void stable_equal__case_insensitive(void **state) {
 	assert_nul(stable_put(expected, "B", V1));
 
 	assert_stable_equal(actual, expected, NULL, NULL);
+
+	assert_nul(stable_put(actual, "c", V2));
+
+	assert_stable_not_equal(actual, expected, NULL, NULL);
 
 	stable_free(actual);
 	stable_free(expected);
@@ -191,6 +199,25 @@ static void stable_vals_slist__many(void **state) {
 	stable_free(tab);
 }
 
+static void stable_clone__shallow(void **state) {
+	const struct STable *from = stable_init();
+
+	assert_nul(stable_put(from, "a", V0));
+	assert_nul(stable_put(from, "b", NULL));
+	assert_nul(stable_put(from, "c", V2));
+
+	const struct STable *to = stable_clone(from, NULL);
+
+	assert_non_nul(to);
+
+	assert_int_equal(stable_size(to), 3);
+
+	assert_stable_equal(from, to, NULL, NULL);
+
+	stable_free(from);
+	stable_free(to);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(stable_put_get_remove__case_sensitive),
@@ -208,6 +235,8 @@ int main(void) {
 		TEST(stable_keys_slist__many),
 
 		TEST(stable_vals_slist__many),
+
+		TEST(stable_clone__shallow),
 	};
 
 	return RUN(tests);

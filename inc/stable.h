@@ -30,6 +30,9 @@ const struct STable *stable_init(void);
 // construct a table with initial size, growing as necessary, NULL on zero initial or grow
 const struct STable *stable_init_with(const size_t initial, const size_t grow, const bool case_insensitive);
 
+// clone a table, NULL clone_val for shallow clone
+const struct STable *stable_clone(const struct STable* const from, fn_clone clone_val);
+
 // free table
 void stable_free(const void* const tab);
 
@@ -90,8 +93,7 @@ struct SList *stable_vals_slist(const struct STable* const tab);
  * Info
  */
 
-// to string, user frees
-// lines with format "%s = %p\n", "%s" when str_val
+// to string, user frees, format "%s = %p\n", "%s" when str_val
 char *stable_str(const struct STable* const tab, fn_str str_val);
 
 // number of entries

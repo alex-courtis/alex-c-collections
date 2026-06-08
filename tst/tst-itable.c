@@ -95,6 +95,10 @@ static void itable_equal__(void **state) {
 
 	assert_itable_equal(actual, expected, NULL, NULL);
 
+	assert_nul(itable_put(actual, 2, V2));
+
+	assert_itable_not_equal(actual, expected, NULL, NULL);
+
 	itable_free(actual);
 	itable_free(expected);
 }
@@ -141,6 +145,25 @@ static void itable_vals_slist__many(void **state) {
 	itable_free(tab);
 }
 
+static void itable_clone__shallow(void **state) {
+	const struct ITable *from = itable_init();
+
+	assert_nul(itable_put(from, 0, V0));
+	assert_nul(itable_put(from, 1, NULL));
+	assert_nul(itable_put(from, 2, V2));
+
+	const struct ITable *to = itable_clone(from, NULL);
+
+	assert_non_nul(to);
+
+	assert_int_equal(itable_size(to), 3);
+
+	assert_itable_equal(from, to, NULL, NULL);
+
+	itable_free(from);
+	itable_free(to);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(itable_put_get_remove),
@@ -154,6 +177,8 @@ int main(void) {
 		TEST(itable_str__),
 
 		TEST(itable_vals_slist__many),
+
+		TEST(itable_clone__shallow),
 	};
 
 	return RUN(tests);
