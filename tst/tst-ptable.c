@@ -4,18 +4,18 @@
 #include "expects.h"
 
 #include <cmocka.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "fn.h"
 #include "slist.h"
+#include "str.h"
 
 #include "ptable.h"
 
 /*
    diff -u \
-   <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) \
+   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) \
    <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' tst/tst-ptable.c)
    */
 
@@ -53,10 +53,6 @@ static int after_each(void **state) {
 
 static void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
-}
-
-static char* fn_str_first(const void *val) {
-	return strndup(val, 1);
 }
 
 static void ptable_init__size(void **state) {
@@ -228,6 +224,49 @@ static void ptable_put__grow(void **state) {
 	assert_ptr_equal(ptable_get(tab, K4), V4);
 	assert_ptr_equal(ptable_get(tab, K5), V5);
 
+	ptable_free(tab);
+}
+
+static void ptable__equal_key(void **state) {
+	const struct PTable *tab = ptable_init_with(fn_equal_strcasecmp, NULL, NULL, NULL, 10, 10);
+
+	assert_nul(ptable_put(tab, "zero", V0));
+	assert_nul(ptable_put(tab, "one", V1));
+
+	assert_int_equal(ptable_size(tab), 2);
+	assert_ptr_equal(ptable_get(tab, "ZERO"), V0);
+	assert_ptr_equal(ptable_get(tab, "ONE"), V1);
+
+	assert_ptr_equal(ptable_put(tab, "ZERO", V2), V0);
+
+	assert_ptr_equal(ptable_remove(tab, "ONE"), V1);
+
+	ptable_free(tab);
+}
+
+static const void *fn_alloc_key_duplicate(const void* const val) {
+	return sprintf_alloc("%s%s", (char*)val, (char*)val);
+}
+
+static void fn_free_key_free(const void* const val) {
+	free((void*)val);
+}
+
+static void ptable__alloc_key_free_key(void **state) {
+	const struct PTable *tab = ptable_init_with(fn_equal_strcasecmp, fn_alloc_key_duplicate, fn_free_key_free, NULL, 10, 10);
+
+	assert_nul(ptable_put(tab, "zero", V0));
+	assert_nul(ptable_put(tab, "one", V1));
+
+	assert_ptr_equal(ptable_get(tab, "zerozero"), V0);
+	assert_ptr_equal(ptable_get(tab, "oneone"), V1);
+
+	assert_ptr_equal(ptable_remove(tab, "zerozero"), V0);
+
+	assert_int_equal(ptable_size(tab), 1);
+	assert_ptr_equal(ptable_get(tab, "oneone"), V1);
+
+	// valgrind will indicate that the key has been free'd
 	ptable_free(tab);
 }
 
@@ -522,7 +561,25 @@ static void ptable_equal__comparison_different(void **state) {
 
 	assert_nul(ptable_put(b, K0, "b"));
 
-	assert_false(ptable_equal(a, b, fn_equal_strcmp));
+	assert_ptable_not_equal(a, b, fn_equal_strcmp, NULL);
+
+	ptable_free(a);
+	ptable_free(b);
+}
+
+static void ptable_equal__equal_key(void **state) {
+	const struct PTable *a = ptable_init_with(fn_equal_strcasecmp, NULL, NULL, (fn_str)strdup, 10, 10);
+	const struct PTable *b = ptable_init_with(fn_equal_strcasecmp, NULL, NULL, (fn_str)strdup, 10, 10);
+
+	assert_nul(ptable_put(a, "zero", V0));
+	assert_nul(ptable_put(a, "one", V1));
+	assert_nul(ptable_put(a, "two", V2));
+
+	assert_nul(ptable_put(b, "ZERO", V0));
+	assert_nul(ptable_put(b, "ONE", V1));
+	assert_nul(ptable_put(b, "TWO", V2));
+
+	assert_ptable_equal(a, b, NULL, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
@@ -599,8 +656,7 @@ static void ptable_str__pointers(void **state) {
 	ptable_put(tab, K1, NULL);
 	ptable_put(tab, K2, V2);
 
-	char expected[2048];
-	snprintf(expected, sizeof(expected),
+	char *expected = sprintf_alloc(
 			"%p = %p\n"
 			"%p = (null)\n"
 			"%p = %p\n",
@@ -614,7 +670,12 @@ static void ptable_str__pointers(void **state) {
 	assert_str_equal(actual, expected);
 
 	free(actual);
+	free(expected);
 	ptable_free(tab);
+}
+
+static char* fn_str_first(const void *val) {
+	return strndup(val, 1);
 }
 
 static void ptable_str__fn_str(void **state) {
@@ -624,8 +685,7 @@ static void ptable_str__fn_str(void **state) {
 	ptable_put(tab, K1, NULL);
 	ptable_put(tab, K2, "BBB");
 
-	char expected[2048];
-	snprintf(expected, sizeof(expected),
+	char *expected = sprintf_alloc(
 			"%p = A\n"
 			"%p = (null)\n"
 			"%p = B\n",
@@ -638,6 +698,31 @@ static void ptable_str__fn_str(void **state) {
 	assert_str_equal(actual, expected);
 
 	free(actual);
+	free(expected);
+	ptable_free(tab);
+}
+
+static void ptable_str__fn_str_key(void **state) {
+	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, (fn_str)strdup, 10, 10);
+
+	assert_nul(ptable_put(tab, "zero", V0));
+	assert_nul(ptable_put(tab, "one", NULL));
+	assert_nul(ptable_put(tab, "two", V2));
+
+	char *expected = sprintf_alloc(
+			"zero = %p\n"
+			"one = (null)\n"
+			"two = %p\n",
+			V0,
+			V2
+			);
+
+	char *actual = ptable_str(tab, NULL);
+
+	assert_str_equal(actual, expected);
+
+	free(actual);
+	free(expected);
 	ptable_free(tab);
 }
 
@@ -666,12 +751,17 @@ int main(void) {
 		TEST(ptable_remove__existing),
 		TEST(ptable_remove__inexistent),
 
+		TEST(ptable__equal_key),
+
+		TEST(ptable__alloc_key_free_key),
+
 		TEST(ptable_equal__length_different),
 		TEST(ptable_equal__keys_different),
 		TEST(ptable_equal__pointers_ok),
 		TEST(ptable_equal__pointers_different),
 		TEST(ptable_equal__comparison_ok),
 		TEST(ptable_equal__comparison_different),
+		TEST(ptable_equal__equal_key),
 
 		TEST(ptable_keys_slist__empty),
 		TEST(ptable_keys_slist__many),
@@ -683,6 +773,7 @@ int main(void) {
 		TEST(ptable_str__empty),
 		TEST(ptable_str__pointers),
 		TEST(ptable_str__fn_str),
+		TEST(ptable_str__fn_str_key),
 	};
 
 	return RUN(tests);

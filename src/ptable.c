@@ -335,7 +335,7 @@ char *ptable_str(const struct PTable* const tab, fn_str str_val) {
 				out = sprintf_append(out, "%s\n", val);
 				free(val);
 			} else {
-				out = sprintf_append(out, "%s\n", (char*)*v);
+				out = sprintf_append(out, "%p\n", *v);
 			}
 		} else {
 			out = sprintf_append(out, "%s", "(null)\n");
