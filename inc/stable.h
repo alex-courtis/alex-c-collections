@@ -75,8 +75,7 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
  * Comparison
  */
 
-// same length, keys and vals equal in order, NULL equal compares pointers
-// case sensitivity defined by a
+// same length, keys and vals equal in order, NULL equal_val compares pointers, case sensitivity defined by a
 bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal equal_val);
 
 /*

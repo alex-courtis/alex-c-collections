@@ -74,7 +74,7 @@ void pset_sort(const struct PSet* const set, fn_less_than less_than_val);
  * Comparison
  */
 
-// same length, vals equal in order, NULL equal compares pointers
+// same length, vals equal in order, NULL equal_val compares pointers
 bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal equal_val);
 
 /*

@@ -10,16 +10,13 @@
 
 /*
    diff -u \
-   <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) \
-   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+   <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
 
    diff -u \
-   <(sed -e ' s/stable/xtable/g ; s/STable/XTable/g ' inc/stable.h) \
-   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+   <(sed -e ' s/stable/xtable/g ; s/STable/XTable/g ' inc/stable.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
 
    diff -u \
-   <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) \
-   <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' src/stable.c)
+   <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' src/stable.c) | less
    */
 
 struct ITable {

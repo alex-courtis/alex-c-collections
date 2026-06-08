@@ -82,7 +82,7 @@ const void *ptable_remove(const struct PTable* const tab, const void* const key)
  * Comparison
  */
 
-// same length, keys and vals equal in order, NULL equal compares pointers
+// same length, keys and vals equal in order, NULL equal_val compares pointers
 bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal equal_val);
 
 /*

@@ -596,7 +596,7 @@ static void sset_slist__many(void **state) {
 	assert_str_equal(slist_at(list, 0), "0");
 	assert_str_equal(slist_at(list, 1), "1");
 
-	slist_free_vals(&list, NULL);
+	slist_free(&list);
 	sset_free(set);
 }
 

@@ -10,8 +10,10 @@
 
 /*
    diff -u \
-   <(sed -e ' s/pset/xset/g ; s/PSet/XSet/g ' src/pset.c) \
-   <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' src/sset.c)
+   <(sed -e ' s/pset/xset/g ; s/PSet/XSet/g ' inc/pset.h) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' inc/sset.h) | less
+
+   diff -u \
+   <(sed -e ' s/pset/xset/g ; s/PSet/XSet/g ' src/pset.c) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' src/sset.c) | less
    */
 
 struct SSet {
@@ -251,7 +253,7 @@ struct SList *sset_slist(const struct SSet* const set) {
 	struct SList *list = NULL;
 
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
-		slist_append(&list, strdup(*v));
+		slist_append(&list, (void*)*v);
 	}
 
 	return list;

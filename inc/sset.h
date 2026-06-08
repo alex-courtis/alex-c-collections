@@ -24,7 +24,7 @@ struct SSetIter; // IWYU pragma: keep
 // construct a set with initial size 10, growing by 10 as necessary
 const struct SSet *sset_init(void);
 
-// construct a set with initial size, grow as needed, NULL on zero param
+// construct a set with initial size, grow as needed, NULL on zero initial or grow
 const struct SSet *sset_init_with(const size_t initial, const size_t grow, const bool case_insensitive);
 
 // deep clone
@@ -76,7 +76,7 @@ bool sset_equal(const struct SSet* const a, const struct SSet* const b);
  * Conversion
  */
 
-// ordered strings, caller frees list and contents
+// ordered strings, caller frees list
 struct SList *sset_slist(const struct SSet* const set);
 
 /*
