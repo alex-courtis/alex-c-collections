@@ -83,10 +83,10 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn
  * Conversion
  */
 
-// ordered key pointers to list, caller frees list only
+// ordered key pointers, caller frees list only
 struct SList *ptable_keys_slist(const struct PTable* const tab);
 
-// ordered val pointers to list, caller frees list only
+// ordered val pointers, caller frees list only
 struct SList *ptable_vals_slist(const struct PTable* const tab);
 
 /*
