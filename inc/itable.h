@@ -76,7 +76,7 @@ const void *itable_remove(const struct ITable* const tab, const uint64_t key);
  * Comparison
  */
 
-// same length, keys and vals equal in order, NULL equal compares pointers
+// same length, keys and vals equal in order, NULL equal_val compares pointers
 bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn_equal equal_val);
 
 /*

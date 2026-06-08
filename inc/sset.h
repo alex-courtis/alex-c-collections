@@ -83,8 +83,7 @@ struct SList *sset_slist(const struct SSet* const set);
  * Info
  */
 
-// to string, user frees
-// lines with format "%s\n"
+// to string, user frees, format "%s\n"
 char *sset_str(const struct SSet* const set);
 
 // number of values

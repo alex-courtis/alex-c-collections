@@ -9,6 +9,7 @@
 
 #include "fn.h"
 #include "slist.h"
+#include "str.h"
 
 #include "pset.h"
 
@@ -664,18 +665,26 @@ static void pset_str__empty(void **state) {
 static void pset_str__many(void **state) {
 	const struct PSet *set = pset_init_with(5, 5);
 
-	assert_true(pset_add(set, "ONE", NULL));
-	assert_true(pset_add(set, "TWO", NULL));
-	assert_true(pset_add(set, "THREE", NULL));
+	void *vals[] = { "0", "1", "2", };
 
-	char *str = pset_str(set, NULL);
-	assert_str_equal(str,
-			"ONE\n"
-			"TWO\n"
-			"THREE\n"
+	assert_true(pset_add(set, vals[0], NULL));
+	assert_true(pset_add(set, vals[1], NULL));
+	assert_true(pset_add(set, vals[2], NULL));
+
+	char *expected = sprintf_alloc(
+			"%p\n"
+			"%p\n"
+			"%p\n",
+			vals[0],
+			vals[1],
+			vals[2]
 			);
 
-	free(str);
+	char *actual = pset_str(set, NULL);
+	assert_str_equal(actual, expected);
+
+	free(actual);
+	free(expected);
 	pset_free(set);
 }
 

@@ -170,16 +170,16 @@ const void *itable_remove(const struct ITable* const tab, const uint64_t key) {
 	return tab ? ptable_remove(tab->ptab, &key) : NULL;
 }
 
-bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn_equal equal) {
-	return a && b ? ptable_equal(a->ptab, b->ptab, equal) : false;
+bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn_equal equal_val) {
+	return a && b ? ptable_equal(a->ptab, b->ptab, equal_val) : false;
 }
 
 struct SList *itable_vals_slist(const struct ITable* const tab) {
 	return tab ? ptable_vals_slist(tab->ptab) : NULL;
 }
 
-char *itable_str(const struct ITable* const tab, fn_str str) {
-	return tab ? ptable_str(tab->ptab, str) : NULL;
+char *itable_str(const struct ITable* const tab, fn_str str_val) {
+	return tab ? ptable_str(tab->ptab, str_val) : NULL;
 }
 
 size_t itable_size(const struct ITable* const tab) {

@@ -11,6 +11,7 @@
 #include "fn.h"
 
 #include "slist.h"
+#include "str.h"
 
 #include "data/words-sorted.c"
 #include "data/words-unsorted.c"
@@ -673,20 +674,29 @@ static void slist_str__null(void **state) {
 static void slist_str__string_vals(void **state) {
 	struct SList *list = NULL;
 
-	slist_append(&list, "zero");
-	slist_append(&list, "one");
-	slist_append(&list, "two");
-	slist_append(&list, NULL);
+	void *vals[] = { "0", "1", NULL, "3", };
 
-	char *str = slist_str(list, NULL);
-	assert_str_equal(str,
-			"zero\n"
-			"one\n"
-			"two\n"
+	slist_append(&list, vals[0]);
+	slist_append(&list, vals[1]);
+	slist_append(&list, vals[2]);
+	slist_append(&list, vals[3]);
+
+	char *actual = slist_str(list, NULL);
+
+	char *expected = sprintf_alloc(
+			"%p\n"
+			"%p\n"
 			"(null)\n"
+			"%p\n",
+			vals[0],
+			vals[1],
+			vals[3]
 			);
 
-	free(str);
+	assert_str_equal(actual, expected);
+
+	free(actual);
+	free(expected);
 	slist_free(&list);
 }
 

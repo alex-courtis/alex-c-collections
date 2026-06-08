@@ -99,7 +99,7 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
  * Info
  */
 
-// to string, user frees, format "%p = %p\n", "%s" when str_val, "%s" when str_key
+// to string, user frees, format "%p = %p\n", "%s" when str_val
 char *ptable_str(const struct PTable* const tab, fn_str str_val);
 
 // number of entries

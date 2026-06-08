@@ -145,8 +145,8 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
 	return tab ? ptable_remove(tab->ptab, key) : NULL;
 }
 
-bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal equal) {
-	return a && b ? ptable_equal(a->ptab, b->ptab, equal) : false;
+bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal equal_val) {
+	return a && b ? ptable_equal(a->ptab, b->ptab, equal_val) : false;
 }
 
 struct SList *stable_keys_slist(const struct STable* const tab) {
@@ -157,8 +157,8 @@ struct SList *stable_vals_slist(const struct STable* const tab) {
 	return tab ? ptable_vals_slist(tab->ptab) : NULL;
 }
 
-char *stable_str(const struct STable* const tab, fn_str str) {
-	return tab ? ptable_str(tab->ptab, str) : NULL;
+char *stable_str(const struct STable* const tab, fn_str str_val) {
+	return tab ? ptable_str(tab->ptab, str_val) : NULL;
 }
 
 size_t stable_size(const struct STable* const tab) {

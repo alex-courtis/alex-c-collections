@@ -60,7 +60,7 @@ const struct PSet *pset_init_with(const size_t initial, const size_t grow) {
 	return set;
 }
 
-const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone) {
+const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone_val) {
 	if (!set)
 		return NULL;
 
@@ -68,8 +68,8 @@ const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone) {
 
 	// loop over vals
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (clone) {
-			pset_add(cloned, clone(*v), NULL);
+		if (clone_val) {
+			pset_add(cloned, clone_val(*v), NULL);
 		} else {
 			pset_add(cloned, *v, NULL);
 		}
@@ -114,14 +114,14 @@ void pset_iter_free(const struct PSetIter* const iter) {
 	free((void*)iter);
 }
 
-bool pset_contains(const struct PSet* const set, const void* const val, fn_equal equal) {
+bool pset_contains(const struct PSet* const set, const void* const val, fn_equal equal_val) {
 	if (!set || !val)
 		return false;
 
 	// loop over vals
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (equal) {
-			if (equal(*v, val)) {
+		if (equal_val) {
+			if (equal_val(*v, val)) {
 				return true;
 			}
 		} else {
@@ -171,7 +171,7 @@ const void *pset_iter_val(const struct PSetIter* const iter) {
 	return iter ? iter->val : NULL;
 }
 
-bool pset_add(const struct PSet* const cset, const void* const val, fn_equal equal) {
+bool pset_add(const struct PSet* const cset, const void* const val, fn_equal equal_val) {
 	if (!cset || !val)
 		return false;
 
@@ -181,8 +181,8 @@ bool pset_add(const struct PSet* const cset, const void* const val, fn_equal equ
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
 
-		if (equal) {
-			if (equal(*v, val)) {
+		if (equal_val) {
+			if (equal_val(*v, val)) {
 				return false;
 			}
 		} else {
@@ -205,7 +205,7 @@ bool pset_add(const struct PSet* const cset, const void* const val, fn_equal equ
 	return true;
 }
 
-const void *pset_remove(const struct PSet* const cset, const void* const val, fn_equal equal) {
+const void *pset_remove(const struct PSet* const cset, const void* const val, fn_equal equal_val) {
 	if (!cset || !val)
 		return NULL;
 
@@ -214,8 +214,8 @@ const void *pset_remove(const struct PSet* const cset, const void* const val, fn
 	// loop over vals
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		bool present = false;
-		if (equal) {
-			present = equal(*v, val);
+		if (equal_val) {
+			present = equal_val(*v, val);
 		} else {
 			present = *v == val;
 		}
@@ -241,7 +241,7 @@ const void *pset_remove(const struct PSet* const cset, const void* const val, fn
 	return NULL;
 }
 
-void pset_sort(const struct PSet* const set, fn_less_than less_than) {
+void pset_sort(const struct PSet* const set, fn_less_than less_than_val) {
 	if (!set)
 		return;
 
@@ -251,7 +251,7 @@ void pset_sort(const struct PSet* const set, fn_less_than less_than) {
 		for (size_t i = *gap; i < set->size; i++) {
 			const void *tmp = set->vals[i];
 			size_t j;
-			for (j = i; (j >= *gap) && less_than(tmp, set->vals[j - *gap]); j -= *gap) {
+			for (j = i; (j >= *gap) && less_than_val(tmp, set->vals[j - *gap]); j -= *gap) {
 				set->vals[j] = set->vals[j - *gap];
 			}
 			set->vals[j] = tmp;
@@ -259,13 +259,13 @@ void pset_sort(const struct PSet* const set, fn_less_than less_than) {
 	}
 }
 
-bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal equals) {
+bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal equal_val) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
 	for (const void **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
-		if (equals) {
-			if (!equals(*av, *bv)) {
+		if (equal_val) {
+			if (!equal_val(*av, *bv)) {
 				return false;
 			}
 		} else if (*av != *bv) {
@@ -289,19 +289,19 @@ struct SList *pset_slist(const struct PSet* const set) {
 	return list;
 }
 
-char *pset_str(const struct PSet* const set, fn_str str) {
+char *pset_str(const struct PSet* const set, fn_str str_val) {
 	if (!set)
 		return NULL;
 
 	char *out = strdup("");
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (str) {
-			char *val_str = str(*v);
+		if (str_val) {
+			char *val_str = str_val(*v);
 			out = sprintf_append(out, "%s\n", val_str);
 			free(val_str);
 		} else {
-			out = sprintf_append(out, "%s\n", (char*)*v);
+			out = sprintf_append(out, "%p\n", *v);
 		}
 	}
 
