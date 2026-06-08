@@ -4,6 +4,7 @@
 #include "expects.h"
 
 #include <cmocka.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -55,8 +56,8 @@ static void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
 }
 
-static const void *mock_alloc_key(const void* const val) {
-	check_expected_ptr(val);
+static const void *mock_alloc_key(const void* const key) {
+	check_expected_ptr(key);
 
 	return mock_ptr_type_checked(void*);
 }
@@ -65,6 +66,18 @@ static void *mock_clone_val(const void* const val) {
 	check_expected_ptr(val);
 
 	return mock_ptr_type_checked(void*);
+}
+
+static bool mock_test_key(const void* const key) {
+	check_expected_ptr(key);
+
+	return mock_type(bool);
+}
+
+static bool mock_test_val(const void* const val) {
+	check_expected_ptr(val);
+
+	return mock_type(bool);
 }
 
 static void ptable_init__size(void **state) {
@@ -145,17 +158,17 @@ static void ptable_clone__deep(void **state) {
 static void ptable_clone__alloc_key(void **state) {
 	const struct PTable *from = ptable_init_with(NULL, mock_alloc_key, NULL, NULL, 10, 10);
 
-	expect_ptr(mock_alloc_key, val, K0);
+	expect_ptr(mock_alloc_key, key, K0);
 	will_return_ptr_type(mock_alloc_key, K0, void*);
 	assert_nul(ptable_put(from, K0, V0));
 
-	expect_ptr(mock_alloc_key, val, K1);
+	expect_ptr(mock_alloc_key, key, K1);
 	will_return_ptr_type(mock_alloc_key, K1, void*);
 	assert_nul(ptable_put(from, K1, V1));
 
-	expect_ptr(mock_alloc_key, val, K0);
+	expect_ptr(mock_alloc_key, key, K0);
 	will_return_ptr_type(mock_alloc_key, K2, void*);
-	expect_ptr(mock_alloc_key, val, K1);
+	expect_ptr(mock_alloc_key, key, K1);
 	will_return_ptr_type(mock_alloc_key, K3, void*);
 
 	const struct PTable *to = ptable_clone(from, NULL);
@@ -471,6 +484,62 @@ static void ptable_iter__removed(void **state) {
 	assert_ptr_equal(ptable_iter_val(iter), V3);
 
 	// end
+	iter = ptable_iter_next(iter);
+	assert_nul(iter);
+
+	ptable_free(tab);
+}
+
+static void ptable_filter_iter__many(void **state) {
+	const struct PTable *tab = ptable_init();
+
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
+	assert_nul(ptable_put(tab, K2, V2));
+	assert_nul(ptable_put(tab, K3, V3));
+	assert_nul(ptable_put(tab, K4, V4));
+
+	assert_int_equal(ptable_size(tab), 5);
+
+	// skip K0
+	expect_ptr(mock_test_key, key, K0);
+	will_return(mock_test_key, false);
+
+	// get K1
+	expect_ptr(mock_test_key, key, K1);
+	will_return(mock_test_key, true);
+	expect_ptr(mock_test_val, val, V1);
+	will_return(mock_test_val, true);
+
+	const struct PTableIter *iter = ptable_filter_iter(tab, mock_test_key, mock_test_val);
+	assert_non_nul(iter);
+	assert_ptr_equal(ptable_iter_key(iter), K1);
+	assert_ptr_equal(ptable_iter_val(iter), V1);
+
+	// skip V2
+	expect_ptr(mock_test_key, key, K2);
+	will_return(mock_test_key, true);
+	expect_ptr(mock_test_val, val, V2);
+	will_return(mock_test_val, false);
+
+	// get V3
+	expect_ptr(mock_test_key, key, K3);
+	will_return(mock_test_key, true);
+	expect_ptr(mock_test_val, val, V3);
+	will_return(mock_test_val, true);
+
+	iter = ptable_iter_next(iter);
+	assert_non_nul(iter);
+	assert_ptr_equal(ptable_iter_key(iter), K3);
+	assert_ptr_equal(ptable_iter_val(iter), V3);
+
+	// skip V4
+	expect_ptr(mock_test_key, key, K4);
+	will_return(mock_test_key, true);
+	expect_ptr(mock_test_val, val, V4);
+	will_return(mock_test_val, false);
+
+	// done
 	iter = ptable_iter_next(iter);
 	assert_nul(iter);
 
@@ -848,6 +917,8 @@ int main(void) {
 		TEST(ptable_iter__free),
 		TEST(ptable_iter__many),
 		TEST(ptable_iter__removed),
+
+		TEST(ptable_filter_iter__many),
 
 		TEST(ptable_put__again),
 

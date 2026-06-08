@@ -25,6 +25,8 @@ struct PTableIter {
 	const void *val;
 	const struct PTable *tab;
 	size_t position;
+	fn_test test_key;
+	fn_test test_val;
 };
 
 // grow to capacity + grow
@@ -151,17 +153,19 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 }
 
 const struct PTableIter *ptable_iter(const struct PTable* const tab) {
+	return ptable_filter_iter(tab, NULL, NULL);
+}
+
+const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_test test_key, fn_test test_val) {
 	if (!tab || tab->size == 0)
 		return NULL;
 
-	// first key/val
 	struct PTableIter *it = calloc(1, sizeof(struct PTableIter));
 	it->tab = tab;
-	it->key = *(tab->keys);
-	it->val = *(tab->vals);
-	it->position = 0;
+	it->test_key = test_key;
+	it->test_val = test_val;
 
-	return it;
+	return ptable_iter_next(it);
 }
 
 const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
@@ -175,14 +179,25 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
 		return NULL;
 	}
 
-	if (++it->position < it->tab->size) {
+	// null key indicates first use, start at the beginning
+	if (it->key) {
+		it->position++;
+	}
+
+	for ( ; it->position < it->tab->size; it->position++) {
+
 		it->key = *(it->tab->keys + it->position);
 		it->val = *(it->tab->vals + it->position);
+
+		if ((it->test_key && !it->test_key(it->key)) || (it->test_val && !it->test_val(it->val))) {
+			continue;
+		}
+
 		return it;
-	} else {
-		ptable_iter_free(it);
-		return NULL;
 	}
+
+	ptable_iter_free(it);
+	return NULL;
 }
 
 const void *ptable_iter_key(const struct PTableIter* const iter) {
