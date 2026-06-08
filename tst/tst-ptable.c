@@ -55,6 +55,18 @@ static void mock_free_val(const void* const val) {
 	check_expected_ptr(val);
 }
 
+static const void *mock_alloc_key(const void* const val) {
+	check_expected_ptr(val);
+
+	return mock_ptr_type_checked(void*);
+}
+
+static void *mock_clone_val(const void* const val) {
+	check_expected_ptr(val);
+
+	return mock_ptr_type_checked(void*);
+}
+
 static void ptable_init__size(void **state) {
 	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 5, 50);
 
@@ -69,6 +81,96 @@ static void ptable_init__invalid(void **state) {
 	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 0, 0);
 
 	assert_nul(tab);
+}
+
+static void ptable_clone__empty(void **state) {
+	const struct PTable *from = ptable_init();
+
+	const struct PTable *to = ptable_clone(from, NULL);
+
+	assert_non_nul(to);
+
+	ptable_free(from);
+	ptable_free(to);
+}
+
+static void ptable_clone__shallow_pointer_key(void **state) {
+	const struct PTable *from = ptable_init();
+
+	assert_nul(ptable_put(from, K0, NULL));
+	assert_nul(ptable_put(from, K1, V1));
+	assert_nul(ptable_put(from, K2, NULL));
+	assert_nul(ptable_put(from, K3, V3));
+	assert_nul(ptable_put(from, K4, NULL));
+
+	const struct PTable *to = ptable_clone(from, NULL);
+
+	assert_non_nul(to);
+
+	assert_int_equal(ptable_size(to), 5);
+
+	assert_ptable_equal(from, to, NULL, NULL);
+
+	ptable_free(from);
+	ptable_free(to);
+}
+
+static void ptable_clone__deep(void **state) {
+	const struct PTable *from = ptable_init();
+
+	assert_nul(ptable_put(from, K0, V0));
+	assert_nul(ptable_put(from, K1, V1));
+
+	expect_ptr(mock_clone_val, val, V0);
+	will_return_ptr_type(mock_clone_val, V2, void*);
+
+	expect_ptr(mock_clone_val, val, V1);
+	will_return_ptr_type(mock_clone_val, V3, void*);
+
+	const struct PTable *to = ptable_clone(from, mock_clone_val);
+
+	assert_non_nul(to);
+
+	assert_int_equal(ptable_size(to), 2);
+
+	assert_ptable_not_equal(from, to, NULL, NULL);
+
+	assert_ptr_equal(ptable_get(to, K0), V2);
+	assert_ptr_equal(ptable_get(to, K1), V3);
+
+	ptable_free(from);
+	ptable_free(to);
+}
+
+static void ptable_clone__alloc_key(void **state) {
+	const struct PTable *from = ptable_init_with(NULL, mock_alloc_key, NULL, NULL, 10, 10);
+
+	expect_ptr(mock_alloc_key, val, K0);
+	will_return_ptr_type(mock_alloc_key, K0, void*);
+	assert_nul(ptable_put(from, K0, V0));
+
+	expect_ptr(mock_alloc_key, val, K1);
+	will_return_ptr_type(mock_alloc_key, K1, void*);
+	assert_nul(ptable_put(from, K1, V1));
+
+	expect_ptr(mock_alloc_key, val, K0);
+	will_return_ptr_type(mock_alloc_key, K2, void*);
+	expect_ptr(mock_alloc_key, val, K1);
+	will_return_ptr_type(mock_alloc_key, K3, void*);
+
+	const struct PTable *to = ptable_clone(from, NULL);
+
+	assert_non_nul(to);
+
+	assert_int_equal(ptable_size(to), 2);
+
+	assert_ptable_not_equal(from, to, NULL, NULL);
+
+	assert_ptr_equal(ptable_get(to, K2), V0);
+	assert_ptr_equal(ptable_get(to, K3), V1);
+
+	ptable_free(from);
+	ptable_free(to);
 }
 
 static void ptable_free_vals__null_fn_free(void **state) {
@@ -291,7 +393,7 @@ static void ptable_iter__free(void **state) {
 	ptable_free(tab);
 }
 
-static void ptable_iter__vals(void **state) {
+static void ptable_iter__many(void **state) {
 	const struct PTable *tab = ptable_init();
 
 	assert_nul(ptable_put(tab, K0, NULL));
@@ -727,6 +829,11 @@ int main(void) {
 		TEST(ptable_init__size),
 		TEST(ptable_init__invalid),
 
+		TEST(ptable_clone__empty),
+		TEST(ptable_clone__shallow_pointer_key),
+		TEST(ptable_clone__deep),
+		TEST(ptable_clone__alloc_key),
+
 		TEST(ptable_free_vals__null_fn_free),
 		TEST(ptable_free_vals__fn_free),
 		TEST(ptable_free_vals__fn_free_hierarchical),
@@ -739,7 +846,7 @@ int main(void) {
 
 		TEST(ptable_iter__empty),
 		TEST(ptable_iter__free),
-		TEST(ptable_iter__vals),
+		TEST(ptable_iter__many),
 		TEST(ptable_iter__removed),
 
 		TEST(ptable_put__again),

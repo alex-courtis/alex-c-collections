@@ -69,6 +69,27 @@ const struct PTable *ptable_init_with(fn_equal equal_key, fn_alloc alloc_key, fn
 	return tab;
 }
 
+const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val) {
+
+	struct PTable *to = calloc(1, sizeof(struct PTable));
+	to->capacity = from->capacity;
+	to->grow = from->grow;
+	to->keys = calloc(to->capacity, sizeof(void*));
+	to->vals = calloc(to->capacity, sizeof(void*));
+	to->equal_key = from->equal_key;
+	to->alloc_key = from->alloc_key;
+	to->free_key = from->free_key;
+	to->str_key = from->str_key;
+
+	const void **k;
+	const void **v;
+	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
+		ptable_put(to, *k, clone_val ? clone_val(*v) : *v);
+	}
+
+	return to;
+}
+
 void ptable_free(const void* const cvtab) {
 	if (!cvtab)
 		return;
@@ -247,7 +268,7 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 	return NULL;
 }
 
-bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal equal) {
+bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal equal_val) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
@@ -264,8 +285,8 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn
 		}
 
 		// value
-		if (equal) {
-			if (!equal(*av, *bv)) {
+		if (equal_val) {
+			if (!equal_val(*av, *bv)) {
 				return false;
 			}
 		} else if (*av != *bv) {

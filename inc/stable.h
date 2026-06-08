@@ -33,8 +33,8 @@ const struct STable *stable_init_with(const size_t initial, const size_t grow, c
 // free table
 void stable_free(const void* const tab);
 
-// free table and vals, null fn_free uses free()
-void stable_free_vals(const struct STable* const tab, fn_free);
+// free table and vals, null free_val uses free()
+void stable_free_vals(const struct STable* const tab, fn_free free_val);
 
 // free iter
 void stable_iter_free(const struct STableIter* const iter);
@@ -74,7 +74,7 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
 
 // same length, keys and vals equal in order, NULL equal compares pointers
 // case sensitivity defined by a
-bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal);
+bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal equal_val);
 
 /*
  * Conversion
@@ -91,8 +91,8 @@ struct SList *stable_vals_slist(const struct STable* const tab);
  */
 
 // to string, user frees
-// lines with format "%s = %p\n", "%s" when fn_str
-char *stable_str(const struct STable* const tab, fn_str);
+// lines with format "%s = %p\n", "%s" when str_val
+char *stable_str(const struct STable* const tab, fn_str str_val);
 
 // number of entries
 size_t stable_size(const struct STable* const tab);

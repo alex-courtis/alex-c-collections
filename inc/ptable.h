@@ -34,11 +34,16 @@ const struct PTable *ptable_init(void);
 // NULL str_key: "%p"
 const struct PTable *ptable_init_with(fn_equal equal_key, fn_alloc alloc_key, fn_free free_key, fn_str str_key, const size_t initial, const size_t grow);
 
+// clone a table
+// keys are duplicated using alloc_key otherwise set pointer
+// clone_val for deep clone of values, NULL clone_val for shallow clone setting pointers only
+const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val);
+
 // free table
 void ptable_free(const void* const tab);
 
-// free table and vals, null fn_free_val uses free()
-void ptable_free_vals(const struct PTable* const tab, fn_free);
+// free table and vals, null free_val uses free()
+void ptable_free_vals(const struct PTable* const tab, fn_free free_val);
 
 // free iter
 void ptable_iter_free(const struct PTableIter* const iter);
@@ -77,7 +82,7 @@ const void *ptable_remove(const struct PTable* const tab, const void* const key)
  */
 
 // same length, keys and vals equal in order, NULL equal compares pointers
-bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal);
+bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal equal_val);
 
 /*
  * Conversion
@@ -94,8 +99,8 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
  */
 
 // to string, user frees
-// lines with format "%p = %p\n", "%s" when fn_str
-char *ptable_str(const struct PTable* const tab, fn_str);
+// lines with format "%p = %p\n", "%s" when str_val
+char *ptable_str(const struct PTable* const tab, fn_str str_val);
 
 // number of entries
 size_t ptable_size(const struct PTable* const tab);
