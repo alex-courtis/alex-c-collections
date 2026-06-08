@@ -47,13 +47,13 @@ void ptable_iter_free(const struct PTableIter* const iter);
  * Access
  */
 
-// return val, NULL not present
+// return val, NULL if not present
 const void *ptable_get(const struct PTable* const tab, const void* const key);
 
 // create an iterator, caller must ptable_iter_free or invoke ptable_next until NULL
 const struct PTableIter *ptable_iter(const struct PTable* const tab);
 
-// next iterator value, NULL at end of table
+// next iterator entry, NULL at end of table
 const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);
 
 // iterator key, NULL on NULL iter
@@ -94,12 +94,10 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
  */
 
 // to string, user frees
-// fn_str NULL: "%p = %p\n"
-// fn_str:      "%p = %s\n"
-// NULL vals always printed as "(null)"
+// lines with format "%p = %p\n", "%s" when fn_str
 char *ptable_str(const struct PTable* const tab, fn_str);
 
-// number of entries with val
+// number of entries
 size_t ptable_size(const struct PTable* const tab);
 
 // current capacity: initial + n * grow

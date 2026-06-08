@@ -26,7 +26,7 @@ struct PSetIter; // IWYU pragma: keep
 // construct a set with initial size 10, growing by 10 as necessary
 const struct PSet *pset_init(void);
 
-// construct a set with initial size, grow as needed, NULL on zero param
+// construct a set with initial size, grow as needed, NULL on zero initial or grow
 const struct PSet *pset_init_with(const size_t initial, const size_t grow);
 
 // clone a set, fn_clone for deep clone, NULL fn_clone for shallow clone setting pointers only

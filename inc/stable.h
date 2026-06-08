@@ -27,7 +27,7 @@ struct STableIter; // IWYU pragma: keep
 // construct a table with initial size 10, growing by 10 as necessary, case sensitive
 const struct STable *stable_init(void);
 
-// construct a table with initial size, growing as necessary, NULL on zero param
+// construct a table with initial size, growing as necessary, NULL on zero initial or grow
 const struct STable *stable_init_with(const size_t initial, const size_t grow, const bool case_insensitive);
 
 // free table
@@ -72,7 +72,8 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
  * Comparison
  */
 
-// same length, keys and vals equal, case sensitivity is from a, NULL equal compares pointers
+// same length, keys and vals equal in order, NULL equal compares pointers
+// case sensitivity defined by a
 bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal);
 
 /*
@@ -90,9 +91,7 @@ struct SList *stable_vals_slist(const struct STable* const tab);
  */
 
 // to string, user frees
-// lines with format "%s = %s\n"
-// NULL vals printed as "(null)"
-// fn_str NULL for char* vals
+// lines with format "%s = %p\n", "%s" when fn_str
 char *stable_str(const struct STable* const tab, fn_str);
 
 // number of entries

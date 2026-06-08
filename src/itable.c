@@ -156,10 +156,6 @@ bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn
 	return a && b ? ptable_equal(a->ptab, b->ptab, equal) : false;
 }
 
-struct SList *itable_keys_slist(const struct ITable* const tab) {
-	return tab ? ptable_keys_slist(tab->ptab) : NULL;
-}
-
 struct SList *itable_vals_slist(const struct ITable* const tab) {
 	return tab ? ptable_vals_slist(tab->ptab) : NULL;
 }

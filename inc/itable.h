@@ -28,7 +28,7 @@ struct ITableIter; // IWYU pragma: keep
 // construct a table with initial size 10, growing by 10 as necessary
 const struct ITable *itable_init(void);
 
-// construct a table with initial size, growing as necessary, NULL on zero param
+// construct a table with initial size, growing as necessary, NULL on zero initial or grow
 const struct ITable *itable_init_with(const size_t initial, const size_t grow);
 
 // free table
@@ -44,13 +44,13 @@ void itable_iter_free(const struct ITableIter* const iter);
  * Access
  */
 
-// return val, NULL not present
+// return val, NULL if not present
 const void *itable_get(const struct ITable* const tab, const uint64_t key);
 
 // create an iterator, caller must itable_iter_free or invoke itable_next until NULL
 const struct ITableIter *itable_iter(const struct ITable* const tab);
 
-// next iterator value, NULL at end of table
+// next iterator entry, NULL at end of table
 const struct ITableIter *itable_iter_next(const struct ITableIter* const iter);
 
 // iterator key, 0 on NULL iter
@@ -88,9 +88,7 @@ struct SList *itable_vals_slist(const struct ITable* const tab);
  */
 
 // to string, user frees
-// lines with format "%PRIu64 = %s\n"
-// NULL vals printed as "(null)"
-// fn_str NULL for char* vals
+// lines with format "%PRIu64 = %p\n", "%s" when fn_str
 char *itable_str(const struct ITable* const tab, fn_str);
 
 // number of entries

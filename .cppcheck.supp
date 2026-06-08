@@ -1,9 +1,8 @@
-unusedFunction:src/itable.c
-staticFunction:src/itable.c
 
 unusedFunction:tst/asserts.h
 unusedFunction:tst/expects.h
 unusedFunction:tst/assert-itable.h
+unusedFunction:tst/assert-stable.h
 unusedFunction:tst/expect-stable.h
 
 unusedFunction:tst/util-file.c
