@@ -684,12 +684,12 @@ static void stable_str__string_vals(void **state) {
 
 	char expected[2048];
 	snprintf(expected, sizeof(expected),
-			"%s = 1\n"
+			"%s = %p\n"
 			"%s = (null)\n"
-			"%s = 3\n",
-			KEYS[0],
+			"%s = %p\n",
+			KEYS[0], vals[0],
 			KEYS[1],
-			KEYS[2]
+			KEYS[2], vals[2]
 			);
 
 	char *actual = stable_str(tab, NULL);

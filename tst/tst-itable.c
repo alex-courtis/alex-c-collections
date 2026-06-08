@@ -617,12 +617,12 @@ static void itable_str__string_vals(void **state) {
 
 	char expected[2048];
 	snprintf(expected, sizeof(expected),
-			"%"PRIu64" = 1\n"
+			"%"PRIu64" = %p\n"
 			"%"PRIu64" = (null)\n"
-			"%"PRIu64" = 3\n",
-			KEYS[0],
+			"%"PRIu64" = %p\n",
+			KEYS[0], vals[0],
 			KEYS[1],
-			KEYS[2]
+			KEYS[2], vals[2]
 			);
 
 	char *actual = itable_str(tab, NULL);

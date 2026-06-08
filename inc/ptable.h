@@ -29,7 +29,7 @@ const struct PTable *ptable_init(void);
 
 // construct a table with initial size, growing as necessary, NULL on zero initial or grow
 // NULL equal_key: compares pointers
-// NULL alloc_key: key pointer passed
+// NULL alloc_key: key pointer
 // NULL free_key: NOP
 // NULL str_key: "%p"
 const struct PTable *ptable_init_with(fn_equal equal_key, fn_alloc alloc_key, fn_free free_key, fn_str str_key, const size_t initial, const size_t grow);
