@@ -94,8 +94,5 @@ char *itable_str(const struct ITable* const tab, fn_str);
 // number of entries
 size_t itable_size(const struct ITable* const tab);
 
-// current capacity: initial + n * grow
-size_t itable_capacity(const struct ITable* const tab);
-
 #endif // ITABLE_H
 

@@ -100,8 +100,5 @@ char *ptable_str(const struct PTable* const tab, fn_str);
 // number of entries
 size_t ptable_size(const struct PTable* const tab);
 
-// current capacity: initial + n * grow
-size_t ptable_capacity(const struct PTable* const tab);
-
 #endif // PTABLE_H
 

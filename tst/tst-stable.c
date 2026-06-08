@@ -40,6 +40,8 @@ static void stable_put_get_remove__case_sensitive(void **state) {
 	assert_nul(stable_put(tab, "b", V1));
 	assert_nul(stable_put(tab, "c", V2));
 
+	assert_int_equal(stable_size(tab), 3);
+
 	assert_ptr_equal(stable_get(tab, "b"), V1);
 
 	assert_nul(stable_get(tab, "x"));

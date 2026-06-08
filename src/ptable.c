@@ -342,8 +342,3 @@ char *ptable_str(const struct PTable* const tab, fn_str str_val) {
 size_t ptable_size(const struct PTable* const tab) {
 	return tab ? tab->size : 0;
 }
-
-// todo remove
-size_t ptable_capacity(const struct PTable* const tab) {
-	return tab ? tab->capacity : 0;
-}

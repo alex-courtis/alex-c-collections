@@ -61,7 +61,6 @@ static void ptable_init__size(void **state) {
 	assert_non_nul(tab);
 
 	assert_int_equal(ptable_size(tab), 0);
-	assert_int_equal(ptable_capacity(tab), 5);
 
 	ptable_free(tab);
 }
@@ -204,17 +203,14 @@ static void ptable_put__grow(void **state) {
 	assert_nul(ptable_put(tab, K2, V2));
 
 	assert_int_equal(ptable_size(tab), 3);
-	assert_int_equal(ptable_capacity(tab), 3);
 
 	assert_nul(ptable_put(tab, K3, V3));
 	assert_int_equal(ptable_size(tab), 4);
-	assert_int_equal(ptable_capacity(tab), 8);
 
 	assert_nul(ptable_put(tab, K4, V4));
 	assert_nul(ptable_put(tab, K5, V5));
 
 	assert_int_equal(ptable_size(tab), 6);
-	assert_int_equal(ptable_capacity(tab), 8);
 
 	assert_ptr_equal(ptable_get(tab, K0), V0);
 	assert_ptr_equal(ptable_get(tab, K1), V1);

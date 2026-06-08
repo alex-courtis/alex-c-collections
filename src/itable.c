@@ -167,7 +167,3 @@ char *itable_str(const struct ITable* const tab, fn_str str) {
 size_t itable_size(const struct ITable* const tab) {
 	return tab ? ptable_size(tab->ptab) : 0;
 }
-
-size_t itable_capacity(const struct ITable* const tab) {
-	return tab ? ptable_capacity(tab->ptab) : 0;
-}

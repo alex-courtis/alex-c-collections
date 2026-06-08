@@ -39,6 +39,8 @@ static void itable_put_get_remove(void **state) {
 	assert_nul(itable_put(tab, 1, V1));
 	assert_nul(itable_put(tab, 2, V2));
 
+	assert_int_equal(itable_size(tab), 3);
+
 	assert_ptr_equal(itable_get(tab, 1), V1);
 
 	assert_nul(itable_get(tab, 999));

@@ -97,8 +97,5 @@ char *stable_str(const struct STable* const tab, fn_str);
 // number of entries
 size_t stable_size(const struct STable* const tab);
 
-// current capacity: initial + n * grow
-size_t stable_capacity(const struct STable* const tab);
-
 #endif // STABLE_H
 

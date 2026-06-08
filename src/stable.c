@@ -146,7 +146,3 @@ char *stable_str(const struct STable* const tab, fn_str str) {
 size_t stable_size(const struct STable* const tab) {
 	return tab ? ptable_size(tab->ptab) : 0;
 }
-
-size_t stable_capacity(const struct STable* const tab) {
-	return tab ? ptable_capacity(tab->ptab) : 0;
-}
