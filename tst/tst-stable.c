@@ -1,6 +1,7 @@
 #include "tst.h"
 #include "asserts.h"
 #include "assert-stable.h"
+#include "expects.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -11,6 +12,10 @@
 #include "str.h"
 
 #include "stable.h"
+
+/*
+   diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
+   */
 
 static int vals[3] = { 20, 21, 22, };
 static void *V0 = &vals[0];
@@ -31,6 +36,18 @@ static int before_each(void **state) {
 
 static int after_each(void **state) {
 	return 0;
+}
+
+static bool mock_test_key_str(const char* const key) {
+	check_expected_ptr(key);
+
+	return mock_type(bool);
+}
+
+static bool mock_test_val(const void* const val) {
+	check_expected_ptr(val);
+
+	return mock_type(bool);
 }
 
 static void stable_put_get_remove__case_sensitive(void **state) {
@@ -97,6 +114,41 @@ static void stable_iter__(void **state) {
 	assert_nul(stable_iter_val(iter));
 
 	stable_iter_free(iter);
+
+	stable_free(tab);
+}
+
+static void stable_filter_iter__(void **state) {
+	const struct STable *tab = stable_init();
+
+	assert_nul(stable_put(tab, "0", V0));
+	assert_nul(stable_put(tab, "1", V1));
+	assert_nul(stable_put(tab, "2", V2));
+
+	// skip "0"
+	expect_string(mock_test_key_str, key, "0");
+	will_return(mock_test_key_str, false);
+
+	// get 1
+	expect_string(mock_test_key_str, key, "1");
+	will_return(mock_test_key_str, true);
+	expect_ptr(mock_test_val, val, V1);
+	will_return(mock_test_val, true);
+
+	const struct STableIter *iter = stable_filter_iter(tab, (fn_test)mock_test_key_str, mock_test_val);
+	assert_non_nul(iter);
+	assert_str_equal(stable_iter_key(iter), "1");
+	assert_ptr_equal(stable_iter_val(iter), V1);
+
+	// skip V2
+	expect_string(mock_test_key_str, key, "2");
+	will_return(mock_test_key_str, true);
+	expect_ptr(mock_test_val, val, V2);
+	will_return(mock_test_val, false);
+
+	// done
+	iter = stable_iter_next(iter);
+	assert_nul(iter);
 
 	stable_free(tab);
 }
@@ -226,6 +278,8 @@ int main(void) {
 		TEST(stable_free_vals__),
 
 		TEST(stable_iter__),
+
+		TEST(stable_filter_iter__),
 
 		TEST(stable_equal__case_sensitive),
 		TEST(stable_equal__case_insensitive),

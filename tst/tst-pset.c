@@ -17,9 +17,7 @@
 #include "data/words-unsorted.c"
 
 /*
-   diff -u \
-   <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) \
-   <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' tst/tst-sset.c)
+   diff --color=always -U 10000 <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' tst/tst-sset.c) | less
    */
 
 static int before_all(void **state) {

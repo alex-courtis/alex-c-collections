@@ -14,12 +14,6 @@
 
 #include "ptable.h"
 
-/*
-   diff -u \
-   <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) \
-   <(sed -e 's/ptable/xtable/g ; s/PTable/XTable/g' tst/tst-ptable.c)
-   */
-
 static int keys[6] = { 10, 11, 12, 13, 14, 15 };
 static void *K0 = &keys[0];
 static void *K1 = &keys[1];

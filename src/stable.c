@@ -9,14 +9,11 @@
 #include "stable.h"
 
 /*
-   diff -u \
-   <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' inc/stable.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' inc/stable.h) | less
 
-   diff -u \
-   <(sed -e ' s/stable/xtable/g ; s/STable/XTable/g ' inc/stable.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/stable/xtable/g ; s/STable/XTable/g ' inc/stable.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
 
-   diff -u \
-   <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' src/stable.c) | less
+   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' src/stable.c) | less
    */
 
 struct STable {
@@ -100,6 +97,21 @@ const struct STableIter *stable_iter(const struct STable* const tab) {
 		return NULL;
 
 	const struct PTableIter *pit = ptable_iter(tab->ptab);
+
+	if (!pit)
+		return NULL;
+
+	struct STableIter *it = calloc(1, sizeof(struct STableIter));
+	it->pit = pit;
+
+	return it;
+}
+
+const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_test test_key, fn_test test_val) {
+	if (!tab)
+		return NULL;
+
+	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, test_key, test_val);
 
 	if (!pit)
 		return NULL;

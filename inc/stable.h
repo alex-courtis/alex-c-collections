@@ -52,6 +52,9 @@ const void *stable_get(const struct STable* const tab, const char* const key);
 // create an iterator, caller must stable_iter_free or invoke stable_next until NULL
 const struct STableIter *stable_iter(const struct STable* const tab);
 
+// create an iterator filtering by test_key and test_val, NULL tests match all
+const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_test test_key, fn_test test_val);
+
 // next iterator entry, NULL at end of table
 const struct STableIter *stable_iter_next(const struct STableIter* const iter);
 

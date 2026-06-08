@@ -1,6 +1,7 @@
 #include "tst.h"
 #include "asserts.h"
 #include "assert-itable.h"
+#include "expects.h"
 
 #include <cmocka.h>
 #include <stdlib.h>
@@ -10,6 +11,10 @@
 #include "str.h"
 
 #include "itable.h"
+
+/*
+   diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
+   */
 
 static int vals[3] = { 20, 21, 22, };
 static void *V0 = &vals[0];
@@ -30,6 +35,22 @@ static int before_each(void **state) {
 
 static int after_each(void **state) {
 	return 0;
+}
+
+static bool mock_test_key_int(const uint64_t key) {
+	check_expected_int(key);
+
+	return mock_type(bool);
+}
+
+static bool mock_test_key(const uint64_t* key) {
+	return mock_test_key_int(*key);
+}
+
+static bool mock_test_val(const void* const val) {
+	check_expected_ptr(val);
+
+	return mock_type(bool);
 }
 
 static void itable_put_get_remove(void **state) {
@@ -79,6 +100,41 @@ static void itable_iter__(void **state) {
 	assert_nul(itable_iter_val(iter));
 
 	itable_iter_free(iter);
+
+	itable_free(tab);
+}
+
+static void itable_filter_iter__(void **state) {
+	const struct ITable *tab = itable_init();
+
+	assert_nul(itable_put(tab, 0, V0));
+	assert_nul(itable_put(tab, 1, V1));
+	assert_nul(itable_put(tab, 2, V2));
+
+	// skip "0"
+	expect_int_value(mock_test_key_int, key, 0);
+	will_return(mock_test_key_int, false);
+
+	// get 1
+	expect_int_value(mock_test_key_int, key, 1);
+	will_return(mock_test_key_int, true);
+	expect_ptr(mock_test_val, val, V1);
+	will_return(mock_test_val, true);
+
+	const struct ITableIter *iter = itable_filter_iter(tab, (fn_test)mock_test_key, mock_test_val);
+	assert_non_nul(iter);
+	assert_int_equal(itable_iter_key(iter), 1);
+	assert_ptr_equal(itable_iter_val(iter), V1);
+
+	// skip V2
+	expect_int_value(mock_test_key_int, key, 2);
+	will_return(mock_test_key_int, true);
+	expect_ptr(mock_test_val, val, V2);
+	will_return(mock_test_val, false);
+
+	// done
+	iter = itable_iter_next(iter);
+	assert_nul(iter);
 
 	itable_free(tab);
 }
@@ -171,6 +227,8 @@ int main(void) {
 		TEST(itable_free_vals__),
 
 		TEST(itable_iter__),
+
+		TEST(itable_filter_iter__),
 
 		TEST(itable_equal__),
 
