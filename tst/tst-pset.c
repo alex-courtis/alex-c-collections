@@ -29,6 +29,9 @@ static void *V3 = &vals[3];
 static void *V4 = &vals[4];
 static void *V5 = &vals[5];
 
+static int datas[1] = { 30, };
+static void *D0 = &datas[0];
+
 struct PSet {
 	const void **vals;
 	size_t capacity;
@@ -418,6 +421,57 @@ static void pset_iter__cleared(void **state) {
 	pset_free(set);
 }
 
+static void pset_filter_iter__many(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_true(pset_add(set, V0, NULL));
+	assert_true(pset_add(set, V1, NULL));
+	assert_true(pset_add(set, V2, NULL));
+	assert_true(pset_add(set, V3, NULL));
+	assert_true(pset_add(set, V4, NULL));
+
+	assert_int_equal(pset_size(set), 5);
+
+	// skip V0
+	expect_ptr(mock_test, val, V0);
+	expect_ptr(mock_test, data, D0);
+	will_return(mock_test, false);
+
+	// get V1
+	expect_ptr(mock_test, val, V1);
+	expect_ptr(mock_test, data, D0);
+	will_return(mock_test, true);
+
+	const struct PSetIter *iter = pset_filter_iter(set, mock_test, D0);
+	assert_non_nul(iter);
+	assert_ptr_equal(pset_iter_val(iter), V1);
+
+	// skip V2
+	expect_ptr(mock_test, val, V2);
+	expect_ptr(mock_test, data, D0);
+	will_return(mock_test, false);
+
+	// get V3
+	expect_ptr(mock_test, val, V3);
+	expect_ptr(mock_test, data, D0);
+	will_return(mock_test, true);
+
+	iter = pset_iter_next(iter);
+	assert_non_nul(iter);
+	assert_ptr_equal(pset_iter_val(iter), V3);
+
+	// skip V4
+	expect_ptr(mock_test, val, V4);
+	expect_ptr(mock_test, data, D0);
+	will_return(mock_test, false);
+
+	// done
+	iter = pset_iter_next(iter);
+	assert_nul(iter);
+
+	pset_free(set);
+}
+
 static void pset_add__again(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -702,6 +756,8 @@ int main(void) {
 		TEST(pset_iter__free),
 		TEST(pset_iter__many),
 		TEST(pset_iter__cleared),
+
+		TEST(pset_filter_iter__many),
 
 		TEST(pset_add__again),
 

@@ -25,6 +25,8 @@ struct PSetIter {
 	const void* val;
 	const struct PSet *set;
 	size_t position;
+	fn_test test_val;
+	const void *data;
 };
 
 // grow to capacity + grow
@@ -135,36 +137,53 @@ bool pset_contains(const struct PSet* const set, const void* const val, fn_equal
 }
 
 const struct PSetIter *pset_iter(const struct PSet* const set) {
+	return pset_filter_iter(set, NULL, NULL);
+}
+
+const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_test test_val, const void* const data) {
 	if (!set || set->size == 0)
 		return NULL;
 
 	// first entry
-	struct PSetIter *i = calloc(1, sizeof(struct PSetIter));
-	i->set = set;
-	i->val = *(set->vals);
-	i->position = 0;
+	struct PSetIter *it = calloc(1, sizeof(struct PSetIter));
+	it->set = set;
+	it->test_val = test_val;
+	it->data = data;
 
-	return i;
+	return pset_iter_next(it);
+
+	return it;
 }
 
 const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
 	if (!iter)
 		return NULL;
 
-	struct PSetIter *i = (struct PSetIter*)iter;
+	struct PSetIter *it = (struct PSetIter*)iter;
 
-	if (!i->set) {
-		pset_iter_free(i);
+	if (!it->set) {
+		pset_iter_free(it);
 		return NULL;
 	}
 
-	if (++i->position < i->set->size) {
-		i->val = *(i->set->vals + i->position);
-		return i;
-	} else {
-		pset_iter_free(i);
-		return NULL;
+	// null val indicates first use, start at the beginning
+	if (it->val) {
+		it->position++;
 	}
+
+	for ( ; it->position < it->set->size; it->position++) {
+
+		it->val = *(it->set->vals + it->position);
+
+		if ((it->test_val && !it->test_val(it->val, it->data))) {
+			continue;
+		}
+
+		return it;
+	}
+
+	pset_iter_free(it);
+	return NULL;
 }
 
 const void *pset_iter_val(const struct PSetIter* const iter) {

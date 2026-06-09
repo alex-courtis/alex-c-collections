@@ -20,6 +20,7 @@ struct PTable {
 	fn_str str_key;
 };
 
+// TODO expose a key/val struct
 struct PTableIter {
 	const void *key;
 	const void *val;

@@ -45,6 +45,7 @@ static const void *fn_alloc_key(const void* const val) {
 }
 
 static char *fn_str_key(const void* const val) {
+	// TODO change this to size_t
 	return sprintf_alloc("%"PRIu64, *(uint64_t*)val);
 }
 

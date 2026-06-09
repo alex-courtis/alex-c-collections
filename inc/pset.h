@@ -53,11 +53,15 @@ void pset_iter_free(const struct PSetIter* const iter);
  * Access
  */
 
+// TODO this should be a fn_test as per slist_find_val, or remove it in favour of pset_filter_iter
 // true if this set contains the specified element, null equal_val to compare pointers
 bool pset_contains(const struct PSet* const set, const void* const val, fn_equal equal_val);
 
 // create an iterator, caller must pset_iter_free or invoke pset_next until NULL
 const struct PSetIter *pset_iter(const struct PSet* const set);
+
+// create an iterator filtering by test_val, NULL test_val matches all
+const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_test test_val, const void* const data);
 
 // next iterator value, NULL at end of set
 const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
