@@ -2,11 +2,15 @@
 #define FN_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 //
 // a is generally the value from the collection, b is user supplied
 //
 typedef bool (*fn_equal)(const void* const a, const void* const b);
+
+// true if a == b
+bool fn_equal_ptr(const void* const a, const void* const b);
 
 // true if both NULL or strcmp(a, b) == 0
 bool fn_equal_strcmp(const void* const a, const void* const b);
@@ -31,7 +35,11 @@ bool fn_less_than_strcasecmp(const void* const a, const void* const b);
 //
 // arbitrary test
 //
-typedef bool (*fn_test)(const void* const val);
+typedef bool (*fn_test)(const void* const val, const void* const data);
+
+typedef bool (*fn_test_str)(const char* const val, const void* const data);
+
+typedef bool (*fn_test_uint64_t)(const uint64_t val, const void* const data);
 
 //
 // alloc from data

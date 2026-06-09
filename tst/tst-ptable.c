@@ -14,7 +14,7 @@
 
 #include "ptable.h"
 
-static int keys[6] = { 10, 11, 12, 13, 14, 15 };
+static int keys[6] = { 10, 11, 12, 13, 14, 15, };
 static void *K0 = &keys[0];
 static void *K1 = &keys[1];
 static void *K2 = &keys[2];
@@ -29,6 +29,9 @@ static void *V2 = &vals[2];
 static void *V3 = &vals[3];
 static void *V4 = &vals[4];
 static void *V5 = &vals[5];
+
+static int datas[1] = { 30, };
+static void *D0 = &datas[0];
 
 static int before_all(void **state) {
 	return 0;
@@ -62,14 +65,16 @@ static void *mock_clone_val(const void* const val) {
 	return mock_ptr_type_checked(void*);
 }
 
-static bool mock_test_key(const void* const key) {
+static bool mock_test_key(const void* const key, const void* const data) {
 	check_expected_ptr(key);
+	check_expected_ptr(data);
 
 	return mock_type(bool);
 }
 
-static bool mock_test_val(const void* const val) {
+static bool mock_test_val(const void* const val, const void* const data) {
 	check_expected_ptr(val);
+	check_expected_ptr(data);
 
 	return mock_type(bool);
 }
@@ -333,18 +338,18 @@ static void ptable_put__grow(void **state) {
 }
 
 static void ptable__equal_key(void **state) {
-	const struct PTable *tab = ptable_init_with(fn_equal_strcasecmp, NULL, NULL, NULL, 10, 10);
+	const struct PTable *tab = ptable_init_with(fn_equal_ptr, NULL, NULL, NULL, 10, 10);
 
-	assert_nul(ptable_put(tab, "zero", V0));
-	assert_nul(ptable_put(tab, "one", V1));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
 
 	assert_int_equal(ptable_size(tab), 2);
-	assert_ptr_equal(ptable_get(tab, "ZERO"), V0);
-	assert_ptr_equal(ptable_get(tab, "ONE"), V1);
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V1);
 
-	assert_ptr_equal(ptable_put(tab, "ZERO", V2), V0);
+	assert_ptr_equal(ptable_put(tab, K0, V2), V0);
 
-	assert_ptr_equal(ptable_remove(tab, "ONE"), V1);
+	assert_ptr_equal(ptable_remove(tab, K1), V1);
 
 	ptable_free(tab);
 }
@@ -353,12 +358,8 @@ static const void *fn_alloc_key_duplicate(const void* const val) {
 	return sprintf_alloc("%s%s", (char*)val, (char*)val);
 }
 
-static void fn_free_key_free(const void* const val) {
-	free((void*)val);
-}
-
 static void ptable__alloc_key_free_key(void **state) {
-	const struct PTable *tab = ptable_init_with(fn_equal_strcasecmp, fn_alloc_key_duplicate, fn_free_key_free, NULL, 10, 10);
+	const struct PTable *tab = ptable_init_with(fn_equal_strcmp, fn_alloc_key_duplicate, (fn_free)free, NULL, 10, 10);
 
 	assert_nul(ptable_put(tab, "zero", V0));
 	assert_nul(ptable_put(tab, "one", V1));
@@ -497,29 +498,36 @@ static void ptable_filter_iter__many(void **state) {
 
 	// skip K0
 	expect_ptr(mock_test_key, key, K0);
+	expect_ptr(mock_test_key, data, D0);
 	will_return(mock_test_key, false);
 
 	// get K1
 	expect_ptr(mock_test_key, key, K1);
+	expect_ptr(mock_test_key, data, D0);
 	will_return(mock_test_key, true);
 	expect_ptr(mock_test_val, val, V1);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, true);
 
-	const struct PTableIter *iter = ptable_filter_iter(tab, mock_test_key, mock_test_val);
+	const struct PTableIter *iter = ptable_filter_iter(tab, mock_test_key, mock_test_val, D0);
 	assert_non_nul(iter);
 	assert_ptr_equal(ptable_iter_key(iter), K1);
 	assert_ptr_equal(ptable_iter_val(iter), V1);
 
 	// skip V2
 	expect_ptr(mock_test_key, key, K2);
+	expect_ptr(mock_test_key, data, D0);
 	will_return(mock_test_key, true);
 	expect_ptr(mock_test_val, val, V2);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, false);
 
 	// get V3
 	expect_ptr(mock_test_key, key, K3);
+	expect_ptr(mock_test_key, data, D0);
 	will_return(mock_test_key, true);
 	expect_ptr(mock_test_val, val, V3);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, true);
 
 	iter = ptable_iter_next(iter);
@@ -529,8 +537,10 @@ static void ptable_filter_iter__many(void **state) {
 
 	// skip V4
 	expect_ptr(mock_test_key, key, K4);
+	expect_ptr(mock_test_key, data, D0);
 	will_return(mock_test_key, true);
 	expect_ptr(mock_test_val, val, V4);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, false);
 
 	// done

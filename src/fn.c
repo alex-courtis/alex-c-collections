@@ -4,6 +4,10 @@
 
 #include "fn.h"
 
+bool fn_equal_ptr(const void* const a, const void* const b) {
+	return a == b;
+}
+
 bool fn_equal_strcmp(const void* const a, const void* const b) {
 	if (a == b)
 		return true;

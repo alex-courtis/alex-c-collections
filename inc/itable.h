@@ -54,7 +54,7 @@ const void *itable_get(const struct ITable* const tab, const uint64_t key);
 const struct ITableIter *itable_iter(const struct ITable* const tab);
 
 // create an iterator filtering by test_key and test_val, NULL tests match all
-const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test test_key, fn_test test_val);
+const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_uint64_t test_key, fn_test test_val, const void* const data);
 
 // next iterator entry, NULL at end of table
 const struct ITableIter *itable_iter_next(const struct ITableIter* const iter);

@@ -27,6 +27,7 @@ struct PTableIter {
 	size_t position;
 	fn_test test_key;
 	fn_test test_val;
+	const void *data;
 };
 
 // grow to capacity + grow
@@ -153,10 +154,10 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 }
 
 const struct PTableIter *ptable_iter(const struct PTable* const tab) {
-	return ptable_filter_iter(tab, NULL, NULL);
+	return ptable_filter_iter(tab, NULL, NULL, NULL);
 }
 
-const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_test test_key, fn_test test_val) {
+const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_test test_key, fn_test test_val, const void* const data) {
 	if (!tab || tab->size == 0)
 		return NULL;
 
@@ -164,6 +165,7 @@ const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_t
 	it->tab = tab;
 	it->test_key = test_key;
 	it->test_val = test_val;
+	it->data = data;
 
 	return ptable_iter_next(it);
 }
@@ -189,7 +191,7 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
 		it->key = *(it->tab->keys + it->position);
 		it->val = *(it->tab->vals + it->position);
 
-		if ((it->test_key && !it->test_key(it->key)) || (it->test_val && !it->test_val(it->val))) {
+		if ((it->test_key && !it->test_key(it->key, it->data)) || (it->test_val && !it->test_val(it->val, it->data))) {
 			continue;
 		}
 

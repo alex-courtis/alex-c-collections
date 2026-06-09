@@ -22,6 +22,9 @@ struct ITable {
 
 struct ITableIter {
 	const struct PTableIter *pit;
+	fn_test_uint64_t test_key;
+	fn_test test_val;
+	const void *data;
 };
 
 static bool fn_equal_key(const void* const a, const void* const b) {
@@ -124,17 +127,30 @@ const struct ITableIter *itable_iter(const struct ITable* const tab) {
 	return it;
 }
 
-const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test test_key, fn_test test_val) {
+static bool fn_test_key_wrapper(const void* const val, const void* const data) {
+	const struct ITableIter * const it = data;
+	return it->test_key(*(uint64_t*)val, it->data);
+}
+
+static bool fn_test_val_wrapper(const void* const val, const void* const data) {
+	const struct ITableIter * const it = data;
+	return it->test_val(val, it->data);
+}
+
+const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_uint64_t test_key, fn_test test_val, const void* const data) {
 	if (!tab)
 		return NULL;
 
-	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, test_key, test_val);
-
-	if (!pit)
-		return NULL;
-
 	struct ITableIter *it = calloc(1, sizeof(struct ITableIter));
-	it->pit = pit;
+	it->test_key = test_key;
+	it->test_val = test_val;
+	it->data = data;
+	it->pit = ptable_filter_iter(tab->ptab, fn_test_key_wrapper, fn_test_val_wrapper, it);
+
+	if (!it->pit) {
+		itable_iter_free(it);
+		it = NULL;
+	}
 
 	return it;
 }

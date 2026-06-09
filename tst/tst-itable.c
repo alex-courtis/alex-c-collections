@@ -4,6 +4,8 @@
 #include "expects.h"
 
 #include <cmocka.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,6 +23,9 @@ static void *V0 = &vals[0];
 static void *V1 = &vals[1];
 static void *V2 = &vals[2];
 
+static int datas[1] = { 30, };
+static void *D0 = &datas[0];
+
 static int before_all(void **state) {
 	return 0;
 }
@@ -37,18 +42,16 @@ static int after_each(void **state) {
 	return 0;
 }
 
-static bool mock_test_key_int(const uint64_t key) {
+static bool mock_test_key_int(const uint64_t key, const void* const data) {
 	check_expected_int(key);
+	check_expected_ptr(data);
 
 	return mock_type(bool);
 }
 
-static bool mock_test_key(const uint64_t* key) {
-	return mock_test_key_int(*key);
-}
-
-static bool mock_test_val(const void* const val) {
+static bool mock_test_val(const void* const val, const void* const data) {
 	check_expected_ptr(val);
+	check_expected_ptr(data);
 
 	return mock_type(bool);
 }
@@ -113,23 +116,28 @@ static void itable_filter_iter__(void **state) {
 
 	// skip "0"
 	expect_int_value(mock_test_key_int, key, 0);
+	expect_ptr(mock_test_key_int, data, D0);
 	will_return(mock_test_key_int, false);
 
 	// get 1
 	expect_int_value(mock_test_key_int, key, 1);
+	expect_ptr(mock_test_key_int, data, D0);
 	will_return(mock_test_key_int, true);
 	expect_ptr(mock_test_val, val, V1);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, true);
 
-	const struct ITableIter *iter = itable_filter_iter(tab, (fn_test)mock_test_key, mock_test_val);
+	const struct ITableIter *iter = itable_filter_iter(tab, mock_test_key_int, mock_test_val, D0);
 	assert_non_nul(iter);
 	assert_int_equal(itable_iter_key(iter), 1);
 	assert_ptr_equal(itable_iter_val(iter), V1);
 
 	// skip V2
 	expect_int_value(mock_test_key_int, key, 2);
+	expect_ptr(mock_test_key_int, data, D0);
 	will_return(mock_test_key_int, true);
 	expect_ptr(mock_test_val, val, V2);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, false);
 
 	// done

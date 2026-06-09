@@ -22,6 +22,9 @@ static void *V0 = &vals[0];
 static void *V1 = &vals[1];
 static void *V2 = &vals[2];
 
+static int datas[1] = { 30, };
+static void *D0 = &datas[0];
+
 static int before_all(void **state) {
 	return 0;
 }
@@ -38,14 +41,16 @@ static int after_each(void **state) {
 	return 0;
 }
 
-static bool mock_test_key_str(const char* const key) {
+static bool mock_test_key_str(const char* const key, const void* const data) {
 	check_expected_ptr(key);
+	check_expected_ptr(data);
 
 	return mock_type(bool);
 }
 
-static bool mock_test_val(const void* const val) {
+static bool mock_test_val(const void* const val, const void* const data) {
 	check_expected_ptr(val);
+	check_expected_ptr(data);
 
 	return mock_type(bool);
 }
@@ -127,23 +132,28 @@ static void stable_filter_iter__(void **state) {
 
 	// skip "0"
 	expect_string(mock_test_key_str, key, "0");
+	expect_ptr(mock_test_key_str, data, D0);
 	will_return(mock_test_key_str, false);
 
 	// get 1
 	expect_string(mock_test_key_str, key, "1");
+	expect_ptr(mock_test_key_str, data, D0);
 	will_return(mock_test_key_str, true);
 	expect_ptr(mock_test_val, val, V1);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, true);
 
-	const struct STableIter *iter = stable_filter_iter(tab, (fn_test)mock_test_key_str, mock_test_val);
+	const struct STableIter *iter = stable_filter_iter(tab, mock_test_key_str, mock_test_val, D0);
 	assert_non_nul(iter);
 	assert_str_equal(stable_iter_key(iter), "1");
 	assert_ptr_equal(stable_iter_val(iter), V1);
 
 	// skip V2
 	expect_string(mock_test_key_str, key, "2");
+	expect_ptr(mock_test_key_str, data, D0);
 	will_return(mock_test_key_str, true);
 	expect_ptr(mock_test_val, val, V2);
+	expect_ptr(mock_test_val, data, D0);
 	will_return(mock_test_val, false);
 
 	// done

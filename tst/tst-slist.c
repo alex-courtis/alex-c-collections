@@ -40,14 +40,18 @@ static char* fn_str_first(const void *val) {
 	return strndup(val, 1);
 }
 
-static bool test_contains_x(const void *data) {
-	if (strcmp("x", data) == 0) {
+static bool test_contains_x(const void* const val, const void* const data) {
+	check_expected_ptr(data);
+
+	if (strcmp("x", val) == 0) {
 		return true;
 	}
 	return false;
 }
 
-static bool test_false(const void *data) {
+static bool test_false(const void* const val, const void* const data) {
+	check_expected_ptr(data);
+
 	return false;
 }
 
@@ -193,6 +197,8 @@ static void slist_remove_all_free__some(void **state) {
 static void slist_find__no(void **state) {
 	struct SList *list = NULL;
 
+	void *D = { "d" };
+
 	void *vals[] = { "0", "1", "2", };
 	slist_append(&list, vals[0]);
 	slist_append(&list, vals[1]);
@@ -201,10 +207,16 @@ static void slist_find__no(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	const void *val = slist_find_val(list, test_false);
+	expect_ptr(test_false, data, D);
+	expect_ptr(test_false, data, D);
+	expect_ptr(test_false, data, D);
+	const void *val = slist_find_val(list, test_false, D);
 	assert_nul(val);
 
-	const struct SList *i = slist_find(list, test_false);
+	expect_ptr(test_false, data, D);
+	expect_ptr(test_false, data, D);
+	expect_ptr(test_false, data, D);
+	const struct SList *i = slist_find(list, test_false, D);
 	assert_nul(i);
 
 	slist_free(&list);
@@ -212,6 +224,8 @@ static void slist_find__no(void **state) {
 
 static void slist_find__yes(void **state) {
 	struct SList *list = NULL;
+
+	void *D = { "d" };
 
 	void *vals[] = { "0", "x", "2", };
 	slist_append(&list, vals[0]);
@@ -221,11 +235,15 @@ static void slist_find__yes(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	const void *val = slist_find_val(list, test_contains_x);
+	expect_ptr(test_contains_x, data, D);
+	expect_ptr(test_contains_x, data, D);
+	const void *val = slist_find_val(list, test_contains_x, D);
 	assert_non_nul(val);
 	assert_str_equal(val, "x");
 
-	const struct SList *i = slist_find(list, test_contains_x);
+	expect_ptr(test_contains_x, data, D);
+	expect_ptr(test_contains_x, data, D);
+	const struct SList *i = slist_find(list, test_contains_x, D);
 	assert_non_nul(i);
 	assert_str_equal(i->val, "x");
 

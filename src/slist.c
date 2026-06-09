@@ -148,14 +148,14 @@ void *slist_at(const struct SList *head, size_t index) {
 	return NULL;
 }
 
-struct SList *slist_find(struct SList *head, fn_test test_val) {
+struct SList *slist_find(struct SList *head, fn_test test_val, const void* const data) {
 	struct SList *i;
 
 	if (!test_val)
 		return NULL;
 
 	for (i = head; i; i = i->nex) {
-		if (test_val(i->val)) {
+		if (test_val(i->val, data)) {
 			return i;
 		}
 	}
@@ -163,8 +163,8 @@ struct SList *slist_find(struct SList *head, fn_test test_val) {
 	return NULL;
 }
 
-void *slist_find_val(struct SList *head, fn_test test_val) {
-	const struct SList *f = slist_find(head, test_val);
+void *slist_find_val(struct SList *head, fn_test test_val, const void* const data) {
+	const struct SList *f = slist_find(head, test_val, data);
 	if (f)
 		return f->val;
 	else

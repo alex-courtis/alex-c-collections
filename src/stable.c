@@ -107,11 +107,11 @@ const struct STableIter *stable_iter(const struct STable* const tab) {
 	return it;
 }
 
-const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_test test_key, fn_test test_val) {
+const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_test_str test_key, fn_test test_val, const void* const data) {
 	if (!tab)
 		return NULL;
 
-	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, test_key, test_val);
+	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, (fn_test)test_key, test_val, data);
 
 	if (!pit)
 		return NULL;
