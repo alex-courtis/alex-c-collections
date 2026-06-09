@@ -140,7 +140,6 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 	if (!tab)
 		return NULL;
 
-	// loop over keys
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals;
@@ -217,7 +216,6 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 
 	struct PTable *tab = (struct PTable*)ctab;
 
-	// loop over existing keys
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
@@ -255,7 +253,6 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 
 	struct PTable *tab = (struct PTable*)ctab;
 
-	// loop over existing keys
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {

@@ -53,9 +53,10 @@ void pset_iter_free(const struct PSetIter* const iter);
  * Access
  */
 
-// TODO this should be a fn_test as per slist_find_val, or remove it in favour of pset_filter_iter
-// true if this set contains the specified element, null equal_val to compare pointers
-bool pset_contains(const struct PSet* const set, const void* const val, fn_equal equal_val);
+// true if this set contains the specified element
+bool pset_contains(const struct PSet* const set, const void* const val);
+
+// todo maybe add a find first
 
 // create an iterator, caller must pset_iter_free or invoke pset_next until NULL
 const struct PSetIter *pset_iter(const struct PSet* const set);
@@ -73,11 +74,11 @@ const void *pset_iter_val(const struct PSetIter* const iter);
  * Mutate
  */
 
-// true if this set did not already contain the specified element, NULL equal_val compares pointer
-bool pset_add(const struct PSet* const set, const void* const val, fn_equal equal_val);
+// true if this set did not already contain the specified element
+bool pset_add(const struct PSet* const set, const void* const val);
 
 // true if this set contained the element, NULL equal_val compares pointer
-const void *pset_remove(const struct PSet* const set, const void* const val, fn_equal equal_val);
+const void *pset_remove(const struct PSet* const set, const void* const val);
 
 // shell sort in place
 void pset_sort(const struct PSet* const set, fn_less_than less_than_val);

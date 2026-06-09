@@ -87,7 +87,6 @@ void sset_free(const struct SSet* const set) {
 	if (!set)
 		return;
 
-	// loop over vals
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
 		if (*v) {
 			free((void*)*v);
@@ -162,7 +161,6 @@ bool sset_add(const struct SSet* const cset, const char* const val) {
 
 	struct SSet *set = (struct SSet*)cset;
 
-	// loop over vals
 	const char **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
 
@@ -191,7 +189,6 @@ bool sset_remove(const struct SSet* const cset, const char* const val) {
 
 	struct SSet *set = (struct SSet*)cset;
 
-	// loop over vals
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
 		if (set->equal(*v, val)) {
 
