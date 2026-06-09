@@ -43,7 +43,7 @@ const struct PTable *ptable_init(void);
 // construct a table with params
 const struct PTable *ptable_init_with(const struct PTableParams params);
 
-// clone a table
+// clone a table with clone_val
 const struct PTable *ptable_clone(const struct PTable* const from);
 
 // free table

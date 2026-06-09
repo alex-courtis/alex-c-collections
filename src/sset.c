@@ -69,18 +69,18 @@ const struct SSet *sset_init_with(const struct SSetParams params) {
 	return set;
 }
 
-const struct SSet *sset_clone(const struct SSet* const set) {
-	if (!set)
+const struct SSet *sset_clone(const struct SSet* const from) {
+	if (!from)
 		return NULL;
 
-	const struct SSetParams params = { .initial = set->capacity, .grow = set->grow, .case_insensitive = set->equal == fn_equal_strcasecmp, };
-	const struct SSet *cloned = sset_init_with(params);
+	const struct SSetParams params = { .initial = from->capacity, .grow = from->grow, .case_insensitive = from->equal == fn_equal_strcasecmp, };
+	const struct SSet *to = sset_init_with(params);
 
-	for (const char **v = set->vals; v < set->vals + set->size; v++) {
-		sset_add(cloned, *v);
+	for (const char **v = from->vals; v < from->vals + from->size; v++) {
+		sset_add(to, *v);
 	}
 
-	return cloned;
+	return to;
 }
 
 void sset_free(const struct SSet* const set) {

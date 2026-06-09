@@ -77,8 +77,7 @@ static void ptable_init__size(void **state) {
 }
 
 static void ptable_init__defaults(void **state) {
-	const struct PTableParams params = { .initial = 0, .grow = 0, };
-	const struct PTable *tab = ptable_init_with(params);
+	const struct PTable *tab = ptable_init();
 
 	assert_non_nul(tab);
 
@@ -696,23 +695,7 @@ static void ptable_equal__length_different(void **state) {
 	ptable_free(b);
 }
 
-static void ptable_equal__keys_different(void **state) {
-	const struct PTable *a = ptable_init();
-	const struct PTable *b = ptable_init();
-
-	assert_nul(ptable_put(a, K0, NULL));
-	assert_nul(ptable_put(a, K1, NULL));
-
-	assert_nul(ptable_put(b, K0, NULL));
-	assert_nul(ptable_put(b, K2, NULL));
-
-	assert_ptable_not_equal(a, b, NULL, NULL);
-
-	ptable_free(a);
-	ptable_free(b);
-}
-
-static void ptable_equal__pointers_ok(void **state) {
+static void ptable_equal__key_pointers_ok(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
@@ -730,7 +713,7 @@ static void ptable_equal__pointers_ok(void **state) {
 	ptable_free(b);
 }
 
-static void ptable_equal__pointers_different(void **state) {
+static void ptable_equal__key_pointers_different(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
@@ -748,7 +731,7 @@ static void ptable_equal__pointers_different(void **state) {
 	ptable_free(b);
 }
 
-static void ptable_equal__comparison_ok(void **state) {
+static void ptable_equal__equal_val_ok(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
@@ -762,7 +745,7 @@ static void ptable_equal__comparison_ok(void **state) {
 	ptable_free(b);
 }
 
-static void ptable_equal__comparison_different(void **state) {
+static void ptable_equal__equal_val_different(void **state) {
 	const struct PTable *a = ptable_init();
 	const struct PTable *b = ptable_init();
 
@@ -776,7 +759,7 @@ static void ptable_equal__comparison_different(void **state) {
 	ptable_free(b);
 }
 
-static void ptable_equal__equal_key(void **state) {
+static void ptable_equal__equal_key_ok(void **state) {
 	const struct PTableParams params = { .equal_key = fn_equal_strcasecmp, .str_key = (fn_str)strdup, };
 	const struct PTable *a = ptable_init_with(params);
 	const struct PTable *b = ptable_init_with(params);
@@ -790,6 +773,25 @@ static void ptable_equal__equal_key(void **state) {
 	assert_nul(ptable_put(b, "TWO", V2));
 
 	assert_ptable_equal(a, b, NULL, NULL);
+
+	ptable_free(a);
+	ptable_free(b);
+}
+
+static void ptable_equal__equal_key_different(void **state) {
+	const struct PTableParams params = { .equal_key = fn_equal_strcasecmp, .str_key = (fn_str)strdup, };
+	const struct PTable *a = ptable_init_with(params);
+	const struct PTable *b = ptable_init_with(params);
+
+	assert_nul(ptable_put(a, "zero", V0));
+	assert_nul(ptable_put(a, "one", V1));
+	assert_nul(ptable_put(a, "two", V2));
+
+	assert_nul(ptable_put(b, "ZERO", V0));
+	assert_nul(ptable_put(b, "ONE", V1));
+	assert_nul(ptable_put(b, "THREE", V2));
+
+	assert_ptable_not_equal(a, b, NULL, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
@@ -975,12 +977,12 @@ int main(void) {
 		TEST(ptable__alloc_key_free_key),
 
 		TEST(ptable_equal__length_different),
-		TEST(ptable_equal__keys_different),
-		TEST(ptable_equal__pointers_ok),
-		TEST(ptable_equal__pointers_different),
-		TEST(ptable_equal__comparison_ok),
-		TEST(ptable_equal__comparison_different),
-		TEST(ptable_equal__equal_key),
+		TEST(ptable_equal__key_pointers_ok),
+		TEST(ptable_equal__key_pointers_different),
+		TEST(ptable_equal__equal_val_ok),
+		TEST(ptable_equal__equal_val_different),
+		TEST(ptable_equal__equal_key_ok),
+		TEST(ptable_equal__equal_key_different),
 
 		TEST(ptable_keys_slist__empty),
 		TEST(ptable_keys_slist__many),

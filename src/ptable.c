@@ -75,16 +75,16 @@ const struct PTable *ptable_init_with(const struct PTableParams params) {
 
 const struct PTable *ptable_clone(const struct PTable* const from) {
 
-	struct PTable *to = calloc(1, sizeof(struct PTable));
-	to->capacity = from->capacity;
-	to->grow = from->grow;
-	to->keys = calloc(to->capacity, sizeof(void*));
-	to->vals = calloc(to->capacity, sizeof(void*));
-	to->equal_key = from->equal_key;
-	to->alloc_key = from->alloc_key;
-	to->free_key = from->free_key;
-	to->str_key = from->str_key;
-	to->clone_val = from->clone_val;
+	const struct PTableParams params = {
+		.equal_key = from->equal_key,
+		.alloc_key = from->alloc_key,
+		.free_key = from->free_key,
+		.str_key = from->str_key,
+		.clone_val = from->clone_val,
+		.initial = from->capacity,
+		.grow = from->grow,
+	};
+	const struct PTable *to =  ptable_init_with(params);
 
 	const void **k;
 	const void **v;

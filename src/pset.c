@@ -19,6 +19,7 @@ struct PSet {
 	size_t capacity;
 	size_t grow;
 	size_t size;
+	fn_clone clone_val;
 };
 
 struct PSetIter {
@@ -57,26 +58,30 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	set->capacity = params.initial ? params.initial : 10;
 	set->grow = params.grow ? params.grow : 10;;
 	set->vals = calloc(set->capacity, sizeof(void*));
+	set->clone_val = params.clone_val;
 
 	return set;
 }
 
-const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone_val) {
-	if (!set)
+const struct PSet *pset_clone(const struct PSet* const from) {
+	if (!from)
 		return NULL;
 
-	const struct PSetParams params = { .initial = set->capacity, .grow = set->grow, };
-	const struct PSet *cloned = pset_init_with(params);
+	const struct PSetParams params = {
+		.initial = from->capacity,
+		.grow = from->grow,
+		.clone_val = from->clone_val,
+	};
+	const struct PSet *to = pset_init_with(params);
 
-	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (clone_val) {
-			pset_add(cloned, clone_val(*v));
-		} else {
-			pset_add(cloned, *v);
-		}
+	for (const void **v = from->vals; v < from->vals + from->size; v++) {
+		if (to->clone_val)
+			pset_add(to, to->clone_val(*v));
+		else
+			pset_add(to, *v);
 	}
 
-	return cloned;
+	return to;
 }
 
 void pset_free(const void* const cvset) {

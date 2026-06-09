@@ -20,11 +20,12 @@ struct PSet; // IWYU pragma: keep
 struct PSetIter; // IWYU pragma: keep
 
 /*
- * Optional constructor params
+ * Optional constructor params, defaults noted
  */
 struct PSetParams {
-	const size_t initial; // default 10
-	const size_t grow;    // default 10
+	fn_clone clone_val;   // shallow clone
+	const size_t initial; // 10
+	const size_t grow;    // 10
 };
 
 /*
@@ -37,8 +38,8 @@ const struct PSet *pset_init(void);
 // construct a set with params
 const struct PSet *pset_init_with(const struct PSetParams params);
 
-// clone a set, NULL clone_val for shallow clone
-const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone_val);
+// clone a table with clone_val
+const struct PSet *pset_clone(const struct PSet* const from);
 
 // free set
 void pset_free(const void* const set);

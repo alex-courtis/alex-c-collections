@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "fn.h"
+
 /*
  * Array backed ordered string set.
  * Operations linearly traverse values.
@@ -18,12 +20,12 @@ struct SSet; // IWYU pragma: keep
 struct SSetIter; // IWYU pragma: keep
 
 /*
- * Optional constructor params
+ * Optional constructor params, defaults noted
  */
 struct SSetParams {
-	const size_t initial;        // default 10
-	const size_t grow;           // default 10
-	const bool case_insensitive; // default false
+	const bool case_insensitive; // false
+	const size_t initial;        // 10
+	const size_t grow;           // 10
 };
 
 /*
@@ -37,7 +39,7 @@ const struct SSet *sset_init(void);
 const struct SSet *sset_init_with(const struct SSetParams params);
 
 // deep clone
-const struct SSet *sset_clone(const struct SSet* const set);
+const struct SSet *sset_clone(const struct SSet* const from);
 
 // free set and vals
 void sset_free(const struct SSet* const set);
