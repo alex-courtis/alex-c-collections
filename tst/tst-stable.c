@@ -64,7 +64,9 @@ static void stable_put_get_remove__case_sensitive(void **state) {
 
 static void stable_put_get_remove__case_insensitive(void **state) {
 
-	const struct STable *tab = stable_init_with(10, 10, true);
+	const struct STableParams params = { .case_insensitive = true, };
+	const struct STable *tab = stable_init_with(params);
+
 	assert_nul(stable_put(tab, "A", V0));
 	assert_nul(stable_put(tab, "B", V1));
 
@@ -172,7 +174,9 @@ static void stable_equal__case_sensitive(void **state) {
 
 static void stable_equal__case_insensitive(void **state) {
 
-	const struct STable *actual = stable_init_with(10, 10, true);
+	const struct STableParams params = { .case_insensitive = true, };
+	const struct STable *actual = stable_init_with(params);
+
 	assert_nul(stable_put(actual, "a", V0));
 	assert_nul(stable_put(actual, "b", V1));
 

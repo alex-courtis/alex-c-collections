@@ -50,16 +50,20 @@ static char *fn_str_key(const void* const val) {
 }
 
 const struct ITable *itable_init(void) {
-	return itable_init_with(10, 10);
+	const struct ITableParams params = { 0 };
+	return itable_init_with(params);
 }
 
-const struct ITable *itable_init_with(const size_t initial, const size_t grow) {
-	const struct PTable *ptab = ptable_init_with(
-			fn_equal_key,
-			fn_alloc_key,
-			(fn_free)free,
-			fn_str_key,
-			initial, grow);
+const struct ITable *itable_init_with(const struct ITableParams params) {
+	const struct PTableParams ptable_params = {
+		.equal_key = fn_equal_key,
+		.alloc_key = fn_alloc_key,
+		.free_key = (fn_free)free,
+		.str_key = fn_str_key,
+		.initial = params.initial,
+		.grow = params.grow,
+	};
+	const struct PTable *ptab = ptable_init_with(ptable_params);
 
 	if (!ptab)
 		return NULL;

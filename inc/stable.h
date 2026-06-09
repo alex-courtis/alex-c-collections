@@ -21,14 +21,23 @@ struct STable; // IWYU pragma: keep
 struct STableIter; // IWYU pragma: keep
 
 /*
+ * Optional constructor params
+ */
+struct STableParams {
+	const size_t initial;        // default 10
+	const size_t grow;           // default 10
+	const bool case_insensitive; // default false
+};
+
+/*
  * Lifecycle
  */
 
-// construct a table with initial size 10, growing by 10 as necessary, case sensitive
+// construct a table with STableParams defaults
 const struct STable *stable_init(void);
 
-// construct a table with initial size, growing as necessary, NULL on zero initial or grow
-const struct STable *stable_init_with(const size_t initial, const size_t grow, const bool case_insensitive);
+// construct a table with params
+const struct STable *stable_init_with(const struct STableParams params);
 
 // clone a table, NULL clone_val for shallow clone
 const struct STable *stable_clone(const struct STable* const from, fn_clone clone_val);

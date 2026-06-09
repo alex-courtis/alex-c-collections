@@ -29,16 +29,20 @@ static char *fn_str_str(const void* const val) {
 }
 
 const struct STable *stable_init(void) {
-	return stable_init_with(10, 10, false);
+	const struct STableParams params = { 0 };
+	return stable_init_with(params);
 }
 
-const struct STable *stable_init_with(const size_t initial, const size_t grow, const bool case_insensitive) {
-	const struct PTable *ptab = ptable_init_with(
-			case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
-			(fn_alloc)strdup,
-			(fn_free)free,
-			fn_str_str,
-			initial, grow);
+const struct STable *stable_init_with(const struct STableParams params) {
+	const struct PTableParams ptable_params = {
+		.equal_key = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
+		.alloc_key = (fn_alloc)strdup,
+		.free_key = (fn_free)free,
+		.str_key = fn_str_str,
+		.initial = params.initial,
+		.grow = params.grow,
+	};
+	const struct PTable *ptab = ptable_init_with(ptable_params);
 
 	if (!ptab)
 		return NULL;

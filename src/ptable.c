@@ -53,22 +53,20 @@ static void grow_ptable(struct PTable *tab) {
 }
 
 const struct PTable *ptable_init(void) {
-	return ptable_init_with(NULL, NULL, NULL, NULL, 10, 10);
+	const struct PTableParams params = { 0 };
+	return ptable_init_with(params);
 }
 
-const struct PTable *ptable_init_with(fn_equal equal_key, fn_alloc alloc_key, fn_free free_key, fn_str str_key, const size_t initial, const size_t grow) {
-	if (initial == 0 || grow == 0)
-		return NULL;
-
+const struct PTable *ptable_init_with(const struct PTableParams params) {
 	struct PTable *tab = calloc(1, sizeof(struct PTable));
-	tab->capacity = initial;
-	tab->grow = grow;
+	tab->capacity = params.initial ? params.initial : 10;
+	tab->grow = params.grow ? params.grow : 10;
 	tab->keys = calloc(tab->capacity, sizeof(void*));
 	tab->vals = calloc(tab->capacity, sizeof(void*));
-	tab->equal_key = equal_key;
-	tab->alloc_key = alloc_key;
-	tab->free_key = free_key;
-	tab->str_key = str_key;
+	tab->equal_key = params.equal_key;
+	tab->alloc_key = params.alloc_key;
+	tab->free_key = params.free_key;
+	tab->str_key = params.str_key;
 
 	return tab;
 }

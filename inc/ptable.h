@@ -21,20 +21,28 @@ struct PTable; // IWYU pragma: keep
 struct PTableIter; // IWYU pragma: keep
 
 /*
+ * Optional constructor params
+ */
+struct PTableParams {
+	const fn_equal equal_key; // NULL compares pointers
+	const fn_alloc alloc_key; // NULL uses the key pointer
+	const fn_free free_key;   // NULL nop
+	const fn_str str_key;     // NULL "%p"
+	const size_t initial;     // default 10
+	const size_t grow;        // default 10
+};
+
+/*
  * Lifecycle
  */
 
 // TODO PTableParams
 
-// construct a table with initial size 10, growing by 10 as necessary
+// construct a table with PTableParams defaults
 const struct PTable *ptable_init(void);
 
-// construct a table with initial size, growing as necessary, NULL on zero initial or grow
-// NULL equal_key: compares pointers
-// NULL alloc_key: key pointer
-// NULL free_key: NOP
-// NULL str_key: "%p"
-const struct PTable *ptable_init_with(fn_equal equal_key, fn_alloc alloc_key, fn_free free_key, fn_str str_key, const size_t initial, const size_t grow);
+// construct a table with params
+const struct PTable *ptable_init_with(const struct PTableParams params);
 
 // TODO move clone_val to member
 // clone a table, NULL clone_val for shallow clone, keys are duplicated using alloc_key

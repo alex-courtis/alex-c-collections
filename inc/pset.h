@@ -31,7 +31,7 @@ struct PSetParams {
  * Lifecycle
  */
 
-// construct a set with defaults
+// construct a set with PSetParams defaults
 const struct PSet *pset_init(void);
 
 // construct a set with params

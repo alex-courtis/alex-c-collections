@@ -15,6 +15,18 @@
 
 #include "ptable.h"
 
+struct PTable {
+	const void **keys;
+	const void **vals;
+	size_t capacity;
+	size_t grow;
+	size_t size;
+	fn_equal equal_key;
+	fn_alloc alloc_key;
+	fn_free free_key;
+	fn_str str_key;
+};
+
 static int keys[6] = { 10, 11, 12, 13, 14, 15, };
 static void *K0 = &keys[0];
 static void *K1 = &keys[1];
@@ -51,19 +63,29 @@ static int after_each(void **state) {
 }
 
 static void ptable_init__size(void **state) {
-	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 5, 50);
+	const struct PTableParams params = { .initial = 2, .grow = 4, };
+	const struct PTable *tab = ptable_init_with(params);
 
 	assert_non_nul(tab);
 
-	assert_int_equal(ptable_size(tab), 0);
+	assert_int_equal(tab->size, 0);
+	assert_int_equal(tab->capacity, 2);
+	assert_int_equal(tab->grow, 4);
 
 	ptable_free(tab);
 }
 
-static void ptable_init__invalid(void **state) {
-	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 0, 0);
+static void ptable_init__defaults(void **state) {
+	const struct PTableParams params = { .initial = 0, .grow = 0, };
+	const struct PTable *tab = ptable_init_with(params);
 
-	assert_nul(tab);
+	assert_non_nul(tab);
+
+	assert_int_equal(tab->size, 0);
+	assert_int_equal(tab->capacity, 10);
+	assert_int_equal(tab->grow, 10);
+
+	ptable_free(tab);
 }
 
 static void ptable_clone__empty(void **state) {
@@ -130,7 +152,8 @@ static void ptable_clone__deep_many(void **state) {
 }
 
 static void ptable_clone__alloc_key(void **state) {
-	const struct PTable *from = ptable_init_with(NULL, mock_alloc, NULL, NULL, 10, 10);
+	const struct PTableParams params = { .alloc_key = mock_alloc, };
+	const struct PTable *from = ptable_init_with(params);
 
 	expect_ptr(mock_alloc, val, K0);
 	will_return_ptr_type(mock_alloc, K0, void*);
@@ -284,21 +307,29 @@ static void ptable_put__null_overwrite(void **state) {
 }
 
 static void ptable_put__grow(void **state) {
-	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, NULL, 3, 5);
+	const struct PTableParams params = { .initial = 3, .grow = 5, };
+	const struct PTable *tab = ptable_init_with(params);
 
 	assert_nul(ptable_put(tab, K0, V0));
 	assert_nul(ptable_put(tab, K1, V1));
 	assert_nul(ptable_put(tab, K2, V2));
 
-	assert_int_equal(ptable_size(tab), 3);
+	assert_int_equal(tab->size, 3);
+	assert_int_equal(tab->capacity, 3);
+	assert_int_equal(tab->grow, 5);
 
 	assert_nul(ptable_put(tab, K3, V3));
-	assert_int_equal(ptable_size(tab), 4);
+
+	assert_int_equal(tab->size, 4);
+	assert_int_equal(tab->capacity, 8);
+	assert_int_equal(tab->grow, 5);
 
 	assert_nul(ptable_put(tab, K4, V4));
 	assert_nul(ptable_put(tab, K5, V5));
 
-	assert_int_equal(ptable_size(tab), 6);
+	assert_int_equal(tab->size, 6);
+	assert_int_equal(tab->capacity, 8);
+	assert_int_equal(tab->grow, 5);
 
 	assert_ptr_equal(ptable_get(tab, K0), V0);
 	assert_ptr_equal(ptable_get(tab, K1), V1);
@@ -312,7 +343,8 @@ static void ptable_put__grow(void **state) {
 }
 
 static void ptable__equal_key(void **state) {
-	const struct PTable *tab = ptable_init_with(fn_equal_ptr, NULL, NULL, NULL, 10, 10);
+	const struct PTableParams params = { .equal_key = fn_equal_ptr, };
+	const struct PTable *tab = ptable_init_with(params);
 
 	assert_nul(ptable_put(tab, K0, V0));
 	assert_nul(ptable_put(tab, K1, V1));
@@ -333,7 +365,12 @@ static const void *fn_alloc_key_duplicate(const void* const val) {
 }
 
 static void ptable__alloc_key_free_key(void **state) {
-	const struct PTable *tab = ptable_init_with(fn_equal_strcmp, fn_alloc_key_duplicate, (fn_free)free, NULL, 10, 10);
+	const struct PTableParams params = {
+		.equal_key = fn_equal_strcmp,
+		.alloc_key = fn_alloc_key_duplicate,
+		.free_key = (fn_free)free,
+	};
+	const struct PTable *tab = ptable_init_with(params);
 
 	assert_nul(ptable_put(tab, "zero", V0));
 	assert_nul(ptable_put(tab, "one", V1));
@@ -711,8 +748,9 @@ static void ptable_equal__comparison_different(void **state) {
 }
 
 static void ptable_equal__equal_key(void **state) {
-	const struct PTable *a = ptable_init_with(fn_equal_strcasecmp, NULL, NULL, (fn_str)strdup, 10, 10);
-	const struct PTable *b = ptable_init_with(fn_equal_strcasecmp, NULL, NULL, (fn_str)strdup, 10, 10);
+	const struct PTableParams params = { .equal_key = fn_equal_strcasecmp, .str_key = (fn_str)strdup, };
+	const struct PTable *a = ptable_init_with(params);
+	const struct PTable *b = ptable_init_with(params);
 
 	assert_nul(ptable_put(a, "zero", V0));
 	assert_nul(ptable_put(a, "one", V1));
@@ -846,7 +884,8 @@ static void ptable_str__fn_str(void **state) {
 }
 
 static void ptable_str__fn_str_key(void **state) {
-	const struct PTable *tab = ptable_init_with(NULL, NULL, NULL, (fn_str)strdup, 10, 10);
+	const struct PTableParams params = { .str_key = (fn_str)strdup, };
+	const struct PTable *tab = ptable_init_with(params);
 
 	assert_nul(ptable_put(tab, "zero", V0));
 	assert_nul(ptable_put(tab, "one", NULL));
@@ -872,7 +911,7 @@ static void ptable_str__fn_str_key(void **state) {
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(ptable_init__size),
-		TEST(ptable_init__invalid),
+		TEST(ptable_init__defaults),
 
 		TEST(ptable_clone__empty),
 		TEST(ptable_clone__params),
