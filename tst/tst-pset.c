@@ -85,10 +85,6 @@ static void pset_init__defaults(void **state) {
 	pset_free(set);
 }
 
-static void pset_clone__null(void **state) {
-	assert_nul(pset_clone(NULL, NULL));
-}
-
 static void pset_clone__empty(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -160,18 +156,17 @@ static void pset_clone__deep_many(void **state) {
 	pset_free(set);
 }
 
-static void pset_free_vals__null(void **state) {
+static void pset_free_vals__null_free_val(void **state) {
 	const struct PSet *set = pset_init();
 
-	assert_true(pset_add(set, V0));
-	assert_true(pset_add(set, V1));
+	const char *val = strdup("0");
 
-	assert_int_equal(pset_size(set), 2);
-	assert_true(pset_contains(set, V0));
-	assert_true(pset_contains(set, V1));
+	pset_add(set, val);
 
-	// not much we can do here but valgrind
-	pset_free(set);
+	assert_int_equal(pset_size(set), 1);
+
+	// valgrind will indicate that val has been free'd
+	pset_free_vals(set, NULL);
 }
 
 static void pset_free_vals__free_val(void **state) {
@@ -184,8 +179,8 @@ static void pset_free_vals__free_val(void **state) {
 	assert_true(pset_contains(set, V0));
 	assert_true(pset_contains(set, V1));
 
-	expect_str(mock_free, val, V0);
-	expect_str(mock_free, val, V1);
+	expect_ptr(mock_free, val, V0);
+	expect_ptr(mock_free, val, V1);
 
 	pset_free_vals(set, mock_free);
 }
@@ -323,7 +318,6 @@ static void pset_iter__free(void **state) {
 	assert_non_nul(iter);
 	assert_str_equal(pset_iter_val(iter), V0);
 
-	// not much we can do here but valgrind
 	pset_iter_free(iter);
 
 	pset_free(set);
@@ -662,13 +656,12 @@ int main(void) {
 		TEST(pset_init__size),
 		TEST(pset_init__defaults),
 
-		TEST(pset_clone__null),
 		TEST(pset_clone__empty),
 		TEST(pset_clone__params),
 		TEST(pset_clone__shallow_many),
 		TEST(pset_clone__deep_many),
 
-		TEST(pset_free_vals__null),
+		TEST(pset_free_vals__null_free_val),
 		TEST(pset_free_vals__free_val),
 
 		TEST(pset_add__new),

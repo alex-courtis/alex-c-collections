@@ -77,7 +77,11 @@ static void ptable_clone__empty(void **state) {
 	ptable_free(to);
 }
 
-static void ptable_clone__shallow_pointer_key(void **state) {
+static void ptable_clone__params(void **state) {
+	// TODO
+}
+
+static void ptable_clone__shallow_many(void **state) {
 	const struct PTable *from = ptable_init();
 
 	assert_nul(ptable_put(from, K0, NULL));
@@ -98,7 +102,7 @@ static void ptable_clone__shallow_pointer_key(void **state) {
 	ptable_free(to);
 }
 
-static void ptable_clone__deep(void **state) {
+static void ptable_clone__deep_many(void **state) {
 	const struct PTable *from = ptable_init();
 
 	assert_nul(ptable_put(from, K0, V0));
@@ -156,7 +160,7 @@ static void ptable_clone__alloc_key(void **state) {
 	ptable_free(to);
 }
 
-static void ptable_free_vals__null_fn_free(void **state) {
+static void ptable_free_vals__null_free_val(void **state) {
 	const struct PTable *tab = ptable_init();
 
 	const char *val = strdup("0");
@@ -165,11 +169,10 @@ static void ptable_free_vals__null_fn_free(void **state) {
 
 	assert_int_equal(ptable_size(tab), 1);
 
-	// valgrind will indicate that val has been free'd
 	ptable_free_vals(tab, NULL);
 }
 
-static void ptable_free_vals__fn_free(void **state) {
+static void ptable_free_vals__free_val(void **state) {
 	const struct PTable *tab = ptable_init();
 
 	ptable_put(tab, K0, V0);
@@ -188,7 +191,7 @@ static void fn_free_ptable(const void *val) {
 	ptable_free_vals(val, mock_free);
 }
 
-static void ptable_free_vals__fn_free_hierarchical(void **state) {
+static void ptable_free_vals__free_val_hierarchical(void **state) {
 	const struct PTable *outer = ptable_init();
 	const struct PTable *inner1 = ptable_init();
 	const struct PTable *inner2 = ptable_init();
@@ -343,7 +346,6 @@ static void ptable__alloc_key_free_key(void **state) {
 	assert_int_equal(ptable_size(tab), 1);
 	assert_ptr_equal(ptable_get(tab, "oneone"), V1);
 
-	// valgrind will indicate that the key has been free'd
 	ptable_free(tab);
 }
 
@@ -366,7 +368,6 @@ static void ptable_iter__free(void **state) {
 	assert_ptr_equal(ptable_iter_key(iter), K0);
 	assert_ptr_equal(ptable_iter_val(iter), V0);
 
-	// valgrind will indicate that iter has been free'd
 	ptable_iter_free(iter);
 
 	ptable_free(tab);
@@ -874,13 +875,14 @@ int main(void) {
 		TEST(ptable_init__invalid),
 
 		TEST(ptable_clone__empty),
-		TEST(ptable_clone__shallow_pointer_key),
-		TEST(ptable_clone__deep),
+		TEST(ptable_clone__params),
+		TEST(ptable_clone__shallow_many),
+		TEST(ptable_clone__deep_many),
 		TEST(ptable_clone__alloc_key),
 
-		TEST(ptable_free_vals__null_fn_free),
-		TEST(ptable_free_vals__fn_free),
-		TEST(ptable_free_vals__fn_free_hierarchical),
+		TEST(ptable_free_vals__null_free_val),
+		TEST(ptable_free_vals__free_val),
+		TEST(ptable_free_vals__free_val_hierarchical),
 
 		TEST(ptable_put__new),
 		TEST(ptable_put__overwrite),
