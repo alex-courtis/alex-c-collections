@@ -24,9 +24,10 @@ struct STableIter; // IWYU pragma: keep
  * Optional constructor params
  */
 struct STableParams {
-	const size_t initial;        // default 10
-	const size_t grow;           // default 10
 	const bool case_insensitive; // default false
+	fn_clone clone_val;          // shallow clone
+	const size_t initial;        // 10
+	const size_t grow;           // 10
 };
 
 /*
@@ -39,8 +40,8 @@ const struct STable *stable_init(void);
 // construct a table with params
 const struct STable *stable_init_with(const struct STableParams params);
 
-// clone a table, NULL clone_val for shallow clone
-const struct STable *stable_clone(const struct STable* const from, fn_clone clone_val);
+// clone a table
+const struct STable *stable_clone(const struct STable* const from);
 
 // free table
 void stable_free(const void* const tab);

@@ -18,6 +18,7 @@ struct PTable {
 	fn_alloc alloc_key;
 	fn_free free_key;
 	fn_str str_key;
+	fn_clone clone_val;
 };
 
 // TODO expose a key/val struct
@@ -67,11 +68,12 @@ const struct PTable *ptable_init_with(const struct PTableParams params) {
 	tab->alloc_key = params.alloc_key;
 	tab->free_key = params.free_key;
 	tab->str_key = params.str_key;
+	tab->clone_val = params.clone_val;
 
 	return tab;
 }
 
-const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val) {
+const struct PTable *ptable_clone(const struct PTable* const from) {
 
 	struct PTable *to = calloc(1, sizeof(struct PTable));
 	to->capacity = from->capacity;
@@ -82,11 +84,12 @@ const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clon
 	to->alloc_key = from->alloc_key;
 	to->free_key = from->free_key;
 	to->str_key = from->str_key;
+	to->clone_val = from->clone_val;
 
 	const void **k;
 	const void **v;
 	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
-		ptable_put(to, *k, clone_val ? clone_val(*v) : *v);
+		ptable_put(to, *k, from->clone_val ? from->clone_val(*v) : *v);
 	}
 
 	return to;
@@ -100,7 +103,9 @@ void ptable_free(const void* const cvtab) {
 
 	if (tab->free_key) {
 		for (const void **k = tab->keys; k < tab->keys + tab->capacity; k++) {
-			tab->free_key(*k);
+			if (*k) {
+				tab->free_key(*k);
+			}
 		}
 	}
 

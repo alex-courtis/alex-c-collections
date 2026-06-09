@@ -60,6 +60,7 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 		.alloc_key = fn_alloc_key,
 		.free_key = (fn_free)free,
 		.str_key = fn_str_key,
+		.clone_val = params.clone_val,
 		.initial = params.initial,
 		.grow = params.grow,
 	};
@@ -74,12 +75,12 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 	return tab;
 }
 
-const struct ITable *itable_clone(const struct ITable* const from, fn_clone clone_val) {
+const struct ITable *itable_clone(const struct ITable* const from) {
 	if (!from)
 		return NULL;
 
 	struct ITable *to = calloc(1, sizeof(struct ITable));
-	to->ptab = ptable_clone(from->ptab, clone_val);
+	to->ptab = ptable_clone(from->ptab);
 
 	return to;
 }

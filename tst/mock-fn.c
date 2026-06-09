@@ -53,3 +53,9 @@ void *mock_clone(const void* const val) {
 	return mock_ptr_type_checked(void*);
 }
 
+char* mock_str(const void* const val) {
+	check_expected_ptr(val);
+
+	return mock_ptr_type_checked(char*);
+}
+

@@ -22,11 +22,12 @@ struct ITable; // IWYU pragma: keep
 struct ITableIter; // IWYU pragma: keep
 
 /*
- * Optional constructor params
+ * Optional constructor params, defaults noted
  */
 struct ITableParams {
-	const size_t initial;     // default 10
-	const size_t grow;        // default 10
+	fn_clone clone_val;   // shallow clone
+	const size_t initial; // 10
+	const size_t grow;    // 10
 };
 
 /*
@@ -39,8 +40,8 @@ const struct ITable *itable_init(void);
 // construct a table with params
 const struct ITable *itable_init_with(const struct ITableParams params);
 
-// clone a table, NULL clone_val for shallow clone
-const struct ITable *itable_clone(const struct ITable* const from, fn_clone clone_val);
+// clone a table
+const struct ITable *itable_clone(const struct ITable* const from);
 
 // free table
 void itable_free(const void* const tab);

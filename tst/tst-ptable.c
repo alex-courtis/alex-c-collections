@@ -25,6 +25,7 @@ struct PTable {
 	fn_alloc alloc_key;
 	fn_free free_key;
 	fn_str str_key;
+	fn_clone clone_val;
 };
 
 static int keys[6] = { 10, 11, 12, 13, 14, 15, };
@@ -91,16 +92,43 @@ static void ptable_init__defaults(void **state) {
 static void ptable_clone__empty(void **state) {
 	const struct PTable *from = ptable_init();
 
-	const struct PTable *to = ptable_clone(from, NULL);
+	const struct PTable *to = ptable_clone(from);
 
 	assert_non_nul(to);
+
+	assert_int_equal(to->size, 0);
 
 	ptable_free(from);
 	ptable_free(to);
 }
 
 static void ptable_clone__params(void **state) {
-	// TODO
+	const struct PTableParams params = {
+		.equal_key = mock_equal,
+		.alloc_key = mock_alloc,
+		.free_key = mock_free,
+		.str_key = mock_str,
+		.clone_val = mock_clone,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct PTable *from = ptable_init_with(params);
+
+	const struct PTable *to = ptable_clone(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(to->size, 0);
+	assert_int_equal(to->capacity, 99);
+	assert_int_equal(to->grow, 1);
+	assert_ptr_equal(to->equal_key, mock_equal);
+	assert_ptr_equal(to->alloc_key, mock_alloc);
+	assert_ptr_equal(to->free_key, mock_free);
+	assert_ptr_equal(to->str_key, mock_str);
+	assert_ptr_equal(to->clone_val, mock_clone);
+
+	ptable_free(from);
+	ptable_free(to);
 }
 
 static void ptable_clone__shallow_many(void **state) {
@@ -112,7 +140,7 @@ static void ptable_clone__shallow_many(void **state) {
 	assert_nul(ptable_put(from, K3, V3));
 	assert_nul(ptable_put(from, K4, NULL));
 
-	const struct PTable *to = ptable_clone(from, NULL);
+	const struct PTable *to = ptable_clone(from);
 
 	assert_non_nul(to);
 
@@ -125,7 +153,8 @@ static void ptable_clone__shallow_many(void **state) {
 }
 
 static void ptable_clone__deep_many(void **state) {
-	const struct PTable *from = ptable_init();
+	const struct PTableParams params = { .clone_val = mock_clone, };
+	const struct PTable *from = ptable_init_with(params);
 
 	assert_nul(ptable_put(from, K0, V0));
 	assert_nul(ptable_put(from, K1, V1));
@@ -136,7 +165,7 @@ static void ptable_clone__deep_many(void **state) {
 	expect_ptr(mock_clone, val, V1);
 	will_return_ptr_type(mock_clone, V3, void*);
 
-	const struct PTable *to = ptable_clone(from, mock_clone);
+	const struct PTable *to = ptable_clone(from);
 
 	assert_non_nul(to);
 
@@ -168,7 +197,7 @@ static void ptable_clone__alloc_key(void **state) {
 	expect_ptr(mock_alloc, val, K1);
 	will_return_ptr_type(mock_alloc, K3, void*);
 
-	const struct PTable *to = ptable_clone(from, NULL);
+	const struct PTable *to = ptable_clone(from);
 
 	assert_non_nul(to);
 

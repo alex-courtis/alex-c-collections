@@ -43,8 +43,9 @@ static int after_each(void **state) {
 }
 
 static void itable_put_get_remove(void **state) {
+	const struct ITableParams params = { 0 };
+	const struct ITable *tab = itable_init_with(params);
 
-	const struct ITable *tab = itable_init();
 	assert_nul(itable_put(tab, 0, V0));
 	assert_nul(itable_put(tab, 1, V1));
 	assert_nul(itable_put(tab, 2, V2));
@@ -202,7 +203,7 @@ static void itable_clone__shallow(void **state) {
 	assert_nul(itable_put(from, 1, NULL));
 	assert_nul(itable_put(from, 2, V2));
 
-	const struct ITable *to = itable_clone(from, NULL);
+	const struct ITable *to = itable_clone(from);
 
 	assert_non_nul(to);
 

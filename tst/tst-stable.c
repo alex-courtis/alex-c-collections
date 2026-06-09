@@ -63,7 +63,6 @@ static void stable_put_get_remove__case_sensitive(void **state) {
 }
 
 static void stable_put_get_remove__case_insensitive(void **state) {
-
 	const struct STableParams params = { .case_insensitive = true, };
 	const struct STable *tab = stable_init_with(params);
 
@@ -259,7 +258,7 @@ static void stable_clone__shallow(void **state) {
 	assert_nul(stable_put(from, "b", NULL));
 	assert_nul(stable_put(from, "c", V2));
 
-	const struct STable *to = stable_clone(from, NULL);
+	const struct STable *to = stable_clone(from);
 
 	assert_non_nul(to);
 
