@@ -2,6 +2,7 @@
 #include "asserts.h"
 #include "assert-slist.h"
 #include "expects.h"
+#include "mock-fn.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -30,10 +31,6 @@ static int before_each(void **state) {
 
 static int after_each(void **state) {
 	return 0;
-}
-
-static void mock_free_val(const void* const val) {
-	check_expected_ptr(val);
 }
 
 static char* fn_str_first(const void *val) {
@@ -77,11 +74,11 @@ static void slist_free_vals__many(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	expect_str(mock_free_val, val, "0");
-	expect_str(mock_free_val, val, "1");
-	expect_str(mock_free_val, val, "2");
+	expect_str(mock_free, val, "0");
+	expect_str(mock_free, val, "1");
+	expect_str(mock_free, val, "2");
 
-	slist_free_vals(&list, mock_free_val);
+	slist_free_vals(&list, mock_free);
 
 	assert_nul(list);
 }
@@ -171,10 +168,10 @@ static void slist_remove_all_free__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 4);
 
-	expect_str(mock_free_val, val, "x");
-	expect_str(mock_free_val, val, "x");
+	expect_str(mock_free, val, "x");
+	expect_str(mock_free, val, "x");
 
-	slist_remove_all_free(&list, fn_equal_strcmp, "x", mock_free_val);
+	slist_remove_all_free(&list, fn_equal_strcmp, "x", mock_free);
 
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 2);

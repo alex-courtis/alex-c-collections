@@ -2,6 +2,7 @@
 #include "asserts.h"
 #include "assert-pset.h"
 #include "expects.h"
+#include "mock-fn.h"
 
 #include <cmocka.h>
 #include <stdlib.h>
@@ -34,10 +35,6 @@ static int before_each(void **state) {
 
 static int after_each(void **state) {
 	return 0;
-}
-
-static void mock_free_val(const void* const val) {
-	check_expected_ptr(val);
 }
 
 static char* fn_str_first(const void *val) {
@@ -161,10 +158,10 @@ static void pset_free_vals__free_val(void **state) {
 	assert_true(pset_contains(set, vals[0], NULL));
 	assert_true(pset_contains(set, vals[1], NULL));
 
-	expect_str(mock_free_val, val, vals[0]);
-	expect_str(mock_free_val, val, vals[1]);
+	expect_str(mock_free, val, vals[0]);
+	expect_str(mock_free, val, vals[1]);
 
-	pset_free_vals(set, mock_free_val);
+	pset_free_vals(set, mock_free);
 }
 
 static void pset_add__new(void **state) {

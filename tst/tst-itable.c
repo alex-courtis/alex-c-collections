@@ -2,6 +2,7 @@
 #include "asserts.h"
 #include "assert-itable.h"
 #include "expects.h"
+#include "mock-fn.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -40,20 +41,6 @@ static int before_each(void **state) {
 
 static int after_each(void **state) {
 	return 0;
-}
-
-static bool mock_test_key_int(const uint64_t key, const void* const data) {
-	check_expected_int(key);
-	check_expected_ptr(data);
-
-	return mock_type(bool);
-}
-
-static bool mock_test_val(const void* const val, const void* const data) {
-	check_expected_ptr(val);
-	check_expected_ptr(data);
-
-	return mock_type(bool);
 }
 
 static void itable_put_get_remove(void **state) {
@@ -115,30 +102,30 @@ static void itable_filter_iter__(void **state) {
 	assert_nul(itable_put(tab, 2, V2));
 
 	// skip "0"
-	expect_int_value(mock_test_key_int, key, 0);
-	expect_ptr(mock_test_key_int, data, D0);
-	will_return(mock_test_key_int, false);
+	expect_int_value(mock_test_uint64_t, val, 0);
+	expect_ptr(mock_test_uint64_t, data, D0);
+	will_return(mock_test_uint64_t, false);
 
 	// get 1
-	expect_int_value(mock_test_key_int, key, 1);
-	expect_ptr(mock_test_key_int, data, D0);
-	will_return(mock_test_key_int, true);
-	expect_ptr(mock_test_val, val, V1);
-	expect_ptr(mock_test_val, data, D0);
-	will_return(mock_test_val, true);
+	expect_int_value(mock_test_uint64_t, val, 1);
+	expect_ptr(mock_test_uint64_t, data, D0);
+	will_return(mock_test_uint64_t, true);
+	expect_ptr(mock_test, val, V1);
+	expect_ptr(mock_test, data, D0);
+	will_return(mock_test, true);
 
-	const struct ITableIter *iter = itable_filter_iter(tab, mock_test_key_int, mock_test_val, D0);
+	const struct ITableIter *iter = itable_filter_iter(tab, mock_test_uint64_t, mock_test, D0);
 	assert_non_nul(iter);
 	assert_int_equal(itable_iter_key(iter), 1);
 	assert_ptr_equal(itable_iter_val(iter), V1);
 
 	// skip V2
-	expect_int_value(mock_test_key_int, key, 2);
-	expect_ptr(mock_test_key_int, data, D0);
-	will_return(mock_test_key_int, true);
-	expect_ptr(mock_test_val, val, V2);
-	expect_ptr(mock_test_val, data, D0);
-	will_return(mock_test_val, false);
+	expect_int_value(mock_test_uint64_t, val, 2);
+	expect_ptr(mock_test_uint64_t, data, D0);
+	will_return(mock_test_uint64_t, true);
+	expect_ptr(mock_test, val, V2);
+	expect_ptr(mock_test, data, D0);
+	will_return(mock_test, false);
 
 	// done
 	iter = itable_iter_next(iter);
