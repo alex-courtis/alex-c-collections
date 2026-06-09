@@ -11,12 +11,11 @@
 
 #include "sset.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #include "data/words-sorted.c"
 #include "data/words-unsorted.c"
-
-/*
-   diff --color=always -U 10000 <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' tst/tst-sset.c)
-   */
+#pragma GCC diagnostic pop // "-Wunused-variable"
 
 struct SSet {
 	const char **vals;
