@@ -45,16 +45,15 @@ static void grow_pset(struct PSet *set) {
 }
 
 const struct PSet *pset_init(void) {
-	return pset_init_with(10, 10);
+	const struct PSetParams params = { 0 };
+	return pset_init_with(params);
 }
 
-const struct PSet *pset_init_with(const size_t initial, const size_t grow) {
-	if (initial == 0 || grow == 0)
-		return NULL;
-
+const struct PSet *pset_init_with(const struct PSetParams params) {
 	struct PSet *set = calloc(1, sizeof(struct PSet));
-	set->capacity = initial;
-	set->grow = grow;
+
+	set->capacity = params.initial ? params.initial : 10;
+	set->grow = params.grow ? params.grow : 10;;
 	set->vals = calloc(set->capacity, sizeof(void*));
 
 	return set;
@@ -64,7 +63,8 @@ const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone_val) 
 	if (!set)
 		return NULL;
 
-	const struct PSet *cloned = pset_init_with(set->capacity, set->grow);
+	const struct PSetParams params = { .initial = set->capacity, .grow = set->grow, };
+	const struct PSet *cloned = pset_init_with(params);
 
 	// loop over vals
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
@@ -309,8 +309,4 @@ char *pset_str(const struct PSet* const set, fn_str str_val) {
 }
 size_t pset_size(const struct PSet* const set) {
 	return set ? set->size : 0;
-}
-
-size_t pset_capacity(const struct PSet* const set) {
-	return set ? set->capacity : 0;
 }

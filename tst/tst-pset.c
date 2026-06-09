@@ -21,6 +21,13 @@
    diff --color=always -U 10000 <(sed -e 's/pset/xset/g ; s/PSet/XSet/g' tst/tst-pset.c) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' tst/tst-sset.c) | less
    */
 
+struct PSet {
+	const void **vals;
+	size_t capacity;
+	size_t grow;
+	size_t size;
+};
+
 static int before_all(void **state) {
 	return 0;
 }
@@ -42,21 +49,29 @@ static char* fn_str_first(const void *val) {
 }
 
 static void pset_init__size(void **state) {
-	const struct PSet *set = pset_init_with(5, 50);
+	const struct PSetParams params = { .initial = 2, .grow = 4 };
+	const struct PSet *set = pset_init_with(params);
 
 	assert_non_nul(set);
 
-	assert_int_equal(pset_size(set), 0);
-
-	assert_int_equal(pset_capacity(set), 5);
+	assert_int_equal(set->size, 0);
+	assert_int_equal(set->capacity, 2);
+	assert_int_equal(set->grow, 4);
 
 	pset_free_vals(set, NULL);
 }
 
-static void pset_init__invalid(void **state) {
-	const struct PSet *set = pset_init_with(0, 0);
+static void pset_init__defaults(void **state) {
+	const struct PSetParams params = { .initial = 0, .grow = 0 };
+	const struct PSet *set = pset_init_with(params);
 
-	assert_nul(set);
+	assert_non_nul(set);
+
+	assert_int_equal(set->size, 0);
+	assert_int_equal(set->capacity, 10);
+	assert_int_equal(set->grow, 10);
+
+	pset_free(set);
 }
 
 static void pset_clone__null(void **state) {
@@ -77,15 +92,16 @@ static void pset_clone__empty(void **state) {
 }
 
 static void pset_clone__params(void **state) {
-	const struct PSet *set = pset_init_with(3, 4);
+	const struct PSetParams params = { .initial = 3, .grow = 4, };
+	const struct PSet *set = pset_init_with(params);
 
 	const struct PSet *clone = pset_clone(set, NULL);
 
 	assert_non_nul(clone);
 
-	assert_int_equal(pset_size(clone), 0);
-
-	assert_int_equal(pset_capacity(clone), 3);
+	assert_int_equal(set->size, 0);
+	assert_int_equal(set->capacity, 3);
+	assert_int_equal(set->grow, 4);
 
 	pset_free_vals(set, NULL);
 	pset_free_vals(clone, NULL);
@@ -148,7 +164,7 @@ static void pset_free_vals__null(void **state) {
 }
 
 static void pset_free_vals__free_val(void **state) {
-	const struct PSet *set = pset_init_with(3, 5);
+	const struct PSet *set = pset_init();
 
 	char *vals[] = { "0", "1", };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -165,7 +181,7 @@ static void pset_free_vals__free_val(void **state) {
 }
 
 static void pset_add__new(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -182,7 +198,7 @@ static void pset_add__new(void **state) {
 }
 
 static void pset_add__new_fn_equal(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, strdup("0"), fn_equal_strcmp));
 	assert_true(pset_add(set, strdup("1"), fn_equal_strcmp));
@@ -198,7 +214,7 @@ static void pset_add__new_fn_equal(void **state) {
 }
 
 static void pset_add__null(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -215,34 +231,36 @@ static void pset_add__null(void **state) {
 }
 
 static void pset_add__grow(void **state) {
-	const struct PSet *set = pset_init_with(2, 5);
+	const struct PSetParams params = { .initial = 2, .grow = 5 };
+	const struct PSet *set = pset_init_with(params);
 
 	void *initial[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(set, initial[0], NULL));
 	assert_true(pset_add(set, initial[1], NULL));
 
-	assert_int_equal(pset_size(set), 2);
-	assert_int_equal(pset_capacity(set), 2);
+	assert_int_equal(set->size, 2);
+	assert_int_equal(set->capacity, 2);
+	assert_int_equal(set->grow, 5);
 
 	assert_true(pset_contains(set, initial[0], NULL));
 	assert_true(pset_contains(set, initial[1], NULL));
 
 	void *grow[] = { strdup("2"), strdup("3"), };
 	assert_true(pset_add(set, grow[0], NULL));
-	assert_int_equal(pset_size(set), 3);
-	assert_int_equal(pset_capacity(set), 7);
+	assert_int_equal(set->size, 3);
+	assert_int_equal(set->capacity, 7);
 	assert_true(pset_contains(set, grow[0], NULL));
 
 	assert_true(pset_add(set, grow[1], NULL));
-	assert_int_equal(pset_size(set), 4);
-	assert_int_equal(pset_capacity(set), 7);
+	assert_int_equal(set->size, 4);
+	assert_int_equal(set->capacity, 7);
 	assert_true(pset_contains(set, grow[1], NULL));
 
 	void *subsequent[] = { strdup("4"), strdup("5"), };
 	assert_true(pset_add(set, subsequent[0], NULL));
 	assert_true(pset_add(set, subsequent[1], NULL));
-	assert_int_equal(pset_size(set), 6);
-	assert_int_equal(pset_capacity(set), 7);
+	assert_int_equal(set->size, 6);
+	assert_int_equal(set->capacity, 7);
 
 	assert_true(pset_contains(set, subsequent[0], NULL));
 	assert_true(pset_contains(set, subsequent[1], NULL));
@@ -251,7 +269,7 @@ static void pset_add__grow(void **state) {
 }
 
 static void pset_remove__existing(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("2"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -282,7 +300,7 @@ static void pset_remove__existing(void **state) {
 }
 
 static void pset_remove__inexistent(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -303,7 +321,7 @@ static void pset_remove__inexistent(void **state) {
 }
 
 static void pset_remove__fn_equal(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, strdup("0"), fn_equal_strcmp));
 	assert_true(pset_add(set, strdup("1"), fn_equal_strcmp));
@@ -334,7 +352,7 @@ static void pset_remove__fn_equal(void **state) {
 }
 
 static void pset_iter__empty(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	assert_int_equal(pset_size(set), 0);
 
@@ -344,7 +362,7 @@ static void pset_iter__empty(void **state) {
 }
 
 static void pset_iter__free(void **state) {
-	const struct PSet *set = pset_init_with(3, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -362,7 +380,7 @@ static void pset_iter__free(void **state) {
 
 
 static void pset_iter__many(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -385,7 +403,7 @@ static void pset_iter__many(void **state) {
 }
 
 static void pset_iter__cleared(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -407,7 +425,7 @@ static void pset_iter__cleared(void **state) {
 }
 
 static void pset_add__again(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), strdup("3"), };
 	assert_true(pset_add(set, vals[0], NULL));
@@ -506,13 +524,14 @@ static void pset_sort__many(void **state) {
 }
 
 static void pset_sort__words(void **state) {
-	const struct PSet *actual = pset_init_with(400, 400);
+	const struct PSetParams params = { .initial = 400, .grow = 400, };
+	const struct PSet *actual = pset_init_with(params);
 
 	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
 		assert_true(pset_add(actual, words_unsorted[i - 1], NULL));
 	}
 
-	const struct PSet *expected = pset_init_with(400, 400);
+	const struct PSet *expected = pset_init_with(params);
 
 	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
 		assert_true(pset_add(expected, words_sorted[i], NULL));
@@ -527,8 +546,8 @@ static void pset_sort__words(void **state) {
 }
 
 static void pset_equal__length_different(void **state) {
-	const struct PSet *a = pset_init_with(5, 5);
-	const struct PSet *b = pset_init_with(5, 5);
+	const struct PSet *a = pset_init();
+	const struct PSet *b = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 
@@ -544,8 +563,8 @@ static void pset_equal__length_different(void **state) {
 }
 
 static void pset_equal__pointers_ok(void **state) {
-	const struct PSet *a = pset_init_with(5, 5);
-	const struct PSet *b = pset_init_with(5, 5);
+	const struct PSet *a = pset_init();
+	const struct PSet *b = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 	assert_true(pset_add(a, vals[0], NULL));
@@ -561,8 +580,8 @@ static void pset_equal__pointers_ok(void **state) {
 }
 
 static void pset_equal__pointers_different(void **state) {
-	const struct PSet *a = pset_init_with(5, 5);
-	const struct PSet *b = pset_init_with(5, 5);
+	const struct PSet *a = pset_init();
+	const struct PSet *b = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
 	assert_true(pset_add(a, vals[0], NULL));
@@ -580,8 +599,8 @@ static void pset_equal__pointers_different(void **state) {
 }
 
 static void pset_equal__comparison_ok(void **state) {
-	const struct PSet *a = pset_init_with(5, 5);
-	const struct PSet *b = pset_init_with(5, 5);
+	const struct PSet *a = pset_init();
+	const struct PSet *b = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 
@@ -598,8 +617,8 @@ static void pset_equal__comparison_ok(void **state) {
 }
 
 static void pset_equal__comparison_different(void **state) {
-	const struct PSet *a = pset_init_with(5, 5);
-	const struct PSet *b = pset_init_with(5, 5);
+	const struct PSet *a = pset_init();
+	const struct PSet *b = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), strdup("2"), };
 
@@ -618,7 +637,7 @@ static void pset_equal__comparison_different(void **state) {
 }
 
 static void pset_vals_slist__empty(void **state) {
-	const struct PSet *set = pset_init_with(3, 5);
+	const struct PSet *set = pset_init();
 
 	assert_nul(pset_slist(set));
 
@@ -626,7 +645,7 @@ static void pset_vals_slist__empty(void **state) {
 }
 
 static void pset_vals_slist__many(void **state) {
-	const struct PSet *tab = pset_init_with(3, 5);
+	const struct PSet *tab = pset_init();
 
 	void *vals[] = { strdup("0"), strdup("1"), };
 
@@ -648,7 +667,7 @@ static void pset_str__null(void **state) {
 }
 
 static void pset_str__empty(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	char *str = pset_str(set, NULL);
 	assert_str_equal(str, "");
@@ -658,7 +677,7 @@ static void pset_str__empty(void **state) {
 }
 
 static void pset_str__many(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	void *vals[] = { "0", "1", "2", };
 
@@ -684,7 +703,7 @@ static void pset_str__many(void **state) {
 }
 
 static void pset_str__fn_str(void **state) {
-	const struct PSet *set = pset_init_with(5, 5);
+	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, "ONE", NULL));
 	assert_true(pset_add(set, "TWO", NULL));
@@ -704,7 +723,7 @@ static void pset_str__fn_str(void **state) {
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(pset_init__size),
-		TEST(pset_init__invalid),
+		TEST(pset_init__defaults),
 
 		TEST(pset_clone__null),
 		TEST(pset_clone__empty),

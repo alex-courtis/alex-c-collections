@@ -20,14 +20,22 @@ struct PSet; // IWYU pragma: keep
 struct PSetIter; // IWYU pragma: keep
 
 /*
+ * Optional constructor params
+ */
+struct PSetParams {
+	const size_t initial; // default 10
+	const size_t grow;    // default 10
+};
+
+/*
  * Lifecycle
  */
 
-// construct a set with initial size 10, growing by 10 as necessary
+// construct a set with defaults
 const struct PSet *pset_init(void);
 
-// construct a set with initial size, grow as needed, NULL on zero initial or grow
-const struct PSet *pset_init_with(const size_t initial, const size_t grow);
+// construct a set with params
+const struct PSet *pset_init_with(const struct PSetParams params);
 
 // clone a set, NULL clone_val for shallow clone
 const struct PSet *pset_clone(const struct PSet* const set, fn_clone clone_val);
@@ -93,9 +101,6 @@ char *pset_str(const struct PSet* const set, fn_str str_val);
 
 // number of values
 size_t pset_size(const struct PSet* const set);
-
-// current capacity: initial + n * grow
-size_t pset_capacity(const struct PSet* const set);
 
 #endif // PSET_H
 

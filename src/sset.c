@@ -47,18 +47,18 @@ static void grow_sset(struct SSet *set) {
 }
 
 const struct SSet *sset_init(void) {
-	return sset_init_with(10, 10, false);
+	const struct SSetParams params = { 0 };
+	return sset_init_with(params);
 }
 
-const struct SSet *sset_init_with(const size_t initial, const size_t grow, const bool case_insensitive) {
-	if (initial == 0 || grow == 0)
-		return NULL;
-
+const struct SSet *sset_init_with(const struct SSetParams params) {
 	struct SSet *set = calloc(1, sizeof(struct SSet));
-	set->capacity = initial;
-	set->grow = grow;
+
+	set->capacity = params.initial ? params.initial : 10;
+	set->grow = params.grow ? params.grow : 10;;
 	set->vals = calloc(set->capacity, sizeof(void*));
-	if (case_insensitive) {
+
+	if (params.case_insensitive) {
 		set->equal = fn_equal_strcasecmp;
 		set->less_than = fn_less_than_strcasecmp;
 	} else {
@@ -73,7 +73,8 @@ const struct SSet *sset_clone(const struct SSet* const set) {
 	if (!set)
 		return NULL;
 
-	const struct SSet *cloned = sset_init_with(set->capacity, set->grow, set->equal == fn_equal_strcasecmp);
+	const struct SSetParams params = { .initial = set->capacity, .grow = set->grow, .case_insensitive = set->equal == fn_equal_strcasecmp, };
+	const struct SSet *cloned = sset_init_with(params);
 
 	for (const char **v = set->vals; v < set->vals + set->size; v++) {
 		sset_add(cloned, *v);
@@ -272,8 +273,4 @@ char *sset_str(const struct SSet* const set) {
 
 size_t sset_size(const struct SSet* const set) {
 	return set ? set->size : 0;
-}
-
-size_t sset_capacity(const struct SSet* const set) {
-	return set ? set->capacity : 0;
 }

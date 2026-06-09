@@ -18,14 +18,23 @@ struct SSet; // IWYU pragma: keep
 struct SSetIter; // IWYU pragma: keep
 
 /*
+ * Optional constructor params
+ */
+struct SSetParams {
+	const size_t initial;        // default 10
+	const size_t grow;           // default 10
+	const bool case_insensitive; // default false
+};
+
+/*
  * Lifecycle
  */
 
-// construct a set with initial size 10, growing by 10 as necessary
+// construct a set with defaults
 const struct SSet *sset_init(void);
 
-// construct a set with initial size, grow as needed, NULL on zero initial or grow
-const struct SSet *sset_init_with(const size_t initial, const size_t grow, const bool case_insensitive);
+// construct a set with params
+const struct SSet *sset_init_with(const struct SSetParams params);
 
 // deep clone
 const struct SSet *sset_clone(const struct SSet* const set);
@@ -88,9 +97,6 @@ char *sset_str(const struct SSet* const set);
 
 // number of values
 size_t sset_size(const struct SSet* const set);
-
-// current capacity: initial + n * grow
-size_t sset_capacity(const struct SSet* const set);
 
 #endif // SSET_H
 
