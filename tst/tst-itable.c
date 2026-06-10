@@ -67,8 +67,7 @@ static void itable_free_vals__(void **state) {
 	const struct ITable *tab = itable_init();
 	assert_nul(itable_put(tab, 0, strdup("zero")));
 
-	// valgrind will indicate that key and val have been free'd
-	itable_free_vals(tab, NULL);
+	itable_free_vals(tab);
 }
 
 static void itable_iter__(void **state) {

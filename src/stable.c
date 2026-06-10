@@ -39,6 +39,7 @@ const struct STable *stable_init_with(const struct STableParams params) {
 		.equal_val = params.equal_val,
 		.alloc_key = (fn_alloc)strdup,
 		.free_key = (fn_free)free,
+		.free_val = params.free_val,
 		.str_key = fn_str_str,
 		.clone_val = params.clone_val,
 		.initial = params.initial,
@@ -76,11 +77,11 @@ void stable_free(const void* const cvtab) {
 	free(tab);
 }
 
-void stable_free_vals(const struct STable* const tab, fn_free free_val) {
+void stable_free_vals(const struct STable* const tab) {
 	if (!tab)
 		return;
 
-	ptable_free_vals(tab->ptab, free_val);
+	ptable_free_vals(tab->ptab);
 
 	free((void*)tab);
 }

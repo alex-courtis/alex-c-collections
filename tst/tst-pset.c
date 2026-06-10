@@ -38,6 +38,7 @@ struct PSet {
 	size_t grow;
 	size_t size;
 	fn_equal equal_val;
+	fn_free free_val;
 	fn_clone clone_val;
 };
 
@@ -174,12 +175,12 @@ static void pset_free_vals__null_free_val(void **state) {
 
 	assert_int_equal(pset_size(set), 1);
 
-	// valgrind will indicate that val has been free'd
 	pset_free_vals(set, NULL);
 }
 
 static void pset_free_vals__free_val(void **state) {
-	const struct PSet *set = pset_init();
+	const struct PSetParams params = { .free_val = mock_free, };
+	const struct PSet *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));

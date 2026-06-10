@@ -18,6 +18,7 @@ struct PTable {
 	fn_equal equal_val;
 	fn_alloc alloc_key;
 	fn_free free_key;
+	fn_free free_val;
 	fn_str str_key;
 	fn_clone clone_val;
 };
@@ -69,6 +70,7 @@ const struct PTable *ptable_init_with(const struct PTableParams params) {
 	tab->equal_val = params.equal_val;
 	tab->alloc_key = params.alloc_key;
 	tab->free_key = params.free_key;
+	tab->free_val = params.free_val;
 	tab->str_key = params.str_key;
 	tab->clone_val = params.clone_val;
 
@@ -118,14 +120,14 @@ void ptable_free(const void* const cvtab) {
 	free(tab);
 }
 
-void ptable_free_vals(const struct PTable* const tab, fn_free free_val) {
+void ptable_free_vals(const struct PTable* const tab) {
 	if (!tab)
 		return;
 
 	for (const void **v = tab->vals; v < tab->vals + tab->capacity; v++) {
 		if (*v) {
-			if (free_val) {
-				free_val(*v);
+			if (tab->free_val) {
+				tab->free_val(*v);
 			} else {
 				free((void*)*v);
 			}

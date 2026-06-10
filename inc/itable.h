@@ -26,6 +26,7 @@ struct ITableIter; // IWYU pragma: keep
  */
 struct ITableParams {
 	fn_equal equal_val;   // compare val pointers
+	fn_free free_val;     // free
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
@@ -47,8 +48,8 @@ const struct ITable *itable_clone(const struct ITable* const from);
 // free table
 void itable_free(const void* const tab);
 
-// free table and vals, null free_val uses free()
-void itable_free_vals(const struct ITable* const tab, fn_free free_val);
+// free table and vals
+void itable_free_vals(const struct ITable* const tab);
 
 // free iter
 void itable_iter_free(const struct ITableIter* const iter);

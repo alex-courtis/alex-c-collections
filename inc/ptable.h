@@ -28,6 +28,7 @@ struct PTableParams {
 	fn_equal equal_val;   // compare val pointers
 	fn_alloc alloc_key;   // set the key pointer, result be idempotent
 	fn_free free_key;     // nop
+	fn_free free_val;     // free
 	fn_str str_key;       // "%p"
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
@@ -50,8 +51,8 @@ const struct PTable *ptable_clone(const struct PTable* const from);
 // free table
 void ptable_free(const void* const tab);
 
-// free table and vals, null free_val uses free()
-void ptable_free_vals(const struct PTable* const tab, fn_free free_val);
+// free table and vals
+void ptable_free_vals(const struct PTable* const tab);
 
 // free iter
 void ptable_iter_free(const struct PTableIter* const iter);

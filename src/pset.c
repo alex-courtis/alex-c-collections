@@ -20,6 +20,7 @@ struct PSet {
 	size_t grow;
 	size_t size;
 	fn_equal equal_val;
+	fn_free free_val;
 	fn_clone clone_val;
 };
 
@@ -60,6 +61,7 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	set->grow = params.grow ? params.grow : 10;;
 	set->vals = calloc(set->capacity, sizeof(void*));
 	set->equal_val = params.equal_val;
+	set->free_val = params.free_val;
 	set->clone_val = params.clone_val;
 
 	return set;
@@ -104,8 +106,8 @@ void pset_free_vals(const struct PSet* const set, fn_free free_val) {
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (*v) {
-			if (free_val) {
-				free_val(*v);
+			if (set->free_val) {
+				set->free_val(*v);
 			} else {
 				free((void*)*v);
 			}

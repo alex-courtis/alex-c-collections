@@ -84,8 +84,7 @@ static void stable_free_vals__(void **state) {
 	const struct STable *tab = stable_init();
 	assert_nul(stable_put(tab, "a", strdup("zero")));
 
-	// valgrind will indicate that key and val have been free'd
-	stable_free_vals(tab, NULL);
+	stable_free_vals(tab);
 }
 
 static void stable_iter__(void **state) {

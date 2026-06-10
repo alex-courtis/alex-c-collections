@@ -24,6 +24,7 @@ struct PSetIter; // IWYU pragma: keep
  */
 struct PSetParams {
 	fn_equal equal_val;   // compare val pointers
+	fn_free free_val;     // free
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
@@ -45,7 +46,7 @@ const struct PSet *pset_clone(const struct PSet* const from);
 // free set
 void pset_free(const void* const set);
 
-// free set and vals, NULL free_val uses free()
+// free table and vals
 void pset_free_vals(const struct PSet* const set, fn_free free_val);
 
 // free iter
