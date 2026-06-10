@@ -33,6 +33,7 @@ const struct STable *stable_init(void) {
 	return stable_init_with(params);
 }
 
+// TODO test this and clone
 const struct STable *stable_init_with(const struct STableParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
@@ -41,6 +42,7 @@ const struct STable *stable_init_with(const struct STableParams params) {
 		.free_key = (fn_free)free,
 		.free_val = params.free_val,
 		.str_key = fn_str_str,
+		.str_val = params.str_val,
 		.clone_val = params.clone_val,
 		.initial = params.initial,
 		.grow = params.grow,
@@ -173,8 +175,8 @@ struct SList *stable_vals_slist(const struct STable* const tab) {
 	return tab ? ptable_vals_slist(tab->ptab) : NULL;
 }
 
-char *stable_str(const struct STable* const tab, fn_str str_val) {
-	return tab ? ptable_str(tab->ptab, str_val) : NULL;
+char *stable_str(const struct STable* const tab) {
+	return tab ? ptable_str(tab->ptab) : NULL;
 }
 
 size_t stable_size(const struct STable* const tab) {

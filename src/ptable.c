@@ -20,6 +20,7 @@ struct PTable {
 	fn_free free_key;
 	fn_free free_val;
 	fn_str str_key;
+	fn_str str_val;
 	fn_clone clone_val;
 };
 
@@ -72,6 +73,7 @@ const struct PTable *ptable_init_with(const struct PTableParams params) {
 	tab->free_key = params.free_key;
 	tab->free_val = params.free_val;
 	tab->str_key = params.str_key;
+	tab->str_val = params.str_val;
 	tab->clone_val = params.clone_val;
 
 	return tab;
@@ -84,7 +86,9 @@ const struct PTable *ptable_clone(const struct PTable* const from) {
 		.equal_val = from->equal_val,
 		.alloc_key = from->alloc_key,
 		.free_key = from->free_key,
+		.free_val = from->free_val,
 		.str_key = from->str_key,
+		.str_val = from->str_val,
 		.clone_val = from->clone_val,
 		.initial = from->capacity,
 		.grow = from->grow,
@@ -349,7 +353,7 @@ struct SList *ptable_vals_slist(const struct PTable* const tab) {
 	return list;
 }
 
-char *ptable_str(const struct PTable* const tab, fn_str str_val) {
+char *ptable_str(const struct PTable* const tab) {
 	if (!tab)
 		return NULL;
 
@@ -368,8 +372,8 @@ char *ptable_str(const struct PTable* const tab, fn_str str_val) {
 		}
 
 		if (*v) {
-			if (str_val) {
-				char *val = str_val(*v);
+			if (tab->str_val) {
+				char *val = tab->str_val(*v);
 				out = sprintf_append(out, "%s\n", val);
 				free(val);
 			} else {

@@ -30,6 +30,7 @@ struct PTableParams {
 	fn_free free_key;     // nop
 	fn_free free_val;     // free
 	fn_str str_key;       // "%p"
+	fn_str str_val;       // "%p"
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
@@ -110,9 +111,8 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
  * Info
  */
 
-// TODO move str_val to member
-// to string, user frees, format "%p = %p\n", "%s" when str_val
-char *ptable_str(const struct PTable* const tab, fn_str str_val);
+// to string, user frees, format "str_key = str_val\n"
+char *ptable_str(const struct PTable* const tab);
 
 // number of entries
 size_t ptable_size(const struct PTable* const tab);

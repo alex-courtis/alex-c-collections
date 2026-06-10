@@ -54,6 +54,7 @@ const struct ITable *itable_init(void) {
 	return itable_init_with(params);
 }
 
+// TODO test this and clone
 const struct ITable *itable_init_with(const struct ITableParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = fn_equal_key,
@@ -62,6 +63,7 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 		.free_key = (fn_free)free,
 		.free_val = params.free_val,
 		.str_key = fn_str_key,
+		.str_val = params.str_val,
 		.clone_val = params.clone_val,
 		.initial = params.initial,
 		.grow = params.grow,
@@ -211,8 +213,8 @@ struct SList *itable_vals_slist(const struct ITable* const tab) {
 	return tab ? ptable_vals_slist(tab->ptab) : NULL;
 }
 
-char *itable_str(const struct ITable* const tab, fn_str str_val) {
-	return tab ? ptable_str(tab->ptab, str_val) : NULL;
+char *itable_str(const struct ITable* const tab) {
+	return tab ? ptable_str(tab->ptab) : NULL;
 }
 
 size_t itable_size(const struct ITable* const tab) {

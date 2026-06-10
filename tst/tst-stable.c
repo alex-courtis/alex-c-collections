@@ -160,11 +160,11 @@ static void stable_equal__case_sensitive(void **state) {
 	assert_nul(stable_put(expected, "a", V0));
 	assert_nul(stable_put(expected, "b", V1));
 
-	assert_stable_equal(actual, expected, NULL);
+	assert_stable_equal(actual, expected);
 
 	assert_nul(stable_put(actual, "c", V2));
 
-	assert_stable_not_equal(actual, expected, NULL);
+	assert_stable_not_equal(actual, expected);
 
 	stable_free(actual);
 	stable_free(expected);
@@ -182,11 +182,11 @@ static void stable_equal__case_insensitive(void **state) {
 	assert_nul(stable_put(expected, "A", V0));
 	assert_nul(stable_put(expected, "B", V1));
 
-	assert_stable_equal(actual, expected, NULL);
+	assert_stable_equal(actual, expected);
 
 	assert_nul(stable_put(actual, "c", V2));
 
-	assert_stable_not_equal(actual, expected, NULL);
+	assert_stable_not_equal(actual, expected);
 
 	stable_free(actual);
 	stable_free(expected);
@@ -207,7 +207,7 @@ static void stable_str__(void **state) {
 			V2
 			);
 
-	char *actual = stable_str(tab, NULL);
+	char *actual = stable_str(tab);
 
 	assert_str_equal(actual, expected);
 
@@ -263,7 +263,7 @@ static void stable_clone__shallow(void **state) {
 
 	assert_int_equal(stable_size(to), 3);
 
-	assert_stable_equal(from, to, NULL);
+	assert_stable_equal(from, to);
 
 	stable_free(from);
 	stable_free(to);

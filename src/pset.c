@@ -22,6 +22,7 @@ struct PSet {
 	fn_equal equal_val;
 	fn_less_than less_than_val;
 	fn_free free_val;
+	fn_str str_val;
 	fn_clone clone_val;
 };
 
@@ -64,6 +65,7 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	set->equal_val = params.equal_val;
 	set->less_than_val = params.less_than_val;
 	set->free_val = params.free_val;
+	set->str_val = params.str_val;
 	set->clone_val = params.clone_val;
 
 	return set;
@@ -78,15 +80,14 @@ const struct PSet *pset_clone(const struct PSet* const from) {
 		.grow = from->grow,
 		.equal_val = from->equal_val,
 		.less_than_val = from->less_than_val,
+		.free_val = from->free_val,
+		.str_val = from->str_val,
 		.clone_val = from->clone_val,
 	};
 	const struct PSet *to = pset_init_with(params);
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		if (to->clone_val)
-			pset_add(to, to->clone_val(*v));
-		else
-			pset_add(to, *v);
+		pset_add(to, from->clone_val ? from->clone_val(*v) : *v);
 	}
 
 	return to;
@@ -295,15 +296,15 @@ struct SList *pset_slist(const struct PSet* const set) {
 	return list;
 }
 
-char *pset_str(const struct PSet* const set, fn_str str_val) {
+char *pset_str(const struct PSet* const set) {
 	if (!set)
 		return NULL;
 
 	char *out = strdup("");
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (str_val) {
-			char *val_str = str_val(*v);
+		if (set->str_val) {
+			char *val_str = set->str_val(*v);
 			out = sprintf_append(out, "%s\n", val_str);
 			free(val_str);
 		} else {

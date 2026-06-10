@@ -27,6 +27,7 @@ struct ITableIter; // IWYU pragma: keep
 struct ITableParams {
 	fn_equal equal_val;   // compare val pointers
 	fn_free free_val;     // free
+	fn_str str_val;       // "%p"
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
@@ -104,8 +105,8 @@ struct SList *itable_vals_slist(const struct ITable* const tab);
  * Info
  */
 
-// to string, user frees, format "%PRIu64 = %p\n", "%s" when str_val
-char *itable_str(const struct ITable* const tab, fn_str str_val);
+// to string, user frees, format "k = str_val\n"
+char *itable_str(const struct ITable* const tab);
 
 // number of entries
 size_t itable_size(const struct ITable* const tab);
