@@ -118,13 +118,13 @@ static void stable_iter__(void **state) {
 	const struct STableIter *iter = stable_iter(tab);
 
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "a");
-	assert_ptr_equal(stable_iter_val(iter), V0);
+	assert_str_equal(iter->key, "a");
+	assert_ptr_equal(iter->val, V0);
 
 	iter = stable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "b");
-	assert_nul(stable_iter_val(iter));
+	assert_str_equal(iter->key, "b");
+	assert_nul(iter->val);
 
 	stable_iter_free(iter);
 
@@ -153,8 +153,8 @@ static void stable_filter_iter__(void **state) {
 
 	const struct STableIter *iter = stable_filter_iter(tab, mock_test_str, mock_test, D0);
 	assert_non_nul(iter);
-	assert_str_equal(stable_iter_key(iter), "1");
-	assert_ptr_equal(stable_iter_val(iter), V1);
+	assert_str_equal(iter->key, "1");
+	assert_ptr_equal(iter->val, V1);
 
 	// skip V2
 	expect_string(mock_test_str, val, "2");

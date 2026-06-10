@@ -18,7 +18,12 @@ struct STable; // IWYU pragma: keep
 /*
  * Entry iterator.
  */
-struct STableIter; // IWYU pragma: keep
+struct STableIterState; // IWYU pragma: keep
+struct STableIter {
+	const char *key;
+	const void *val;
+	struct STableIterState *st;
+};
 
 /*
  * Optional constructor params, defaults noted
@@ -70,12 +75,6 @@ const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_t
 
 // next iterator entry, NULL at end of table
 const struct STableIter *stable_iter_next(const struct STableIter* const iter);
-
-// iterator key, NULL on NULL iter
-const char *stable_iter_key(const struct STableIter* const iter);
-
-// iterator value, NULL on NULL iter
-const void *stable_iter_val(const struct STableIter* const iter);
 
 /*
  * Mutate

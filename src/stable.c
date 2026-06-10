@@ -19,7 +19,7 @@ struct STable {
 	const struct PTable *ptab;
 };
 
-struct STableIter {
+struct STableIterState {
 	const struct PTableIter *pit;
 };
 
@@ -86,8 +86,10 @@ void stable_iter_free(const struct STableIter* const iter) {
 	if (!iter)
 		return;
 
-	ptable_iter_free(iter->pit);
+	if (iter->st)
+		ptable_iter_free(iter->st->pit);
 
+	free((void*)iter->st);
 	free((void*)iter);
 }
 
@@ -96,18 +98,7 @@ const void *stable_get(const struct STable* const tab, const char* const key) {
 }
 
 const struct STableIter *stable_iter(const struct STable* const tab) {
-	if (!tab)
-		return NULL;
-
-	const struct PTableIter *pit = ptable_iter(tab->ptab);
-
-	if (!pit)
-		return NULL;
-
-	struct STableIter *it = calloc(1, sizeof(struct STableIter));
-	it->pit = pit;
-
-	return it;
+	return stable_filter_iter(tab, NULL, NULL, NULL);
 }
 
 const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_test_str test_key, fn_test test_val, const void* const data) {
@@ -120,7 +111,11 @@ const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_t
 		return NULL;
 
 	struct STableIter *it = calloc(1, sizeof(struct STableIter));
-	it->pit = pit;
+	it->st = calloc(1, sizeof(struct STableIterState));
+	it->st->pit = pit;
+
+	it->key = pit->key;
+	it->val = pit->val;
 
 	return it;
 }
@@ -131,22 +126,22 @@ const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
 
 	struct STableIter *it = (struct STableIter*)iter;
 
-	it->pit = ptable_iter_next(iter->pit);
-
-	if (!it->pit) {
+	if (!it->st || !it->st->pit) {
 		free(it);
+		return NULL;
+	}
+
+	it->st->pit = ptable_iter_next(iter->st->pit);
+
+	if (it->st->pit) {
+		it->key = it->st->pit->key;
+		it->val = it->st->pit->val;
+	} else {
+		stable_iter_free(it);
 		it = NULL;
 	}
 
 	return it;
-}
-
-const char *stable_iter_key(const struct STableIter* const iter) {
-	return iter ? iter->pit->key : NULL;
-}
-
-const void *stable_iter_val(const struct STableIter* const iter) {
-	return iter ? iter->pit->val : NULL;
 }
 
 const void *stable_put(const struct STable* const tab, const char* const key, const void* const val) {
