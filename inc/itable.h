@@ -43,7 +43,7 @@ const struct ITable *itable_init(void);
 // construct a table with params
 const struct ITable *itable_init_with(const struct ITableParams params);
 
-// clone a table with clone_val
+// clone a table
 const struct ITable *itable_clone(const struct ITable* const from);
 
 // free table

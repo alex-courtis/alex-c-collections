@@ -5,7 +5,6 @@
 
 #include "util-file.h"
 
-#include "fn.h"
 #include "pset.h"
 
 void _assert_pset_equal(const struct PSet *a, const struct PSet *b, const char * const file, const int line) {

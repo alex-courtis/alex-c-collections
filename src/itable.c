@@ -11,9 +11,9 @@
 /*
    diff --color=always -U 10000 <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' inc/itable.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' inc/itable.h) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' inc/stable.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' src/itable.c) | less
+   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' src/stable.c) | less
    */
 
 struct ITable {
@@ -54,7 +54,6 @@ const struct ITable *itable_init(void) {
 	return itable_init_with(params);
 }
 
-// TODO test this and clone
 const struct ITable *itable_init_with(const struct ITableParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = fn_equal_key,

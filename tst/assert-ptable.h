@@ -5,7 +5,6 @@
 
 #include "util-file.h"
 
-#include "fn.h"
 #include "ptable.h"
 
 void _assert_ptable_equal(const struct PTable *a, const struct PTable *b, const char * const file, const int line) {

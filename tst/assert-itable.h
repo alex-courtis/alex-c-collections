@@ -5,7 +5,6 @@
 
 #include "util-file.h"
 
-#include "fn.h"
 #include "itable.h"
 
 void _assert_itable_equal(const struct ITable *a, const struct ITable *b, const char * const file, const int line) {

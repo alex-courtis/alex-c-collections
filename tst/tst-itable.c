@@ -9,10 +9,31 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "fn.h"
 #include "slist.h"
 #include "str.h"
 
 #include "itable.h"
+
+struct PTable {
+	const void **keys;
+	const void **vals;
+	size_t capacity;
+	size_t grow;
+	size_t size;
+	fn_equal equal_key;
+	fn_equal equal_val;
+	fn_alloc alloc_key;
+	fn_free free_key;
+	fn_free free_val;
+	fn_str str_key;
+	fn_str str_val;
+	fn_clone clone_val;
+};
+
+struct ITable {
+	const struct PTable *ptab;
+};
 
 /*
    diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
@@ -214,6 +235,39 @@ static void itable_clone__shallow(void **state) {
 	itable_free(to);
 }
 
+// also tests constructor
+static void itable_clone__params(void **state) {
+	const struct ITableParams params = {
+		.equal_val = mock_equal,
+		.free_val = mock_free,
+		.str_val = mock_str,
+		.clone_val = mock_clone,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct ITable *from = itable_init_with(params);
+
+	const struct ITable *to = itable_clone(from);
+
+	assert_non_nul(to);
+
+	// commented out are tested elsewhere
+	assert_int_equal(to->ptab->size, 0);
+	assert_int_equal(to->ptab->capacity, 99);
+	assert_int_equal(to->ptab->grow, 1);
+	// assert_ptr_equal(to->ptab->equal_key, mock_equal);
+	assert_ptr_equal(to->ptab->equal_val, mock_equal);
+	// assert_ptr_equal(to->ptab->alloc_key, (fn_alloc)strdup);
+	assert_ptr_equal(to->ptab->free_key, (fn_free)free);
+	assert_ptr_equal(to->ptab->free_val, mock_free);
+	// assert_ptr_equal(to->ptab->str_key, fn_str_str_or_null);
+	assert_ptr_equal(to->ptab->str_val, mock_str);
+	assert_ptr_equal(to->ptab->clone_val, mock_clone);
+
+	itable_free(from);
+	itable_free(to);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(itable_put_get_remove),
@@ -231,6 +285,7 @@ int main(void) {
 		TEST(itable_vals_slist__many),
 
 		TEST(itable_clone__shallow),
+		TEST(itable_clone__params),
 	};
 
 	return RUN(tests);

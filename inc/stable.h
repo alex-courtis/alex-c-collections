@@ -40,7 +40,7 @@ struct STableParams {
 // construct a table with STableParams defaults
 const struct STable *stable_init(void);
 
-// clone a table with clone_val
+// construct a table with params
 const struct STable *stable_init_with(const struct STableParams params);
 
 // clone a table

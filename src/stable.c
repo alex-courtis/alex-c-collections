@@ -4,7 +4,6 @@
 
 #include "fn.h"
 #include "ptable.h"
-#include "str.h"
 
 #include "stable.h"
 
@@ -24,16 +23,11 @@ struct STableIter {
 	const struct PTableIter *pit;
 };
 
-static char *fn_str_str(const void* const val) {
-	return sprintf_alloc("%s", val ? (char*)val : "(null)");
-}
-
 const struct STable *stable_init(void) {
 	const struct STableParams params = { 0 };
 	return stable_init_with(params);
 }
 
-// TODO test this and clone
 const struct STable *stable_init_with(const struct STableParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
@@ -41,7 +35,7 @@ const struct STable *stable_init_with(const struct STableParams params) {
 		.alloc_key = (fn_alloc)strdup,
 		.free_key = (fn_free)free,
 		.free_val = params.free_val,
-		.str_key = fn_str_str,
+		.str_key = fn_str_or_null,
 		.str_val = params.str_val,
 		.clone_val = params.clone_val,
 		.initial = params.initial,

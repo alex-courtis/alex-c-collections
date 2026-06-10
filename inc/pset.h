@@ -92,7 +92,7 @@ void pset_sort(const struct PSet* const set);
  * Comparison
  */
 
-// same length, vals equal in order, uses equal_val
+// same length, vals equal in order, uses equal_val from a
 bool pset_equal(const struct PSet* const a, const struct PSet* const b);
 
 /*

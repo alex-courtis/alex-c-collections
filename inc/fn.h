@@ -64,4 +64,7 @@ void *fn_clone_strdup(const void* const val);
 //
 typedef char* (*fn_str)(const void* const val);
 
+// val or "(null)"
+char *fn_str_or_null(const void* const val);
+
 #endif // FN_H

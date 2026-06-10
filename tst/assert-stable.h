@@ -5,7 +5,6 @@
 
 #include "util-file.h"
 
-#include "fn.h"
 #include "stable.h"
 
 void _assert_stable_equal(const struct STable *a, const struct STable *b, const char * const file, const int line) {
