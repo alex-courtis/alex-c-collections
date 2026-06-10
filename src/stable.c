@@ -36,6 +36,7 @@ const struct STable *stable_init(void) {
 const struct STable *stable_init_with(const struct STableParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
+		.equal_val = params.equal_val,
 		.alloc_key = (fn_alloc)strdup,
 		.free_key = (fn_free)free,
 		.str_key = fn_str_str,
@@ -159,8 +160,8 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
 	return tab ? ptable_remove(tab->ptab, key) : NULL;
 }
 
-bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal equal_val) {
-	return a && b ? ptable_equal(a->ptab, b->ptab, equal_val) : false;
+bool stable_equal(const struct STable* const a, const struct STable* const b) {
+	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }
 
 struct SList *stable_keys_slist(const struct STable* const tab) {

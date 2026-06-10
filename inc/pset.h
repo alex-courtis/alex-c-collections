@@ -23,6 +23,7 @@ struct PSetIter; // IWYU pragma: keep
  * Optional constructor params, defaults noted
  */
 struct PSetParams {
+	fn_equal equal_val;   // compare val pointers
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
@@ -88,8 +89,8 @@ void pset_sort(const struct PSet* const set, fn_less_than less_than_val);
  * Comparison
  */
 
-// same length, vals equal in order, NULL equal_val compares pointers
-bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal equal_val);
+// same length, vals equal in order, uses equal_val
+bool pset_equal(const struct PSet* const a, const struct PSet* const b);
 
 /*
  * Conversion

@@ -25,6 +25,7 @@ struct ITableIter; // IWYU pragma: keep
  * Optional constructor params, defaults noted
  */
 struct ITableParams {
+	fn_equal equal_val;   // compare val pointers
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
@@ -88,8 +89,8 @@ const void *itable_remove(const struct ITable* const tab, const uint64_t key);
  * Comparison
  */
 
-// same length, keys and vals equal in order, NULL equal_val compares pointers
-bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn_equal equal_val);
+// same length, keys and vals equal in order, uses equal_val from a
+bool itable_equal(const struct ITable* const a, const struct ITable* const b);
 
 /*
  * Conversion

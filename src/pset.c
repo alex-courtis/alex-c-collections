@@ -19,6 +19,7 @@ struct PSet {
 	size_t capacity;
 	size_t grow;
 	size_t size;
+	fn_equal equal_val;
 	fn_clone clone_val;
 };
 
@@ -58,6 +59,7 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	set->capacity = params.initial ? params.initial : 10;
 	set->grow = params.grow ? params.grow : 10;;
 	set->vals = calloc(set->capacity, sizeof(void*));
+	set->equal_val = params.equal_val;
 	set->clone_val = params.clone_val;
 
 	return set;
@@ -70,6 +72,7 @@ const struct PSet *pset_clone(const struct PSet* const from) {
 	const struct PSetParams params = {
 		.initial = from->capacity,
 		.grow = from->grow,
+		.equal_val = from->equal_val,
 		.clone_val = from->clone_val,
 	};
 	const struct PSet *to = pset_init_with(params);
@@ -257,13 +260,13 @@ void pset_sort(const struct PSet* const set, fn_less_than less_than_val) {
 	}
 }
 
-bool pset_equal(const struct PSet* const a, const struct PSet* const b, fn_equal equal_val) {
+bool pset_equal(const struct PSet* const a, const struct PSet* const b) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
 	for (const void **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
-		if (equal_val) {
-			if (!equal_val(*av, *bv)) {
+		if (a->equal_val) {
+			if (!a->equal_val(*av, *bv)) {
 				return false;
 			}
 		} else if (*av != *bv) {

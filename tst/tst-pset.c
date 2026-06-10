@@ -37,6 +37,7 @@ struct PSet {
 	size_t capacity;
 	size_t grow;
 	size_t size;
+	fn_equal equal_val;
 	fn_clone clone_val;
 };
 
@@ -100,6 +101,7 @@ static void pset_clone__empty(void **state) {
 
 static void pset_clone__params(void **state) {
 	const struct PSetParams params = {
+		.equal_val = mock_equal,
 		.clone_val = mock_clone,
 		.initial = 3,
 		.grow = 4,
@@ -113,6 +115,7 @@ static void pset_clone__params(void **state) {
 	assert_int_equal(set->size, 0);
 	assert_int_equal(set->capacity, 3);
 	assert_int_equal(set->grow, 4);
+	assert_ptr_equal(set->equal_val, mock_equal);
 	assert_ptr_equal(set->clone_val, mock_clone);
 
 	pset_free(set);
@@ -132,8 +135,8 @@ static void pset_clone__shallow_many(void **state) {
 	assert_true(pset_contains(clone, V0));
 	assert_true(pset_contains(clone, V1));
 
-	assert_pset_equal(set, clone, NULL, NULL);
-	assert_pset_equal(clone, set, NULL, NULL);
+	assert_pset_equal(set, clone, NULL);
+	assert_pset_equal(clone, set, NULL);
 
 	pset_free(clone);
 	pset_free(set);
@@ -475,7 +478,7 @@ static void pset_sort__empty(void **state) {
 
 	assert_int_equal(pset_size(actual), 0);
 
-	assert_pset_equal(actual, expected, mock_test, NULL);
+	assert_pset_equal(actual, expected, NULL);
 
 	pset_free(actual);
 	pset_free(expected);
@@ -491,7 +494,7 @@ static void pset_sort__one(void **state) {
 
 	pset_sort(actual, mock_less_than);
 
-	assert_pset_equal(actual, expected, NULL, NULL);
+	assert_pset_equal(actual, expected, NULL);
 
 	pset_free(actual);
 	pset_free(expected);
@@ -506,7 +509,7 @@ static void pset_equal__length_different(void **state) {
 	assert_true(pset_add(b, V0));
 	assert_true(pset_add(b, V1));
 
-	assert_pset_not_equal(a, b, NULL, NULL);
+	assert_pset_not_equal(a, b, NULL);
 
 	pset_free(a);
 	pset_free(b);
@@ -522,7 +525,7 @@ static void pset_equal__val_pointers_ok(void **state) {
 	assert_true(pset_add(b, V0));
 	assert_true(pset_add(b, V1));
 
-	assert_pset_equal(a, b, NULL, NULL);
+	assert_pset_equal(a, b, NULL);
 
 	pset_free(a);
 	pset_free(b);
@@ -538,15 +541,16 @@ static void pset_equal__val_pointers_different(void **state) {
 	assert_true(pset_add(b, V0));
 	assert_true(pset_add(b, V2));
 
-	assert_pset_not_equal(a, b, NULL, NULL);
+	assert_pset_not_equal(a, b, NULL);
 
 	pset_free(a);
 	pset_free(b);
 }
 
 static void pset_equal__equal_val_ok(void **state) {
-	const struct PSet *a = pset_init();
-	const struct PSet *b = pset_init();
+	const struct PSetParams params = { .equal_val = fn_equal_strcmp, };
+	const struct PSet *a = pset_init_with(params);
+	const struct PSet *b = pset_init_with(params);
 
 	assert_true(pset_add(a, V0));
 	assert_true(pset_add(a, V1));
@@ -554,15 +558,16 @@ static void pset_equal__equal_val_ok(void **state) {
 	assert_true(pset_add(b, V0));
 	assert_true(pset_add(b, V1));
 
-	assert_pset_equal(a, b, fn_equal_strcmp, NULL);
+	assert_pset_equal(a, b, NULL);
 
 	pset_free(a);
 	pset_free(b);
 }
 
 static void pset_equal__equal_val_different(void **state) {
-	const struct PSet *a = pset_init();
-	const struct PSet *b = pset_init();
+	const struct PSetParams params = { .equal_val = fn_equal_strcmp, };
+	const struct PSet *a = pset_init_with(params);
+	const struct PSet *b = pset_init_with(params);
 
 	assert_true(pset_add(a, "0"));
 	assert_true(pset_add(a, "1"));
@@ -570,7 +575,7 @@ static void pset_equal__equal_val_different(void **state) {
 	assert_true(pset_add(b, "0"));
 	assert_true(pset_add(b, "2"));
 
-	assert_pset_not_equal(a, b, fn_equal_strcmp, NULL);
+	assert_pset_not_equal(a, b, NULL);
 
 	pset_free(a);
 	pset_free(b);

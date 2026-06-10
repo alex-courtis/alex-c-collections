@@ -25,7 +25,8 @@ struct PTableIter; // IWYU pragma: keep
  */
 struct PTableParams {
 	fn_equal equal_key;   // compare key pointers
-	fn_alloc alloc_key;   // set the key pointer
+	fn_equal equal_val;   // compare val pointers
+	fn_alloc alloc_key;   // set the key pointer, result be idempotent
 	fn_free free_key;     // nop
 	fn_str str_key;       // "%p"
 	fn_clone clone_val;   // shallow clone
@@ -91,9 +92,8 @@ const void *ptable_remove(const struct PTable* const tab, const void* const key)
  * Comparison
  */
 
-// TODO move equal_val to member
-// same length, keys and vals equal in order, NULL equal_val compares pointers
-bool ptable_equal(const struct PTable* const a, const struct PTable* const b, fn_equal equal_val);
+// same length, keys and vals equal in order, uses equal_key and equal_val from a
+bool ptable_equal(const struct PTable* const a, const struct PTable* const b);
 
 /*
  * Conversion

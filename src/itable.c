@@ -57,6 +57,7 @@ const struct ITable *itable_init(void) {
 const struct ITable *itable_init_with(const struct ITableParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = fn_equal_key,
+		.equal_val = params.equal_val,
 		.alloc_key = fn_alloc_key,
 		.free_key = (fn_free)free,
 		.str_key = fn_str_key,
@@ -201,8 +202,8 @@ const void *itable_remove(const struct ITable* const tab, const uint64_t key) {
 	return tab ? ptable_remove(tab->ptab, &key) : NULL;
 }
 
-bool itable_equal(const struct ITable* const a, const struct ITable* const b, fn_equal equal_val) {
-	return a && b ? ptable_equal(a->ptab, b->ptab, equal_val) : false;
+bool itable_equal(const struct ITable* const a, const struct ITable* const b) {
+	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }
 
 struct SList *itable_vals_slist(const struct ITable* const tab) {

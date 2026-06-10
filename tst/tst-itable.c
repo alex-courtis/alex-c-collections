@@ -144,11 +144,11 @@ static void itable_equal__(void **state) {
 	assert_nul(itable_put(expected, 0, V0));
 	assert_nul(itable_put(expected, 1, V1));
 
-	assert_itable_equal(actual, expected, NULL, NULL);
+	assert_itable_equal(actual, expected, NULL);
 
 	assert_nul(itable_put(actual, 2, V2));
 
-	assert_itable_not_equal(actual, expected, NULL, NULL);
+	assert_itable_not_equal(actual, expected, NULL);
 
 	itable_free(actual);
 	itable_free(expected);
@@ -209,7 +209,7 @@ static void itable_clone__shallow(void **state) {
 
 	assert_int_equal(itable_size(to), 3);
 
-	assert_itable_equal(from, to, NULL, NULL);
+	assert_itable_equal(from, to, NULL);
 
 	itable_free(from);
 	itable_free(to);

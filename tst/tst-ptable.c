@@ -22,6 +22,7 @@ struct PTable {
 	size_t grow;
 	size_t size;
 	fn_equal equal_key;
+	fn_equal equal_val;
 	fn_alloc alloc_key;
 	fn_free free_key;
 	fn_str str_key;
@@ -104,6 +105,7 @@ static void ptable_clone__empty(void **state) {
 static void ptable_clone__params(void **state) {
 	const struct PTableParams params = {
 		.equal_key = mock_equal,
+		.equal_val = mock_equal,
 		.alloc_key = mock_alloc,
 		.free_key = mock_free,
 		.str_key = mock_str,
@@ -121,6 +123,7 @@ static void ptable_clone__params(void **state) {
 	assert_int_equal(to->capacity, 99);
 	assert_int_equal(to->grow, 1);
 	assert_ptr_equal(to->equal_key, mock_equal);
+	assert_ptr_equal(to->equal_val, mock_equal);
 	assert_ptr_equal(to->alloc_key, mock_alloc);
 	assert_ptr_equal(to->free_key, mock_free);
 	assert_ptr_equal(to->str_key, mock_str);
@@ -145,7 +148,7 @@ static void ptable_clone__shallow_many(void **state) {
 
 	assert_int_equal(ptable_size(to), 5);
 
-	assert_ptable_equal(from, to, NULL, NULL);
+	assert_ptable_equal(from, to, NULL);
 
 	ptable_free(from);
 	ptable_free(to);
@@ -170,7 +173,7 @@ static void ptable_clone__deep_many(void **state) {
 
 	assert_int_equal(ptable_size(to), 2);
 
-	assert_ptable_not_equal(from, to, NULL, NULL);
+	assert_ptable_not_equal(from, to, NULL);
 
 	assert_ptr_equal(ptable_get(to, K0), V2);
 	assert_ptr_equal(ptable_get(to, K1), V3);
@@ -202,7 +205,7 @@ static void ptable_clone__alloc_key(void **state) {
 
 	assert_int_equal(ptable_size(to), 2);
 
-	assert_ptable_not_equal(from, to, NULL, NULL);
+	assert_ptable_not_equal(from, to, NULL);
 
 	assert_ptr_equal(ptable_get(to, K2), V0);
 	assert_ptr_equal(ptable_get(to, K3), V1);
@@ -689,7 +692,7 @@ static void ptable_equal__length_different(void **state) {
 
 	assert_nul(ptable_put(b, K1, V2));
 
-	assert_ptable_not_equal(a, b, NULL, NULL);
+	assert_ptable_not_equal(a, b, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
@@ -707,7 +710,7 @@ static void ptable_equal__key_pointers_ok(void **state) {
 	assert_nul(ptable_put(b, K1, V1));
 	assert_nul(ptable_put(b, K2, V2));
 
-	assert_ptable_equal(a, b, NULL, NULL);
+	assert_ptable_equal(a, b, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
@@ -725,35 +728,37 @@ static void ptable_equal__key_pointers_different(void **state) {
 	assert_nul(ptable_put(b, K1, V0));
 	assert_nul(ptable_put(b, K2, V0));
 
-	assert_ptable_not_equal(a, b, NULL, NULL);
+	assert_ptable_not_equal(a, b, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
 }
 
 static void ptable_equal__equal_val_ok(void **state) {
-	const struct PTable *a = ptable_init();
-	const struct PTable *b = ptable_init();
+	const struct PTableParams params = { .equal_val = fn_equal_strcmp, };
+	const struct PTable *a = ptable_init_with(params);
+	const struct PTable *b = ptable_init_with(params);
 
 	assert_nul(ptable_put(a, K0, "a"));
 
 	assert_nul(ptable_put(b, K0, "a"));
 
-	assert_ptable_equal(a, b, fn_equal_strcmp, NULL);
+	assert_ptable_equal(a, b, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
 }
 
 static void ptable_equal__equal_val_different(void **state) {
-	const struct PTable *a = ptable_init();
-	const struct PTable *b = ptable_init();
+	const struct PTableParams params = { .equal_val = fn_equal_strcmp, };
+	const struct PTable *a = ptable_init_with(params);
+	const struct PTable *b = ptable_init_with(params);
 
 	assert_nul(ptable_put(a, K0, "a"));
 
 	assert_nul(ptable_put(b, K0, "b"));
 
-	assert_ptable_not_equal(a, b, fn_equal_strcmp, NULL);
+	assert_ptable_not_equal(a, b, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
@@ -772,7 +777,7 @@ static void ptable_equal__equal_key_ok(void **state) {
 	assert_nul(ptable_put(b, "ONE", V1));
 	assert_nul(ptable_put(b, "TWO", V2));
 
-	assert_ptable_equal(a, b, NULL, NULL);
+	assert_ptable_equal(a, b, NULL);
 
 	ptable_free(a);
 	ptable_free(b);
@@ -791,7 +796,7 @@ static void ptable_equal__equal_key_different(void **state) {
 	assert_nul(ptable_put(b, "ONE", V1));
 	assert_nul(ptable_put(b, "THREE", V2));
 
-	assert_ptable_not_equal(a, b, NULL, NULL);
+	assert_ptable_not_equal(a, b, NULL);
 
 	ptable_free(a);
 	ptable_free(b);

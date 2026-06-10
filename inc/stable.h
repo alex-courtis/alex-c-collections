@@ -25,6 +25,7 @@ struct STableIter; // IWYU pragma: keep
  */
 struct STableParams {
 	const bool case_insensitive; // false
+	fn_equal equal_val;          // compare val pointers
 	fn_clone clone_val;          // shallow clone
 	const size_t initial;        // 10
 	const size_t grow;           // 10
@@ -88,8 +89,8 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
  * Comparison
  */
 
-// same length, keys and vals equal in order, NULL equal_val compares pointers, case sensitivity defined by a
-bool stable_equal(const struct STable* const a, const struct STable* const b, fn_equal equal_val);
+// same length, keys and vals equal in order, uses case_insensitive and equal_val from a
+bool stable_equal(const struct STable* const a, const struct STable* const b);
 
 /*
  * Conversion
