@@ -444,8 +444,8 @@ static void ptable_iter__free(void **state) {
 
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K0);
-	assert_ptr_equal(ptable_iter_val(iter), V0);
+	assert_ptr_equal(iter->key, K0);
+	assert_ptr_equal(iter->val, V0);
 
 	ptable_iter_free(iter);
 
@@ -466,32 +466,32 @@ static void ptable_iter__many(void **state) {
 	// zero
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K0);
-	assert_nul(ptable_iter_val(iter));
+	assert_ptr_equal(iter->key, K0);
+	assert_nul(iter->val);
 
 	// one
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K1);
-	assert_ptr_equal(ptable_iter_val(iter), V1);
+	assert_ptr_equal(iter->key, K1);
+	assert_ptr_equal(iter->val, V1);
 
 	// two
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K2);
-	assert_nul(ptable_iter_val(iter));
+	assert_ptr_equal(iter->key, K2);
+	assert_nul(iter->val);
 
 	// three
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K3);
-	assert_ptr_equal(ptable_iter_val(iter), V3);
+	assert_ptr_equal(iter->key, K3);
+	assert_ptr_equal(iter->val, V3);
 
 	// four
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K4);
-	assert_nul(ptable_iter_val(iter));
+	assert_ptr_equal(iter->key, K4);
+	assert_nul(iter->val);
 
 	// end
 	iter = ptable_iter_next(iter);
@@ -520,14 +520,14 @@ static void ptable_iter__removed(void **state) {
 	// one
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K1);
-	assert_ptr_equal(ptable_iter_val(iter), V1);
+	assert_ptr_equal(iter->key, K1);
+	assert_ptr_equal(iter->val, V1);
 
 	// three
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K3);
-	assert_ptr_equal(ptable_iter_val(iter), V3);
+	assert_ptr_equal(iter->key, K3);
+	assert_ptr_equal(iter->val, V3);
 
 	// end
 	iter = ptable_iter_next(iter);
@@ -562,8 +562,8 @@ static void ptable_filter_iter__many(void **state) {
 
 	const struct PTableIter *iter = ptable_filter_iter(tab, mock_test, mock_test, D0);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K1);
-	assert_ptr_equal(ptable_iter_val(iter), V1);
+	assert_ptr_equal(iter->key, K1);
+	assert_ptr_equal(iter->val, V1);
 
 	// skip V2
 	expect_ptr(mock_test, val, K2);
@@ -583,8 +583,8 @@ static void ptable_filter_iter__many(void **state) {
 
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K3);
-	assert_ptr_equal(ptable_iter_val(iter), V3);
+	assert_ptr_equal(iter->key, K3);
+	assert_ptr_equal(iter->val, V3);
 
 	// skip V4
 	expect_ptr(mock_test, val, K4);
@@ -624,14 +624,14 @@ static void ptable_put__again(void **state) {
 	// one
 	const struct PTableIter *iter = ptable_iter(tab);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K1);
-	assert_ptr_equal(ptable_iter_val(iter), V1);
+	assert_ptr_equal(iter->key, K1);
+	assert_ptr_equal(iter->val, V1);
 
 	// zero moved later
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(ptable_iter_key(iter), K0);
-	assert_ptr_equal(ptable_iter_val(iter), V0);
+	assert_ptr_equal(iter->key, K0);
+	assert_ptr_equal(iter->val, V0);
 
 	// end
 	iter = ptable_iter_next(iter);

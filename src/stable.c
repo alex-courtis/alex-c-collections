@@ -142,11 +142,11 @@ const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
 }
 
 const char *stable_iter_key(const struct STableIter* const iter) {
-	return iter ? ptable_iter_key(iter->pit) : NULL;
+	return iter ? iter->pit->key : NULL;
 }
 
 const void *stable_iter_val(const struct STableIter* const iter) {
-	return iter ? ptable_iter_val(iter->pit) : NULL;
+	return iter ? iter->pit->val : NULL;
 }
 
 const void *stable_put(const struct STable* const tab, const char* const key, const void* const val) {

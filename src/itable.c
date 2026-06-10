@@ -182,7 +182,7 @@ size_t itable_iter_key(const struct ITableIter* const iter) {
 	if (!iter)
 		return 0;
 
-	const void *key = ptable_iter_key(iter->pit);
+	const void *key = iter->pit->key;
 
 	if (key)
 		return *(size_t*)key;
@@ -191,7 +191,7 @@ size_t itable_iter_key(const struct ITableIter* const iter) {
 }
 
 const void *itable_iter_val(const struct ITableIter* const iter) {
-	return iter ? ptable_iter_val(iter->pit) : NULL;
+	return iter ? iter->pit->val : NULL;
 }
 
 const void *itable_put(const struct ITable* const tab, const size_t key, const void* const val) {

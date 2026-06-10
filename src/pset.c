@@ -124,7 +124,7 @@ void pset_iter_free(const struct PSetIter* const iter) {
 	if (!iter)
 		return;
 
-	free((void*)iter->state);
+	free((void*)iter->st);
 	free((void*)iter);
 }
 
@@ -150,14 +150,12 @@ const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_test te
 		return NULL;
 
 	struct PSetIter *it = calloc(1, sizeof(struct PSetIter));
-	it->state = calloc(1, sizeof(struct PSetIterState));
-	it->state->set = set;
-	it->state->test_val = test_val;
-	it->state->data = data;
+	it->st = calloc(1, sizeof(struct PSetIterState));
+	it->st->set = set;
+	it->st->test_val = test_val;
+	it->st->data = data;
 
 	return pset_iter_next(it);
-
-	return it;
 }
 
 const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
@@ -165,22 +163,22 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
 		return NULL;
 
 	struct PSetIter *it = (struct PSetIter*)iter;
-	struct PSetIterState *state = it->state;
-	if (!state || !state->set) {
+	struct PSetIterState *st = it->st;
+	if (!st || !st->set) {
 		pset_iter_free(it);
 		return NULL;
 	}
 
 	// null val indicates first use, start at the beginning
 	if (it->val) {
-		state->position++;
+		st->position++;
 	}
 
-	for ( ; state->position < state->set->size; state->position++) {
+	for ( ; st->position < st->set->size; st->position++) {
 
-		it->val = *(state->set->vals + state->position);
+		it->val = *(st->set->vals + st->position);
 
-		if ((state->test_val && !state->test_val(it->val, state->data))) {
+		if ((st->test_val && !st->test_val(it->val, st->data))) {
 			continue;
 		}
 

@@ -20,7 +20,7 @@ struct PSet; // IWYU pragma: keep
 struct PSetIterState; // IWYU pragma: keep
 struct PSetIter {
 	const void* val;
-	struct PSetIterState *state;
+	struct PSetIterState *st;
 };
 
 /*

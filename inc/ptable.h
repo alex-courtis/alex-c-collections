@@ -18,7 +18,12 @@ struct PTable; // IWYU pragma: keep
 /*
  * Entry iterator.
  */
-struct PTableIter; // IWYU pragma: keep
+struct PTableIterState; // IWYU pragma: keep
+struct PTableIter {
+	const void *key;
+	const void *val;
+	struct PTableIterState *st;
+};
 
 /*
  * Optional constructor params, defaults noted
@@ -73,12 +78,6 @@ const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_t
 
 // next iterator entry, NULL at end of table
 const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);
-
-// iterator key, NULL on NULL iter
-const void *ptable_iter_key(const struct PTableIter* const iter);
-
-// iterator value, NULL on NULL iter
-const void *ptable_iter_val(const struct PTableIter* const iter);
 
 /*
  * Mutate
