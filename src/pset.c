@@ -20,6 +20,7 @@ struct PSet {
 	size_t grow;
 	size_t size;
 	fn_equal equal_val;
+	fn_less_than less_than_val;
 	fn_free free_val;
 	fn_clone clone_val;
 };
@@ -61,6 +62,7 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	set->grow = params.grow ? params.grow : 10;;
 	set->vals = calloc(set->capacity, sizeof(void*));
 	set->equal_val = params.equal_val;
+	set->less_than_val = params.less_than_val;
 	set->free_val = params.free_val;
 	set->clone_val = params.clone_val;
 
@@ -75,6 +77,7 @@ const struct PSet *pset_clone(const struct PSet* const from) {
 		.initial = from->capacity,
 		.grow = from->grow,
 		.equal_val = from->equal_val,
+		.less_than_val = from->less_than_val,
 		.clone_val = from->clone_val,
 	};
 	const struct PSet *to = pset_init_with(params);
@@ -244,8 +247,8 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	return NULL;
 }
 
-void pset_sort(const struct PSet* const set, fn_less_than less_than_val) {
-	if (!set)
+void pset_sort(const struct PSet* const set) {
+	if (!set || !set->less_than_val)
 		return;
 
 	static const size_t gaps[] = { 701, 301, 132, 57, 23, 10, 4, 1, 0 }; // Ciura gap sequence
@@ -254,7 +257,7 @@ void pset_sort(const struct PSet* const set, fn_less_than less_than_val) {
 		for (size_t i = *gap; i < set->size; i++) {
 			const void *tmp = set->vals[i];
 			size_t j;
-			for (j = i; (j >= *gap) && less_than_val(tmp, set->vals[j - *gap]); j -= *gap) {
+			for (j = i; (j >= *gap) && set->less_than_val(tmp, set->vals[j - *gap]); j -= *gap) {
 				set->vals[j] = set->vals[j - *gap];
 			}
 			set->vals[j] = tmp;

@@ -23,11 +23,12 @@ struct PSetIter; // IWYU pragma: keep
  * Optional constructor params, defaults noted
  */
 struct PSetParams {
-	fn_equal equal_val;   // compare val pointers
-	fn_free free_val;     // free
-	fn_clone clone_val;   // shallow clone
-	const size_t initial; // 10
-	const size_t grow;    // 10
+	fn_equal equal_val;         // compare val pointers
+	fn_less_than less_than_val; // no sorting
+	fn_free free_val;           // free
+	fn_clone clone_val;         // shallow clone
+	const size_t initial;       // 10
+	const size_t grow;          // 10
 };
 
 /*
@@ -84,7 +85,7 @@ bool pset_add(const struct PSet* const set, const void* const val);
 const void *pset_remove(const struct PSet* const set, const void* const val);
 
 // shell sort in place
-void pset_sort(const struct PSet* const set, fn_less_than less_than_val);
+void pset_sort(const struct PSet* const set);
 
 /*
  * Comparison

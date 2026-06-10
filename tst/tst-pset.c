@@ -38,6 +38,7 @@ struct PSet {
 	size_t grow;
 	size_t size;
 	fn_equal equal_val;
+	fn_less_than less_than_val;
 	fn_free free_val;
 	fn_clone clone_val;
 };
@@ -471,11 +472,11 @@ static void pset_add__again(void **state) {
 }
 
 static void pset_sort__empty(void **state) {
-	const struct PSet *actual = pset_init();
+	const struct PSetParams params = { .less_than_val = mock_test, };
+	const struct PSet *actual = pset_init_with(params);
+	const struct PSet *expected = pset_init_with(params);
 
-	const struct PSet *expected = pset_init();
-
-	pset_sort(actual, mock_test);
+	pset_sort(actual);
 
 	assert_int_equal(pset_size(actual), 0);
 
@@ -486,14 +487,38 @@ static void pset_sort__empty(void **state) {
 }
 
 static void pset_sort__one(void **state) {
-	const struct PSet *actual = pset_init();
+	const struct PSetParams params = { .less_than_val = mock_test, };
+	const struct PSet *actual = pset_init_with(params);
 
 	assert_true(pset_add(actual, V0));
 
 	const struct PSet *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 
-	pset_sort(actual, mock_less_than);
+	pset_sort(actual);
+
+	assert_pset_equal(actual, expected, NULL);
+
+	pset_free(actual);
+	pset_free(expected);
+}
+
+bool test_a_is_V0(const void* const a, const void* const b) {
+	return a == V0;
+}
+
+static void pset_sort__two(void **state) {
+	const struct PSetParams params = { .less_than_val = test_a_is_V0, };
+	const struct PSet *actual = pset_init_with(params);
+
+	assert_true(pset_add(actual, V1));
+	assert_true(pset_add(actual, V0));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, V0));
+	assert_true(pset_add(expected, V1));
+
+	pset_sort(actual);
 
 	assert_pset_equal(actual, expected, NULL);
 
@@ -693,6 +718,7 @@ int main(void) {
 
 		TEST(pset_sort__empty),
 		TEST(pset_sort__one),
+		TEST(pset_sort__two),
 
 		TEST(pset_equal__length_different),
 		TEST(pset_equal__val_pointers_ok),
