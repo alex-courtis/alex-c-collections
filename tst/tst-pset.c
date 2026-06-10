@@ -335,7 +335,7 @@ static void pset_iter__free(void **state) {
 
 	const struct PSetIter *iter = pset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(pset_iter_val(iter), V0);
+	assert_str_equal(iter->val, V0);
 
 	pset_iter_free(iter);
 
@@ -353,11 +353,11 @@ static void pset_iter__many(void **state) {
 
 	const struct PSetIter *iter = pset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(pset_iter_val(iter), V0);
+	assert_str_equal(iter->val, V0);
 
 	iter = pset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(pset_iter_val(iter), V1);
+	assert_str_equal(iter->val, V1);
 
 	iter = pset_iter_next(iter);
 	assert_nul(iter);
@@ -406,7 +406,7 @@ static void pset_filter_iter__many(void **state) {
 
 	const struct PSetIter *iter = pset_filter_iter(set, mock_test, D0);
 	assert_non_nul(iter);
-	assert_ptr_equal(pset_iter_val(iter), V1);
+	assert_ptr_equal(iter->val, V1);
 
 	// skip V2
 	expect_ptr(mock_test, val, V2);
@@ -420,7 +420,7 @@ static void pset_filter_iter__many(void **state) {
 
 	iter = pset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_ptr_equal(pset_iter_val(iter), V3);
+	assert_ptr_equal(iter->val, V3);
 
 	// skip V4
 	expect_ptr(mock_test, val, V4);
@@ -455,22 +455,22 @@ static void pset_add__again(void **state) {
 	// 0
 	const struct PSetIter *iter = pset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(pset_iter_val(iter), V0);
+	assert_str_equal(iter->val, V0);
 
 	// 2
 	iter = pset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(pset_iter_val(iter), V2);
+	assert_str_equal(iter->val, V2);
 
 	// 3
 	iter = pset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(pset_iter_val(iter), V3);
+	assert_str_equal(iter->val, V3);
 
 	// 0 moved later
 	iter = pset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(pset_iter_val(iter), V1);
+	assert_str_equal(iter->val, V1);
 
 	// end
 	iter = pset_iter_next(iter);

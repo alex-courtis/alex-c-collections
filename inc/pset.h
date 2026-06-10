@@ -11,13 +11,17 @@
  * Operations linearly traverse values.
  * NULL not permitted.
  * Not thread safe.
-*/
+ */
 struct PSet; // IWYU pragma: keep
 
 /*
  * Entry iterator.
  */
-struct PSetIter; // IWYU pragma: keep
+struct PSetIterState; // IWYU pragma: keep
+struct PSetIter {
+	const void* val;
+	struct PSetIterState *state;
+};
 
 /*
  * Optional constructor params, defaults noted
@@ -71,9 +75,6 @@ const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_test te
 
 // next iterator value, NULL at end of set
 const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
-
-// iterator value, NULL on NULL iter
-const void *pset_iter_val(const struct PSetIter* const iter);
 
 /*
  * Mutate

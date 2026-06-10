@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+// TODO proxy pset
+
 /*
  * Array backed ordered string set.
  * Operations linearly traverse values.
