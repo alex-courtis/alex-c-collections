@@ -1,4 +1,3 @@
-#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -22,7 +21,7 @@ struct ITable {
 
 struct ITableIter {
 	const struct PTableIter *pit;
-	fn_test_uint64_t test_key;
+	fn_test_size_t test_key;
 	fn_test test_val;
 	const void *data;
 };
@@ -34,19 +33,18 @@ static bool fn_equal_key(const void* const a, const void* const b) {
 	if (!a || !b)
 		return false;
 
-	return *(uint64_t*)a == *(uint64_t*)b;
+	return *(size_t*)a == *(size_t*)b;
 }
 
 static const void *fn_alloc_key(const void* const val) {
-	uint64_t *out = calloc(1, sizeof(uint64_t));
-	*out = *(uint64_t*)val;
+	size_t *out = calloc(1, sizeof(size_t));
+	*out = *(size_t*)val;
 
 	return out;
 }
 
 static char *fn_str_key(const void* const val) {
-	// TODO change this to size_t
-	return sprintf_alloc("%"PRIu64, *(uint64_t*)val);
+	return sprintf_alloc("%zu", *(size_t*)val);
 }
 
 const struct ITable *itable_init(void) {
@@ -117,7 +115,7 @@ void itable_iter_free(const struct ITableIter* const iter) {
 	free((void*)iter);
 }
 
-const void *itable_get(const struct ITable* const tab, const uint64_t key) {
+const void *itable_get(const struct ITable* const tab, const size_t key) {
 	return tab ? ptable_get(tab->ptab, &key) : NULL;
 }
 
@@ -138,7 +136,7 @@ const struct ITableIter *itable_iter(const struct ITable* const tab) {
 
 static bool fn_test_key_wrapper(const void* const val, const void* const data) {
 	const struct ITableIter * const it = data;
-	return it->test_key(*(uint64_t*)val, it->data);
+	return it->test_key(*(size_t*)val, it->data);
 }
 
 static bool fn_test_val_wrapper(const void* const val, const void* const data) {
@@ -146,7 +144,7 @@ static bool fn_test_val_wrapper(const void* const val, const void* const data) {
 	return it->test_val(val, it->data);
 }
 
-const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_uint64_t test_key, fn_test test_val, const void* const data) {
+const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_size_t test_key, fn_test test_val, const void* const data) {
 	if (!tab)
 		return NULL;
 
@@ -180,14 +178,14 @@ const struct ITableIter *itable_iter_next(const struct ITableIter* const iter) {
 	return it;
 }
 
-uint64_t itable_iter_key(const struct ITableIter* const iter) {
+size_t itable_iter_key(const struct ITableIter* const iter) {
 	if (!iter)
 		return 0;
 
 	const void *key = ptable_iter_key(iter->pit);
 
 	if (key)
-		return *(uint64_t*)key;
+		return *(size_t*)key;
 	else
 		return 0;
 }
@@ -196,11 +194,11 @@ const void *itable_iter_val(const struct ITableIter* const iter) {
 	return iter ? ptable_iter_val(iter->pit) : NULL;
 }
 
-const void *itable_put(const struct ITable* const tab, const uint64_t key, const void* const val) {
+const void *itable_put(const struct ITable* const tab, const size_t key, const void* const val) {
 	return tab ? ptable_put(tab->ptab, &key, val) : NULL;
 }
 
-const void *itable_remove(const struct ITable* const tab, const uint64_t key) {
+const void *itable_remove(const struct ITable* const tab, const size_t key) {
 	return tab ? ptable_remove(tab->ptab, &key) : NULL;
 }
 

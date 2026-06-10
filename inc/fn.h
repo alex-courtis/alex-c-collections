@@ -2,6 +2,7 @@
 #define FN_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 //
@@ -39,7 +40,7 @@ typedef bool (*fn_test)(const void* const val, const void* const data);
 
 typedef bool (*fn_test_str)(const char* const val, const void* const data);
 
-typedef bool (*fn_test_uint64_t)(const uint64_t val, const void* const data);
+typedef bool (*fn_test_size_t)(const size_t val, const void* const data);
 
 //
 // alloc from data

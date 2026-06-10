@@ -2,49 +2,38 @@
 
 ## Collections
 
+Not thread safe.
+
 ### SList
 
-* Containerless singly linked list.
-* Not thread safe.
-* NULL values permitted.
-
-### SSet
-
-* Array backed ordered string set.
-* Operations linearly traverse values.
-* NULL not permitted.
-* Not thread safe.
+- Containerless singly linked list.
+- NULL values permitted.
 
 ### PSet
 
-* Array backed ordered pointer set.
-* Operations linearly traverse values.
-* NULL not permitted.
-* Not thread safe.
+- Array backed pointer set.
+- Entries preserve insertion order.
+- Operations linearly traverse values.
+- NULL not permitted.
 
-### ITable
+### SSet
 
-* Array backed string indexed table.
-* Entries preserve insertion order.
-* Operations linearly traverse keys.
-* NULL values permitted.
-* Not thread safe.
-
-### STable
-
-* Array backed string indexed table.
-* Entries preserve insertion order.
-* Operations linearly traverse keys.
-* NULL values permitted.
-* Not thread safe.
+- `PSet` with string values
 
 ### PTable
 
-* Array backed pointer indexed table.
-* Entries preserve insertion order.
-* Operations linearly traverse keys.
-* NULL values permitted.
-* Not thread safe.
+- Array backed pointer indexed table.
+- Entries preserve insertion order.
+- Operations linearly traverse keys.
+- NULL values permitted.
+
+### ITable
+
+- `PTable` with `size_t` keys
+
+### STable
+
+- `PTable` with string keys.
 
 ## Strings
 

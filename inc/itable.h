@@ -3,12 +3,11 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 
 #include "fn.h"
 
 /*
- * Array backed integer indexed table.
+ * Array backed size_t indexed table.
  * Entries preserve insertion order.
  * Operations linearly traverse keys.
  * NULL values permitted.
@@ -60,19 +59,19 @@ void itable_iter_free(const struct ITableIter* const iter);
  */
 
 // return val, NULL if not present
-const void *itable_get(const struct ITable* const tab, const uint64_t key);
+const void *itable_get(const struct ITable* const tab, const size_t key);
 
 // create an iterator, caller must itable_iter_free or invoke itable_next until NULL
 const struct ITableIter *itable_iter(const struct ITable* const tab);
 
 // create an iterator filtering by test_key and test_val, NULL tests match all
-const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_uint64_t test_key, fn_test test_val, const void* const data);
+const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_size_t test_key, fn_test test_val, const void* const data);
 
 // next iterator entry, NULL at end of table
 const struct ITableIter *itable_iter_next(const struct ITableIter* const iter);
 
 // iterator key, 0 on NULL iter
-uint64_t itable_iter_key(const struct ITableIter* const iter);
+size_t itable_iter_key(const struct ITableIter* const iter);
 
 // iterator value, NULL on NULL iter
 const void *itable_iter_val(const struct ITableIter* const iter);
@@ -82,10 +81,10 @@ const void *itable_iter_val(const struct ITableIter* const iter);
  */
 
 // set key/val, return old val if overwritten
-const void *itable_put(const struct ITable* const tab, const uint64_t key, const void* const val);
+const void *itable_put(const struct ITable* const tab, const size_t key, const void* const val);
 
 // remove key, return old val if present
-const void *itable_remove(const struct ITable* const tab, const uint64_t key);
+const void *itable_remove(const struct ITable* const tab, const size_t key);
 
 /*
  * Comparison
