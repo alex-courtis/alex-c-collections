@@ -175,7 +175,7 @@ static void pset_free_vals__null_free_val(void **state) {
 
 	assert_int_equal(pset_size(set), 1);
 
-	pset_free_vals(set, NULL);
+	pset_free_vals(set);
 }
 
 static void pset_free_vals__free_val(void **state) {
@@ -192,7 +192,7 @@ static void pset_free_vals__free_val(void **state) {
 	expect_ptr(mock_free, val, V0);
 	expect_ptr(mock_free, val, V1);
 
-	pset_free_vals(set, mock_free);
+	pset_free_vals(set);
 }
 
 static void pset_add__new(void **state) {

@@ -47,7 +47,7 @@ const struct PSet *pset_clone(const struct PSet* const from);
 void pset_free(const void* const set);
 
 // free table and vals
-void pset_free_vals(const struct PSet* const set, fn_free free_val);
+void pset_free_vals(const struct PSet* const set);
 
 // free iter
 void pset_iter_free(const struct PSetIter* const iter);

@@ -100,7 +100,7 @@ void pset_free(const void* const cvset) {
 	free(set);
 }
 
-void pset_free_vals(const struct PSet* const set, fn_free free_val) {
+void pset_free_vals(const struct PSet* const set) {
 	if (!set)
 		return;
 
