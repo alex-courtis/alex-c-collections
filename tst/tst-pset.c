@@ -503,7 +503,7 @@ static void pset_sort__one(void **state) {
 	pset_free(expected);
 }
 
-bool test_a_is_V0(const void* const a, const void* const b) {
+static bool test_a_is_V0(const void* const a, const void* const b) {
 	return a == V0;
 }
 
