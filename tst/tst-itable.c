@@ -101,13 +101,13 @@ static void itable_iter__(void **state) {
 	const struct ITableIter *iter = itable_iter(tab);
 
 	assert_non_nul(iter);
-	assert_int_equal(itable_iter_key(iter), 0);
-	assert_ptr_equal(itable_iter_val(iter), V0);
+	assert_int_equal(iter->key, 0);
+	assert_ptr_equal(iter->val, V0);
 
 	iter = itable_iter_next(iter);
 	assert_non_nul(iter);
-	assert_int_equal(itable_iter_key(iter), 1);
-	assert_nul(itable_iter_val(iter));
+	assert_int_equal(iter->key, 1);
+	assert_nul(iter->val);
 
 	itable_iter_free(iter);
 
@@ -121,28 +121,32 @@ static void itable_filter_iter__(void **state) {
 	assert_nul(itable_put(tab, 1, V1));
 	assert_nul(itable_put(tab, 2, V2));
 
-	// skip "0"
+	// skip K0
 	expect_int_value(mock_test_size_t, val, 0);
 	expect_ptr(mock_test_size_t, data, D0);
 	will_return(mock_test_size_t, false);
 
-	// get 1
+	// pass K1
 	expect_int_value(mock_test_size_t, val, 1);
 	expect_ptr(mock_test_size_t, data, D0);
 	will_return(mock_test_size_t, true);
+
+	// pass V1
 	expect_ptr(mock_test, val, V1);
 	expect_ptr(mock_test, data, D0);
 	will_return(mock_test, true);
 
 	const struct ITableIter *iter = itable_filter_iter(tab, mock_test_size_t, mock_test, D0);
 	assert_non_nul(iter);
-	assert_int_equal(itable_iter_key(iter), 1);
-	assert_ptr_equal(itable_iter_val(iter), V1);
+	assert_int_equal(iter->key, 1);
+	assert_ptr_equal(iter->val, V1);
 
-	// skip V2
+	// pass K2
 	expect_int_value(mock_test_size_t, val, 2);
 	expect_ptr(mock_test_size_t, data, D0);
 	will_return(mock_test_size_t, true);
+
+	// skip V2
 	expect_ptr(mock_test, val, V2);
 	expect_ptr(mock_test, data, D0);
 	will_return(mock_test, false);
@@ -275,7 +279,6 @@ int main(void) {
 		TEST(itable_free_vals__),
 
 		TEST(itable_iter__),
-
 		TEST(itable_filter_iter__),
 
 		TEST(itable_equal__),

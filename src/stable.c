@@ -112,8 +112,8 @@ const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_t
 
 	struct STableIter *it = calloc(1, sizeof(struct STableIter));
 	it->st = calloc(1, sizeof(struct STableIterState));
-	it->st->pit = pit;
 
+	it->st->pit = pit;
 	it->key = pit->key;
 	it->val = pit->val;
 

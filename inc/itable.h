@@ -18,7 +18,12 @@ struct ITable; // IWYU pragma: keep
 /*
  * Entry iterator.
  */
-struct ITableIter; // IWYU pragma: keep
+struct ITableIterState; // IWYU pragma: keep
+struct ITableIter {
+	size_t key;
+	const void *val;
+	struct ITableIterState *ist;
+};
 
 /*
  * Optional constructor params, defaults noted
@@ -69,12 +74,6 @@ const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_t
 
 // next iterator entry, NULL at end of table
 const struct ITableIter *itable_iter_next(const struct ITableIter* const iter);
-
-// iterator key, 0 on NULL iter
-size_t itable_iter_key(const struct ITableIter* const iter);
-
-// iterator value, NULL on NULL iter
-const void *itable_iter_val(const struct ITableIter* const iter);
 
 /*
  * Mutate
