@@ -28,6 +28,13 @@ struct ITable {
 	const struct PTable *ptab;
 };
 
+struct ITableIterState {
+	const struct PTableIter *pit;
+	fn_test_size_t test_key;
+	fn_test test_val;
+	const void *data;
+};
+
 /*
    diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
    */
@@ -104,6 +111,36 @@ static void itable_iter__(void **state) {
 
 	itable_iter_free(iter);
 
+	itable_free(tab);
+}
+
+static void itable_iter__empty(void **state) {
+
+	const struct ITable *tab = itable_init();
+
+	const struct ITableIter *iter = itable_iter(tab);
+
+	assert_nul(iter);
+
+	itable_free(tab);
+}
+
+static void itable_iter__state_deleted(void **state) {
+	const struct ITable *tab = itable_init();
+
+	assert_nul(itable_put(tab, 0, V0));
+
+	const struct ITableIter *iter = itable_iter(tab);
+	assert_non_nul(iter);
+
+	const struct ITableIterState *st = iter->st;
+	((struct ITableIter*)iter)->st = NULL;
+
+	iter = itable_iter_next(iter);
+	assert_nul(iter);
+
+	ptable_iter_free(st->pit);
+	free((void*)st);
 	itable_free(tab);
 }
 
@@ -265,6 +302,23 @@ static void itable_clone__params(void **state) {
 	itable_free(to);
 }
 
+static void itable__null_inputs(void **state) {
+	assert_nul(itable_clone(NULL));
+	itable_free(NULL);
+	itable_free_vals(NULL);
+	itable_iter_free(NULL);
+	assert_false(itable_get(NULL, 0));
+	assert_nul(itable_iter(NULL));
+	assert_nul(itable_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(itable_iter_next(NULL));
+	assert_false(itable_put(NULL, 0, NULL));
+	assert_nul(itable_remove(NULL, 0));
+	assert_false(itable_equal(NULL, NULL));
+	assert_nul(itable_vals_slist(NULL));
+	assert_nul(itable_str(NULL));
+	assert_int_equal(itable_size(NULL), 0);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(itable_put_get_remove),
@@ -272,6 +326,9 @@ int main(void) {
 		TEST(itable_free_vals__),
 
 		TEST(itable_iter__),
+		TEST(itable_iter__empty),
+		TEST(itable_iter__state_deleted),
+
 		TEST(itable_filter_iter__),
 
 		TEST(itable_equal__),
@@ -282,6 +339,8 @@ int main(void) {
 
 		TEST(itable_clone__shallow),
 		TEST(itable_clone__params),
+
+		TEST(itable__null_inputs),
 	};
 
 	return RUN(tests);

@@ -27,13 +27,7 @@ struct ITableIterState {
 };
 
 static bool fn_equal_key(const void* const a, const void* const b) {
-	if (a == b)
-		return true;
-
-	if (!a || !b)
-		return false;
-
-	return *(size_t*)a == *(size_t*)b;
+	return a && b && *(size_t*)a == *(size_t*)b;
 }
 
 static const void *fn_alloc_key(const void* const val) {
@@ -67,11 +61,12 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 	};
 	const struct PTable *ptab = ptable_init_with(ptable_params);
 
-	if (!ptab)
-		return NULL;
+	struct ITable *tab = NULL;
 
-	struct ITable *tab = calloc(1, sizeof(struct ITable));
-	tab->ptab = ptab;
+	if (ptab) {
+		tab = calloc(1, sizeof(struct ITable));
+		tab->ptab = ptab;
+	}
 
 	return tab;
 }
@@ -125,21 +120,11 @@ const struct ITableIter *itable_iter(const struct ITable* const tab) {
 
 static bool fn_test_key_wrapper(const void* const val, const void* const iter) {
 	const struct ITableIter * const it = iter;
-
-	if (!it || !it->st || !it->st->test_key) {
-		return false;
-	}
-
 	return it->st->test_key(*(size_t*)val, it->st->data);
 }
 
 static bool fn_test_val_wrapper(const void* const val, const void* const iter) {
 	const struct ITableIter * const it = iter;
-
-	if (!it || !it->st || !it->st->test_val) {
-		return false;
-	}
-
 	return it->st->test_val(val, it->st->data);
 }
 
