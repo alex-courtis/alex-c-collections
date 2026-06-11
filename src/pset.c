@@ -20,7 +20,7 @@
 struct PSet {
 	const struct PSetParams params;
 	const void **vals;
-	size_t cap;
+	size_t capacity;
 	size_t size;
 };
 
@@ -33,20 +33,20 @@ struct PSetIterState {
 
 // grow to capacity + grow
 static void grow_pset(struct PSet *set) {
-	size_t new_capacity = set->cap + (set->params.grow ? set->params.grow : PSET_DEFAULT_GROW);
+	size_t new_capacity = set->capacity + (set->params.grow ? set->params.grow : PSET_DEFAULT_GROW);
 
 	// grow new arrays
 	const void **new_vals = calloc(new_capacity, sizeof(void*));
 
 	// copy old arrays
-	memcpy(new_vals, set->vals, set->cap * sizeof(void*));
+	memcpy(new_vals, set->vals, set->capacity * sizeof(void*));
 
 	// free old arrays
 	free(set->vals);
 
 	// lock in new
 	set->vals = new_vals;
-	set->cap = new_capacity;
+	set->capacity = new_capacity;
 }
 
 const struct PSet *pset_init(void) {
@@ -57,8 +57,8 @@ const struct PSet *pset_init(void) {
 const struct PSet *pset_init_with(const struct PSetParams params) {
 	struct PSet *set = calloc(1, sizeof(struct PSet));
 
-	set->cap = params.initial ? params.initial : PSET_DEFAULT_INITIAL;
-	set->vals = calloc(set->cap, sizeof(void*));
+	set->capacity = params.initial ? params.initial : PSET_DEFAULT_INITIAL;
+	set->vals = calloc(set->capacity, sizeof(void*));
 
 	memcpy((void*)&set->params, &params, sizeof(struct PSetParams));
 
@@ -189,7 +189,7 @@ bool pset_add(const struct PSet* const cset, const void* const val) {
 	}
 
 	// maybe grow for new entry
-	if (set->size >= set->cap) {
+	if (set->size >= set->capacity) {
 		grow_pset(set);
 		v = &set->vals[set->size];
 	}

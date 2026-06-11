@@ -35,7 +35,7 @@ static void *D0 = &datas[0];
 struct PSet {
 	const struct PSetParams params;
 	const void **vals;
-	size_t cap;
+	size_t capacity;
 	size_t size;
 };
 
@@ -66,7 +66,7 @@ static void pset_init__size(void **state) {
 	assert_non_nul(set);
 
 	assert_int_equal(set->size, 0);
-	assert_int_equal(set->cap, 2);
+	assert_int_equal(set->capacity, 2);
 	assert_int_equal(set->params.grow, 4);
 
 	pset_free(set);
@@ -78,14 +78,14 @@ static void pset_init__defaults(void **state) {
 	assert_non_nul(set);
 
 	assert_int_equal(set->size, 0);
-	assert_int_equal(set->cap, 10);
+	assert_int_equal(set->capacity, 10);
 
 	size_t v[25] = { 0 };
 	for (size_t i = 0; i < 25; i++)
 		pset_add(set, &v[i]);
 
 	assert_int_equal(set->size, 25);
-	assert_int_equal(set->cap, 30);
+	assert_int_equal(set->capacity, 30);
 
 	pset_free(set);
 }
@@ -121,7 +121,7 @@ static void pset_clone__params(void **state) {
 	assert_non_nul(clone);
 
 	assert_int_equal(set->size, 0);
-	assert_int_equal(set->cap, 3);
+	assert_int_equal(set->capacity, 3);
 	assert_int_equal(set->params.grow, 4);
 	assert_ptr_equal(set->params.equal_val, mock_equal);
 	assert_ptr_equal(set->params.less_than_val, mock_less_than);
@@ -245,7 +245,7 @@ static void pset_add__grow(void **state) {
 	assert_true(pset_add(set, V1));
 
 	assert_int_equal(set->size, 2);
-	assert_int_equal(set->cap, 2);
+	assert_int_equal(set->capacity, 2);
 	assert_int_equal(set->params.grow, 5);
 
 	assert_true(pset_contains(set, V0));
@@ -253,18 +253,18 @@ static void pset_add__grow(void **state) {
 
 	assert_true(pset_add(set, V2));
 	assert_int_equal(set->size, 3);
-	assert_int_equal(set->cap, 7);
+	assert_int_equal(set->capacity, 7);
 	assert_true(pset_contains(set, V2));
 
 	assert_true(pset_add(set, V3));
 	assert_int_equal(set->size, 4);
-	assert_int_equal(set->cap, 7);
+	assert_int_equal(set->capacity, 7);
 	assert_true(pset_contains(set, V3));
 
 	assert_true(pset_add(set, V4));
 	assert_true(pset_add(set, V5));
 	assert_int_equal(set->size, 6);
-	assert_int_equal(set->cap, 7);
+	assert_int_equal(set->capacity, 7);
 
 	assert_true(pset_contains(set, V4));
 	assert_true(pset_contains(set, V5));
