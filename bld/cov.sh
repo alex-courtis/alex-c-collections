@@ -14,7 +14,6 @@ if [ $# -lt 1 ]; then
 	usage
 fi
 TEST_TARGET="${1}"
-shift
 
 rm -f "${INFO_FILE}"
 rm -rf "${REP_PATH}"
@@ -23,10 +22,13 @@ make clean
 
 # build with coverage flag to generate .gcno
 if [ $# -eq 1 ]; then
+	shift
 
 	# build all objects with coverage
 	make CFLAGS="--coverage" all
 else
+	shift
+
 	# build specified objects with coverage
 	for obj in ${@}; do
 		make CFLAGS="--coverage" "src/${obj}.o"
@@ -48,5 +50,12 @@ genhtml \
 	"${INFO_FILE}" \
 	--output-directory "${REP_PATH}"
 
-xdg-open \
-	"${REP_PATH}/index.html"
+if [ $# -eq 1 ]; then
+	# open the one and only specified object
+	xdg-open \
+		"${REP_PATH}/src/${1}.c.gcov.html"
+else
+	# open src
+	xdg-open \
+		"${REP_PATH}/src/index.html"
+fi

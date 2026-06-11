@@ -15,12 +15,6 @@
 
 #include "pset.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#include "data/words-sorted.c"
-#include "data/words-unsorted.c"
-#pragma GCC diagnostic pop // "-Wunused-variable"
-
 static int vals[6] = { 20, 21, 22, 23, 24, 25, };
 static void *V0 = &V0;
 static void *V1 = &V1;
@@ -208,6 +202,27 @@ static void pset_add__new(void **state) {
 	pset_free(set);
 }
 
+static void pset_add__equal_val(void **state) {
+	const struct PSetParams params = { .equal_val = mock_equal, };
+	const struct PSet *set = pset_init_with(params);
+
+	assert_true(pset_add(set, V0));
+
+	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, V1);
+	will_return(mock_equal, false);
+
+	assert_true(pset_add(set, V1));
+
+	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, V0);
+	will_return(mock_equal, true);
+
+	assert_false(pset_add(set, V0));
+
+	pset_free(set);
+}
+
 static void pset_add__null(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -305,6 +320,29 @@ static void pset_remove__inexistent(void **state) {
 	pset_free(set);
 }
 
+static void pset_remove__equal_val(void **state) {
+	const struct PSetParams params = { .equal_val = mock_equal, };
+	const struct PSet *set = pset_init_with(params);
+
+	assert_true(pset_add(set, V0));
+
+	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, V0);
+	will_return(mock_equal, true);
+
+	assert_true(pset_contains(set, V0));
+
+	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, V0);
+	will_return(mock_equal, true);
+
+	assert_true(pset_remove(set, V0));
+
+	assert_int_equal(pset_size(set), 0);
+
+	pset_free(set);
+}
+
 static void pset_iter__empty(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -329,7 +367,6 @@ static void pset_iter__free(void **state) {
 
 	pset_free(set);
 }
-
 
 static void pset_iter__many(void **state) {
 	const struct PSet *set = pset_init();
@@ -368,6 +405,24 @@ static void pset_iter__cleared(void **state) {
 
 	assert_nul(pset_iter(set));
 
+	pset_free(set);
+}
+
+static void pset_iter__state_deleted(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+
+	const struct PSetIter *iter = pset_iter(set);
+	assert_non_nul(iter);
+
+	const struct PSetIterState *st = iter->st;
+	((struct PSetIter*)iter)->st = NULL;
+
+	iter = pset_iter_next(iter);
+	assert_nul(iter);
+
+	free((void*)st);
 	pset_free(set);
 }
 
@@ -694,16 +749,19 @@ int main(void) {
 		TEST(pset_free_vals__free_val),
 
 		TEST(pset_add__new),
+		TEST(pset_add__equal_val),
 		TEST(pset_add__null),
 		TEST(pset_add__grow),
 
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),
+		TEST(pset_remove__equal_val),
 
 		TEST(pset_iter__empty),
 		TEST(pset_iter__free),
 		TEST(pset_iter__many),
 		TEST(pset_iter__cleared),
+		TEST(pset_iter__state_deleted),
 
 		TEST(pset_filter_iter__many),
 
