@@ -33,15 +33,10 @@ static int datas[1] = { 30, };
 static void *D0 = &datas[0];
 
 struct PSet {
+	const struct PSetParams params;
 	const void **vals;
-	size_t capacity;
-	size_t grow;
+	size_t cap;
 	size_t size;
-	fn_equal equal_val;
-	fn_less_than less_than_val;
-	fn_free free_val;
-	fn_str str_val;
-	fn_clone clone_val;
 };
 
 static int before_all(void **state) {
@@ -71,8 +66,8 @@ static void pset_init__size(void **state) {
 	assert_non_nul(set);
 
 	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 2);
-	assert_int_equal(set->grow, 4);
+	assert_int_equal(set->cap, 2);
+	assert_int_equal(set->params.grow, 4);
 
 	pset_free(set);
 }
@@ -83,8 +78,14 @@ static void pset_init__defaults(void **state) {
 	assert_non_nul(set);
 
 	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 10);
-	assert_int_equal(set->grow, 10);
+	assert_int_equal(set->cap, 10);
+
+	size_t v[25] = { 0 };
+	for (size_t i = 0; i < 25; i++)
+		pset_add(set, &v[i]);
+
+	assert_int_equal(set->size, 25);
+	assert_int_equal(set->cap, 30);
 
 	pset_free(set);
 }
@@ -120,13 +121,13 @@ static void pset_clone__params(void **state) {
 	assert_non_nul(clone);
 
 	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 3);
-	assert_int_equal(set->grow, 4);
-	assert_ptr_equal(set->equal_val, mock_equal);
-	assert_ptr_equal(set->less_than_val, mock_less_than);
-	assert_ptr_equal(set->free_val, mock_free);
-	assert_ptr_equal(set->str_val, mock_str);
-	assert_ptr_equal(set->clone_val, mock_clone);
+	assert_int_equal(set->cap, 3);
+	assert_int_equal(set->params.grow, 4);
+	assert_ptr_equal(set->params.equal_val, mock_equal);
+	assert_ptr_equal(set->params.less_than_val, mock_less_than);
+	assert_ptr_equal(set->params.free_val, mock_free);
+	assert_ptr_equal(set->params.str_val, mock_str);
+	assert_ptr_equal(set->params.clone_val, mock_clone);
 
 	pset_free(set);
 	pset_free(clone);
@@ -244,26 +245,26 @@ static void pset_add__grow(void **state) {
 	assert_true(pset_add(set, V1));
 
 	assert_int_equal(set->size, 2);
-	assert_int_equal(set->capacity, 2);
-	assert_int_equal(set->grow, 5);
+	assert_int_equal(set->cap, 2);
+	assert_int_equal(set->params.grow, 5);
 
 	assert_true(pset_contains(set, V0));
 	assert_true(pset_contains(set, V1));
 
 	assert_true(pset_add(set, V2));
 	assert_int_equal(set->size, 3);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(set->cap, 7);
 	assert_true(pset_contains(set, V2));
 
 	assert_true(pset_add(set, V3));
 	assert_int_equal(set->size, 4);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(set->cap, 7);
 	assert_true(pset_contains(set, V3));
 
 	assert_true(pset_add(set, V4));
 	assert_true(pset_add(set, V5));
 	assert_int_equal(set->size, 6);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(set->cap, 7);
 
 	assert_true(pset_contains(set, V4));
 	assert_true(pset_contains(set, V5));

@@ -29,13 +29,13 @@ struct PSetIter {
  * Optional constructor params, defaults noted
  */
 struct PSetParams {
-	fn_equal equal_val;         // compare val pointers
-	fn_less_than less_than_val; // no sorting
-	fn_free free_val;           // free
-	fn_str str_val;             // "%p"
-	fn_clone clone_val;         // shallow clone
-	const size_t initial;       // 10
-	const size_t grow;          // 10
+	const fn_equal equal_val;         // compare val pointers
+	const fn_less_than less_than_val; // no sorting
+	const fn_free free_val;           // free
+	const fn_str str_val;             // "%p"
+	const fn_clone clone_val;         // shallow clone
+	const size_t initial;             // 10
+	const size_t grow;                // 10
 };
 
 /*

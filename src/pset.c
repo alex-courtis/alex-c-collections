@@ -8,6 +8,9 @@
 
 #include "pset.h"
 
+#define PSET_DEFAULT_INITIAL 10
+#define PSET_DEFAULT_GROW 10
+
 /*
    diff --color=always -U 10000 <(sed -e ' s/pset/xset/g ; s/PSet/XSet/g ' inc/pset.h) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' inc/sset.h) | less
 
@@ -15,40 +18,35 @@
    */
 
 struct PSet {
+	const struct PSetParams params;
 	const void **vals;
-	// TODO this could be PSetParams memcpy'd
-	size_t capacity;
-	size_t grow;
+	size_t cap;
 	size_t size;
-	fn_equal equal_val;
-	fn_less_than less_than_val;
-	fn_free free_val;
-	fn_str str_val;
-	fn_clone clone_val;
 };
 
 struct PSetIterState {
 	const struct PSet *set;
-	size_t position;
+	size_t pos;
 	fn_test test_val;
 	const void *data;
 };
 
 // grow to capacity + grow
 static void grow_pset(struct PSet *set) {
+	size_t new_capacity = set->cap + (set->params.grow ? set->params.grow : PSET_DEFAULT_GROW);
 
 	// grow new arrays
-	const void **new_vals = calloc(set->capacity + set->grow, sizeof(void*));
+	const void **new_vals = calloc(new_capacity, sizeof(void*));
 
 	// copy old arrays
-	memcpy(new_vals, set->vals, set->capacity * sizeof(void*));
+	memcpy(new_vals, set->vals, set->cap * sizeof(void*));
 
 	// free old arrays
 	free(set->vals);
 
 	// lock in new
 	set->vals = new_vals;
-	set->capacity += set->grow;
+	set->cap = new_capacity;
 }
 
 const struct PSet *pset_init(void) {
@@ -59,14 +57,10 @@ const struct PSet *pset_init(void) {
 const struct PSet *pset_init_with(const struct PSetParams params) {
 	struct PSet *set = calloc(1, sizeof(struct PSet));
 
-	set->capacity = params.initial ? params.initial : 10;
-	set->grow = params.grow ? params.grow : 10;;
-	set->vals = calloc(set->capacity, sizeof(void*));
-	set->equal_val = params.equal_val;
-	set->less_than_val = params.less_than_val;
-	set->free_val = params.free_val;
-	set->str_val = params.str_val;
-	set->clone_val = params.clone_val;
+	set->cap = params.initial ? params.initial : PSET_DEFAULT_INITIAL;
+	set->vals = calloc(set->cap, sizeof(void*));
+
+	memcpy((void*)&set->params, &params, sizeof(struct PSetParams));
 
 	return set;
 }
@@ -75,19 +69,10 @@ const struct PSet *pset_clone(const struct PSet* const from) {
 	if (!from)
 		return NULL;
 
-	const struct PSetParams params = {
-		.initial = from->capacity,
-		.grow = from->grow,
-		.equal_val = from->equal_val,
-		.less_than_val = from->less_than_val,
-		.free_val = from->free_val,
-		.str_val = from->str_val,
-		.clone_val = from->clone_val,
-	};
-	const struct PSet *to = pset_init_with(params);
+	const struct PSet *to = pset_init_with(from->params);
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		pset_add(to, from->clone_val ? from->clone_val(*v) : *v);
+		pset_add(to, from->params.clone_val ? from->params.clone_val(*v) : *v);
 	}
 
 	return to;
@@ -110,8 +95,8 @@ void pset_free_vals(const struct PSet* const set) {
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (*v) {
-			if (set->free_val) {
-				set->free_val(*v);
+			if (set->params.free_val) {
+				set->params.free_val(*v);
 			} else {
 				free((void*)*v);
 			}
@@ -134,7 +119,7 @@ bool pset_contains(const struct PSet* const set, const void* const val) {
 		return false;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->equal_val ? set->equal_val(*v, val) : *v == val) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
 			return true;
 		}
 	}
@@ -172,12 +157,12 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
 
 	// null val indicates first use, start at the beginning
 	if (it->val) {
-		st->position++;
+		st->pos++;
 	}
 
-	for ( ; st->position < st->set->size; st->position++) {
+	for ( ; st->pos < st->set->size; st->pos++) {
 
-		it->val = *(st->set->vals + st->position);
+		it->val = *(st->set->vals + st->pos);
 
 		if ((st->test_val && !st->test_val(it->val, st->data))) {
 			continue;
@@ -198,13 +183,13 @@ bool pset_add(const struct PSet* const cset, const void* const val) {
 
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
-		if (set->equal_val ? set->equal_val(*v, val) : *v == val) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
 			return false;
 		}
 	}
 
 	// maybe grow for new entry
-	if (set->size >= set->capacity) {
+	if (set->size >= set->cap) {
 		grow_pset(set);
 		v = &set->vals[set->size];
 	}
@@ -223,7 +208,7 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	struct PSet *set = (struct PSet*)cset;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->equal_val ? set->equal_val(*v, val) : *v == val) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
 			const void *removed = *v;
 
 			*v = NULL;
@@ -244,7 +229,7 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 }
 
 void pset_sort(const struct PSet* const set) {
-	if (!set || !set->less_than_val)
+	if (!set || !set->params.less_than_val)
 		return;
 
 	static const size_t gaps[] = { 701, 301, 132, 57, 23, 10, 4, 1, 0 }; // Ciura gap sequence
@@ -253,7 +238,7 @@ void pset_sort(const struct PSet* const set) {
 		for (size_t i = *gap; i < set->size; i++) {
 			const void *tmp = set->vals[i];
 			size_t j;
-			for (j = i; (j >= *gap) && set->less_than_val(tmp, set->vals[j - *gap]); j -= *gap) {
+			for (j = i; (j >= *gap) && set->params.less_than_val(tmp, set->vals[j - *gap]); j -= *gap) {
 				set->vals[j] = set->vals[j - *gap];
 			}
 			set->vals[j] = tmp;
@@ -266,8 +251,8 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b) {
 		return false;
 
 	for (const void **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
-		if (a->equal_val) {
-			if (!a->equal_val(*av, *bv)) {
+		if (a->params.equal_val) {
+			if (!a->params.equal_val(*av, *bv)) {
 				return false;
 			}
 		} else if (*av != *bv) {
@@ -298,8 +283,8 @@ char *pset_str(const struct PSet* const set) {
 	char *out = strdup("");
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->str_val) {
-			char *val_str = set->str_val(*v);
+		if (set->params.str_val) {
+			char *val_str = set->params.str_val(*v);
 			out = sprintf_append(out, "%s\n", val_str);
 			free(val_str);
 		} else {

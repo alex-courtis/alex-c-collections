@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #include "slist.h"
-#include "fn.h"
+#include "pset.h"
 
 #include "sset.h"
 
@@ -18,15 +18,10 @@
 #pragma GCC diagnostic pop // "-Wunused-variable"
 
 struct PSet {
+	const struct PSetParams params;
 	const void **vals;
-	size_t capacity;
-	size_t grow;
+	size_t cap;
 	size_t size;
-	fn_equal equal_val;
-	fn_less_than less_than_val;
-	fn_free free_val;
-	fn_str str_val;
-	fn_clone clone_val;
 };
 
 struct SSet {
@@ -56,8 +51,7 @@ static void sset_init__size(void **state) {
 	assert_non_nul(set);
 
 	assert_int_equal(set->pset->size, 0);
-	assert_int_equal(set->pset->capacity, 2);
-	assert_int_equal(set->pset->grow, 4);
+	assert_int_equal(set->pset->cap, 2);
 
 	sset_free(set);
 }
@@ -69,8 +63,7 @@ static void sset_init__defaults(void **state) {
 	assert_non_nul(set);
 
 	assert_int_equal(set->pset->size, 0);
-	assert_int_equal(set->pset->capacity, 10);
-	assert_int_equal(set->pset->grow, 10);
+	assert_int_equal(set->pset->cap, 10);
 
 	sset_free(set);
 }
@@ -101,8 +94,7 @@ static void sset_clone__params(void **state) {
 	assert_non_nul(clone);
 
 	assert_int_equal(set->pset->size, 0);
-	assert_int_equal(set->pset->capacity, 3);
-	assert_int_equal(set->pset->grow, 4);
+	assert_int_equal(set->pset->cap, 3);
 
 	assert_true(sset_add(set, "A"));
 	assert_false(sset_add(set, "a"));
@@ -219,8 +211,7 @@ static void sset_add__grow(void **state) {
 	assert_true(sset_add(set, initial[1]));
 
 	assert_int_equal(set->pset->size, 2);
-	assert_int_equal(set->pset->capacity, 2);
-	assert_int_equal(set->pset->grow, 5);
+	assert_int_equal(set->pset->cap, 2);
 
 	assert_true(sset_contains(set, initial[0]));
 	assert_true(sset_contains(set, initial[1]));
@@ -228,19 +219,19 @@ static void sset_add__grow(void **state) {
 	void *grow[] = { "2", "3", };
 	assert_true(sset_add(set, grow[0]));
 	assert_int_equal(set->pset->size, 3);
-	assert_int_equal(set->pset->capacity, 7);
+	assert_int_equal(set->pset->cap, 7);
 	assert_true(sset_contains(set, grow[0]));
 
 	assert_true(sset_add(set, grow[1]));
 	assert_int_equal(set->pset->size, 4);
-	assert_int_equal(set->pset->capacity, 7);
+	assert_int_equal(set->pset->cap, 7);
 	assert_true(sset_contains(set, grow[1]));
 
 	void *subsequent[] = { "4", "5", };
 	assert_true(sset_add(set, subsequent[0]));
 	assert_true(sset_add(set, subsequent[1]));
 	assert_int_equal(set->pset->size, 6);
-	assert_int_equal(set->pset->capacity, 7);
+	assert_int_equal(set->pset->cap, 7);
 
 	assert_true(sset_contains(set, subsequent[0]));
 	assert_true(sset_contains(set, subsequent[1]));
