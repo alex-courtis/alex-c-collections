@@ -43,11 +43,12 @@ const struct STable *stable_init_with(const struct STableParams params) {
 	};
 	const struct PTable *ptab = ptable_init_with(ptable_params);
 
-	if (!ptab)
-		return NULL;
+	struct STable *tab = NULL;
 
-	struct STable *tab = calloc(1, sizeof(struct STable));
-	tab->ptab = ptab;
+	if (ptab) {
+		tab = calloc(1, sizeof(struct STable));
+		tab->ptab = ptab;
+	}
 
 	return tab;
 }

@@ -28,6 +28,10 @@ struct STable {
 	const struct PTable *ptab;
 };
 
+struct STableIterState {
+	const struct PTableIter *pit;
+};
+
 /*
    diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
    */
@@ -120,6 +124,36 @@ static void stable_iter__(void **state) {
 	assert_nul(iter->val);
 
 	stable_iter_free(iter);
+
+	stable_free(tab);
+}
+
+static void stable_iter__state_deleted(void **state) {
+	const struct STable *tab = stable_init();
+
+	assert_nul(stable_put(tab, "a", V0));
+
+	const struct STableIter *iter = stable_iter(tab);
+	assert_non_nul(iter);
+
+	const struct STableIterState *st = iter->st;
+	((struct STableIter*)iter)->st = NULL;
+
+	iter = stable_iter_next(iter);
+	assert_nul(iter);
+
+	ptable_iter_free(st->pit);
+	free((void*)st);
+	stable_free(tab);
+}
+
+static void stable_iter__empty(void **state) {
+
+	const struct STable *tab = stable_init();
+
+	const struct STableIter *iter = stable_iter(tab);
+
+	assert_nul(iter);
 
 	stable_free(tab);
 }
@@ -316,6 +350,24 @@ static void stable_clone__params(void **state) {
 	stable_free(to);
 }
 
+static void stable__null_inputs(void **state) {
+	assert_nul(stable_clone(NULL));
+	stable_free(NULL);
+	stable_free_vals(NULL);
+	stable_iter_free(NULL);
+	assert_false(stable_get(NULL, NULL));
+	assert_nul(stable_iter(NULL));
+	assert_nul(stable_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(stable_iter_next(NULL));
+	assert_false(stable_put(NULL, NULL, NULL));
+	assert_nul(stable_remove(NULL, NULL));
+	assert_false(stable_equal(NULL, NULL));
+	assert_nul(stable_keys_slist(NULL));
+	assert_nul(stable_vals_slist(NULL));
+	assert_nul(stable_str(NULL));
+	assert_int_equal(stable_size(NULL), 0);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(stable_put_get_remove__case_sensitive),
@@ -324,6 +376,8 @@ int main(void) {
 		TEST(stable_free_vals__),
 
 		TEST(stable_iter__),
+		TEST(stable_iter__empty),
+		TEST(stable_iter__state_deleted),
 
 		TEST(stable_filter_iter__),
 
@@ -338,6 +392,8 @@ int main(void) {
 
 		TEST(stable_clone__shallow),
 		TEST(stable_clone__params),
+
+		TEST(stable__null_inputs),
 	};
 
 	return RUN(tests);

@@ -522,6 +522,24 @@ static void ptable_iter__removed(void **state) {
 	ptable_free(tab);
 }
 
+static void ptable_iter__state_deleted(void **state) {
+	const struct PTable *tab = ptable_init();
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	const struct PTableIter *iter = ptable_iter(tab);
+	assert_non_nul(iter);
+
+	const struct PTableIterState *st = iter->st;
+	((struct PTableIter*)iter)->st = NULL;
+
+	iter = ptable_iter_next(iter);
+	assert_nul(iter);
+
+	free((void*)st);
+	ptable_free(tab);
+}
+
 static void ptable_filter_iter__many(void **state) {
 	const struct PTable *tab = ptable_init();
 
@@ -938,6 +956,24 @@ static void ptable_str__str_key(void **state) {
 	ptable_free(tab);
 }
 
+static void ptable__null_inputs(void **state) {
+	assert_nul(ptable_clone(NULL));
+	ptable_free(NULL);
+	ptable_free_vals(NULL);
+	ptable_iter_free(NULL);
+	assert_false(ptable_get(NULL, NULL));
+	assert_nul(ptable_iter(NULL));
+	assert_nul(ptable_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(ptable_iter_next(NULL));
+	assert_false(ptable_put(NULL, NULL, NULL));
+	assert_nul(ptable_remove(NULL, NULL));
+	assert_false(ptable_equal(NULL, NULL));
+	assert_nul(ptable_keys_slist(NULL));
+	assert_nul(ptable_vals_slist(NULL));
+	assert_nul(ptable_str(NULL));
+	assert_int_equal(ptable_size(NULL), 0);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(ptable_init__defaults),
@@ -962,6 +998,7 @@ int main(void) {
 		TEST(ptable_iter__free),
 		TEST(ptable_iter__many),
 		TEST(ptable_iter__removed),
+		TEST(ptable_iter__state_deleted),
 
 		TEST(ptable_filter_iter__many),
 
@@ -992,6 +1029,8 @@ int main(void) {
 		TEST(ptable_str__pointers),
 		TEST(ptable_str__str_val),
 		TEST(ptable_str__str_key),
+
+		TEST(ptable__null_inputs),
 	};
 
 	return RUN(tests);

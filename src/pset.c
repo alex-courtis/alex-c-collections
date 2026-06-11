@@ -216,12 +216,13 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	struct PSet *set = (struct PSet*)cset;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		bool equal = false;
-		if (set->params.equal_val && set->params.equal_val(*v, val)) {
-			equal = true;
-		} else if (*v == val) {
-			equal = true;
+		bool equal;
+		if (set->params.equal_val) {
+			equal = set->params.equal_val(*v, val);
+		} else {
+			equal = *v == val;
 		}
+
 		if (equal) {
 			const void *removed = *v;
 
