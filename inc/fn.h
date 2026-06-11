@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// TODO try and specify param types
-
 //
 // a is generally the value from the collection, b is user supplied
 //

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// TODO proxy pset
+#include "fn.h"
 
 /*
  * Array backed ordered string set.
@@ -17,7 +17,11 @@ struct SSet; // IWYU pragma: keep
 /*
  * Entry iterator.
  */
-struct SSetIter; // IWYU pragma: keep
+struct SSetIterState; // IWYU pragma: keep
+struct SSetIter {
+	const char* val;
+	struct SSetIterState *st;
+};
 
 /*
  * Optional constructor params, defaults noted
@@ -54,14 +58,14 @@ void sset_iter_free(const struct SSetIter* const iter);
 // true if this set contains the specified element
 bool sset_contains(const struct SSet* const set, const char* const val);
 
-// create an iterator, caller must sset_iter_free or invoke sset_next until NULL
+// create an iterator, caller must sset_iter_free or invoke pset_next until NULL
 const struct SSetIter *sset_iter(const struct SSet* const set);
+
+// create an iterator filtering by test_val, NULL test_val matches all
+const struct SSetIter *sset_filter_iter(const struct SSet* const set, fn_test test_val, const void* const data);
 
 // next iterator value, NULL at end of set
 const struct SSetIter *sset_iter_next(const struct SSetIter* const iter);
-
-// iterator value, NULL on NULL iter
-const char *sset_iter_val(const struct SSetIter* const iter);
 
 /*
  * Mutate

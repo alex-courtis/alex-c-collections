@@ -52,7 +52,7 @@ const struct STable *stable_init_with(const struct STableParams params);
 const struct STable *stable_clone(const struct STable* const from);
 
 // free table
-void stable_free(const void* const tab);
+void stable_free(const struct STable* const tab);
 
 // free table and vals
 void stable_free_vals(const struct STable* const tab);

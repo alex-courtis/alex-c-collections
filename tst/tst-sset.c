@@ -17,13 +17,20 @@
 #include "data/words-unsorted.c"
 #pragma GCC diagnostic pop // "-Wunused-variable"
 
-struct SSet {
-	const char **vals;
+struct PSet {
+	const void **vals;
 	size_t capacity;
 	size_t grow;
 	size_t size;
-	fn_equal equal;
-	fn_less_than less_than;
+	fn_equal equal_val;
+	fn_less_than less_than_val;
+	fn_free free_val;
+	fn_str str_val;
+	fn_clone clone_val;
+};
+
+struct SSet {
+	const struct PSet *pset;
 };
 
 static int before_all(void **state) {
@@ -48,9 +55,9 @@ static void sset_init__size(void **state) {
 
 	assert_non_nul(set);
 
-	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 2);
-	assert_int_equal(set->grow, 4);
+	assert_int_equal(set->pset->size, 0);
+	assert_int_equal(set->pset->capacity, 2);
+	assert_int_equal(set->pset->grow, 4);
 
 	sset_free(set);
 }
@@ -61,9 +68,9 @@ static void sset_init__defaults(void **state) {
 
 	assert_non_nul(set);
 
-	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 10);
-	assert_int_equal(set->grow, 10);
+	assert_int_equal(set->pset->size, 0);
+	assert_int_equal(set->pset->capacity, 10);
+	assert_int_equal(set->pset->grow, 10);
 
 	sset_free(set);
 }
@@ -93,9 +100,9 @@ static void sset_clone__params(void **state) {
 
 	assert_non_nul(clone);
 
-	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 3);
-	assert_int_equal(set->grow, 4);
+	assert_int_equal(set->pset->size, 0);
+	assert_int_equal(set->pset->capacity, 3);
+	assert_int_equal(set->pset->grow, 4);
 
 	assert_true(sset_add(set, "A"));
 	assert_false(sset_add(set, "a"));
@@ -211,29 +218,29 @@ static void sset_add__grow(void **state) {
 	assert_true(sset_add(set, initial[0]));
 	assert_true(sset_add(set, initial[1]));
 
-	assert_int_equal(set->size, 2);
-	assert_int_equal(set->capacity, 2);
-	assert_int_equal(set->grow, 5);
+	assert_int_equal(set->pset->size, 2);
+	assert_int_equal(set->pset->capacity, 2);
+	assert_int_equal(set->pset->grow, 5);
 
 	assert_true(sset_contains(set, initial[0]));
 	assert_true(sset_contains(set, initial[1]));
 
 	void *grow[] = { "2", "3", };
 	assert_true(sset_add(set, grow[0]));
-	assert_int_equal(set->size, 3);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(set->pset->size, 3);
+	assert_int_equal(set->pset->capacity, 7);
 	assert_true(sset_contains(set, grow[0]));
 
 	assert_true(sset_add(set, grow[1]));
-	assert_int_equal(set->size, 4);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(set->pset->size, 4);
+	assert_int_equal(set->pset->capacity, 7);
 	assert_true(sset_contains(set, grow[1]));
 
 	void *subsequent[] = { "4", "5", };
 	assert_true(sset_add(set, subsequent[0]));
 	assert_true(sset_add(set, subsequent[1]));
-	assert_int_equal(set->size, 6);
-	assert_int_equal(set->capacity, 7);
+	assert_int_equal(set->pset->size, 6);
+	assert_int_equal(set->pset->capacity, 7);
 
 	assert_true(sset_contains(set, subsequent[0]));
 	assert_true(sset_contains(set, subsequent[1]));
@@ -319,7 +326,7 @@ static void sset_iter__empty(void **state) {
 
 	assert_int_equal(sset_size(set), 0);
 
-	assert_nul(sset_iter(set));
+	assert_nul(sset_filter_iter(set, NULL, NULL));
 
 	sset_free(set);
 }
@@ -333,7 +340,7 @@ static void sset_iter__free(void **state) {
 
 	const struct SSetIter *iter = sset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(sset_iter_val(iter), "0");
+	assert_str_equal(iter->val, "0");
 
 	sset_iter_free(iter);
 
@@ -352,11 +359,11 @@ static void sset_iter__many(void **state) {
 
 	const struct SSetIter *iter = sset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(sset_iter_val(iter), "0");
+	assert_str_equal(iter->val, "0");
 
 	iter = sset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(sset_iter_val(iter), "1");
+	assert_str_equal(iter->val, "1");
 
 	iter = sset_iter_next(iter);
 	assert_nul(iter);
@@ -405,22 +412,22 @@ static void sset_add__again(void **state) {
 	// 0
 	const struct SSetIter *iter = sset_iter(set);
 	assert_non_nul(iter);
-	assert_str_equal(sset_iter_val(iter), "0");
+	assert_str_equal(iter->val, "0");
 
 	// 2
 	iter = sset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(sset_iter_val(iter), "2");
+	assert_str_equal(iter->val, "2");
 
 	// 3
 	iter = sset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(sset_iter_val(iter), "3");
+	assert_str_equal(iter->val, "3");
 
 	// 0 moved later
 	iter = sset_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(sset_iter_val(iter), "1");
+	assert_str_equal(iter->val, "1");
 
 	// end
 	iter = sset_iter_next(iter);

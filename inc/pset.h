@@ -23,6 +23,8 @@ struct PSetIter {
 	struct PSetIterState *st;
 };
 
+// todo note which functions use which
+
 /*
  * Optional constructor params, defaults noted
  */
@@ -46,7 +48,7 @@ const struct PSet *pset_init(void);
 // construct a set with params
 const struct PSet *pset_init_with(const struct PSetParams params);
 
-// clone a table with clone_val
+// clone a set
 const struct PSet *pset_clone(const struct PSet* const from);
 
 // free set

@@ -86,15 +86,13 @@ const struct ITable *itable_clone(const struct ITable* const from) {
 	return to;
 }
 
-void itable_free(const void* const cvtab) {
-	if (!cvtab)
+void itable_free(const struct ITable* const tab) {
+	if (!tab)
 		return;
-
-	struct ITable *tab = (struct ITable*)cvtab;
 
 	ptable_free(tab->ptab);
 
-	free(tab);
+	free((void*)tab);
 }
 
 void itable_free_vals(const struct ITable* const tab) {
@@ -110,10 +108,10 @@ void itable_iter_free(const struct ITableIter* const iter) {
 	if (!iter)
 		return;
 
-	if (iter->ist)
-		ptable_iter_free(iter->ist->pit);
+	if (iter->st)
+		ptable_iter_free(iter->st->pit);
 
-	free((void*)iter->ist);
+	free((void*)iter->st);
 	free((void*)iter);
 }
 
@@ -128,21 +126,21 @@ const struct ITableIter *itable_iter(const struct ITable* const tab) {
 static bool fn_test_key_wrapper(const void* const val, const void* const iter) {
 	const struct ITableIter * const it = iter;
 
-	if (!it || !it->ist || !it->ist->test_key) {
+	if (!it || !it->st || !it->st->test_key) {
 		return false;
 	}
 
-	return it->ist->test_key(*(size_t*)val, it->ist->data);
+	return it->st->test_key(*(size_t*)val, it->st->data);
 }
 
 static bool fn_test_val_wrapper(const void* const val, const void* const iter) {
 	const struct ITableIter * const it = iter;
 
-	if (!it || !it->ist || !it->ist->test_val) {
+	if (!it || !it->st || !it->st->test_val) {
 		return false;
 	}
 
-	return it->ist->test_val(val, it->ist->data);
+	return it->st->test_val(val, it->st->data);
 }
 
 const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_size_t test_key, fn_test test_val, const void* const data) {
@@ -150,16 +148,16 @@ const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_t
 		return NULL;
 
 	struct ITableIter *it = calloc(1, sizeof(struct ITableIter));
-	it->ist = calloc(1, sizeof(struct ITableIterState));
-	it->ist->test_key = test_key;
-	it->ist->test_val = test_val;
-	it->ist->data = data;
+	it->st = calloc(1, sizeof(struct ITableIterState));
+	it->st->test_key = test_key;
+	it->st->test_val = test_val;
+	it->st->data = data;
 
 	// pass the ITableIter as data, to be passed to the test wrappers
 	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, test_key ? fn_test_key_wrapper : NULL, test_val ? fn_test_val_wrapper : NULL, it);
 
 	if (pit) {
-		it->ist->pit = pit;
+		it->st->pit = pit;
 		it->key = *(size_t*)pit->key;
 		it->val = pit->val;
 	} else {
@@ -176,16 +174,16 @@ const struct ITableIter *itable_iter_next(const struct ITableIter* const iter) {
 
 	struct ITableIter *it = (struct ITableIter*)iter;
 
-	if (!it->ist || !it->ist->pit) {
+	if (!it->st || !it->st->pit) {
 		free(it);
 		return NULL;
 	}
 
-	it->ist->pit = ptable_iter_next(iter->ist->pit);
+	it->st->pit = ptable_iter_next(iter->st->pit);
 
-	if (it->ist->pit) {
-		it->key = *(size_t*)it->ist->pit->key;
-		it->val = it->ist->pit->val;
+	if (it->st->pit) {
+		it->key = *(size_t*)it->st->pit->key;
+		it->val = it->st->pit->val;
 	} else {
 		itable_iter_free(it);
 		it = NULL;

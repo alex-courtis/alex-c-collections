@@ -16,6 +16,7 @@
 
 struct PSet {
 	const void **vals;
+	// TODO this could be PSetParams memcpy'd
 	size_t capacity;
 	size_t grow;
 	size_t size;
@@ -133,7 +134,7 @@ bool pset_contains(const struct PSet* const set, const void* const val) {
 		return false;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (*v == val) {
+		if (set->equal_val ? set->equal_val(*v, val) : *v == val) {
 			return true;
 		}
 	}
@@ -197,7 +198,7 @@ bool pset_add(const struct PSet* const cset, const void* const val) {
 
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
-		if (*v == val) {
+		if (set->equal_val ? set->equal_val(*v, val) : *v == val) {
 			return false;
 		}
 	}
@@ -222,7 +223,7 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	struct PSet *set = (struct PSet*)cset;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (*v == val) {
+		if (set->equal_val ? set->equal_val(*v, val) : *v == val) {
 			const void *removed = *v;
 
 			*v = NULL;

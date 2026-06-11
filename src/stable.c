@@ -62,15 +62,13 @@ const struct STable *stable_clone(const struct STable* const from) {
 	return to;
 }
 
-void stable_free(const void* const cvtab) {
-	if (!cvtab)
+void stable_free(const struct STable* const tab) {
+	if (!tab)
 		return;
-
-	struct STable *tab = (struct STable*)cvtab;
 
 	ptable_free(tab->ptab);
 
-	free(tab);
+	free((void*)tab);
 }
 
 void stable_free_vals(const struct STable* const tab) {

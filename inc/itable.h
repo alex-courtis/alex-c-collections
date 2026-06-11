@@ -22,7 +22,7 @@ struct ITableIterState; // IWYU pragma: keep
 struct ITableIter {
 	size_t key;
 	const void *val;
-	struct ITableIterState *ist;
+	struct ITableIterState *st;
 };
 
 /*
@@ -51,7 +51,7 @@ const struct ITable *itable_init_with(const struct ITableParams params);
 const struct ITable *itable_clone(const struct ITable* const from);
 
 // free table
-void itable_free(const void* const tab);
+void itable_free(const struct ITable* const tab);
 
 // free table and vals
 void itable_free_vals(const struct ITable* const tab);
