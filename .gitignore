@@ -1,5 +1,8 @@
 **/*.o
 
+**/*.gcda
+**/*.gcno
+
 tst/tst-*
 !tst/tst-*.h
 !tst/tst-*.c

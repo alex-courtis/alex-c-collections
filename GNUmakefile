@@ -13,7 +13,7 @@ TST_E = $(filter tst/tst%,$(TST_O:.o=))
 all: $(SRC_O)
 
 clean:
-	rm -f $(SRC_O) $(TST_O) $(TST_E)
+	rm -f $(SRC_O) $(TST_O) $(TST_E) src/*gcda src/*gcno
 
 #
 # lib
