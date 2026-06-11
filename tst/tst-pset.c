@@ -311,7 +311,7 @@ static void pset_remove__inexistent(void **state) {
 	assert_true(pset_contains(set, V0));
 	assert_true(pset_contains(set, V1));
 
-	assert_null(pset_remove(set, V2));
+	assert_nul(pset_remove(set, V2));
 
 	assert_int_equal(pset_size(set), 2);
 	assert_true(pset_contains(set, V0));
@@ -736,6 +736,24 @@ static void pset_str__str_val(void **state) {
 	pset_free(set);
 }
 
+static void pset__null_inputs(void **state) {
+	assert_nul(pset_clone(NULL));
+	pset_free(NULL);
+	pset_free_vals(NULL);
+	pset_iter_free(NULL);
+	assert_false(pset_contains(NULL, NULL));
+	assert_nul(pset_iter(NULL));
+	assert_nul(pset_filter_iter(NULL, NULL, NULL));
+	assert_nul(pset_iter_next(NULL));
+	assert_false(pset_add(NULL, NULL));
+	assert_nul(pset_remove(NULL, NULL));
+	pset_sort(NULL);
+	assert_false(pset_equal(NULL, NULL));
+	assert_nul(pset_slist(NULL));
+	assert_nul(pset_str(NULL));
+	assert_int_equal(pset_size(NULL), 0);
+}
+
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(pset_init__defaults),
@@ -783,6 +801,8 @@ int main(void) {
 		TEST(pset_str__empty),
 		TEST(pset_str__pointers),
 		TEST(pset_str__str_val),
+
+		TEST(pset__null_inputs),
 	};
 
 	return RUN(tests);
