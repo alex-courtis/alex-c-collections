@@ -10,25 +10,18 @@
 #include <string.h>
 
 #include "fn.h"
+#include "ptable.h"
 #include "slist.h"
 #include "str.h"
 
 #include "stable.h"
 
 struct PTable {
+	const struct PTableParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
-	size_t grow;
 	size_t size;
-	fn_equal equal_key;
-	fn_equal equal_val;
-	fn_alloc alloc_key;
-	fn_free free_key;
-	fn_free free_val;
-	fn_str str_key;
-	fn_str str_val;
-	fn_clone clone_val;
 };
 
 struct STable {
@@ -309,15 +302,15 @@ static void stable_clone__params(void **state) {
 
 	assert_int_equal(to->ptab->size, 0);
 	assert_int_equal(to->ptab->capacity, 99);
-	assert_int_equal(to->ptab->grow, 1);
-	assert_ptr_equal(to->ptab->equal_key, fn_equal_strcasecmp);
-	assert_ptr_equal(to->ptab->equal_val, mock_equal);
-	assert_ptr_equal(to->ptab->alloc_key, (fn_alloc)strdup);
-	assert_ptr_equal(to->ptab->free_key, (fn_free)free);
-	assert_ptr_equal(to->ptab->free_val, mock_free);
-	assert_ptr_equal(to->ptab->str_key, fn_str_or_null);
-	assert_ptr_equal(to->ptab->str_val, mock_str);
-	assert_ptr_equal(to->ptab->clone_val, mock_clone);
+	assert_int_equal(to->ptab->params.grow, 1);
+	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
+	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
+	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
+	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ptab->params.free_val, mock_free);
+	assert_ptr_equal(to->ptab->params.str_key, fn_str_or_null);
+	assert_ptr_equal(to->ptab->params.str_val, mock_str);
+	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
 
 	stable_free(from);
 	stable_free(to);

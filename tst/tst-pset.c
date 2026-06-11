@@ -59,19 +59,6 @@ static char* fn_str_first(const void *val) {
 	return strndup(val, 1);
 }
 
-static void pset_init__size(void **state) {
-	const struct PSetParams params = { .initial = 2, .grow = 4 };
-	const struct PSet *set = pset_init_with(params);
-
-	assert_non_nul(set);
-
-	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 2);
-	assert_int_equal(set->params.grow, 4);
-
-	pset_free(set);
-}
-
 static void pset_init__defaults(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -696,7 +683,6 @@ static void pset_str__str_val(void **state) {
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
-		TEST(pset_init__size),
 		TEST(pset_init__defaults),
 
 		TEST(pset_clone__empty),

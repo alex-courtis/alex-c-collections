@@ -8,20 +8,15 @@
 
 #include "ptable.h"
 
+#define PTABLE_DEFAULT_INITIAL 10
+#define PTABLE_DEFAULT_GROW 10
+
 struct PTable {
+	const struct PTableParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
-	size_t grow;
 	size_t size;
-	fn_equal equal_key;
-	fn_equal equal_val;
-	fn_alloc alloc_key;
-	fn_free free_key;
-	fn_free free_val;
-	fn_str str_key;
-	fn_str str_val;
-	fn_clone clone_val;
 };
 
 struct PTableIterState {
@@ -34,10 +29,11 @@ struct PTableIterState {
 
 // grow to capacity + grow
 static void grow_ptable(struct PTable *tab) {
+	size_t new_capacity = tab->capacity + (tab->params.grow ? tab->params.grow : PTABLE_DEFAULT_GROW);
 
 	// grow new arrays
-	const void **new_keys = calloc(tab->capacity + tab->grow, sizeof(void*));
-	const void **new_vals = calloc(tab->capacity + tab->grow, sizeof(void*));
+	const void **new_keys = calloc(new_capacity, sizeof(void*));
+	const void **new_vals = calloc(new_capacity, sizeof(void*));
 
 	// copy old arrays
 	memcpy(new_keys, tab->keys, tab->capacity * sizeof(void*));
@@ -50,7 +46,7 @@ static void grow_ptable(struct PTable *tab) {
 	// lock in new
 	tab->keys = new_keys;
 	tab->vals = new_vals;
-	tab->capacity += tab->grow;
+	tab->capacity = new_capacity;
 }
 
 const struct PTable *ptable_init(void) {
@@ -60,42 +56,24 @@ const struct PTable *ptable_init(void) {
 
 const struct PTable *ptable_init_with(const struct PTableParams params) {
 	struct PTable *tab = calloc(1, sizeof(struct PTable));
-	tab->capacity = params.initial ? params.initial : 10;
-	tab->grow = params.grow ? params.grow : 10;
+
+	tab->capacity = params.initial ? params.initial : PTABLE_DEFAULT_INITIAL;
 	tab->keys = calloc(tab->capacity, sizeof(void*));
 	tab->vals = calloc(tab->capacity, sizeof(void*));
-	tab->equal_key = params.equal_key;
-	tab->equal_val = params.equal_val;
-	tab->alloc_key = params.alloc_key;
-	tab->free_key = params.free_key;
-	tab->free_val = params.free_val;
-	tab->str_key = params.str_key;
-	tab->str_val = params.str_val;
-	tab->clone_val = params.clone_val;
+
+	memcpy((void*)&tab->params, &params, sizeof(struct PTableParams));
 
 	return tab;
 }
 
 const struct PTable *ptable_clone(const struct PTable* const from) {
 
-	const struct PTableParams params = {
-		.equal_key = from->equal_key,
-		.equal_val = from->equal_val,
-		.alloc_key = from->alloc_key,
-		.free_key = from->free_key,
-		.free_val = from->free_val,
-		.str_key = from->str_key,
-		.str_val = from->str_val,
-		.clone_val = from->clone_val,
-		.initial = from->capacity,
-		.grow = from->grow,
-	};
-	const struct PTable *to =  ptable_init_with(params);
+	const struct PTable *to =  ptable_init_with(from->params);
 
 	const void **k;
 	const void **v;
 	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
-		ptable_put(to, *k, from->clone_val ? from->clone_val(*v) : *v);
+		ptable_put(to, *k, from->params.clone_val ? from->params.clone_val(*v) : *v);
 	}
 
 	return to;
@@ -107,10 +85,10 @@ void ptable_free(const void* const cvtab) {
 
 	struct PTable *tab = (struct PTable*)cvtab;
 
-	if (tab->free_key) {
+	if (tab->params.free_key) {
 		for (const void **k = tab->keys; k < tab->keys + tab->capacity; k++) {
 			if (*k) {
-				tab->free_key(*k);
+				tab->params.free_key(*k);
 			}
 		}
 	}
@@ -127,8 +105,8 @@ void ptable_free_vals(const struct PTable* const tab) {
 
 	for (const void **v = tab->vals; v < tab->vals + tab->capacity; v++) {
 		if (*v) {
-			if (tab->free_val) {
-				tab->free_val(*v);
+			if (tab->params.free_val) {
+				tab->params.free_val(*v);
 			} else {
 				free((void*)*v);
 			}
@@ -155,7 +133,7 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 	for (k = tab->keys, v = tab->vals;
 			k < tab->keys + tab->size;
 			k++, v++) {
-		if (tab->equal_key ? tab->equal_key(*k, key) : *k == key) {
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			return *v;
 		}
 	}
@@ -225,7 +203,7 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
 		// overwrite existing values
-		if (tab->equal_key ? tab->equal_key(*k, key) : *k == key) {
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			const void *prev = *v;
 			*v = val;
 			return prev;
@@ -240,8 +218,8 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	}
 
 	// new
-	if (tab->alloc_key) {
-		*k = tab->alloc_key(key);
+	if (tab->params.alloc_key) {
+		*k = tab->params.alloc_key(key);
 	} else {
 		*k = key;
 	}
@@ -261,9 +239,9 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
-		if (tab->equal_key ? tab->equal_key(*k, key) : *k == key) {
-			if (tab->free_key) {
-				tab->free_key((void*)*k);
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
+			if (tab->params.free_key) {
+				tab->params.free_key((void*)*k);
 			}
 			*k = NULL;
 			const void* prev = *v;
@@ -299,13 +277,13 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b) {
 			ak++, bk++, av++, bv++) {
 
 		// key
-		if (!(a->equal_key ? a->equal_key(*ak, *bk) : *ak == *bk)) {
+		if (!(a->params.equal_key ? a->params.equal_key(*ak, *bk) : *ak == *bk)) {
 			return false;
 		}
 
 		// value
-		if (a->equal_val) {
-			if (!a->equal_val(*av, *bv)) {
+		if (a->params.equal_val) {
+			if (!a->params.equal_val(*av, *bv)) {
 				return false;
 			}
 		} else if (*av != *bv) {
@@ -355,8 +333,8 @@ char *ptable_str(const struct PTable* const tab) {
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
-		if (tab->str_key) {
-			char *key = tab->str_key(*k);
+		if (tab->params.str_key) {
+			char *key = tab->params.str_key(*k);
 			out = sprintf_append(out, "%s = ", key ? key : "???");
 			free(key);
 		} else {
@@ -364,8 +342,8 @@ char *ptable_str(const struct PTable* const tab) {
 		}
 
 		if (*v) {
-			if (tab->str_val) {
-				char *val = tab->str_val(*v);
+			if (tab->params.str_val) {
+				char *val = tab->params.str_val(*v);
 				out = sprintf_append(out, "%s\n", val);
 				free(val);
 			} else {

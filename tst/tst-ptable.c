@@ -16,19 +16,11 @@
 #include "ptable.h"
 
 struct PTable {
+	const struct PTableParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
-	size_t grow;
 	size_t size;
-	fn_equal equal_key;
-	fn_equal equal_val;
-	fn_alloc alloc_key;
-	fn_free free_key;
-	fn_free free_val;
-	fn_str str_key;
-	fn_str str_val;
-	fn_clone clone_val;
 };
 
 static int keys[6] = { 10, 11, 12, 13, 14, 15, };
@@ -66,19 +58,6 @@ static int after_each(void **state) {
 	return 0;
 }
 
-static void ptable_init__size(void **state) {
-	const struct PTableParams params = { .initial = 2, .grow = 4, };
-	const struct PTable *tab = ptable_init_with(params);
-
-	assert_non_nul(tab);
-
-	assert_int_equal(tab->size, 0);
-	assert_int_equal(tab->capacity, 2);
-	assert_int_equal(tab->grow, 4);
-
-	ptable_free(tab);
-}
-
 static void ptable_init__defaults(void **state) {
 	const struct PTable *tab = ptable_init();
 
@@ -86,7 +65,14 @@ static void ptable_init__defaults(void **state) {
 
 	assert_int_equal(tab->size, 0);
 	assert_int_equal(tab->capacity, 10);
-	assert_int_equal(tab->grow, 10);
+
+	size_t k[25] = { 0 };
+	size_t v[25] = { 0 };
+	for (size_t i = 0; i < 25; i++)
+		ptable_put(tab, &k[i], &v[i]);
+
+	assert_int_equal(tab->size, 25);
+	assert_int_equal(tab->capacity, 30);
 
 	ptable_free(tab);
 }
@@ -126,15 +112,15 @@ static void ptable_clone__params(void **state) {
 
 	assert_int_equal(to->size, 0);
 	assert_int_equal(to->capacity, 99);
-	assert_int_equal(to->grow, 1);
-	assert_ptr_equal(to->equal_key, mock_equal);
-	assert_ptr_equal(to->equal_val, mock_equal);
-	assert_ptr_equal(to->alloc_key, mock_alloc);
-	assert_ptr_equal(to->free_key, mock_free);
-	assert_ptr_equal(to->free_val, mock_free);
-	assert_ptr_equal(to->str_key, mock_str);
-	assert_ptr_equal(to->str_val, mock_str);
-	assert_ptr_equal(to->clone_val, mock_clone);
+	assert_int_equal(to->params.grow, 1);
+	assert_ptr_equal(to->params.equal_key, mock_equal);
+	assert_ptr_equal(to->params.equal_val, mock_equal);
+	assert_ptr_equal(to->params.alloc_key, mock_alloc);
+	assert_ptr_equal(to->params.free_key, mock_free);
+	assert_ptr_equal(to->params.free_val, mock_free);
+	assert_ptr_equal(to->params.str_key, mock_str);
+	assert_ptr_equal(to->params.str_val, mock_str);
+	assert_ptr_equal(to->params.clone_val, mock_clone);
 
 	ptable_free(from);
 	ptable_free(to);
@@ -358,20 +344,20 @@ static void ptable_put__grow(void **state) {
 
 	assert_int_equal(tab->size, 3);
 	assert_int_equal(tab->capacity, 3);
-	assert_int_equal(tab->grow, 5);
+	assert_int_equal(tab->params.grow, 5);
 
 	assert_nul(ptable_put(tab, K3, V3));
 
 	assert_int_equal(tab->size, 4);
 	assert_int_equal(tab->capacity, 8);
-	assert_int_equal(tab->grow, 5);
+	assert_int_equal(tab->params.grow, 5);
 
 	assert_nul(ptable_put(tab, K4, V4));
 	assert_nul(ptable_put(tab, K5, V5));
 
 	assert_int_equal(tab->size, 6);
 	assert_int_equal(tab->capacity, 8);
-	assert_int_equal(tab->grow, 5);
+	assert_int_equal(tab->params.grow, 5);
 
 	assert_ptr_equal(ptable_get(tab, K0), V0);
 	assert_ptr_equal(ptable_get(tab, K1), V1);
@@ -954,7 +940,6 @@ static void ptable_str__str_key(void **state) {
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
-		TEST(ptable_init__size),
 		TEST(ptable_init__defaults),
 
 		TEST(ptable_clone__empty),
