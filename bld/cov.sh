@@ -2,60 +2,64 @@
 
 set -e
 
-INFO_FILE="/tmp/coverage.info" 
+INFO_PATH="/tmp/coverage.info" 
 REP_PATH="/tmp/coverage-report"
 
 usage() {
-	printf "usage: ${0} <test target> [objects to cover...]\n"
+	echo "usage: ${0} [target e.g. slist ...]"
 	exit 0
 }
 
-if [ $# -lt 1 ]; then
+if [ "${1}" = "-h" ]; then
 	usage
 fi
-TEST_TARGET="${1}"
 
-rm -f "${INFO_FILE}"
 rm -rf "${REP_PATH}"
+rm -rf "${INFO_PATH}"
+mkdir "${INFO_PATH}"
 
 make clean
 
 # build with coverage flag to generate .gcno
-if [ $# -eq 1 ]; then
-	shift
+make CC=gcc CFLAGS="--coverage -fcondition-coverage" all
 
-	# build all objects with coverage
-	make CFLAGS="--coverage" all
+if [ $# -gt 0 ]; then
+	TESTS="${*}"
 else
-	shift
-
-	# build specified objects with coverage
-	for obj in ${@}; do
-		make CFLAGS="--coverage" "src/${obj}.o"
+	for TEST_C in tst/tst-*c; do
+		TESTS="${TESTS} $(echo "${TEST_C}" | sed -E 's/tst\/tst\-(.*)\.c/\1/g')"
 	done
-
-	# remainder without coverage
-	make all
 fi
 
-# execute test targets to generate .gcda
-make LDFLAGS="--coverage" "${TEST_TARGET}"
+for TEST in ${TESTS}; do
 
-lcov \
-	--capture \
-	--directory src \
-	--output-file "${INFO_FILE}"
+	# remove previous test execution
+	rm -f src/*gcda
 
+	# execute test target to generate .gcda
+	make CC="gcc" LDFLAGS="--coverage" "test-${TEST}"
+
+	# generate coverage info for the individual test
+	geninfo \
+		--test-name "tst_${TEST}" \
+		--mcdc-coverage \
+		--all \
+		--output-file "${INFO_PATH}/${TEST}.info" \
+		src
+	:
+done
+
+# combined report for all coverage info
 genhtml \
-	"${INFO_FILE}" \
-	--output-directory "${REP_PATH}"
+	--show-details \
+	--mcdc-coverage \
+	--show-proportion \
+	--dark-mode \
+	--num-spaces 4 \
+	--flat \
+	--rc genhtml_hi_limit=100 \
+	--output-directory "${REP_PATH}" \
+	${INFO_PATH}
 
-if [ $# -eq 1 ]; then
-	# open the one and only specified object
-	xdg-open \
-		"${REP_PATH}/src/${1}.c.gcov.html"
-else
-	# open src
-	xdg-open \
-		"${REP_PATH}/src/index.html"
-fi
+xdg-open \
+	"${REP_PATH}/index-detail.html"
