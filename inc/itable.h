@@ -29,9 +29,9 @@ struct ITableIter {
  * Optional constructor params, defaults noted
  */
 struct ITableParams {
-	fn_equal equal_val;   // compare val pointers
-	const size_t initial; // 10
-	const size_t grow;    // 10
+	const fn_equal equal_val; // _equal           (compare val pointers)
+	const size_t initial;     // initial capacity (10)
+	const size_t grow;        // grow capacity by (10)
 };
 
 /*

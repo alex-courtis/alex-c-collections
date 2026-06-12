@@ -23,18 +23,16 @@ struct PSetIter {
 	struct PSetIterState *st;
 };
 
-// todo note which functions use which
-
 /*
  * Optional constructor params, defaults noted
  */
 struct PSetParams {
-	const fn_equal equal_val;         // compare val pointers
-	const fn_less_than less_than_val; // no sorting
-	const fn_free free_val;           // free
-	const fn_clone clone_val;         // shallow clone
-	const size_t initial;             // 10
-	const size_t grow;                // 10
+	const fn_equal equal_val; // _equal            (compare val pointers)
+	const size_t initial;     // initial capacity  (10)
+	const size_t grow;        // grow capacity by  (10)
+
+	// todo inline
+	const fn_less_than less_than_val; //                     (no sorting)
 };
 
 /*
@@ -47,14 +45,14 @@ const struct PSet *pset_init(void);
 // construct a set with params
 const struct PSet *pset_init_with(const struct PSetParams params);
 
-// clone a set
-const struct PSet *pset_clone(const struct PSet* const from);
+// clone a table, NULL clone_val for shallow clone
+const struct PSet *pset_clone(const struct PSet* const from, fn_clone clone_val);
 
 // free set
 void pset_free(const struct PSet* const set);
 
-// free table and vals
-void pset_free_vals(const struct PSet* const set);
+// free set and vals, NULL free_val calls free
+void pset_free_vals(const struct PSet* const set, fn_free free_val);
 
 // free iter
 void pset_iter_free(const struct PSetIter* const iter);
@@ -84,7 +82,7 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
 // true if this set did not already contain the specified element
 bool pset_add(const struct PSet* const set, const void* const val);
 
-// true if this set contained the element
+// returns value if removed
 const void *pset_remove(const struct PSet* const set, const void* const val);
 
 // shell sort in place

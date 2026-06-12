@@ -27,9 +27,9 @@ struct SSetIter {
  * Optional constructor params, defaults noted
  */
 struct SSetParams {
-	const bool case_insensitive; // false
-	const size_t initial;        // 10
-	const size_t grow;           // 10
+	const bool case_insensitive; //                  (false)
+	const size_t initial;        // initial capacity (10)
+	const size_t grow;           // grow capacity by (10)
 };
 
 /*

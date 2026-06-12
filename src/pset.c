@@ -65,14 +65,14 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	return set;
 }
 
-const struct PSet *pset_clone(const struct PSet* const from) {
+const struct PSet *pset_clone(const struct PSet* const from, fn_clone clone_val) {
 	if (!from)
 		return NULL;
 
 	const struct PSet *to = pset_init_with(from->params);
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		pset_add(to, from->params.clone_val ? from->params.clone_val(*v) : *v);
+		pset_add(to, clone_val ? clone_val(*v) : *v);
 	}
 
 	return to;
@@ -87,14 +87,14 @@ void pset_free(const struct PSet * const set) {
 	free((void*)set);
 }
 
-void pset_free_vals(const struct PSet* const set) {
+void pset_free_vals(const struct PSet* const set, fn_free free_val) {
 	if (!set)
 		return;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (*v) {
-			if (set->params.free_val) {
-				set->params.free_val(*v);
+			if (free_val) {
+				free_val(*v);
 			} else {
 				free((void*)*v);
 			}

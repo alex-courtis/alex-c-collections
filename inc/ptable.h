@@ -26,15 +26,15 @@ struct PTableIter {
 };
 
 /*
- * Optional constructor params, defaults noted
+ * Optional constructor params (defaults noted)
  */
 struct PTableParams {
-	fn_equal equal_key;   // compare key pointers
-	fn_equal equal_val;   // compare val pointers
-	fn_alloc alloc_key;   // set the key pointer, result be idempotent
-	fn_free free_key;     // nop
-	const size_t initial; // 10
-	const size_t grow;    // 10
+	const fn_equal equal_key;   // _get, _put, _equal, _clone       (compare key pointers)
+	const fn_equal equal_val;   // _equal                           (compare val pointers)
+	const fn_alloc alloc_key;   // _clone, _put, must be idempotent (use key pointer)
+	const fn_free free_key;     // _remove, _free, _free_vals       (NOP)
+	const size_t initial;       // initial capacity                 (10)
+	const size_t grow;          // grow capacity by                 (10)
 };
 
 /*
