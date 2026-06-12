@@ -362,12 +362,16 @@ char *ptable_str(const struct PTable* const tab) {
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
-		if (tab->params.str_key) {
-			char *key = tab->params.str_key(*k);
-			out = sprintf_append(out, "%s = ", key ? key : "???");
-			free(key);
+		if (*k) {
+			if (tab->params.str_key) {
+				char *key = tab->params.str_key(*k);
+				out = sprintf_append(out, "%s = ", key);
+				free(key);
+			} else {
+				out = sprintf_append(out, "%p = ", *k);
+			}
 		} else {
-			out = sprintf_append(out, "%p = ", *k ? *k : "(null)");
+			out = sprintf_append(out, "(null) = ");
 		}
 
 		if (*v) {

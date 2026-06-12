@@ -61,5 +61,13 @@ genhtml \
 	--output-directory "${REP_PATH}" \
 	${INFO_PATH}
 
-xdg-open \
-	"${REP_PATH}/index-detail.html"
+if [ $# -eq 1 ]; then
+	xdg-open \
+		"${REP_PATH}/src/${1}.c.gcov.html"
+else
+	xdg-open \
+		"${REP_PATH}/index-detail.html"
+fi
+
+# clear .gnco for next (non-coverage) run
+make clean

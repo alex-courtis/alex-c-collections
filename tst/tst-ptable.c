@@ -23,6 +23,14 @@ struct PTable {
 	size_t size;
 };
 
+struct PTableIterState {
+	const struct PTable *tab;
+	size_t position;
+	fn_test test_key;
+	fn_test test_val;
+	const void *data;
+};
+
 static int keys[6] = { 10, 11, 12, 13, 14, 15, };
 static void *K0 = &keys[0];
 static void *K1 = &keys[1];
@@ -309,12 +317,12 @@ static void ptable_put__null(void **state) {
 	assert_nul(ptable_put(tab, K1, NULL));
 	assert_int_equal(ptable_size(tab), 2);
 
-	assert_nul(ptable_put(tab, K2, V2));
-	assert_int_equal(ptable_size(tab), 3);
+	assert_nul(ptable_put(tab, NULL, V2));
+	assert_int_equal(ptable_size(tab), 2);
 
 	assert_ptr_equal(ptable_get(tab, K0), V0);
 	assert_nul(ptable_get(tab, K1));
-	assert_ptr_equal(ptable_get(tab, K2), V2);
+	assert_nul(ptable_get(tab, K2));
 
 	ptable_free(tab);
 }
@@ -537,6 +545,23 @@ static void ptable_iter__state_deleted(void **state) {
 	assert_nul(iter);
 
 	free((void*)st);
+	ptable_free(tab);
+}
+
+static void ptable_iter__state_tab_deleted(void **state) {
+	const struct PTable *tab = ptable_init();
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	const struct PTableIter *iter = ptable_iter(tab);
+	assert_non_nul(iter);
+
+	struct PTableIterState *st = iter->st;
+	st->tab = NULL;
+
+	iter = ptable_iter_next(iter);
+	assert_nul(iter);
+
 	ptable_free(tab);
 }
 
@@ -884,13 +909,16 @@ static void ptable_str__pointers(void **state) {
 	ptable_put(tab, K1, NULL);
 	ptable_put(tab, K2, V2);
 
+	const void **k = tab->keys;
+	k[2] = NULL;
+
 	char *expected = sprintf_alloc(
 			"%p = %p\n"
 			"%p = (null)\n"
-			"%p = %p\n",
+			"(null) = %p\n",
 			K0, V0,
 			K1,
-			K2, V2
+			V2
 			);
 
 	char *actual = ptable_str(tab);
@@ -939,10 +967,13 @@ static void ptable_str__str_key(void **state) {
 	assert_nul(ptable_put(tab, "one", NULL));
 	assert_nul(ptable_put(tab, "two", V2));
 
+	const void **k = tab->keys;
+	k[2] = NULL;
+
 	char *expected = sprintf_alloc(
 			"zero = %p\n"
 			"one = (null)\n"
-			"two = %p\n",
+			"(null) = %p\n",
 			V0,
 			V2
 			);
@@ -968,6 +999,7 @@ static void ptable__null_inputs(void **state) {
 	assert_false(ptable_put(NULL, NULL, NULL));
 	assert_nul(ptable_remove(NULL, NULL));
 	assert_false(ptable_equal(NULL, NULL));
+	assert_false(ptable_equal(K0, NULL));
 	assert_nul(ptable_keys_slist(NULL));
 	assert_nul(ptable_vals_slist(NULL));
 	assert_nul(ptable_str(NULL));
@@ -999,6 +1031,7 @@ int main(void) {
 		TEST(ptable_iter__many),
 		TEST(ptable_iter__removed),
 		TEST(ptable_iter__state_deleted),
+		TEST(ptable_iter__state_tab_deleted),
 
 		TEST(ptable_filter_iter__many),
 

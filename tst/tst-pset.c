@@ -16,9 +16,9 @@
 #include "pset.h"
 
 static int vals[6] = { 20, 21, 22, 23, 24, 25, };
-static void *V0 = &V0;
-static void *V1 = &V1;
-static void *V2 = &V2;
+static void *V0 = &vals[0];
+static void *V1 = &vals[1];
+static void *V2 = &vals[2];
 static void *V3 = &vals[3];
 static void *V4 = &vals[4];
 static void *V5 = &vals[5];
@@ -31,6 +31,13 @@ struct PSet {
 	const void **vals;
 	size_t capacity;
 	size_t size;
+};
+
+struct PSetIterState {
+	const struct PSet *set;
+	size_t pos;
+	fn_test test_val;
+	const void *data;
 };
 
 static int before_all(void **state) {
@@ -167,6 +174,21 @@ static void pset_free_vals__null_free_val(void **state) {
 	assert_int_equal(pset_size(set), 1);
 
 	pset_free_vals(set);
+}
+
+static void pset_free_vals__missing_val(void **state) {
+	const struct PSet *set = pset_init();
+
+	char *val = strdup("0");
+
+	pset_add(set, val);
+
+	assert_int_equal(pset_size(set), 1);
+
+	set->vals[0] = NULL;
+
+	pset_free_vals(set);
+	free(val);
 }
 
 static void pset_free_vals__free_val(void **state) {
@@ -426,6 +448,23 @@ static void pset_iter__state_deleted(void **state) {
 	pset_free(set);
 }
 
+static void pset_iter__state_set_deleted(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+
+	const struct PSetIter *iter = pset_iter(set);
+	assert_non_nul(iter);
+
+	struct PSetIterState *st = iter->st;
+	st->set = NULL;
+
+	iter = pset_iter_next(iter);
+	assert_nul(iter);
+
+	pset_free(set);
+}
+
 static void pset_filter_iter__many(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -554,20 +593,50 @@ static void pset_sort__one(void **state) {
 	pset_free(expected);
 }
 
-static bool test_a_is_V0(const void* const a, const void* const b) {
-	return a == V0;
+static char* fn_str_int(const void* const val) {
+	return sprintf_alloc("%d", *(int*)val);
 }
 
-static void pset_sort__two(void **state) {
-	const struct PSetParams params = { .less_than_val = test_a_is_V0, };
+static bool test_less_than_int(const void* const a, const void* const b) {
+	return *(int*)a < *(int*)b;
+}
+
+static void pset_sort__many(void **state) {
+	const struct PSetParams params = { .less_than_val = test_less_than_int, .str_val = fn_str_int, };
 	const struct PSet *actual = pset_init_with(params);
+
+	assert_true(pset_add(actual, V2));
+	assert_true(pset_add(actual, V0));
+	assert_true(pset_add(actual, V3));
+	assert_true(pset_add(actual, V5));
+	assert_true(pset_add(actual, V1));
+	assert_true(pset_add(actual, V4));
+
+	const struct PSet *expected = pset_init_with(params);
+	assert_true(pset_add(expected, V0));
+	assert_true(pset_add(expected, V1));
+	assert_true(pset_add(expected, V2));
+	assert_true(pset_add(expected, V3));
+	assert_true(pset_add(expected, V4));
+	assert_true(pset_add(expected, V5));
+
+	pset_sort(actual);
+
+	assert_pset_equal(actual, expected);
+
+	pset_free(actual);
+	pset_free(expected);
+}
+
+static void pset_sort__no_less_than(void **state) {
+	const struct PSet *actual = pset_init();
 
 	assert_true(pset_add(actual, V1));
 	assert_true(pset_add(actual, V0));
 
 	const struct PSet *expected = pset_init();
-	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
+	assert_true(pset_add(expected, V0));
 
 	pset_sort(actual);
 
@@ -631,6 +700,10 @@ static void pset_equal__equal_val_ok(void **state) {
 
 	assert_true(pset_add(a, V0));
 	assert_true(pset_add(a, V1));
+
+	assert_true(pset_contains(a, V0));
+	assert_true(pset_contains(a, V1));
+	assert_false(pset_contains(a, V2));
 
 	assert_true(pset_add(b, V0));
 	assert_true(pset_add(b, V1));
@@ -746,9 +819,12 @@ static void pset__null_inputs(void **state) {
 	assert_nul(pset_filter_iter(NULL, NULL, NULL));
 	assert_nul(pset_iter_next(NULL));
 	assert_false(pset_add(NULL, NULL));
+	assert_false(pset_add(V0, NULL));
 	assert_nul(pset_remove(NULL, NULL));
+	assert_nul(pset_remove(V0, NULL));
 	pset_sort(NULL);
 	assert_false(pset_equal(NULL, NULL));
+	assert_false(pset_equal(V0, NULL));
 	assert_nul(pset_slist(NULL));
 	assert_nul(pset_str(NULL));
 	assert_int_equal(pset_size(NULL), 0);
@@ -764,6 +840,7 @@ int main(void) {
 		TEST(pset_clone__deep_many),
 
 		TEST(pset_free_vals__null_free_val),
+		TEST(pset_free_vals__missing_val),
 		TEST(pset_free_vals__free_val),
 
 		TEST(pset_add__new),
@@ -780,6 +857,7 @@ int main(void) {
 		TEST(pset_iter__many),
 		TEST(pset_iter__cleared),
 		TEST(pset_iter__state_deleted),
+		TEST(pset_iter__state_set_deleted),
 
 		TEST(pset_filter_iter__many),
 
@@ -787,7 +865,8 @@ int main(void) {
 
 		TEST(pset_sort__empty),
 		TEST(pset_sort__one),
-		TEST(pset_sort__two),
+		TEST(pset_sort__many),
+		TEST(pset_sort__no_less_than),
 
 		TEST(pset_equal__length_different),
 		TEST(pset_equal__val_pointers_ok),
