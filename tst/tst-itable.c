@@ -72,7 +72,7 @@ static void itable_free_vals__(void **state) {
 	const struct ITable *tab = itable_init();
 	assert_nul(itable_put(tab, 0, strdup("zero")));
 
-	itable_free_vals(tab);
+	itable_free_vals(tab, NULL);
 }
 
 static void itable_iter__(void **state) {
@@ -292,7 +292,7 @@ static void itable_clone__shallow(void **state) {
 	assert_nul(itable_put(from, 1, NULL));
 	assert_nul(itable_put(from, 2, V2));
 
-	const struct ITable *to = itable_clone(from);
+	const struct ITable *to = itable_clone(from, NULL);
 
 	assert_non_nul(to);
 
@@ -308,14 +308,12 @@ static void itable_clone__shallow(void **state) {
 static void itable_clone__params(void **state) {
 	const struct ITableParams params = {
 		.equal_val = mock_equal,
-		.free_val = mock_free,
-		.clone_val = mock_clone,
 		.initial = 99,
 		.grow = 1,
 	};
 	const struct ITable *from = itable_init_with(params);
 
-	const struct ITable *to = itable_clone(from);
+	const struct ITable *to = itable_clone(from, mock_clone);
 
 	assert_non_nul(to);
 
@@ -327,18 +325,15 @@ static void itable_clone__params(void **state) {
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
 	// assert_ptr_equal(to->ptab->alloc_key, (fn_alloc)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->ptab->params.free_val, mock_free);
-	// assert_ptr_equal(to->ptab->str_key, fn_str_str_or_null);
-	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
 
 	itable_free(from);
 	itable_free(to);
 }
 
 static void itable__null_inputs(void **state) {
-	assert_nul(itable_clone(NULL));
+	assert_nul(itable_clone(NULL, NULL));
 	itable_free(NULL);
-	itable_free_vals(NULL);
+	itable_free_vals(NULL, NULL);
 	itable_iter_free(NULL);
 	assert_false(itable_get(NULL, 0));
 	assert_nul(itable_iter(NULL));

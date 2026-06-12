@@ -66,7 +66,7 @@ const struct PTable *ptable_init_with(const struct PTableParams params) {
 	return tab;
 }
 
-const struct PTable *ptable_clone(const struct PTable* const from) {
+const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val) {
 	if (!from)
 		return NULL;
 
@@ -75,7 +75,7 @@ const struct PTable *ptable_clone(const struct PTable* const from) {
 	const void **k;
 	const void **v;
 	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
-		ptable_put(to, *k, from->params.clone_val ? from->params.clone_val(*v) : *v);
+		ptable_put(to, *k, clone_val ? clone_val(*v) : *v);
 	}
 
 	return to;
@@ -99,14 +99,14 @@ void ptable_free(const struct PTable* const tab) {
 	free((void*)tab);
 }
 
-void ptable_free_vals(const struct PTable* const tab) {
+void ptable_free_vals(const struct PTable* const tab, fn_free free_val) {
 	if (!tab)
 		return;
 
 	for (const void **v = tab->vals; v < tab->vals + tab->capacity; v++) {
 		if (*v) {
-			if (tab->params.free_val) {
-				tab->params.free_val(*v);
+			if (free_val) {
+				free_val(*v);
 			} else {
 				free((void*)*v);
 			}

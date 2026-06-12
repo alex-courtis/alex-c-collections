@@ -33,8 +33,6 @@ struct PTableParams {
 	fn_equal equal_val;   // compare val pointers
 	fn_alloc alloc_key;   // set the key pointer, result be idempotent
 	fn_free free_key;     // nop
-	fn_free free_val;     // free
-	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
 };
@@ -49,14 +47,14 @@ const struct PTable *ptable_init(void);
 // construct a table with params
 const struct PTable *ptable_init_with(const struct PTableParams params);
 
-// clone a table
-const struct PTable *ptable_clone(const struct PTable* const from);
+// clone a table, NULL clone_val for shallow clone
+const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val);
 
 // free table
 void ptable_free(const struct PTable* const tab);
 
-// free table and vals
-void ptable_free_vals(const struct PTable* const tab);
+// free table and vals, NULL free_val calls free
+void ptable_free_vals(const struct PTable* const tab, fn_free free_val);
 
 // free iter
 void ptable_iter_free(const struct PTableIter* const iter);

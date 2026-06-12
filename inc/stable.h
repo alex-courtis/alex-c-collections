@@ -31,8 +31,6 @@ struct STableIter {
 struct STableParams {
 	const bool case_insensitive; // false
 	fn_equal equal_val;          // compare val pointers
-	fn_free free_val;            // free
-	fn_clone clone_val;          // shallow clone
 	const size_t initial;        // 10
 	const size_t grow;           // 10
 };
@@ -47,14 +45,14 @@ const struct STable *stable_init(void);
 // construct a table with params
 const struct STable *stable_init_with(const struct STableParams params);
 
-// clone a table
-const struct STable *stable_clone(const struct STable* const from);
+// clone a table, NULL clone_val for shallow clone
+const struct STable *stable_clone(const struct STable* const from, fn_clone clone_val);
 
 // free table
 void stable_free(const struct STable* const tab);
 
-// free table and vals
-void stable_free_vals(const struct STable* const tab);
+// free table and vals, NULL free_val calls free
+void stable_free_vals(const struct STable* const tab, fn_free free_val);
 
 // free iter
 void stable_iter_free(const struct STableIter* const iter);

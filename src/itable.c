@@ -55,8 +55,6 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 		.equal_val = params.equal_val,
 		.alloc_key = fn_alloc_key,
 		.free_key = (fn_free)free,
-		.free_val = params.free_val,
-		.clone_val = params.clone_val,
 		.initial = params.initial,
 		.grow = params.grow,
 	};
@@ -67,12 +65,12 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 	return tab;
 }
 
-const struct ITable *itable_clone(const struct ITable* const from) {
+const struct ITable *itable_clone(const struct ITable* const from, fn_clone clone_val) {
 	if (!from)
 		return NULL;
 
 	struct ITable *to = calloc(1, sizeof(struct ITable));
-	to->ptab = ptable_clone(from->ptab);
+	to->ptab = ptable_clone(from->ptab, clone_val);
 
 	return to;
 }
@@ -86,11 +84,11 @@ void itable_free(const struct ITable* const tab) {
 	free((void*)tab);
 }
 
-void itable_free_vals(const struct ITable* const tab) {
+void itable_free_vals(const struct ITable* const tab, fn_free free_val) {
 	if (!tab)
 		return;
 
-	ptable_free_vals(tab->ptab);
+	ptable_free_vals(tab->ptab, free_val);
 
 	free((void*)tab);
 }

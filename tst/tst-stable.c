@@ -86,7 +86,7 @@ static void stable_free_vals__(void **state) {
 	const struct STable *tab = stable_init();
 	assert_nul(stable_put(tab, "a", strdup("zero")));
 
-	stable_free_vals(tab);
+	stable_free_vals(tab, NULL);
 }
 
 static void stable_iter__(void **state) {
@@ -307,7 +307,7 @@ static void stable_clone__shallow(void **state) {
 	assert_nul(stable_put(from, "b", NULL));
 	assert_nul(stable_put(from, "c", V2));
 
-	const struct STable *to = stable_clone(from);
+	const struct STable *to = stable_clone(from, NULL);
 
 	assert_non_nul(to);
 
@@ -324,14 +324,12 @@ static void stable_clone__params(void **state) {
 	const struct STableParams params = {
 		.case_insensitive = true,
 		.equal_val = mock_equal,
-		.free_val = mock_free,
-		.clone_val = mock_clone,
 		.initial = 99,
 		.grow = 1,
 	};
 	const struct STable *from = stable_init_with(params);
 
-	const struct STable *to = stable_clone(from);
+	const struct STable *to = stable_clone(from, mock_clone);
 
 	assert_non_nul(to);
 
@@ -342,17 +340,15 @@ static void stable_clone__params(void **state) {
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
 	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->ptab->params.free_val, mock_free);
-	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
 
 	stable_free(from);
 	stable_free(to);
 }
 
 static void stable__null_inputs(void **state) {
-	assert_nul(stable_clone(NULL));
+	assert_nul(stable_clone(NULL, NULL));
 	stable_free(NULL);
-	stable_free_vals(NULL);
+	stable_free_vals(NULL, NULL);
 	stable_iter_free(NULL);
 	assert_false(stable_get(NULL, NULL));
 	assert_nul(stable_iter(NULL));

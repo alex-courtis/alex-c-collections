@@ -34,8 +34,6 @@ const struct STable *stable_init_with(const struct STableParams params) {
 		.equal_val = params.equal_val,
 		.alloc_key = (fn_alloc)strdup,
 		.free_key = (fn_free)free,
-		.free_val = params.free_val,
-		.clone_val = params.clone_val,
 		.initial = params.initial,
 		.grow = params.grow,
 	};
@@ -46,12 +44,12 @@ const struct STable *stable_init_with(const struct STableParams params) {
 	return tab;
 }
 
-const struct STable *stable_clone(const struct STable* const from) {
+const struct STable *stable_clone(const struct STable* const from, fn_clone clone_val) {
 	if (!from)
 		return NULL;
 
 	struct STable *to = calloc(1, sizeof(struct STable));
-	to->ptab = ptable_clone(from->ptab);
+	to->ptab = ptable_clone(from->ptab, clone_val);
 
 	return to;
 }
@@ -65,11 +63,11 @@ void stable_free(const struct STable* const tab) {
 	free((void*)tab);
 }
 
-void stable_free_vals(const struct STable* const tab) {
+void stable_free_vals(const struct STable* const tab, fn_free free_val) {
 	if (!tab)
 		return;
 
-	ptable_free_vals(tab->ptab);
+	ptable_free_vals(tab->ptab, free_val);
 
 	free((void*)tab);
 }

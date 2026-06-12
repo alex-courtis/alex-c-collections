@@ -49,6 +49,9 @@ for TEST in ${TESTS}; do
 	:
 done
 
+# clear .gnco for next (non-coverage) run
+make clean
+
 # combined report for all coverage info
 genhtml \
 	--show-details \
@@ -66,8 +69,6 @@ if [ $# -eq 1 ]; then
 		"${REP_PATH}/src/${1}.c.gcov.html"
 else
 	xdg-open \
-		"${REP_PATH}/index-detail.html"
+		"${REP_PATH}/index.html"
 fi
 
-# clear .gnco for next (non-coverage) run
-make clean
