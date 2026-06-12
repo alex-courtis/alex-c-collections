@@ -72,11 +72,7 @@ const struct PSet *pset_clone(const struct PSet* const from) {
 	const struct PSet *to = pset_init_with(from->params);
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		if (from->params.clone_val) {
-			pset_add(to, from->params.clone_val(*v));
-		} else {
-			pset_add(to, *v);
-		}
+		pset_add(to, from->params.clone_val ? from->params.clone_val(*v) : *v);
 	}
 
 	return to;
@@ -123,9 +119,7 @@ bool pset_contains(const struct PSet* const set, const void* const val) {
 		return false;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->params.equal_val && set->params.equal_val(*v, val)) {
-			return true;
-		} else if (*v == val) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
 			return true;
 		}
 	}
@@ -189,9 +183,7 @@ bool pset_add(const struct PSet* const cset, const void* const val) {
 
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
-		if (set->params.equal_val && set->params.equal_val(*v, val)) {
-			return false;
-		} else if (*v == val) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
 			return false;
 		}
 	}
@@ -216,14 +208,7 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	struct PSet *set = (struct PSet*)cset;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		bool equal;
-		if (set->params.equal_val) {
-			equal = set->params.equal_val(*v, val);
-		} else {
-			equal = *v == val;
-		}
-
-		if (equal) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
 			const void *removed = *v;
 
 			*v = NULL;

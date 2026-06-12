@@ -41,14 +41,9 @@ const struct STable *stable_init_with(const struct STableParams params) {
 		.initial = params.initial,
 		.grow = params.grow,
 	};
-	const struct PTable *ptab = ptable_init_with(ptable_params);
 
-	struct STable *tab = NULL;
-
-	if (ptab) {
-		tab = calloc(1, sizeof(struct STable));
-		tab->ptab = ptab;
-	}
+	struct STable *tab =  calloc(1, sizeof(struct STable));
+	tab->ptab = ptable_init_with(ptable_params);;
 
 	return tab;
 }
@@ -85,8 +80,9 @@ void stable_iter_free(const struct STableIter* const iter) {
 	if (!iter)
 		return;
 
-	if (iter->st)
+	if (iter->st) {
 		ptable_iter_free(iter->st->pit);
+	}
 
 	free((void*)iter->st);
 	free((void*)iter);
@@ -126,7 +122,7 @@ const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
 	struct STableIter *it = (struct STableIter*)iter;
 
 	if (!it->st || !it->st->pit) {
-		free(it);
+		stable_iter_free(it);
 		return NULL;
 	}
 

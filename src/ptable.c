@@ -75,11 +75,7 @@ const struct PTable *ptable_clone(const struct PTable* const from) {
 	const void **k;
 	const void **v;
 	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
-		if (from->params.clone_val) {
-			ptable_put(to, *k, from->params.clone_val(*v));
-		} else {
-			ptable_put(to, *k, *v);
-		}
+		ptable_put(to, *k, from->params.clone_val ? from->params.clone_val(*v) : *v);
 	}
 
 	return to;
@@ -139,9 +135,7 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 	for (k = tab->keys, v = tab->vals;
 			k < tab->keys + tab->size;
 			k++, v++) {
-		if (tab->params.equal_key && tab->params.equal_key(*k, key)) {
-			return *v;
-		} else if (*k == key) {
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			return *v;
 		}
 	}
@@ -212,15 +206,9 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		bool equal_key;
-		if (tab->params.equal_key) {
-			equal_key = tab->params.equal_key(*k, key);
-		} else {
-			equal_key = *k == key;
-		}
 
 		// overwrite existing values
-		if (equal_key) {
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			const void *prev = *v;
 			*v = val;
 			return prev;
@@ -255,14 +243,8 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		bool equal_key;
-		if (tab->params.equal_key) {
-			equal_key = tab->params.equal_key(*k, key);
-		} else {
-			equal_key = *k == key;
-		}
 
-		if (equal_key) {
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			if (tab->params.free_key) {
 				tab->params.free_key((void*)*k);
 			}
@@ -300,14 +282,8 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b) {
 			ak++, bk++, av++, bv++) {
 
 		// key
-		if (a->params.equal_key) {
-			if (!a->params.equal_key(*ak, *bk)) {
-				return false;
-			}
-		} else {
-			if (*ak != *bk) {
-				return false;
-			}
+		if (!(a->params.equal_key ? a->params.equal_key(*ak, *bk) : *ak == *bk)) {
+			return false;
 		}
 
 		// value

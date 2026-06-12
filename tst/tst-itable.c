@@ -144,6 +144,24 @@ static void itable_iter__state_deleted(void **state) {
 	itable_free(tab);
 }
 
+static void itable_iter__state_tab_deleted(void **state) {
+	const struct ITable *tab = itable_init();
+
+	assert_nul(itable_put(tab, 0, V0));
+
+	const struct ITableIter *iter = itable_iter(tab);
+	assert_non_nul(iter);
+
+	const struct PTableIter *piter = iter->st->pit;
+	iter->st->pit = NULL;
+
+	iter = itable_iter_next(iter);
+	assert_nul(iter);
+
+	ptable_iter_free(piter);
+	itable_free(tab);
+}
+
 static void itable_filter_iter__(void **state) {
 	const struct ITable *tab = itable_init();
 
@@ -206,6 +224,39 @@ static void itable_equal__(void **state) {
 
 	itable_free(actual);
 	itable_free(expected);
+}
+
+static void itable_equal__key_removed(void **state) {
+	const struct ITable *a = itable_init();
+	assert_nul(itable_put(a, 0, V0));
+	assert_nul(itable_put(a, 1, V1));
+
+	const struct ITable *b = itable_init();
+	assert_nul(itable_put(b, 0, V0));
+	assert_nul(itable_put(b, 1, V1));
+
+	int *removed_key = (int*)b->ptab->keys[0];
+	b->ptab->keys[0] = NULL;
+
+	assert_itable_not_equal(a, b);
+
+	free(removed_key);
+	itable_free(a);
+	itable_free(b);
+}
+
+static void itable_get__key_removed(void **state) {
+
+	const struct ITable *actual = itable_init();
+	assert_nul(itable_put(actual, 0, V0));
+
+	int *removed_key = (int*)actual->ptab->keys[0];
+	actual->ptab->keys[0] = NULL;
+
+	assert_nul(itable_get(actual, 0));
+
+	free(removed_key);
+	itable_free(actual);
 }
 
 static void itable_str__(void **state) {
@@ -328,10 +379,14 @@ int main(void) {
 		TEST(itable_iter__),
 		TEST(itable_iter__empty),
 		TEST(itable_iter__state_deleted),
+		TEST(itable_iter__state_tab_deleted),
 
 		TEST(itable_filter_iter__),
 
 		TEST(itable_equal__),
+		TEST(itable_equal__key_removed),
+
+		TEST(itable_get__key_removed),
 
 		TEST(itable_str__),
 

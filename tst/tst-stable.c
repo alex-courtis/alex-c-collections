@@ -147,6 +147,24 @@ static void stable_iter__state_deleted(void **state) {
 	stable_free(tab);
 }
 
+static void ptable_iter__state_tab_deleted(void **state) {
+	const struct STable *tab = stable_init();
+
+	assert_nul(stable_put(tab, "a", V0));
+
+	const struct STableIter *iter = stable_iter(tab);
+	assert_non_nul(iter);
+
+	const struct PTableIter *piter = iter->st->pit;
+	iter->st->pit = NULL;
+
+	iter = stable_iter_next(iter);
+	assert_nul(iter);
+
+	ptable_iter_free(piter);
+	stable_free(tab);
+}
+
 static void stable_iter__empty(void **state) {
 
 	const struct STable *tab = stable_init();
@@ -378,6 +396,7 @@ int main(void) {
 		TEST(stable_iter__),
 		TEST(stable_iter__empty),
 		TEST(stable_iter__state_deleted),
+		TEST(ptable_iter__state_tab_deleted),
 
 		TEST(stable_filter_iter__),
 
