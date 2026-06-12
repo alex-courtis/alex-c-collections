@@ -84,7 +84,7 @@ void stable_iter_free(const struct STableIter* const iter) {
 		ptable_iter_free(iter->st->pit);
 	}
 
-	free((void*)iter->st);
+	free(iter->st);
 	free((void*)iter);
 }
 

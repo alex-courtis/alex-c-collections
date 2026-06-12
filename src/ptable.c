@@ -81,11 +81,9 @@ const struct PTable *ptable_clone(const struct PTable* const from) {
 	return to;
 }
 
-void ptable_free(const void* const cvtab) {
-	if (!cvtab)
+void ptable_free(const struct PTable* const tab) {
+	if (!tab)
 		return;
-
-	struct PTable *tab = (struct PTable*)cvtab;
 
 	if (tab->params.free_key) {
 		for (const void **k = tab->keys; k < tab->keys + tab->capacity; k++) {
@@ -98,7 +96,7 @@ void ptable_free(const void* const cvtab) {
 	free(tab->keys);
 	free(tab->vals);
 
-	free(tab);
+	free((void*)tab);
 }
 
 void ptable_free_vals(const struct PTable* const tab) {
@@ -122,7 +120,7 @@ void ptable_iter_free(const struct PTableIter* const iter) {
 	if (!iter)
 		return;
 
-	free((void*)iter->st);
+	free(iter->st);
 	free((void*)iter);
 }
 

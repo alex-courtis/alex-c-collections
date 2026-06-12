@@ -78,15 +78,13 @@ const struct PSet *pset_clone(const struct PSet* const from) {
 	return to;
 }
 
-void pset_free(const void* const cvset) {
-	if (!cvset)
+void pset_free(const struct PSet * const set) {
+	if (!set)
 		return;
-
-	struct PSet *set = (struct PSet*)cvset;
 
 	free(set->vals);
 
-	free(set);
+	free((void*)set);
 }
 
 void pset_free_vals(const struct PSet* const set) {

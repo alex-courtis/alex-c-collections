@@ -55,7 +55,7 @@ const struct PTable *ptable_init_with(const struct PTableParams params);
 const struct PTable *ptable_clone(const struct PTable* const from);
 
 // free table
-void ptable_free(const void* const tab);
+void ptable_free(const struct PTable* const tab);
 
 // free table and vals
 void ptable_free_vals(const struct PTable* const tab);

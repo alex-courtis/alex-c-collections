@@ -52,7 +52,7 @@ const struct PSet *pset_init_with(const struct PSetParams params);
 const struct PSet *pset_clone(const struct PSet* const from);
 
 // free set
-void pset_free(const void* const set);
+void pset_free(const struct PSet* const set);
 
 // free table and vals
 void pset_free_vals(const struct PSet* const set);
@@ -85,7 +85,7 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
 // true if this set did not already contain the specified element
 bool pset_add(const struct PSet* const set, const void* const val);
 
-// true if this set contained the element, NULL equal_val compares pointer
+// true if this set contained the element
 const void *pset_remove(const struct PSet* const set, const void* const val);
 
 // shell sort in place

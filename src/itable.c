@@ -104,7 +104,7 @@ void itable_iter_free(const struct ITableIter* const iter) {
 	if (iter->st)
 		ptable_iter_free(iter->st->pit);
 
-	free((void*)iter->st);
+	free(iter->st);
 	free((void*)iter);
 }
 
