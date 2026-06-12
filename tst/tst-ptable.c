@@ -50,22 +50,6 @@ static void *V5 = &vals[5];
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
 
-static int before_all(void **state) {
-	return 0;
-}
-
-static int after_all(void **state) {
-	return 0;
-}
-
-static int before_each(void **state) {
-	return 0;
-}
-
-static int after_each(void **state) {
-	return 0;
-}
-
 static void ptable_init__defaults(void **state) {
 	const struct PTable *tab = ptable_init();
 

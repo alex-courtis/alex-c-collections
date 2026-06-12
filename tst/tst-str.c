@@ -8,22 +8,6 @@
 
 #include "str.h"
 
-static int before_all(void **state) {
-	return 0;
-}
-
-static int after_all(void **state) {
-	return 0;
-}
-
-static int before_each(void **state) {
-	return 0;
-}
-
-static int after_each(void **state) {
-	return 0;
-}
-
 static void sprintf_alloc__ok(void **state) {
 
 	char *actual = sprintf_alloc("%d_%s", 1, "bar");

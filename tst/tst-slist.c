@@ -17,22 +17,6 @@
 #include "data/words-sorted.c"
 #include "data/words-unsorted.c"
 
-static int before_all(void **state) {
-	return 0;
-}
-
-static int after_all(void **state) {
-	return 0;
-}
-
-static int before_each(void **state) {
-	return 0;
-}
-
-static int after_each(void **state) {
-	return 0;
-}
-
 static char* fn_str_first(const void *val) {
 	return strndup(val, 1);
 }

@@ -47,22 +47,6 @@ static void *V2 = &vals[2];
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
 
-static int before_all(void **state) {
-	return 0;
-}
-
-static int after_all(void **state) {
-	return 0;
-}
-
-static int before_each(void **state) {
-	return 0;
-}
-
-static int after_each(void **state) {
-	return 0;
-}
-
 static void itable_put_get_remove(void **state) {
 	const struct ITableParams params = { 0 };
 	const struct ITable *tab = itable_init_with(params);

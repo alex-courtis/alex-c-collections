@@ -28,22 +28,6 @@ struct SSet {
 	const struct PSet *pset;
 };
 
-static int before_all(void **state) {
-	return 0;
-}
-
-static int after_all(void **state) {
-	return 0;
-}
-
-static int before_each(void **state) {
-	return 0;
-}
-
-static int after_each(void **state) {
-	return 0;
-}
-
 static void sset_init__size(void **state) {
 	const struct SSetParams params = { .initial = 2, .grow = 4 };
 	const struct SSet *set = sset_init_with(params);
