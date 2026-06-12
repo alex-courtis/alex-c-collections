@@ -326,7 +326,7 @@ struct SList *ptable_vals_slist(const struct PTable* const tab) {
 	return list;
 }
 
-char *ptable_str(const struct PTable* const tab) {
+char *ptable_str(const struct PTable* const tab, fn_str str_key, fn_str str_val) {
 	if (!tab)
 		return NULL;
 
@@ -337,8 +337,8 @@ char *ptable_str(const struct PTable* const tab) {
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
 
 		if (*k) {
-			if (tab->params.str_key) {
-				char *key = tab->params.str_key(*k);
+			if (str_key) {
+				char *key = str_key(*k);
 				out = sprintf_append(out, "%s = ", key);
 				free(key);
 			} else {
@@ -349,8 +349,8 @@ char *ptable_str(const struct PTable* const tab) {
 		}
 
 		if (*v) {
-			if (tab->params.str_val) {
-				char *val = tab->params.str_val(*v);
+			if (str_val) {
+				char *val = str_val(*v);
 				out = sprintf_append(out, "%s\n", val);
 				free(val);
 			} else {

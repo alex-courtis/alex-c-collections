@@ -34,8 +34,6 @@ struct PTableParams {
 	fn_alloc alloc_key;   // set the key pointer, result be idempotent
 	fn_free free_key;     // nop
 	fn_free free_val;     // free
-	fn_str str_key;       // "%p"
-	fn_str str_val;       // "%p"
 	fn_clone clone_val;   // shallow clone
 	const size_t initial; // 10
 	const size_t grow;    // 10
@@ -110,8 +108,8 @@ struct SList *ptable_vals_slist(const struct PTable* const tab);
  * Info
  */
 
-// to string, user frees, format "str_key = str_val\n"
-char *ptable_str(const struct PTable* const tab);
+// to string, user frees, format "str_key = str_val\n", "%p" for NULL fn_str
+char *ptable_str(const struct PTable* const tab, fn_str str_key, fn_str str_val);
 
 // number of entries
 size_t ptable_size(const struct PTable* const tab);

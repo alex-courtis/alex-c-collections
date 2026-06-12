@@ -32,7 +32,6 @@ struct PSetParams {
 	const fn_equal equal_val;         // compare val pointers
 	const fn_less_than less_than_val; // no sorting
 	const fn_free free_val;           // free
-	const fn_str str_val;             // "%p"
 	const fn_clone clone_val;         // shallow clone
 	const size_t initial;             // 10
 	const size_t grow;                // 10
@@ -109,8 +108,8 @@ struct SList *pset_slist(const struct PSet* const set);
  * Info
  */
 
-// to string, user frees, format "str_val\n"
-char *pset_str(const struct PSet* const set);
+// to string, user frees, format "str_val\n", "%p" for NULL fn_str
+char *pset_str(const struct PSet* const set, fn_str str_val);
 
 // number of values
 size_t pset_size(const struct PSet* const set);

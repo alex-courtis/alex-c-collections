@@ -81,7 +81,6 @@ static void pset_clone__params(void **state) {
 		.equal_val = mock_equal,
 		.less_than_val = mock_less_than,
 		.free_val = mock_free,
-		.str_val = mock_str,
 		.clone_val = mock_clone,
 		.initial = 3,
 		.grow  = 4,
@@ -98,7 +97,6 @@ static void pset_clone__params(void **state) {
 	assert_ptr_equal(set->params.equal_val, mock_equal);
 	assert_ptr_equal(set->params.less_than_val, mock_less_than);
 	assert_ptr_equal(set->params.free_val, mock_free);
-	assert_ptr_equal(set->params.str_val, mock_str);
 	assert_ptr_equal(set->params.clone_val, mock_clone);
 
 	pset_free(set);
@@ -577,16 +575,12 @@ static void pset_sort__one(void **state) {
 	pset_free(expected);
 }
 
-static char* fn_str_int(const void* const val) {
-	return sprintf_alloc("%d", *(int*)val);
-}
-
 static bool test_less_than_int(const void* const a, const void* const b) {
 	return *(int*)a < *(int*)b;
 }
 
 static void pset_sort__many(void **state) {
-	const struct PSetParams params = { .less_than_val = test_less_than_int, .str_val = fn_str_int, };
+	const struct PSetParams params = { .less_than_val = test_less_than_int, };
 	const struct PSet *actual = pset_init_with(params);
 
 	assert_true(pset_add(actual, V2));
@@ -740,10 +734,9 @@ static void pset_vals_slist__many(void **state) {
 }
 
 static void pset_str__empty(void **state) {
-	const struct PSetParams params = { .str_val = mock_str, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PSet *set = pset_init();
 
-	char *str = pset_str(set);
+	char *str = pset_str(set, mock_str);
 	assert_str_equal(str, "");
 
 	free(str);
@@ -766,7 +759,7 @@ static void pset_str__pointers(void **state) {
 			V2
 			);
 
-	char *actual = pset_str(set);
+	char *actual = pset_str(set, NULL);
 	assert_str_equal(actual, expected);
 
 	free(actual);
@@ -775,14 +768,13 @@ static void pset_str__pointers(void **state) {
 }
 
 static void pset_str__str_val(void **state) {
-	const struct PSetParams params = { .str_val = fn_str_first, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, "ONE"));
 	assert_true(pset_add(set, "TWO"));
 	assert_true(pset_add(set, "THREE"));
 
-	char *str = pset_str(set);
+	char *str = pset_str(set, fn_str_first);
 	assert_str_equal(str,
 			"O\n"
 			"T\n"
@@ -810,7 +802,7 @@ static void pset__null_inputs(void **state) {
 	assert_false(pset_equal(NULL, NULL));
 	assert_false(pset_equal(V0, NULL));
 	assert_nul(pset_slist(NULL));
-	assert_nul(pset_str(NULL));
+	assert_nul(pset_str(NULL, NULL));
 	assert_int_equal(pset_size(NULL), 0);
 }
 

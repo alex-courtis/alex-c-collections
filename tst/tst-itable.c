@@ -258,7 +258,7 @@ static void itable_str__(void **state) {
 			V2
 			);
 
-	char *actual = itable_str(tab);
+	char *actual = itable_str(tab, NULL);
 
 	assert_str_equal(actual, expected);
 
@@ -309,7 +309,6 @@ static void itable_clone__params(void **state) {
 	const struct ITableParams params = {
 		.equal_val = mock_equal,
 		.free_val = mock_free,
-		.str_val = mock_str,
 		.clone_val = mock_clone,
 		.initial = 99,
 		.grow = 1,
@@ -330,7 +329,6 @@ static void itable_clone__params(void **state) {
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->ptab->params.free_val, mock_free);
 	// assert_ptr_equal(to->ptab->str_key, fn_str_str_or_null);
-	assert_ptr_equal(to->ptab->params.str_val, mock_str);
 	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
 
 	itable_free(from);
@@ -350,7 +348,7 @@ static void itable__null_inputs(void **state) {
 	assert_nul(itable_remove(NULL, 0));
 	assert_false(itable_equal(NULL, NULL));
 	assert_nul(itable_vals_slist(NULL));
-	assert_nul(itable_str(NULL));
+	assert_nul(itable_str(NULL, NULL));
 	assert_int_equal(itable_size(NULL), 0);
 }
 

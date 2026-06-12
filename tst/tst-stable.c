@@ -257,7 +257,7 @@ static void stable_str__(void **state) {
 			V2
 			);
 
-	char *actual = stable_str(tab);
+	char *actual = stable_str(tab, NULL);
 
 	assert_str_equal(actual, expected);
 
@@ -325,7 +325,6 @@ static void stable_clone__params(void **state) {
 		.case_insensitive = true,
 		.equal_val = mock_equal,
 		.free_val = mock_free,
-		.str_val = mock_str,
 		.clone_val = mock_clone,
 		.initial = 99,
 		.grow = 1,
@@ -344,8 +343,6 @@ static void stable_clone__params(void **state) {
 	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->ptab->params.free_val, mock_free);
-	assert_ptr_equal(to->ptab->params.str_key, fn_str_or_null);
-	assert_ptr_equal(to->ptab->params.str_val, mock_str);
 	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
 
 	stable_free(from);
@@ -366,7 +363,7 @@ static void stable__null_inputs(void **state) {
 	assert_false(stable_equal(NULL, NULL));
 	assert_nul(stable_keys_slist(NULL));
 	assert_nul(stable_vals_slist(NULL));
-	assert_nul(stable_str(NULL));
+	assert_nul(stable_str(NULL, NULL));
 	assert_int_equal(stable_size(NULL), 0);
 }
 
