@@ -1,16 +1,14 @@
 #include "tst.h"
 #include "asserts.h"
 #include "assert-sset.h"
-#include "expects.h"
-#include "mock-fn.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "fn.h"
 #include "slist.h"
 #include "pset.h"
-#include "str.h"
 
 #include "sset.h"
 
@@ -139,7 +137,7 @@ static void sset_iter__empty(void **state) {
 	sset_free(set);
 }
 
-bool fn_test_starts_with_a(const void* const val, const void* const data) {
+static bool fn_test_starts_with_a(const void* const val, const void* const data) {
 	return *(char*)val == 'a';
 }
 
