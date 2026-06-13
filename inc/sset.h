@@ -71,7 +71,6 @@ const struct SSetIter *sset_iter_next(const struct SSetIter* const iter);
  * Mutate
  */
 
-// TODO invert this return
 // true if this set did not already contain the specified element
 bool sset_add(const struct SSet* const set, const char* const val);
 

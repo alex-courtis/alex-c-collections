@@ -108,6 +108,25 @@ static void slist_remove__every(void **state) {
 	slist_free(&list);
 }
 
+static void slist_remove__inexistent(void **state) {
+	struct SList *list = NULL;
+
+	slist_append(&list, strdup("0"));
+
+	assert_non_nul(list);
+	assert_int_equal(slist_length(list), 1);
+
+	assert_nul(slist_remove(&list, NULL));
+
+	struct SList *other = NULL;
+	slist_append(&list, strdup("x"));
+
+	assert_nul(slist_remove(&list, &other));
+
+	slist_free_vals(&list, NULL);
+	slist_free_vals(&other, NULL);
+}
+
 static void slist_remove_all__some(void **state) {
 	struct SList *list = NULL;
 
@@ -200,6 +219,8 @@ static void slist_find__no(void **state) {
 	const struct SList *i = slist_find(list, test_false, D);
 	assert_nul(i);
 
+	assert_nul(slist_find(list, NULL, D));
+
 	slist_free(&list);
 }
 
@@ -267,6 +288,10 @@ static void slist_find_equal_val__yes(void **state) {
 	assert_str_equal(val, "1");
 
 	const struct SList *i = slist_find_equal(list, fn_equal_strcmp, "1");
+	assert_non_nul(i);
+	assert_str_equal(i->val, "1");
+
+	i = slist_find_equal(list, NULL, vals[1]);
 	assert_non_nul(i);
 	assert_str_equal(i->val, "1");
 
@@ -433,6 +458,21 @@ static void slist_sort__empty(void **state) {
 	assert_nul(to);
 }
 
+static void slist_sort__one(void **state) {
+	struct SList *from = NULL;
+
+	slist_append(&from, strdup("only"));
+
+	struct SList *to = slist_sort(from, mock_less_than);
+
+	assert_non_nul(to);
+
+	assert_nul(slist_sort(from, NULL));
+
+	slist_free_vals(&from, NULL);
+	slist_free(&to);
+}
+
 static void slist_sort__vals(void **state) {
 	struct SList *from = NULL;
 
@@ -496,8 +536,16 @@ static void slist_move__empty(void **state) {
 	struct SList *from = NULL;
 
 	slist_move(&to, &from, fn_equal_strcmp, "x");
-
 	assert_nul(to);
+
+	slist_move(&to, NULL, fn_equal_strcmp, "x");
+	assert_nul(to);
+
+	slist_move(&to, &from, NULL, "x");
+	assert_nul(to);
+
+	slist_move(NULL, NULL, NULL, "x");
+
 	assert_nul(from);
 }
 
@@ -620,6 +668,16 @@ static void slist_move__all(void **state) {
 
 	slist_free(&to);
 	slist_free(&from);
+}
+
+static void slist_at__inexistent(void **state) {
+	struct SList *to = NULL;
+
+	slist_append(&to, strdup("0"));
+
+	assert_nul(slist_at(to, 2));
+
+	slist_free_vals(&to, NULL);
 }
 
 static void slist_clone__deep_empty(void **state) {
@@ -815,12 +873,32 @@ static void slist_xor_free__duplicate_items(void **state) {
 	slist_free_vals(&expected, NULL);
 }
 
+static void slist_xor_free__vals(void **state) {
+	struct SList *list1 = NULL;
+	struct SList *list2 = NULL;
+	struct SList *expected = NULL;
+
+	char *val = "item1";
+
+	slist_append(&list2, val);
+
+	slist_append(&expected, val);
+
+	slist_xor_free(&list1, list2, fn_equal_strcmp, NULL, NULL);
+
+	assert_slist_equal(list1, expected, fn_equal_strcmp, NULL);
+
+	slist_free(&list1);
+	slist_free(&list2);
+	slist_free(&expected);
+}
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(slist_free_vals__many),
 
 		TEST(slist_remove__every),
+		TEST(slist_remove__inexistent),
 
 		TEST(slist_remove_all__some),
 		TEST(slist_remove_all_free__some),
@@ -841,6 +919,7 @@ int main(void) {
 		TEST(slist_equal__not_equal_rhs_size),
 
 		TEST(slist_sort__empty),
+		TEST(slist_sort__one),
 		TEST(slist_sort__vals),
 		TEST(slist_sort__words),
 
@@ -850,6 +929,8 @@ int main(void) {
 		TEST(slist_move__no_match),
 		TEST(slist_move__many),
 		TEST(slist_move__all),
+
+		TEST(slist_at__inexistent),
 
 		TEST(slist_clone__deep_empty),
 		TEST(slist_clone__deep_vals),
@@ -866,6 +947,9 @@ int main(void) {
 		TEST(slist_xor_free__second_list_empty),
 		TEST(slist_xor_free__toggle_items),
 		TEST(slist_xor_free__duplicate_items),
+		TEST(slist_xor_free__vals),
+
+		// TODO test for null input, requires guards
 	};
 
 	return RUN(tests);

@@ -61,8 +61,6 @@ void pset_iter_free(const struct PSetIter* const iter);
 // true if this set contains the specified element
 bool pset_contains(const struct PSet* const set, const void* const val);
 
-// todo maybe add a find first
-
 // create an iterator, caller must pset_iter_free or invoke pset_next until NULL
 const struct PSetIter *pset_iter(const struct PSet* const set);
 

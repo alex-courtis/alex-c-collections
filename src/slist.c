@@ -64,6 +64,9 @@ struct SList *slist_append(struct SList **head, void *val) {
 }
 
 void *slist_remove(struct SList **head, struct SList **item) {
+	if (!item)
+		return NULL;
+
 	struct SList *i, *f, *p;
 	void *removed = NULL;
 
