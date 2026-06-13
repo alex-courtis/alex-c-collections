@@ -309,6 +309,8 @@ static void pset_remove__inexistent(void **state) {
 
 	assert_nul(pset_remove(set, V2));
 
+	assert_nul(pset_remove(set, NULL));
+
 	assert_int_equal(pset_size(set), 2);
 	assert_true(pset_contains(set, V0));
 	assert_true(pset_contains(set, V1));
@@ -635,6 +637,8 @@ static void pset_equal__val_pointers_ok(void **state) {
 	assert_true(pset_add(a, V0));
 	assert_true(pset_add(a, V1));
 
+	assert_pset_not_equal(a, NULL);
+
 	assert_true(pset_add(b, V0));
 	assert_true(pset_add(b, V1));
 
@@ -784,12 +788,9 @@ static void pset__null_inputs(void **state) {
 	assert_nul(pset_filter_iter(NULL, NULL, NULL));
 	assert_nul(pset_iter_next(NULL));
 	assert_false(pset_add(NULL, NULL));
-	assert_false(pset_add(V0, NULL));
 	assert_nul(pset_remove(NULL, NULL));
-	assert_nul(pset_remove(V0, NULL));
 	pset_sort(NULL, NULL);
 	assert_false(pset_equal(NULL, NULL));
-	assert_false(pset_equal(V0, NULL));
 	assert_nul(pset_slist(NULL));
 	assert_nul(pset_str(NULL, NULL));
 	assert_int_equal(pset_size(NULL), 0);

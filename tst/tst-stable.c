@@ -207,6 +207,8 @@ static void stable_equal__case_sensitive(void **state) {
 	assert_nul(stable_put(actual, "a", V0));
 	assert_nul(stable_put(actual, "b", V1));
 
+	assert_stable_not_equal(actual, NULL);
+
 	const struct STable *expected = stable_init();
 	assert_nul(stable_put(expected, "a", V0));
 	assert_nul(stable_put(expected, "b", V1));

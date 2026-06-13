@@ -43,6 +43,7 @@ for TEST in ${TESTS}; do
 	geninfo \
 		--test-name "tst_${TEST}" \
 		--mcdc-coverage \
+		--branch-coverage \
 		--all \
 		--output-file "${INFO_PATH}/${TEST}.info" \
 		src
@@ -56,6 +57,7 @@ make clean
 genhtml \
 	--show-details \
 	--mcdc-coverage \
+	--branch-coverage \
 	--show-proportion \
 	--dark-mode \
 	--num-spaces 4 \

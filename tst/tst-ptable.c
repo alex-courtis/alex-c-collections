@@ -958,6 +958,8 @@ static void ptable_str__str_key(void **state) {
 }
 
 static void ptable__null_inputs(void **state) {
+	const struct PTable *tab = ptable_init();
+
 	assert_nul(ptable_clone(NULL, NULL));
 	ptable_free(NULL);
 	ptable_free_vals(NULL, NULL);
@@ -969,11 +971,13 @@ static void ptable__null_inputs(void **state) {
 	assert_false(ptable_put(NULL, NULL, NULL));
 	assert_nul(ptable_remove(NULL, NULL));
 	assert_false(ptable_equal(NULL, NULL));
-	assert_false(ptable_equal(K0, NULL));
+	assert_false(ptable_equal(tab, NULL));
 	assert_nul(ptable_keys_slist(NULL));
 	assert_nul(ptable_vals_slist(NULL));
 	assert_nul(ptable_str(NULL, NULL, NULL));
 	assert_int_equal(ptable_size(NULL), 0);
+
+	ptable_free(tab);
 }
 
 int main(void) {

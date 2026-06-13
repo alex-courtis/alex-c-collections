@@ -197,6 +197,8 @@ static void itable_equal__(void **state) {
 	assert_nul(itable_put(actual, 0, V0));
 	assert_nul(itable_put(actual, 1, V1));
 
+	assert_itable_not_equal(actual, NULL);
+
 	const struct ITable *expected = itable_init();
 	assert_nul(itable_put(expected, 0, V0));
 	assert_nul(itable_put(expected, 1, V1));
