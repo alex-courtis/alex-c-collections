@@ -26,7 +26,7 @@ struct PTableIter {
 };
 
 /*
- * Optional constructor params (defaults noted)
+ * Optional constructor params (default)
  */
 struct PTableParams {
 	const fn_equal equal_key;   // _get, _put, _equal, _clone       (compare key pointers)
@@ -63,6 +63,8 @@ void ptable_iter_free(const struct PTableIter* const iter);
  * Access
  */
 
+// todo find
+
 // return val, NULL if not present
 const void *ptable_get(const struct PTable* const tab, const void* const key);
 
@@ -84,6 +86,8 @@ const void *ptable_put(const struct PTable* const tab, const void* const key, co
 
 // remove key, return old val if present
 const void *ptable_remove(const struct PTable* const tab, const void* const key);
+
+// todo sort by key or value
 
 /*
  * Comparison

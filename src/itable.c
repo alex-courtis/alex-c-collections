@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fn.h"
 #include "ptable.h"
@@ -16,6 +17,7 @@
    */
 
 struct ITable {
+	const struct ITableParams params;
 	const struct PTable *ptab;
 };
 
@@ -61,6 +63,7 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 
 	struct ITable *tab =  calloc(1, sizeof(struct ITable));
 	tab->ptab = ptable_init_with(ptable_params);;
+	memcpy((void*)&tab->params, &params, sizeof(struct ITableParams));
 
 	return tab;
 }
@@ -71,6 +74,7 @@ const struct ITable *itable_clone(const struct ITable* const from, fn_clone clon
 
 	struct ITable *to = calloc(1, sizeof(struct ITable));
 	to->ptab = ptable_clone(from->ptab, clone_val);
+	memcpy((void*)&to->params, &from->params, sizeof(struct ITableParams));
 
 	return to;
 }

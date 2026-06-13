@@ -26,13 +26,13 @@ struct STableIter {
 };
 
 /*
- * Optional constructor params, defaults noted
+ * Optional constructor params (default)
  */
 struct STableParams {
-	const bool case_insensitive; //                  (false)
-	const fn_equal equal_val;    // _equal           (compare val pointers)
-	const size_t initial;        // initial capacity (10)
-	const size_t grow;           // grow capacity by (10)
+	const bool case_insensitive; //                            (false)
+	const fn_equal equal_val;    // _get, _put, _equal, _clone (compare key pointers)
+	const size_t initial;        // initial capacity           (10)
+	const size_t grow;           // grow capacity by           (10)
 };
 
 /*

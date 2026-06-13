@@ -79,7 +79,6 @@ static void pset_clone__empty(void **state) {
 static void pset_clone__params(void **state) {
 	const struct PSetParams params = {
 		.equal_val = mock_equal,
-		.less_than_val = mock_less_than,
 		.initial = 3,
 		.grow  = 4,
 	};
@@ -93,7 +92,6 @@ static void pset_clone__params(void **state) {
 	assert_int_equal(set->capacity, 3);
 	assert_int_equal(set->params.grow, 4);
 	assert_ptr_equal(set->params.equal_val, mock_equal);
-	assert_ptr_equal(set->params.less_than_val, mock_less_than);
 
 	pset_free(set);
 	pset_free(clone);
@@ -538,11 +536,10 @@ static void pset_add__again(void **state) {
 }
 
 static void pset_sort__empty(void **state) {
-	const struct PSetParams params = { .less_than_val = mock_test, };
-	const struct PSet *actual = pset_init_with(params);
-	const struct PSet *expected = pset_init_with(params);
+	const struct PSet *actual = pset_init();
+	const struct PSet *expected = pset_init();
 
-	pset_sort(actual);
+	pset_sort(actual, mock_less_than);
 
 	assert_int_equal(pset_size(actual), 0);
 
@@ -553,15 +550,14 @@ static void pset_sort__empty(void **state) {
 }
 
 static void pset_sort__one(void **state) {
-	const struct PSetParams params = { .less_than_val = mock_test, };
-	const struct PSet *actual = pset_init_with(params);
+	const struct PSet *actual = pset_init();
 
 	assert_true(pset_add(actual, V0));
 
 	const struct PSet *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 
-	pset_sort(actual);
+	pset_sort(actual, mock_less_than);
 
 	assert_pset_equal(actual, expected);
 
@@ -574,8 +570,7 @@ static bool test_less_than_int(const void* const a, const void* const b) {
 }
 
 static void pset_sort__many(void **state) {
-	const struct PSetParams params = { .less_than_val = test_less_than_int, };
-	const struct PSet *actual = pset_init_with(params);
+	const struct PSet *actual = pset_init();
 
 	assert_true(pset_add(actual, V2));
 	assert_true(pset_add(actual, V0));
@@ -584,7 +579,7 @@ static void pset_sort__many(void **state) {
 	assert_true(pset_add(actual, V1));
 	assert_true(pset_add(actual, V4));
 
-	const struct PSet *expected = pset_init_with(params);
+	const struct PSet *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V2));
@@ -592,7 +587,7 @@ static void pset_sort__many(void **state) {
 	assert_true(pset_add(expected, V4));
 	assert_true(pset_add(expected, V5));
 
-	pset_sort(actual);
+	pset_sort(actual, test_less_than_int);
 
 	assert_pset_equal(actual, expected);
 
@@ -610,7 +605,7 @@ static void pset_sort__no_less_than(void **state) {
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V0));
 
-	pset_sort(actual);
+	pset_sort(actual, NULL);
 
 	assert_pset_equal(actual, expected);
 
@@ -792,7 +787,7 @@ static void pset__null_inputs(void **state) {
 	assert_false(pset_add(V0, NULL));
 	assert_nul(pset_remove(NULL, NULL));
 	assert_nul(pset_remove(V0, NULL));
-	pset_sort(NULL);
+	pset_sort(NULL, NULL);
 	assert_false(pset_equal(NULL, NULL));
 	assert_false(pset_equal(V0, NULL));
 	assert_nul(pset_slist(NULL));

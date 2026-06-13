@@ -25,6 +25,7 @@ struct PSet {
 };
 
 struct SSet {
+	const struct SSetParams params;
 	const struct PSet *pset;
 };
 

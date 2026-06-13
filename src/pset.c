@@ -226,8 +226,8 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	return NULL;
 }
 
-void pset_sort(const struct PSet* const set) {
-	if (!set || !set->params.less_than_val)
+void pset_sort(const struct PSet* const set, fn_less_than less_than_val) {
+	if (!set || !less_than_val)
 		return;
 
 	static const size_t gaps[] = { 701, 301, 132, 57, 23, 10, 4, 1, 0 }; // Ciura gap sequence
@@ -236,7 +236,7 @@ void pset_sort(const struct PSet* const set) {
 		for (size_t i = *gap; i < set->size; i++) {
 			const void *tmp = set->vals[i];
 			size_t j;
-			for (j = i; (j >= *gap) && set->params.less_than_val(tmp, set->vals[j - *gap]); j -= *gap) {
+			for (j = i; (j >= *gap) && less_than_val(tmp, set->vals[j - *gap]); j -= *gap) {
 				set->vals[j] = set->vals[j - *gap];
 			}
 			set->vals[j] = tmp;

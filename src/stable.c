@@ -16,6 +16,7 @@
    */
 
 struct STable {
+	const struct STableParams params;
 	const struct PTable *ptab;
 };
 
@@ -40,6 +41,7 @@ const struct STable *stable_init_with(const struct STableParams params) {
 
 	struct STable *tab =  calloc(1, sizeof(struct STable));
 	tab->ptab = ptable_init_with(ptable_params);;
+	memcpy((void*)&tab->params, &params, sizeof(struct STableParams));
 
 	return tab;
 }
@@ -50,6 +52,7 @@ const struct STable *stable_clone(const struct STable* const from, fn_clone clon
 
 	struct STable *to = calloc(1, sizeof(struct STable));
 	to->ptab = ptable_clone(from->ptab, clone_val);
+	memcpy((void*)&to->params, &from->params, sizeof(struct STableParams));
 
 	return to;
 }

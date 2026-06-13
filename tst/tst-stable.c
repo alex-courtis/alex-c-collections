@@ -25,6 +25,7 @@ struct PTable {
 };
 
 struct STable {
+	const struct STableParams params;
 	const struct PTable *ptab;
 };
 
@@ -340,6 +341,10 @@ static void stable_clone__params(void **state) {
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
 	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
+
+	assert_ptr_equal(to->params.equal_val, mock_equal);
+	assert_ptr_equal(to->params.initial, 99);
+	assert_ptr_equal(to->params.grow, 1);
 
 	stable_free(from);
 	stable_free(to);

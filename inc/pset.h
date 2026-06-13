@@ -24,15 +24,12 @@ struct PSetIter {
 };
 
 /*
- * Optional constructor params, defaults noted
+ * Optional constructor params (default)
  */
 struct PSetParams {
-	const fn_equal equal_val; // _equal            (compare val pointers)
-	const size_t initial;     // initial capacity  (10)
-	const size_t grow;        // grow capacity by  (10)
-
-	// todo inline
-	const fn_less_than less_than_val; //                     (no sorting)
+	const fn_equal equal_val; // _add, _remove, _contains, _equal (compare val pointers)
+	const size_t initial;     // initial capacity                 (10)
+	const size_t grow;        // grow capacity by                 (10)
 };
 
 /*
@@ -85,8 +82,8 @@ bool pset_add(const struct PSet* const set, const void* const val);
 // returns value if removed
 const void *pset_remove(const struct PSet* const set, const void* const val);
 
-// shell sort in place
-void pset_sort(const struct PSet* const set);
+// shell sort in place, NULL less_than_val NOP
+void pset_sort(const struct PSet* const set, fn_less_than less_than_val);
 
 /*
  * Comparison

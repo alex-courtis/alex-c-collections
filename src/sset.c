@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fn.h"
 #include "pset.h"
@@ -13,6 +14,7 @@
    */
 
 struct SSet {
+	const struct SSetParams params;
 	const struct PSet *pset;
 };
 
@@ -29,7 +31,6 @@ const struct SSet *sset_init_with(const struct SSetParams params) {
 
 	const struct PSetParams pset_params = {
 		.equal_val = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
-		.less_than_val = params.case_insensitive ? fn_less_than_strcasecmp : fn_less_than_strcmp,
 		.initial = params.initial,
 		.grow = params.grow,
 	};
@@ -40,6 +41,7 @@ const struct SSet *sset_init_with(const struct SSetParams params) {
 
 	struct SSet *set = calloc(1, sizeof(struct SSet));
 	set->pset = pset;
+	memcpy((void*)&set->params, &params, sizeof(struct SSetParams));
 
 	return set;
 }
@@ -50,6 +52,7 @@ const struct SSet *sset_clone(const struct SSet* const from) {
 
 	struct SSet *to = calloc(1, sizeof(struct SSet));
 	to->pset = pset_clone(from->pset, NULL);
+	memcpy((void*)&to->params, &from->params, sizeof(struct SSetParams));
 
 	return to;
 }
@@ -133,7 +136,7 @@ bool sset_remove(const struct SSet* const set, const char* const val) {
 
 void sset_sort(const struct SSet* const set) {
 	if (set)
-		pset_sort(set->pset);
+		pset_sort(set->pset, set->params.case_insensitive ? fn_less_than_strcasecmp : fn_less_than_strcmp);
 }
 
 bool sset_equal(const struct SSet* const a, const struct SSet* const b) {
