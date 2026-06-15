@@ -13,11 +13,14 @@ TST_E = $(filter tst/tst%,$(TST_O:.o=))
 all: $(SRC_O)
 
 clean:
-	rm -f $(SRC_O) $(TST_O) $(TST_E) **/*gcda **/*gcno actual.* expected.*
+	rm -f $(SRC_O) $(TST_O) $(TST_E) actual.* expected.*
+	find . -name '*.gcno' -type f -delete -print
+	find . -name '*.gcda' -type f -delete -print
 
 #
 # lib
 #
+$(SRC_O): CFLAGS += $(COVCFLAGS)
 $(SRC_O): $(INC_H) config.mk GNUmakefile
 
 #

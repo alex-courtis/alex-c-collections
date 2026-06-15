@@ -6,7 +6,7 @@ INFO_PATH="/tmp/coverage.info"
 REP_PATH="/tmp/coverage-report"
 
 usage() {
-	echo "usage: ${0} [target e.g. slist ...]"
+	echo "usage: ${0} [test-x target ...]"
 	exit 0
 }
 
@@ -18,10 +18,16 @@ rm -rf "${REP_PATH}"
 rm -rf "${INFO_PATH}"
 mkdir "${INFO_PATH}"
 
+export LDLIBS="-lgcov"
+
 make clean
 
-# build with coverage flag to generate .gcno
-make CC=gcc CFLAGS="--coverage -fcondition-coverage" all
+# build with coverage flag to generate only desired .gcno
+make \
+	CC="gcc" \
+	OFLAGS="-O0" \
+	COVCFLAGS="-fprofile-arcs -ftest-coverage -fcondition-coverage" \
+	all
 
 if [ $# -gt 0 ]; then
 	TESTS="${*}"
@@ -33,11 +39,11 @@ fi
 
 for TEST in ${TESTS}; do
 
-	# remove previous test execution
-	rm -f src/*gcda
-
 	# execute test target to generate .gcda
-	make CC="gcc" LDFLAGS="--coverage" "test-${TEST}"
+	make \
+		CC="gcc" \
+		OFLAGS="-O0" \
+		"test-${TEST}"
 
 	# generate coverage info for the individual test
 	geninfo \
@@ -46,12 +52,12 @@ for TEST in ${TESTS}; do
 		--branch-coverage \
 		--all \
 		--output-file "${INFO_PATH}/${TEST}.info" \
-		src
-	:
-done
+		.
 
-# clear .gnco for next (non-coverage) run
-make clean
+	# clear test execution data
+	find . -name '*gcda' -delete -print
+
+done
 
 # combined report for all coverage info
 genhtml \
@@ -66,7 +72,10 @@ genhtml \
 	--output-directory "${REP_PATH}" \
 	${INFO_PATH}
 
-if [ $# -eq 1 ]; then
+# clear .gnco for next (non-coverage) run
+make clean
+
+if [ $# -eq 1 ] && [ -f "${REP_PATH}/src/${1}.c.gcov.html" ]; then
 	xdg-open \
 		"${REP_PATH}/src/${1}.c.gcov.html"
 else
