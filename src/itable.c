@@ -23,8 +23,8 @@ struct ITable {
 
 struct ITableIterState {
 	const struct PTableIter *pit;
-	fn_test_size_t test_key;
-	fn_test test_val;
+	fn_equal_size_t equal_key;
+	fn_equal equal_val;
 	const void *data;
 };
 
@@ -116,28 +116,28 @@ const struct ITableIter *itable_iter(const struct ITable* const tab) {
 	return itable_filter_iter(tab, NULL, NULL, NULL);
 }
 
-static bool fn_test_key_wrapper(const void* const val, const void* const data) {
+static bool fn_equal_key_wrapper(const void* const val, const void* const data) {
 	const struct ITableIterState * const st = data;
-	return st->test_key(*(size_t*)val, st->data);
+	return st->equal_key(*(size_t*)val, st->data);
 }
 
-static bool fn_test_val_wrapper(const void* const val, const void* const data) {
+static bool fn_equal_val_wrapper(const void* const val, const void* const data) {
 	const struct ITableIterState * const st = data;
-	return st->test_val(val, st->data);
+	return st->equal_val(val, st->data);
 }
 
-const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_size_t test_key, fn_test test_val, const void* const data) {
+const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_equal_size_t equal_key, fn_equal equal_val, const void* const data) {
 	if (!tab)
 		return NULL;
 
 	struct ITableIter *it = calloc(1, sizeof(struct ITableIter));
 	it->st = calloc(1, sizeof(struct ITableIterState));
-	it->st->test_key = test_key;
-	it->st->test_val = test_val;
+	it->st->equal_key = equal_key;
+	it->st->equal_val = equal_val;
 	it->st->data = data;
 
 	// pass the ITableIterState as data, to be passed to the test wrappers
-	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, test_key ? fn_test_key_wrapper : NULL, test_val ? fn_test_val_wrapper : NULL, it->st);
+	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, equal_key ? fn_equal_key_wrapper : NULL, equal_val ? fn_equal_val_wrapper : NULL, it->st);
 
 	if (pit) {
 		it->st->pit = pit;

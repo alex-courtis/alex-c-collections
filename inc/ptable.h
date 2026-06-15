@@ -69,8 +69,8 @@ const void *ptable_get(const struct PTable* const tab, const void* const key);
 // create an iterator, caller must ptable_iter_free or invoke ptable_next until NULL
 const struct PTableIter *ptable_iter(const struct PTable* const tab);
 
-// create an iterator filtering by test_key and test_val, NULL tests match all
-const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_test test_key, fn_test test_val, const void* const data);
+// create an iterator filtering by equal_key and equal_val, NULL tests match all
+const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
 
 // next iterator entry, NULL at end of table
 const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);

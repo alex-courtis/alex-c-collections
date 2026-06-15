@@ -36,7 +36,7 @@ struct PSet {
 struct PSetIterState {
 	const struct PSet *set;
 	size_t pos;
-	fn_test test_val;
+	fn_equal equal_val;
 	const void *data;
 };
 
@@ -453,37 +453,37 @@ static void pset_filter_iter__many(void **state) {
 	assert_int_equal(pset_size(set), 5);
 
 	// skip V0
-	expect_ptr(mock_test, val, V0);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, false);
+	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
 
 	// get V1
-	expect_ptr(mock_test, val, V1);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
+	expect_ptr(mock_equal, a, V1);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
 
-	const struct PSetIter *iter = pset_filter_iter(set, mock_test, D0);
+	const struct PSetIter *iter = pset_filter_iter(set, mock_equal, D0);
 	assert_non_nul(iter);
 	assert_ptr_equal(iter->val, V1);
 
 	// skip V2
-	expect_ptr(mock_test, val, V2);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, false);
+	expect_ptr(mock_equal, a, V2);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
 
 	// get V3
-	expect_ptr(mock_test, val, V3);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
+	expect_ptr(mock_equal, a, V3);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
 
 	iter = pset_iter_next(iter);
 	assert_non_nul(iter);
 	assert_ptr_equal(iter->val, V3);
 
 	// skip V4
-	expect_ptr(mock_test, val, V4);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, false);
+	expect_ptr(mock_equal, a, V4);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
 
 	// done
 	iter = pset_iter_next(iter);

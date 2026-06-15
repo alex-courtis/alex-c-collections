@@ -22,8 +22,8 @@ struct PTable {
 struct PTableIterState {
 	const struct PTable *tab;
 	size_t position;
-	fn_test test_key;
-	fn_test test_val;
+	fn_equal equal_key;
+	fn_equal equal_val;
 	const void *data;
 };
 
@@ -145,15 +145,15 @@ const struct PTableIter *ptable_iter(const struct PTable* const tab) {
 	return ptable_filter_iter(tab, NULL, NULL, NULL);
 }
 
-const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_test test_key, fn_test test_val, const void* const data) {
+const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data) {
 	if (!tab || tab->size == 0)
 		return NULL;
 
 	struct PTableIter *it = calloc(1, sizeof(struct PTableIter));
 	it->st = calloc(1, sizeof(struct PTableIterState));
 	it->st->tab = tab;
-	it->st->test_key = test_key;
-	it->st->test_val = test_val;
+	it->st->equal_key = equal_key;
+	it->st->equal_val = equal_val;
 	it->st->data = data;
 
 	return ptable_iter_next(it);
@@ -181,10 +181,10 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
 		it->key = *(st->tab->keys + st->position);
 		it->val = *(st->tab->vals + st->position);
 
-		if (st->test_key && !st->test_key(it->key, st->data)) {
+		if (st->equal_key && !st->equal_key(it->key, st->data)) {
 			continue;
 		}
-		if (st->test_val && !st->test_val(it->val, st->data)) {
+		if (st->equal_val && !st->equal_val(it->val, st->data)) {
 			continue;
 		}
 

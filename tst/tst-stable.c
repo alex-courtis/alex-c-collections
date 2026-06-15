@@ -169,30 +169,30 @@ static void stable_filter_iter__(void **state) {
 	assert_nul(stable_put(tab, "2", V2));
 
 	// skip "0"
-	expect_string(mock_test_str, val, "0");
-	expect_ptr(mock_test_str, data, D0);
-	will_return(mock_test_str, false);
+	expect_string(mock_equal_str, a, "0");
+	expect_ptr(mock_equal_str, b, D0);
+	will_return(mock_equal_str, false);
 
 	// get 1
-	expect_string(mock_test_str, val, "1");
-	expect_ptr(mock_test_str, data, D0);
-	will_return(mock_test_str, true);
-	expect_ptr(mock_test, val, V1);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
+	expect_string(mock_equal_str, a, "1");
+	expect_ptr(mock_equal_str, b, D0);
+	will_return(mock_equal_str, true);
+	expect_ptr(mock_equal, a, V1);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
 
-	const struct STableIter *iter = stable_filter_iter(tab, mock_test_str, mock_test, D0);
+	const struct STableIter *iter = stable_filter_iter(tab, mock_equal_str, mock_equal, D0);
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "1");
 	assert_ptr_equal(iter->val, V1);
 
 	// skip V2
-	expect_string(mock_test_str, val, "2");
-	expect_ptr(mock_test_str, data, D0);
-	will_return(mock_test_str, true);
-	expect_ptr(mock_test, val, V2);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, false);
+	expect_string(mock_equal_str, a, "2");
+	expect_ptr(mock_equal_str, b, D0);
+	will_return(mock_equal_str, true);
+	expect_ptr(mock_equal, a, V2);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
 
 	// done
 	iter = stable_iter_next(iter);

@@ -64,8 +64,8 @@ bool pset_contains(const struct PSet* const set, const void* const val);
 // create an iterator, caller must pset_iter_free or invoke pset_next until NULL
 const struct PSetIter *pset_iter(const struct PSet* const set);
 
-// create an iterator filtering by test_val, NULL test_val matches all
-const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_test test_val, const void* const data);
+// create an iterator filtering by equal_val, NULL equal_val matches all
+const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_equal equal_val, const void* const data);
 
 // next iterator value, NULL at end of set
 const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);

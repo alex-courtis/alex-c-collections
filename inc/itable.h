@@ -66,8 +66,8 @@ const void *itable_get(const struct ITable* const tab, const size_t key);
 // create an iterator, caller must itable_iter_free or invoke itable_next until NULL
 const struct ITableIter *itable_iter(const struct ITable* const tab);
 
-// create an iterator filtering by test_key and test_val, NULL tests match all
-const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_test_size_t test_key, fn_test test_val, const void* const data);
+// create an iterator filtering by equal_key and equal_val, NULL tests match all
+const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_equal_size_t equal_key, fn_equal equal_val, const void* const data);
 
 // next iterator entry, NULL at end of table
 const struct ITableIter *itable_iter_next(const struct ITableIter* const iter);

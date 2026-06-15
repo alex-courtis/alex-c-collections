@@ -137,8 +137,8 @@ static void sset_iter__empty(void **state) {
 	sset_free(set);
 }
 
-static bool fn_test_starts_with_a(const void* const val, const void* const data) {
-	return *(char*)val == 'a';
+static bool fn_equal_str_starts_with_a(const char* const data, const char* const unused) {
+	return *(char*)data == 'a';
 }
 
 static void sset_filter_iter__(void **state) {
@@ -149,7 +149,7 @@ static void sset_filter_iter__(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "b2"));
 
-	const struct SSetIter *iter = sset_filter_iter(set, fn_test_starts_with_a, NULL);
+	const struct SSetIter *iter = sset_filter_iter(set, fn_equal_str_starts_with_a, NULL);
 	assert_non_nul(iter);
 	assert_str_equal(iter->val, "a1");
 

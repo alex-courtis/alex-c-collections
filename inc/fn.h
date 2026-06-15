@@ -9,6 +9,10 @@
 //
 typedef bool (*fn_equal)(const void* const a, const void* const b);
 
+typedef bool (*fn_equal_str)(const char* const a, const char* const b);
+
+typedef bool (*fn_equal_size_t)(const size_t a, const void* const b);
+
 // true if a == b
 bool fn_equal_ptr(const void* const a, const void* const b);
 
@@ -35,11 +39,7 @@ bool fn_less_than_strcasecmp(const void* const a, const void* const b);
 //
 // arbitrary test
 //
-typedef bool (*fn_test)(const void* const val, const void* const data);
-
-typedef bool (*fn_test_str)(const char* const val, const void* const data);
-
-typedef bool (*fn_test_size_t)(const size_t val, const void* const data);
+typedef bool (*fn_test)(const void* const data);
 
 //
 // alloc from data

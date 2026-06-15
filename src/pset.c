@@ -27,7 +27,7 @@ struct PSet {
 struct PSetIterState {
 	const struct PSet *set;
 	size_t pos;
-	fn_test test_val;
+	fn_equal equal_val;
 	const void *data;
 };
 
@@ -129,14 +129,14 @@ const struct PSetIter *pset_iter(const struct PSet* const set) {
 	return pset_filter_iter(set, NULL, NULL);
 }
 
-const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_test test_val, const void* const data) {
+const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_equal equal_val, const void* const data) {
 	if (!set || set->size == 0)
 		return NULL;
 
 	struct PSetIter *it = calloc(1, sizeof(struct PSetIter));
 	it->st = calloc(1, sizeof(struct PSetIterState));
 	it->st->set = set;
-	it->st->test_val = test_val;
+	it->st->equal_val = equal_val;
 	it->st->data = data;
 
 	return pset_iter_next(it);
@@ -162,7 +162,7 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
 
 		it->val = *(st->set->vals + st->pos);
 
-		if ((st->test_val && !st->test_val(it->val, st->data))) {
+		if ((st->equal_val && !st->equal_val(it->val, st->data))) {
 			continue;
 		}
 

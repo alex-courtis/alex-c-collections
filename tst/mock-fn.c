@@ -9,6 +9,20 @@ bool mock_equal(const void* const a, const void* const b) {
 	return mock_type(bool);
 }
 
+bool mock_equal_str(const char* const a, const char* const b) {
+	check_expected_ptr(a);
+	check_expected_ptr(b);
+
+	return mock_type(bool);
+}
+
+bool mock_equal_size_t(const size_t a, const void* const b) {
+	check_expected_int(a);
+	check_expected_ptr(b);
+
+	return mock_type(bool);
+}
+
 bool mock_less_than(const void* const a, const void* const b) {
 	check_expected_ptr(a);
 	check_expected_ptr(b);
@@ -16,22 +30,7 @@ bool mock_less_than(const void* const a, const void* const b) {
 	return mock_type(bool);
 }
 
-bool mock_test(const void* const val, const void* const data) {
-	check_expected_ptr(val);
-	check_expected_ptr(data);
-
-	return mock_type(bool);
-}
-
-bool mock_test_str(const char* const val, const void* const data) {
-	check_expected_ptr(val);
-	check_expected_ptr(data);
-
-	return mock_type(bool);
-}
-
-bool mock_test_size_t(const size_t val, const void* const data) {
-	check_expected_int(val);
+bool mock_test(const void* const data) {
 	check_expected_ptr(data);
 
 	return mock_type(bool);

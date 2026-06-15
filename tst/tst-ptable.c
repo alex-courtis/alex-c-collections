@@ -26,8 +26,8 @@ struct PTable {
 struct PTableIterState {
 	const struct PTable *tab;
 	size_t position;
-	fn_test test_key;
-	fn_test test_val;
+	fn_equal equal_key;
+	fn_equal equal_val;
 	const void *data;
 };
 
@@ -549,38 +549,38 @@ static void ptable_filter_iter__many(void **state) {
 	assert_int_equal(ptable_size(tab), 5);
 
 	// skip K0
-	expect_ptr(mock_test, val, K0);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, false);
+	expect_ptr(mock_equal, a, K0);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
 
 	// get K1
-	expect_ptr(mock_test, val, K1);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
-	expect_ptr(mock_test, val, V1);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
+	expect_ptr(mock_equal, a, K1);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
+	expect_ptr(mock_equal, a, V1);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
 
-	const struct PTableIter *iter = ptable_filter_iter(tab, mock_test, mock_test, D0);
+	const struct PTableIter *iter = ptable_filter_iter(tab, mock_equal, mock_equal, D0);
 	assert_non_nul(iter);
 	assert_ptr_equal(iter->key, K1);
 	assert_ptr_equal(iter->val, V1);
 
 	// skip V2
-	expect_ptr(mock_test, val, K2);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
-	expect_ptr(mock_test, val, V2);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, false);
+	expect_ptr(mock_equal, a, K2);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
+	expect_ptr(mock_equal, a, V2);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
 
 	// get V3
-	expect_ptr(mock_test, val, K3);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
-	expect_ptr(mock_test, val, V3);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
+	expect_ptr(mock_equal, a, K3);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
+	expect_ptr(mock_equal, a, V3);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
 
 	iter = ptable_iter_next(iter);
 	assert_non_nul(iter);
@@ -588,12 +588,12 @@ static void ptable_filter_iter__many(void **state) {
 	assert_ptr_equal(iter->val, V3);
 
 	// skip V4
-	expect_ptr(mock_test, val, K4);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, true);
-	expect_ptr(mock_test, val, V4);
-	expect_ptr(mock_test, data, D0);
-	will_return(mock_test, false);
+	expect_ptr(mock_equal, a, K4);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
+	expect_ptr(mock_equal, a, V4);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
 
 	// done
 	iter = ptable_iter_next(iter);

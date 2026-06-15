@@ -56,10 +56,10 @@ void slist_xor_free(struct SList **head1, struct SList *head2, fn_equal equal_va
 void *slist_at(const struct SList *head, size_t index);
 
 // find
-struct SList *slist_find(struct SList *head, fn_test test_val, const void* const data);
+struct SList *slist_find(struct SList *head, fn_test test_val);
 
 // find a val
-void *slist_find_val(struct SList *head, fn_test test_val, const void* const data);
+void *slist_find_val(struct SList *head, fn_test test_val);
 
 // find, NULL equal_val is val pointer comparison
 struct SList *slist_find_equal(struct SList *head, fn_equal equal_val, const void *b);
