@@ -838,6 +838,26 @@ static void ptable_keys_slist__many(void **state) {
 	ptable_free(tab);
 }
 
+static void ptable_vals_slist__alloc_key(void **state) {
+	const struct PTableParams params = { .alloc_key = mock_alloc, };
+	const struct PTable *tab = ptable_init_with(params);
+
+	expect_ptr(mock_alloc, val, K0);
+	will_return_ptr_type(mock_alloc, K0, void*);
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	expect_ptr(mock_alloc, val, K0);
+	will_return_ptr_type(mock_alloc, K0, void*);
+
+	struct SList *list = ptable_keys_slist(tab);
+
+	assert_ptr_equal(slist_at(list, 0), K0);
+
+	slist_free(&list);
+	ptable_free(tab);
+}
+
 static void ptable_vals_slist__empty(void **state) {
 	const struct PTable *tab = ptable_init();
 
@@ -1028,6 +1048,7 @@ int main(void) {
 
 		TEST(ptable_keys_slist__empty),
 		TEST(ptable_keys_slist__many),
+		TEST(ptable_vals_slist__alloc_key),
 
 		TEST(ptable_vals_slist__empty),
 		TEST(ptable_vals_slist__many),

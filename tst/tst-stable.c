@@ -281,8 +281,8 @@ static void stable_keys_slist__many(void **state) {
 	assert_str_equal(slist_at(list, 0), "a");
 	assert_str_equal(slist_at(list, 1), "b");
 
-	slist_free(&list);
 	stable_free(tab);
+	slist_free_vals(&list, NULL);
 }
 
 static void stable_vals_slist__many(void **state) {
