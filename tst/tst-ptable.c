@@ -199,11 +199,12 @@ static void ptable_free_vals__null_free_val(void **state) {
 
 	assert_int_equal(ptable_size(tab), 1);
 
-	ptable_free_vals(tab, NULL);
+	ptable_free_vals(tab);
 }
 
 static void ptable_free_vals__free_val(void **state) {
-	const struct PTable *tab = ptable_init();
+	const struct PTableParams params = { .free_val = mock_free, };
+	const struct PTable *tab = ptable_init_with(params);
 
 	ptable_put(tab, K0, V0);
 	ptable_put(tab, K1, NULL);
@@ -214,18 +215,20 @@ static void ptable_free_vals__free_val(void **state) {
 	expect_ptr(mock_free, val, V0);
 	expect_ptr(mock_free, val, V2);
 
-	ptable_free_vals(tab, mock_free);
+	ptable_free_vals(tab);
 }
 
 static void fn_free_ptable(const void *val) {
-	ptable_free_vals(val, mock_free);
+	ptable_free_vals(val);
 }
 
 static void ptable_free_vals__free_val_hierarchical(void **state) {
-	const struct PTable *outer = ptable_init();
+	const struct PTableParams params_outer = { .free_val = fn_free_ptable, };
+	const struct PTable *outer = ptable_init_with(params_outer);
 
-	const struct PTable *inner1 = ptable_init();
-	const struct PTable *inner2 = ptable_init();
+	const struct PTableParams params_inner = { .free_val = mock_free, };
+	const struct PTable *inner1 = ptable_init_with(params_inner);
+	const struct PTable *inner2 = ptable_init_with(params_inner);
 
 	ptable_put(outer, K0, (void*)inner1);
 	ptable_put(outer, K1, (void*)inner2);
@@ -243,7 +246,7 @@ static void ptable_free_vals__free_val_hierarchical(void **state) {
 	expect_ptr(mock_free, val, V4);
 	expect_ptr(mock_free, val, V5);
 
-	ptable_free_vals(outer, fn_free_ptable);
+	ptable_free_vals(outer);
 }
 
 static void ptable_put__new(void **state) {
@@ -984,7 +987,7 @@ static void ptable__null_inputs(void **state) {
 
 	assert_nul(ptable_clone(NULL, NULL));
 	ptable_free(NULL);
-	ptable_free_vals(NULL, NULL);
+	ptable_free_vals(NULL);
 	ptable_iter_free(NULL);
 	assert_false(ptable_get(NULL, NULL));
 	assert_nul(ptable_iter(NULL));

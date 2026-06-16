@@ -317,6 +317,7 @@ static void sstable_clone__(void **state) {
 	assert_ptr_equal(to->ptab->params.equal_val, fn_equal_strcmp);
 	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ptab->params.free_val, (fn_free)free);
 
 	assert_true(to->params.case_insensitive_key);
 	assert_ptr_equal(to->params.initial, 99);

@@ -89,7 +89,7 @@ static void stable_free_vals__(void **state) {
 	const struct STable *tab = stable_init();
 	assert_nul(stable_put(tab, "a", strdup("zero")));
 
-	stable_free_vals(tab, NULL);
+	stable_free_vals(tab);
 }
 
 static void stable_iter__(void **state) {
@@ -325,6 +325,7 @@ static void stable_clone__params(void **state) {
 	const struct STableParams params = {
 		.case_insensitive = true,
 		.equal_val = mock_equal,
+		.free_val = mock_free,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -341,6 +342,7 @@ static void stable_clone__params(void **state) {
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
 	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ptab->params.free_val, mock_free);
 
 	assert_true(to->params.case_insensitive);
 	assert_ptr_equal(to->params.equal_val, mock_equal);
@@ -354,7 +356,7 @@ static void stable_clone__params(void **state) {
 static void stable__null_inputs(void **state) {
 	assert_nul(stable_clone(NULL, NULL));
 	stable_free(NULL);
-	stable_free_vals(NULL, NULL);
+	stable_free_vals(NULL);
 	stable_iter_free(NULL);
 	assert_false(stable_get(NULL, NULL));
 	assert_nul(stable_iter(NULL));

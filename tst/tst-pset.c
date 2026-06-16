@@ -148,7 +148,7 @@ static void pset_free_vals__null_free_val(void **state) {
 
 	assert_int_equal(pset_size(set), 1);
 
-	pset_free_vals(set, NULL);
+	pset_free_vals(set);
 }
 
 static void pset_free_vals__missing_val(void **state) {
@@ -162,12 +162,13 @@ static void pset_free_vals__missing_val(void **state) {
 
 	set->vals[0] = NULL;
 
-	pset_free_vals(set, NULL);
+	pset_free_vals(set);
 	free(val);
 }
 
 static void pset_free_vals__free_val(void **state) {
-	const struct PSet *set = pset_init();
+	const struct PSetParams params = { .free_val = mock_free, };
+	const struct PSet *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -179,7 +180,7 @@ static void pset_free_vals__free_val(void **state) {
 	expect_ptr(mock_free, val, V0);
 	expect_ptr(mock_free, val, V1);
 
-	pset_free_vals(set, mock_free);
+	pset_free_vals(set);
 }
 
 static void pset_add__new(void **state) {
@@ -349,21 +350,6 @@ static void pset_remove__equal_val(void **state) {
 	assert_true(pset_remove(set, V0));
 
 	assert_int_equal(pset_size(set), 0);
-
-	pset_free(set);
-}
-
-static void pset_remove__free_val(void **state) {
-	const struct PSetParams params = { .free_val = mock_free, };
-	const struct PSet *set = pset_init_with(params);
-
-	assert_true(pset_add(set, V0));
-
-	expect_ptr(mock_free, val, V0);
-
-	assert_true(pset_remove(set, V0));
-
-	assert_false(pset_remove(set, V0));
 
 	pset_free(set);
 }
@@ -828,7 +814,7 @@ static void pset_str__str_val(void **state) {
 static void pset__null_inputs(void **state) {
 	assert_nul(pset_clone(NULL, NULL));
 	pset_free(NULL);
-	pset_free_vals(NULL, NULL);
+	pset_free_vals(NULL);
 	pset_iter_free(NULL);
 	assert_false(pset_contains(NULL, NULL));
 	assert_nul(pset_iter(NULL));
@@ -865,7 +851,6 @@ int main(void) {
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),
 		TEST(pset_remove__equal_val),
-		TEST(pset_remove__free_val),
 
 		TEST(pset_iter__empty),
 		TEST(pset_iter__free),
