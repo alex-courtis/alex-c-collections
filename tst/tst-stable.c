@@ -132,7 +132,7 @@ static void stable_iter__state_deleted(void **state) {
 	stable_free(tab);
 }
 
-static void ptable_iter__state_tab_deleted(void **state) {
+static void stable_iter__state_tab_deleted(void **state) {
 	const struct STable *tab = stable_init();
 
 	assert_nul(stable_put(tab, "a", V0));
@@ -361,7 +361,7 @@ static void stable__null_inputs(void **state) {
 	assert_nul(stable_iter(NULL));
 	assert_nul(stable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(stable_iter_next(NULL));
-	assert_false(stable_put(NULL, NULL, NULL));
+	assert_nul(stable_put(NULL, NULL, NULL));
 	assert_nul(stable_remove(NULL, NULL));
 	assert_false(stable_equal(NULL, NULL));
 	assert_nul(stable_keys_slist(NULL));
@@ -380,7 +380,7 @@ int main(void) {
 		TEST(stable_iter__),
 		TEST(stable_iter__empty),
 		TEST(stable_iter__state_deleted),
-		TEST(ptable_iter__state_tab_deleted),
+		TEST(stable_iter__state_tab_deleted),
 
 		TEST(stable_filter_iter__),
 

@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+// TODO sort out voids or chars
+
 //
 // a is generally the value from the collection, b is user supplied
 //
