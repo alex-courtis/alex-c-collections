@@ -930,8 +930,6 @@ int main(void) {
 		TEST(slist_xor_free__toggle_items),
 		TEST(slist_xor_free__duplicate_items),
 		TEST(slist_xor_free__vals),
-
-		// TODO test for null input, requires guards
 	};
 
 	return RUN(tests);
