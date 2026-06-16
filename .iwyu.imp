@@ -1,13 +1,10 @@
 [
-# use the forward declarations from the headers
-{ "symbol": ["ITable",     "public", "\"itable.h\"", "public"] },
-{ "symbol": ["ITableIter", "public", "\"itable.h\"", "public"] },
-{ "symbol": ["OSet",       "public", "\"oset.h\"",   "public"] },
-{ "symbol": ["OSetIter",   "public", "\"oset.h\"",   "public"] },
-{ "symbol": ["PTable",     "public", "\"ptable.h\"", "public"] },
-{ "symbol": ["PTableIter", "public", "\"ptable.h\"", "public"] },
-{ "symbol": ["STable",     "public", "\"stable.h\"", "public"] },
-{ "symbol": ["STableIter", "public", "\"stable.h\"", "public"] },
+  # always use the forward declarations from the headers
+  {"symbol": ["PTable", "public", "\"ptable.h\"", "public"]},
+  {"symbol": ["ITable", "public", "\"itable.h\"", "public"]},
+  {"symbol": ["STable", "public", "\"stable.h\"", "public"]},
+  {"symbol": ["PSet",   "public", "\"pset.h\"",   "public"]},
+  {"symbol": ["SSet",   "public", "\"sset.h\"",   "public"]},
 ]
 
 # vim:ft=yaml
