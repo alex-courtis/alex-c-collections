@@ -276,7 +276,11 @@ struct SList *pset_slist(const struct PSet* const set) {
 	struct SList *list = NULL;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		slist_append(&list, (void*)*v);
+		if (set->params.alloc_val) {
+			slist_append(&list, (void*)set->params.alloc_val(*v));
+		} else {
+			slist_append(&list, (void*)*v);
+		}
 	}
 
 	return list;

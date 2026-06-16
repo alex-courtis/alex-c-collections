@@ -29,11 +29,11 @@ struct PSetIter {
  * Optional constructor params (default)
  */
 struct PSetParams {
-	const fn_equal equal_val; // _add, _remove, _contains, _equal (compare val pointers)
-	const fn_alloc alloc_val; // _add, _clone, must be idempotent (use key pointer)
-	const fn_free free_val;   // _remove                          (NOP)
-	const size_t initial;     // initial capacity                 (10)
-	const size_t grow;        // grow capacity by                 (10)
+	const fn_equal equal_val; // _add, _remove, _contains, _equal         (compare val pointers)
+	const fn_alloc alloc_val; // _add, _clone, _slist, must be idempotent (use key pointer)
+	const fn_free free_val;   // _remove                                  (NOP)
+	const size_t initial;     // initial capacity                         (10)
+	const size_t grow;        // grow capacity by                         (10)
 };
 
 /*
@@ -98,7 +98,7 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b);
  * Conversion
  */
 
-// ordered val pointers, caller frees list only
+// ordered val pointers, caller frees list, caller frees vals when alloc_val
 struct SList *pset_slist(const struct PSet* const set);
 
 /*

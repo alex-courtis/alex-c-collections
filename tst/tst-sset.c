@@ -348,7 +348,7 @@ static void sset_slist__(void **state) {
 	assert_str_equal(slist_at(list, 0), "a");
 	assert_str_equal(slist_at(list, 1), "b");
 
-	slist_free(&list);
+	slist_free_vals(&list, NULL);
 	sset_free(set);
 }
 

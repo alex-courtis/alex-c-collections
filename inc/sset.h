@@ -8,7 +8,7 @@
 
 /*
  * `PSet` with string values
- * Values are strdup'd on successful `sset_add` and `sset_clone`
+ * Values are strdup'd on successful `sset_add`, `sset_clone` and `sset_slist`
  * Values are free'd on `sset_free`
  */
 struct SSet; // IWYU pragma: keep
@@ -90,7 +90,7 @@ bool sset_equal(const struct SSet* const a, const struct SSet* const b);
  * Conversion
  */
 
-// ordered strings, caller frees list
+// ordered strings, caller frees list and vals
 struct SList *sset_slist(const struct SSet* const set);
 
 /*

@@ -753,6 +753,24 @@ static void pset_vals_slist__many(void **state) {
 	pset_free(set);
 }
 
+static void pset_vals_slist__alloc_val(void **state) {
+	const struct PSetParams params = { .alloc_val = mock_alloc, };
+	const struct PSet *set = pset_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_true(pset_add(set, V0));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	struct SList *list = pset_slist(set);
+
+	slist_free(&list);
+	pset_free(set);
+}
+
 static void pset_str__empty(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -871,6 +889,7 @@ int main(void) {
 
 		TEST(pset_vals_slist__empty),
 		TEST(pset_vals_slist__many),
+		TEST(pset_vals_slist__alloc_val),
 
 		TEST(pset_str__empty),
 		TEST(pset_str__pointers),
