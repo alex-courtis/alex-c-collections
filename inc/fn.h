@@ -2,7 +2,6 @@
 #define FN_H
 
 #include <stdbool.h>
-#include <stddef.h>
 
 //
 // a is generally the value from the collection, b generally user supplied or the value from the other collection
