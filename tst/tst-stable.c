@@ -258,7 +258,7 @@ static void stable_str__(void **state) {
 			V2
 			);
 
-	char *actual = stable_str(tab, NULL);
+	char *actual = stable_str(tab);
 
 	assert_str_equal(actual, expected);
 
@@ -365,7 +365,7 @@ static void stable__null_inputs(void **state) {
 	assert_false(stable_equal(NULL, NULL));
 	assert_nul(stable_keys_slist(NULL));
 	assert_nul(stable_vals_slist(NULL));
-	assert_nul(stable_str(NULL, NULL));
+	assert_nul(stable_str(NULL));
 	assert_int_equal(stable_size(NULL), 0);
 }
 

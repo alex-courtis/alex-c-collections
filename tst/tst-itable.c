@@ -261,7 +261,7 @@ static void itable_str__(void **state) {
 			V2
 			);
 
-	char *actual = itable_str(tab, NULL);
+	char *actual = itable_str(tab);
 
 	assert_str_equal(actual, expected);
 
@@ -350,7 +350,7 @@ static void itable__null_inputs(void **state) {
 	assert_nul(itable_remove(NULL, 0));
 	assert_false(itable_equal(NULL, NULL));
 	assert_nul(itable_vals_slist(NULL));
-	assert_nul(itable_str(NULL, NULL));
+	assert_nul(itable_str(NULL));
 	assert_int_equal(itable_size(NULL), 0);
 }
 

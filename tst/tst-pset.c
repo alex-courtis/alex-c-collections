@@ -772,9 +772,10 @@ static void pset_vals_slist__alloc_val(void **state) {
 }
 
 static void pset_str__empty(void **state) {
-	const struct PSet *set = pset_init();
+	const struct PSetParams params = { .str_val = mock_str, };
+	const struct PSet *set = pset_init_with(params);
 
-	char *str = pset_str(set, mock_str);
+	char *str = pset_str(set);
 	assert_str_equal(str, "");
 
 	free(str);
@@ -797,7 +798,7 @@ static void pset_str__pointers(void **state) {
 			V2
 			);
 
-	char *actual = pset_str(set, NULL);
+	char *actual = pset_str(set);
 	assert_str_equal(actual, expected);
 
 	free(actual);
@@ -806,13 +807,14 @@ static void pset_str__pointers(void **state) {
 }
 
 static void pset_str__str_val(void **state) {
-	const struct PSet *set = pset_init();
+	const struct PSetParams params = { .str_val = fn_str_first, };
+	const struct PSet *set = pset_init_with(params);
 
 	assert_true(pset_add(set, "ONE"));
 	assert_true(pset_add(set, "TWO"));
 	assert_true(pset_add(set, "THREE"));
 
-	char *str = pset_str(set, fn_str_first);
+	char *str = pset_str(set);
 	assert_str_equal(str,
 			"O\n"
 			"T\n"
@@ -837,7 +839,7 @@ static void pset__null_inputs(void **state) {
 	pset_sort(NULL, NULL);
 	assert_false(pset_equal(NULL, NULL));
 	assert_nul(pset_slist(NULL));
-	assert_nul(pset_str(NULL, NULL));
+	assert_nul(pset_str(NULL));
 	assert_int_equal(pset_size(NULL), 0);
 }
 
