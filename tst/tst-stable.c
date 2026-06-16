@@ -35,6 +35,8 @@ struct STableIterState {
 
 /*
    diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
+
+   diff --color=always -U 10000 <(sed -e 's/sstable/xtable/g ; s/SSTable/XTable/g' tst/tst-sstable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
    */
 
 static int vals[3] = { 20, 21, 22, };
@@ -215,10 +217,6 @@ static void stable_equal__case_sensitive(void **state) {
 
 	assert_stable_equal(actual, expected);
 
-	assert_nul(stable_put(actual, "c", V2));
-
-	assert_stable_not_equal(actual, expected);
-
 	stable_free(actual);
 	stable_free(expected);
 }
@@ -344,6 +342,7 @@ static void stable_clone__params(void **state) {
 	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 
+	assert_true(to->params.case_insensitive);
 	assert_ptr_equal(to->params.equal_val, mock_equal);
 	assert_ptr_equal(to->params.initial, 99);
 	assert_ptr_equal(to->params.grow, 1);

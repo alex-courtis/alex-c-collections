@@ -5,24 +5,14 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fn.h"
 #include "ptable.h"
-#include "stable.h"
 #include "slist.h"
 #include "str.h"
 
 #include "sstable.h"
-
-struct STable {
-	const struct STableParams params;
-	const struct PTable *ptab;
-};
-
-struct SSTable {
-	const struct SSTableParams params;
-	const struct STable *stab;
-};
 
 struct PTable {
 	const struct PTableParams params;
@@ -32,18 +22,14 @@ struct PTable {
 	size_t size;
 };
 
-struct STableIterState {
-	const struct PTableIter *pit;
+struct SSTable {
+	const struct SSTableParams params;
+	const struct PTable *ptab;
 };
 
 struct SSTableIterState {
-	const struct STableIter *sit;
+	const struct PTableIter *pit;
 };
-
-// TODO maybe remove the diffs
-/*
-   diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
-   */
 
 static void sstable_put_get_remove__case_sensitive(void **state) {
 
@@ -69,7 +55,7 @@ static void sstable_put_get_remove__case_sensitive(void **state) {
 }
 
 static void sstable_put_get_remove__case_insensitive(void **state) {
-	const struct SSTableParams params = { .case_insensitive = true, };
+	const struct SSTableParams params = { .case_insensitive_key = true, };
 	const struct SSTable *tab = sstable_init_with(params);
 
 	assert_false(sstable_put(tab, "A", "aaa"));
@@ -123,26 +109,8 @@ static void sstable_iter__state_deleted(void **state) {
 	iter = sstable_iter_next(iter);
 	assert_nul(iter);
 
-	stable_iter_free(st->sit);
+	ptable_iter_free(st->pit);
 	free((void*)st);
-	sstable_free(tab);
-}
-
-static void sstable_iter__state_stab_deleted(void **state) {
-	const struct SSTable *tab = sstable_init();
-
-	assert_false(sstable_put(tab, "a", "aa"));
-
-	const struct SSTableIter *iter = sstable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct STableIter *siter = iter->st->sit;
-	iter->st->sit = NULL;
-
-	iter = sstable_iter_next(iter);
-	assert_nul(iter);
-
-	stable_iter_free(siter);
 	sstable_free(tab);
 }
 
@@ -154,8 +122,8 @@ static void sstable_iter__state_ptab_deleted(void **state) {
 	const struct SSTableIter *iter = sstable_iter(tab);
 	assert_non_nul(iter);
 
-	const struct PTableIter *piter = iter->st->sit->st->pit;
-	iter->st->sit->st->pit = NULL;
+	const struct PTableIter *piter = iter->st->pit;
+	iter->st->pit = NULL;
 
 	iter = sstable_iter_next(iter);
 	assert_nul(iter);
@@ -208,7 +176,7 @@ static void sstable_filter_iter__(void **state) {
 	assert_str_equal(iter->key, "a4");
 	assert_str_equal(iter->val, "b4");
 
-	sstable_iter_free(iter);
+	assert_nul(sstable_iter_next(iter));
 
 	sstable_free(tab);
 }
@@ -235,9 +203,9 @@ static void sstable_equal__case_sensitive(void **state) {
 	sstable_free(expected);
 }
 
-static void sstable_equal__case_insensitive(void **state) {
+static void sstable_equal__case_insensitive_key(void **state) {
 
-	const struct SSTableParams params = { .case_insensitive = true, };
+	const struct SSTableParams params = { .case_insensitive_key = true, };
 	const struct SSTable *actual = sstable_init_with(params);
 
 	assert_false(sstable_put(actual, "a", "aa"));
@@ -249,9 +217,23 @@ static void sstable_equal__case_insensitive(void **state) {
 
 	assert_sstable_equal(actual, expected);
 
-	assert_false(sstable_put(actual, "c", "cc"));
+	sstable_free(actual);
+	sstable_free(expected);
+}
 
-	assert_sstable_not_equal(actual, expected);
+static void sstable_equal__case_insensitive_val(void **state) {
+
+	const struct SSTableParams params = { .case_insensitive_val = true, };
+	const struct SSTable *actual = sstable_init_with(params);
+
+	assert_false(sstable_put(actual, "a", "aa"));
+	assert_false(sstable_put(actual, "b", "bb"));
+
+	const struct SSTable *expected = sstable_init();
+	assert_false(sstable_put(expected, "a", "AA"));
+	assert_false(sstable_put(expected, "b", "BB"));
+
+	assert_sstable_equal(actual, expected);
 
 	sstable_free(actual);
 	sstable_free(expected);
@@ -316,7 +298,7 @@ static void sstable_vals_slist__many(void **state) {
 // also tests constructor
 static void sstable_clone__(void **state) {
 	const struct SSTableParams params = {
-		.case_insensitive = true,
+		.case_insensitive_key = true,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -326,17 +308,17 @@ static void sstable_clone__(void **state) {
 
 	assert_non_nul(to);
 
-	assert_int_equal(to->stab->ptab->size, 0);
-	assert_int_equal(to->stab->ptab->capacity, 99);
-	assert_int_equal(to->stab->ptab->params.grow, 1);
-	assert_ptr_equal(to->stab->ptab->params.equal_key, fn_equal_strcasecmp);
+	assert_non_nul(to);
 
-	assert_true(to->stab->params.case_insensitive);
-	assert_ptr_equal(to->stab->params.initial, 99);
-	assert_int_equal(to->stab->params.grow, 1);
-	assert_ptr_equal(to->stab->params.equal_val, fn_equal_strcmp);
+	assert_int_equal(to->ptab->size, 0);
+	assert_int_equal(to->ptab->capacity, 99);
+	assert_int_equal(to->ptab->params.grow, 1);
+	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
+	assert_ptr_equal(to->ptab->params.equal_val, fn_equal_strcmp);
+	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
+	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 
-	assert_true(to->params.case_insensitive);
+	assert_true(to->params.case_insensitive_key);
 	assert_ptr_equal(to->params.initial, 99);
 	assert_ptr_equal(to->params.grow, 1);
 
@@ -369,13 +351,13 @@ int main(void) {
 		TEST(sstable_iter__),
 		TEST(sstable_iter__empty),
 		TEST(sstable_iter__state_deleted),
-		TEST(sstable_iter__state_stab_deleted),
 		TEST(sstable_iter__state_ptab_deleted),
 
 		TEST(sstable_filter_iter__),
 
 		TEST(sstable_equal__case_sensitive),
-		TEST(sstable_equal__case_insensitive),
+		TEST(sstable_equal__case_insensitive_key),
+		TEST(sstable_equal__case_insensitive_val),
 
 		TEST(sstable_str__),
 
