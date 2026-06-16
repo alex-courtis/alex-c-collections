@@ -28,7 +28,7 @@ static bool test_contains_x(const void* const val) {
 	return false;
 }
 
-static bool test_false(const void* const data) {
+static bool test_false(const void* const val) {
 	return false;
 }
 

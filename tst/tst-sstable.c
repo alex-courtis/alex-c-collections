@@ -143,12 +143,12 @@ static void sstable_iter__empty(void **state) {
 	sstable_free(tab);
 }
 
-static bool fn_equal_str_starts_with_a(const char* const data, const char* const unused) {
-	return *(char*)data == 'a';
+static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
+	return *(char*)a == 'a';
 }
 
-static bool fn_equal_str_starts_with_b(const char* const data, const char* const unused) {
-	return *(char*)data == 'b';
+static bool fn_equal_starts_with_b(const void* const a, const void* const b) {
+	return *(char*)a == 'b';
 }
 
 static void sstable_filter_iter__(void **state) {
@@ -161,7 +161,7 @@ static void sstable_filter_iter__(void **state) {
 	assert_false(sstable_put(tab, "a4", "b4"));
 	assert_false(sstable_put(tab, "a5", "x5"));
 
-	const struct SSTableIter *iter = sstable_filter_iter(tab, fn_equal_str_starts_with_a, fn_equal_str_starts_with_b, NULL);
+	const struct SSTableIter *iter = sstable_filter_iter(tab, fn_equal_starts_with_a, fn_equal_starts_with_b, NULL);
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "a0");
 	assert_str_equal(iter->val, "b0");
