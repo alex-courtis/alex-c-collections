@@ -193,7 +193,11 @@ bool pset_add(const struct PSet* const cset, const void* const val) {
 	}
 
 	// new value
-	*v = (void*)val;
+	if (set->params.alloc_val) {
+		*v = set->params.alloc_val(val);
+	} else {
+		*v = (void*)val;
+	}
 	set->size++;
 
 	return true;
@@ -208,6 +212,10 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
 			const void *removed = *v;
+
+			if (set->params.free_val) {
+				set->params.free_val(*v);
+			}
 
 			*v = NULL;
 			set->size--;

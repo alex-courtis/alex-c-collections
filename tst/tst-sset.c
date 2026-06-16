@@ -5,6 +5,7 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fn.h"
 #include "slist.h"
@@ -33,6 +34,25 @@ struct SSet {
 struct SSetIterState {
 	const struct PSetIter *pit;
 };
+
+static void sset_add__alloc_val_free_val(void **state) {
+	const struct SSet *set = sset_init();
+
+	char *added = strdup("a");
+	char *rejected = strdup("a");
+
+	assert_true(sset_add(set, added));
+	assert_false(sset_add(set, rejected));
+
+	assert_true(sset_contains(set, "a"));
+
+	free(added);
+	free(rejected);
+
+	assert_true(sset_contains(set, "a"));
+
+	sset_free(set);
+}
 
 static void sset_add_contains_remove__case_sensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = false, };
@@ -384,6 +404,8 @@ static void sset__null_inputs(void **state) {
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
+		TEST(sset_add__alloc_val_free_val),
+
 		TEST(sset_add_contains_remove__case_insensitive),
 		TEST(sset_add_contains_remove__case_sensitive),
 

@@ -7,11 +7,10 @@
 #include "fn.h"
 
 /*
- * Array backed ordered string set.
- * Operations linearly traverse values.
- * NULL not permitted.
- * Not thread safe.
-*/
+ * `PSet` with string values
+ * Values are strdup'd on successful `sset_add` and `sset_clone`
+ * Values are free'd on `sset_free`
+ */
 struct SSet; // IWYU pragma: keep
 
 /*

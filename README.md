@@ -6,34 +6,38 @@ Not thread safe.
 
 ### SList
 
-- Containerless singly linked list.
-- NULL values permitted.
+* Containerless singly linked list.
+* NULL values permitted.
 
 ### PSet
 
-- Array backed pointer set.
-- Entries preserve insertion order.
-- Operations linearly traverse values.
-- NULL not permitted.
+* Array backed pointer set.
+* Entries preserve insertion order.
+* Operations linearly traverse values.
+* NULL not permitted.
 
 ### SSet
 
-- `PSet` with string values
+* `PSet` with string values
+* Values are strdup'd on successful `sset_add` and `sset_clone`
+* Values are free'd on `sset_free`
 
 ### PTable
 
-- Array backed pointer indexed table.
-- Entries preserve insertion order.
-- Operations linearly traverse keys.
-- NULL values permitted.
+* Array backed pointer indexed table.
+* Entries preserve insertion order.
+* Operations linearly traverse keys.
+* NULL values permitted.
 
 ### ITable
 
-- `PTable` with `size_t` keys
+* `PTable` with `size_t` keys
 
 ### STable
 
-- `PTable` with string keys.
+* `PTable` with string keys.
+* Keys are strdup'd on successful `stable_put` and `stable_clone`
+* Keys are free'd on `stable_free`
 
 ## Strings
 

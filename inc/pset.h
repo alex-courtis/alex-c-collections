@@ -7,10 +7,10 @@
 #include "fn.h"
 
 /*
- * Array backed ordered set.
+ * Array backed pointer set.
+ * Entries preserve insertion order.
  * Operations linearly traverse values.
  * NULL not permitted.
- * Not thread safe.
  */
 struct PSet; // IWYU pragma: keep
 
@@ -23,11 +23,15 @@ struct PSetIter {
 	struct PSetIterState *st;
 };
 
+// TODO consider using free_val for all _free functions
+
 /*
  * Optional constructor params (default)
  */
 struct PSetParams {
 	const fn_equal equal_val; // _add, _remove, _contains, _equal (compare val pointers)
+	const fn_alloc alloc_val; // _add, _clone, must be idempotent (use key pointer)
+	const fn_free free_val;   // _remove                          (NOP)
 	const size_t initial;     // initial capacity                 (10)
 	const size_t grow;        // grow capacity by                 (10)
 };

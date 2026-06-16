@@ -30,6 +30,8 @@ const struct SSet *sset_init(void) {
 const struct SSet *sset_init_with(const struct SSetParams params) {
 	const struct PSetParams pset_params = {
 		.equal_val = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
+		.alloc_val = (fn_alloc)strdup,
+		.free_val = (fn_free)free,
 		.initial = params.initial,
 		.grow = params.grow,
 	};
@@ -56,7 +58,7 @@ void sset_free(const struct SSet* const set) {
 	if (!set)
 		return;
 
-	pset_free(set->pset);
+	pset_free_vals(set->pset, (fn_free)free);
 
 	free((void*)set);
 }
