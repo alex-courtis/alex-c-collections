@@ -64,6 +64,9 @@ void stable_iter_free(const struct STableIter* const iter);
 // return val, NULL if not present
 const void *stable_get(const struct STable* const tab, const char* const key);
 
+// true if key is present
+bool stable_contains_key(const struct STable* const tab, const char* const key);
+
 // create an iterator, caller must stable_iter_free or invoke stable_next until NULL
 const struct STableIter *stable_iter(const struct STable* const tab);
 

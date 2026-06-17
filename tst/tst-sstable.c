@@ -239,6 +239,22 @@ static void sstable_equal__case_insensitive_val(void **state) {
 	sstable_free_vals(expected);
 }
 
+static void sstable_contains_key__(void **state) {
+	const struct SSTable *tab = sstable_init();
+
+	assert_false(sstable_contains_key(tab, "a"));
+
+	assert_false(sstable_put(tab, "a", "aa"));
+	assert_false(sstable_put(tab, "b", "bb"));
+
+	assert_true(sstable_contains_key(tab, "a"));
+	assert_true(sstable_contains_key(tab, "b"));
+
+	assert_false(sstable_contains_key(tab, "c"));
+
+	assert_false(sstable_contains_key(tab, NULL));
+}
+
 static void sstable_str__(void **state) {
 
 	const struct SSTable *tab = sstable_init();
@@ -332,6 +348,7 @@ static void sstable__null_inputs(void **state) {
 	sstable_free_vals(NULL);
 	sstable_iter_free(NULL);
 	assert_false(sstable_get(NULL, NULL));
+	assert_false(sstable_contains_key(NULL, NULL));
 	assert_nul(sstable_iter(NULL));
 	assert_nul(sstable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(sstable_iter_next(NULL));
@@ -359,6 +376,8 @@ int main(void) {
 		TEST(sstable_equal__case_sensitive),
 		TEST(sstable_equal__case_insensitive_key),
 		TEST(sstable_equal__case_insensitive_val),
+
+		TEST(sstable_contains_key__),
 
 		TEST(sstable_str__),
 

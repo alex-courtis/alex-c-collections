@@ -232,6 +232,22 @@ static void itable_equal__key_removed(void **state) {
 	itable_free(b);
 }
 
+static void itable_contains_key__(void **state) {
+	const struct ITable *tab = itable_init();
+
+	assert_false(itable_contains_key(tab, 0));
+
+	assert_nul(itable_put(tab, 0, V0));
+	assert_nul(itable_put(tab, 1, V1));
+
+	assert_true(itable_contains_key(tab, 0));
+	assert_true(itable_contains_key(tab, 1));
+
+	assert_false(itable_contains_key(tab, 2));
+
+	itable_free(tab);
+}
+
 static void itable_get__key_removed(void **state) {
 
 	const struct ITable *actual = itable_init();
@@ -343,6 +359,7 @@ static void itable__null_inputs(void **state) {
 	itable_free_vals(NULL);
 	itable_iter_free(NULL);
 	assert_false(itable_get(NULL, 0));
+	assert_false(itable_contains_key(NULL, 0));
 	assert_nul(itable_iter(NULL));
 	assert_nul(itable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(itable_iter_next(NULL));
@@ -369,6 +386,8 @@ int main(void) {
 
 		TEST(itable_equal__),
 		TEST(itable_equal__key_removed),
+
+		TEST(itable_contains_key__),
 
 		TEST(itable_get__key_removed),
 

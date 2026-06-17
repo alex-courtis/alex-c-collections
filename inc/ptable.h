@@ -30,15 +30,15 @@ struct PTableIter {
  * Optional constructor params (default)
  */
 struct PTableParams {
-	const fn_equal equal_key;   // _get, _put, _equal, _clone       (compare key pointers)
-	const fn_equal equal_val;   // _equal                           (compare val pointers)
-	const fn_alloc alloc_key;   // _clone, _put, must be idempotent (use key pointer)
-	const fn_free free_key;     // _remove, _free, _free_vals       (NOP)
-	const fn_free free_val;     // _free_vals                       (free)
-	const fn_str str_key;       // _str                             (%p)
-	const fn_str str_val;       // _str                             (%p)
-	const size_t initial;       // initial capacity                 (10)
-	const size_t grow;          // grow capacity by                 (10)
+	const fn_equal equal_key;   // _get, _contains_key, _put, _equal, _clone (compare key pointers)
+	const fn_equal equal_val;   // _equal                                    (compare val pointers)
+	const fn_alloc alloc_key;   // _clone, _put, must be idempotent          (use key pointer)
+	const fn_free free_key;     // _remove, _free, _free_vals                (NOP)
+	const fn_free free_val;     // _free_vals                                (free)
+	const fn_str str_key;       // _str                                      (%p)
+	const fn_str str_val;       // _str                                      (%p)
+	const size_t initial;       // initial capacity                          (10)
+	const size_t grow;          // grow capacity by                          (10)
 };
 
 /*
@@ -69,6 +69,9 @@ void ptable_iter_free(const struct PTableIter* const iter);
 
 // return val, NULL if not present
 const void *ptable_get(const struct PTable* const tab, const void* const key);
+
+// true if key is present
+bool ptable_contains_key(const struct PTable* const tab, const void* const key);
 
 // create an iterator, caller must ptable_iter_free or invoke ptable_next until NULL
 const struct PTableIter *ptable_iter(const struct PTable* const tab);

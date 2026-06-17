@@ -117,6 +117,10 @@ const void *itable_get(const struct ITable* const tab, const size_t key) {
 	return tab ? ptable_get(tab->ptab, &key) : NULL;
 }
 
+bool itable_contains_key(const struct ITable* const tab, const size_t key) {
+	return tab ? ptable_contains_key(tab->ptab, &key) : false;
+}
+
 const struct ITableIter *itable_iter(const struct ITable* const tab) {
 	return itable_filter_iter(tab, NULL, NULL, NULL);
 }

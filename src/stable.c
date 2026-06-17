@@ -96,6 +96,10 @@ const void *stable_get(const struct STable* const tab, const char* const key) {
 	return tab ? ptable_get(tab->ptab, key) : NULL;
 }
 
+bool stable_contains_key(const struct STable* const tab, const char* const key) {
+	return tab ? ptable_contains_key(tab->ptab, key) : false;
+}
+
 const struct STableIter *stable_iter(const struct STable* const tab) {
 	return stable_filter_iter(tab, NULL, NULL, NULL);
 }

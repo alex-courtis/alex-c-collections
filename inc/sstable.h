@@ -62,6 +62,9 @@ void sstable_iter_free(const struct SSTableIter* const iter);
 // return val, NULL if not present
 const void *sstable_get(const struct SSTable* const tab, const char* const key);
 
+// true if key is present
+bool sstable_contains_key(const struct SSTable* const tab, const char* const key);
+
 // create an iterator, caller must sstable_iter_free or invoke sstable_next until NULL
 const struct SSTableIter *sstable_iter(const struct SSTable* const tab);
 

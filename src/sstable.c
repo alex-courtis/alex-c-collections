@@ -87,6 +87,10 @@ const void *sstable_get(const struct SSTable* const tab, const char* const key) 
 	return tab ? ptable_get(tab->ptab, key) : NULL;
 }
 
+bool sstable_contains_key(const struct SSTable* const tab, const char* const key) {
+	return tab ? ptable_get(tab->ptab, key) : false;
+}
+
 const struct SSTableIter *sstable_iter(const struct SSTable* const tab) {
 	return sstable_filter_iter(tab, NULL, NULL, NULL);
 }

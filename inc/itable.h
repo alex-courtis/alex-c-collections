@@ -66,6 +66,9 @@ void itable_iter_free(const struct ITableIter* const iter);
 // return val, NULL if not present
 const void *itable_get(const struct ITable* const tab, const size_t key);
 
+// true if key is present
+bool itable_contains_key(const struct ITable* const tab, const size_t key);
+
 // create an iterator, caller must itable_iter_free or invoke itable_next until NULL
 const struct ITableIter *itable_iter(const struct ITable* const tab);
 

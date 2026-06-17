@@ -125,7 +125,7 @@ void ptable_iter_free(const struct PTableIter* const iter) {
 }
 
 const void *ptable_get(const struct PTable* const tab, const void* const key) {
-	if (!tab)
+	if (!tab || !key)
 		return NULL;
 
 	const void **k;
@@ -139,6 +139,22 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 	}
 
 	return NULL;
+}
+
+bool ptable_contains_key(const struct PTable* const tab, const void* const key) {
+	if (!tab || !key)
+		return false;
+
+	const void **k;
+	for (k = tab->keys;
+			k < tab->keys + tab->size;
+			k++) {
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 const struct PTableIter *ptable_iter(const struct PTable* const tab) {
@@ -233,7 +249,7 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 }
 
 const void *ptable_remove(const struct PTable* const ctab, const void* const key) {
-	if (!ctab)
+	if (!ctab || !key)
 		return NULL;
 
 	struct PTable *tab = (struct PTable*)ctab;

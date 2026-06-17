@@ -243,6 +243,22 @@ static void stable_equal__case_insensitive(void **state) {
 	stable_free(expected);
 }
 
+static void stable_contains_key__(void **state) {
+	const struct STable *tab = stable_init();
+
+	assert_false(stable_contains_key(tab, "a"));
+
+	assert_nul(stable_put(tab, "a", V0));
+	assert_nul(stable_put(tab, "b", V1));
+
+	assert_true(stable_contains_key(tab, "a"));
+	assert_true(stable_contains_key(tab, "b"));
+
+	assert_false(stable_contains_key(tab, "c"));
+
+	assert_false(stable_contains_key(tab, NULL));
+}
+
 static void stable_str__(void **state) {
 
 	const struct STable *tab = stable_init();
@@ -359,6 +375,7 @@ static void stable__null_inputs(void **state) {
 	stable_free_vals(NULL);
 	stable_iter_free(NULL);
 	assert_false(stable_get(NULL, NULL));
+	assert_false(stable_contains_key(NULL, NULL));
 	assert_nul(stable_iter(NULL));
 	assert_nul(stable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(stable_iter_next(NULL));
@@ -387,6 +404,8 @@ int main(void) {
 
 		TEST(stable_equal__case_sensitive),
 		TEST(stable_equal__case_insensitive),
+
+		TEST(stable_contains_key__),
 
 		TEST(stable_str__),
 
