@@ -253,6 +253,8 @@ static void sstable_contains_key__(void **state) {
 	assert_false(sstable_contains_key(tab, "c"));
 
 	assert_false(sstable_contains_key(tab, NULL));
+
+	sstable_free_vals(tab);
 }
 
 static void sstable_str__(void **state) {

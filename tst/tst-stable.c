@@ -257,6 +257,8 @@ static void stable_contains_key__(void **state) {
 	assert_false(stable_contains_key(tab, "c"));
 
 	assert_false(stable_contains_key(tab, NULL));
+
+	stable_free(tab);
 }
 
 static void stable_str__(void **state) {
