@@ -173,18 +173,16 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
 	return NULL;
 }
 
-const void *pset_add(const struct PSet* const cset, const void* const val) {
+bool pset_add(const struct PSet* const cset, const void* const val) {
 	if (!cset || !val)
-		return NULL;
+		return false;
 
 	struct PSet *set = (struct PSet*)cset;
 
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
 		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
-			const void *prev = *v;
-			*v = val;
-			return prev;
+			return false;
 		}
 	}
 
@@ -202,25 +200,7 @@ const void *pset_add(const struct PSet* const cset, const void* const val) {
 	}
 	set->size++;
 
-	return NULL;
-}
-
-bool pset_add_free(const struct PSet* const set, const void* const val) {
-	if (!set || !val)
-		return false;
-
-	const void *old = pset_add(set, val);
-
-	if (old) {
-		if (set->params.free_val) {
-			set->params.free_val(old);
-		} else {
-			free((void*)old);
-		}
-		return true;
-	} else {
-		return false;
-	}
+	return true;
 }
 
 const void *pset_remove(const struct PSet* const cset, const void* const val) {

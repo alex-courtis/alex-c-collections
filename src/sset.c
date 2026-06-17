@@ -125,7 +125,7 @@ const struct SSetIter *sset_iter_next(const struct SSetIter* const iter) {
 }
 
 bool sset_add(const struct SSet* const set, const char* const val) {
-	return set ? pset_add(set->pset, val) != NULL : false;
+	return set ? pset_add(set->pset, val) : false;
 }
 
 bool sset_remove(const struct SSet* const set, const char* const val) {

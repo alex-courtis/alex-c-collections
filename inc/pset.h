@@ -77,22 +77,11 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
  * Mutate
  */
 
-// add val, return old val if overwritten
-const void *pset_add(const struct PSet* const set, const void* const val);
-
-// TODO
-// // add val if not present, return existing val if present
-// const void *pset_add_if_absent(const struct PSet* const set, const void* const val);
-
-// add val, free old val, return true if overwritten
-bool pset_add_free(const struct PSet* const tab, const void* const val);
+// true if this set did not already contain the specified element
+bool pset_add(const struct PSet* const set, const void* const val);
 
 // returns value if removed
 const void *pset_remove(const struct PSet* const set, const void* const val);
-
-// TODO
-// // remove val, if removed free val and return true
-// bool pset_remove_free(const struct PSet* const set, const void* const val);
 
 // shell sort in place, NULL less_than_val NOP
 void pset_sort(const struct PSet* const set, fn_less_than less_than_val);
