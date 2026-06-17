@@ -60,7 +60,7 @@ void sstable_iter_free(const struct SSTableIter* const iter);
  */
 
 // return val, NULL if not present
-const void *sstable_get(const struct SSTable* const tab, const char* const key);
+const char *sstable_get(const struct SSTable* const tab, const char* const key);
 
 // true if key is present
 bool sstable_contains_key(const struct SSTable* const tab, const char* const key);
@@ -80,6 +80,9 @@ const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const iter
 
 // set key/val, return true if overwritten
 bool sstable_put(const struct SSTable* const tab, const char* const key, const char* const val);
+
+// set key/val if not present, return existing val if present
+const char *sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val);
 
 // remove key, return true if removed
 bool sstable_remove(const struct SSTable* const tab, const char* const key);

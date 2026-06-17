@@ -83,12 +83,12 @@ void sstable_iter_free(const struct SSTableIter* const iter) {
 	free((void*)iter);
 }
 
-const void *sstable_get(const struct SSTable* const tab, const char* const key) {
+const char *sstable_get(const struct SSTable* const tab, const char* const key) {
 	return tab ? ptable_get(tab->ptab, key) : NULL;
 }
 
 bool sstable_contains_key(const struct SSTable* const tab, const char* const key) {
-	return tab ? ptable_get(tab->ptab, key) : false;
+	return tab ? ptable_contains_key(tab->ptab, key) : false;
 }
 
 const struct SSTableIter *sstable_iter(const struct SSTable* const tab) {
@@ -139,7 +139,7 @@ const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const iter
 }
 
 bool sstable_put(const struct SSTable* const tab, const char* const key, const char* const val) {
-	if (!tab)
+	if (!tab || !key)
 		return false;
 
 	const char *new = val ? strdup(val) : NULL;
@@ -150,6 +150,19 @@ bool sstable_put(const struct SSTable* const tab, const char* const key, const c
 		return true;
 	} else {
 		return false;
+	}
+}
+
+const char *sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val) {
+	if (!tab || !key)
+		return NULL;
+
+	if (ptable_contains_key(tab->ptab, key)) {
+		return ptable_get(tab->ptab, key);
+	} else {
+		const char *new = val ? strdup(val) : NULL;
+		ptable_put(tab->ptab, key, new);
+		return NULL;
 	}
 }
 

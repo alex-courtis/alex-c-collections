@@ -257,6 +257,21 @@ static void sstable_contains_key__(void **state) {
 	sstable_free_vals(tab);
 }
 
+static void sstable_put_if_absent__(void **state) {
+	const struct SSTable *tab = sstable_init();
+
+	assert_nul(sstable_put_if_absent(tab, "a", "aa"));
+	assert_str_equal(sstable_get(tab, "a"), "aa");
+
+	const void *existing = sstable_put_if_absent(tab, "a", "xx");
+	assert_str_equal(existing, "aa");
+
+	assert_nul(sstable_put_if_absent(tab, "b", NULL));
+	assert_nul(sstable_get(tab, "b"));
+
+	sstable_free_vals(tab);
+}
+
 static void sstable_str__(void **state) {
 
 	const struct SSTable *tab = sstable_init();
@@ -346,6 +361,8 @@ static void sstable_clone__(void **state) {
 }
 
 static void sstable__null_inputs(void **state) {
+	const struct SSTable *tab = sstable_init();
+
 	assert_nul(sstable_clone(NULL));
 	sstable_free_vals(NULL);
 	sstable_iter_free(NULL);
@@ -355,12 +372,17 @@ static void sstable__null_inputs(void **state) {
 	assert_nul(sstable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(sstable_iter_next(NULL));
 	assert_false(sstable_put(NULL, NULL, NULL));
+	assert_false(sstable_put(tab, NULL, NULL));
+	assert_false(sstable_put_if_absent(NULL, NULL, NULL));
+	assert_false(sstable_put_if_absent(tab, NULL, NULL));
 	assert_false(sstable_remove(NULL, NULL));
 	assert_false(sstable_equal(NULL, NULL));
 	assert_nul(sstable_keys_slist(NULL));
 	assert_nul(sstable_vals_slist(NULL));
 	assert_nul(sstable_str(NULL));
 	assert_int_equal(sstable_size(NULL), 0);
+
+	sstable_free_vals(tab);
 }
 
 int main(void) {
@@ -380,6 +402,8 @@ int main(void) {
 		TEST(sstable_equal__case_insensitive_val),
 
 		TEST(sstable_contains_key__),
+
+		TEST(sstable_put_if_absent__),
 
 		TEST(sstable_str__),
 
