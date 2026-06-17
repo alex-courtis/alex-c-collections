@@ -29,7 +29,7 @@ struct STableIter {
 struct STableParams {
 	const bool case_insensitive; //                            (false)
 	const fn_equal equal_val;    // _get, _put, _equal, _clone (compare key pointers)
-	const fn_free free_val;      // _free_vals                 (free)
+	const fn_free free_val;      // _put_free, _free_vals      (free)
 	const fn_str str_val;        // _str                       (%p)
 	const size_t initial;        // initial capacity           (10)
 	const size_t grow;           // grow capacity by           (10)
@@ -82,6 +82,9 @@ const struct STableIter *stable_iter_next(const struct STableIter* const iter);
 
 // set key/val, return old val if overwritten
 const void *stable_put(const struct STable* const tab, const char* const key, const void* const val);
+
+// set key/val, free old val, return true if overwritten
+bool stable_put_free(const struct STable* const tab, const  char* const key, const void* const val);
 
 // remove key, return old val if present
 const void *stable_remove(const struct STable* const tab, const char* const key);

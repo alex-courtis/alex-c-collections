@@ -248,6 +248,21 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	return NULL;
 }
 
+bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val) {
+	const void *old = ptable_put(tab, key, val);
+
+	if (old) {
+		if (tab->params.free_val) {
+			tab->params.free_val(old);
+		} else {
+			free((void*)old);
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
 const void *ptable_remove(const struct PTable* const ctab, const void* const key) {
 	if (!ctab || !key)
 		return NULL;

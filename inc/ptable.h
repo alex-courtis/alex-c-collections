@@ -34,7 +34,7 @@ struct PTableParams {
 	const fn_equal equal_val;   // _equal                                    (compare val pointers)
 	const fn_alloc alloc_key;   // _clone, _put, must be idempotent          (use key pointer)
 	const fn_free free_key;     // _remove, _free, _free_vals                (NOP)
-	const fn_free free_val;     // _free_vals                                (free)
+	const fn_free free_val;     // _put_free, _free_vals                     (free)
 	const fn_str str_key;       // _str                                      (%p)
 	const fn_str str_val;       // _str                                      (%p)
 	const size_t initial;       // initial capacity                          (10)
@@ -88,6 +88,9 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);
 
 // set key/val, return old val if overwritten
 const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val);
+
+// set key/val, free old val, return true if overwritten
+bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val);
 
 // remove key, return old val if present
 const void *ptable_remove(const struct PTable* const tab, const void* const key);

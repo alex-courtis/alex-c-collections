@@ -353,6 +353,34 @@ static void ptable_put__grow(void **state) {
 	ptable_free(tab);
 }
 
+static void ptable_put_free__free(void **state) {
+	const struct PTable *tab = ptable_init();
+
+	char *val = strdup("val");
+
+	assert_nul(ptable_put(tab, K0, val));
+
+	assert_false(ptable_put_free(tab, K1, V1));
+
+	assert_true(ptable_put_free(tab, K0, V0));
+
+	ptable_free(tab);
+}
+
+static void ptable_put_free__free_val(void **state) {
+	const struct PTableParams params = { .free_val = mock_free, };
+	const struct PTable *tab = ptable_init_with(params);
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	assert_false(ptable_put_free(tab, K1, V1));
+
+	expect_ptr(mock_free, val, V0);
+	assert_true(ptable_put_free(tab, K0, V0));
+
+	ptable_free(tab);
+}
+
 static void ptable__equal_key(void **state) {
 	const struct PTableParams params = { .equal_key = fn_equal_ptr, };
 	const struct PTable *tab = ptable_init_with(params);
@@ -1035,6 +1063,7 @@ static void ptable__null_inputs(void **state) {
 	assert_nul(ptable_iter_next(NULL));
 	assert_false(ptable_put(NULL, NULL, NULL));
 	assert_false(ptable_put(tab, NULL, NULL));
+	assert_false(ptable_put_free(NULL, NULL, NULL));
 	assert_nul(ptable_remove(NULL, NULL));
 	assert_nul(ptable_remove(tab, NULL));
 	assert_false(ptable_equal(NULL, NULL));
@@ -1066,6 +1095,8 @@ int main(void) {
 		TEST(ptable_put__null),
 		TEST(ptable_put__null_overwrite),
 		TEST(ptable_put__grow),
+		TEST(ptable_put_free__free),
+		TEST(ptable_put_free__free_val),
 
 		TEST(ptable_iter__empty),
 		TEST(ptable_iter__free),

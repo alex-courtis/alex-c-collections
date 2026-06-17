@@ -26,7 +26,7 @@ struct ITableIter {
  */
 struct ITableParams {
 	const fn_equal equal_val; // _get, _put, _equal, _clone (compare key pointers)
-	const fn_free free_val;   // _free_vals                 (free)
+	const fn_free free_val;   // _put_free, _free_vals      (free)
 	const fn_str str_val;     // _str                       (%p)
 	const size_t initial;     // initial capacity           (10)
 	const size_t grow;        // grow capacity by           (10)
@@ -84,6 +84,9 @@ const struct ITableIter *itable_iter_next(const struct ITableIter* const iter);
 
 // set key/val, return old val if overwritten
 const void *itable_put(const struct ITable* const tab, const size_t key, const void* const val);
+
+// set key/val, free old val, return true if overwritten
+bool itable_put_free(const struct ITable* const tab, const size_t key, const char* const val);
 
 // remove key, return old val if present
 const void *itable_remove(const struct ITable* const tab, const size_t key);
