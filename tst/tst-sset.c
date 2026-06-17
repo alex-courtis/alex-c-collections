@@ -41,8 +41,8 @@ static void sset_add__alloc_val_free_val(void **state) {
 	char *added = strdup("a");
 	char *rejected = strdup("a");
 
-	assert_true(sset_add(set, added));
-	assert_false(sset_add(set, rejected));
+	assert_false(sset_add(set, added));
+	assert_true(sset_add(set, rejected));
 
 	assert_true(sset_contains(set, "a"));
 
@@ -58,10 +58,10 @@ static void sset_add_contains_remove__case_sensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = false, };
 	const struct SSet *set = sset_init_with(params);
 
-	assert_true(sset_add(set, "A"));
-	assert_true(sset_add(set, "B"));
-
+	assert_false(sset_add(set, "A"));
 	assert_false(sset_add(set, "B"));
+
+	assert_true(sset_add(set, "B"));
 
 	assert_false(sset_contains(set, "b"));
 	assert_true(sset_contains(set, "B"));
@@ -76,10 +76,10 @@ static void sset_add_contains_remove__case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *set = sset_init_with(params);
 
-	assert_true(sset_add(set, "A"));
-	assert_true(sset_add(set, "B"));
-
+	assert_false(sset_add(set, "A"));
 	assert_false(sset_add(set, "B"));
+
+	assert_true(sset_add(set, "B"));
 
 	assert_true(sset_contains(set, "b"));
 	assert_true(sset_contains(set, "B"));
@@ -92,8 +92,8 @@ static void sset_add_contains_remove__case_insensitive(void **state) {
 static void sset_iter__(void **state) {
 
 	const struct SSet *set = sset_init();
-	assert_true(sset_add(set, "a"));
-	assert_true(sset_add(set, "b"));
+	assert_false(sset_add(set, "a"));
+	assert_false(sset_add(set, "b"));
 
 	const struct SSetIter *iter = sset_iter(set);
 
@@ -112,7 +112,7 @@ static void sset_iter__(void **state) {
 static void sset_iter__state_deleted(void **state) {
 	const struct SSet *set = sset_init();
 
-	assert_true(sset_add(set, "a"));
+	assert_false(sset_add(set, "a"));
 
 	const struct SSetIter *iter = sset_iter(set);
 	assert_non_nul(iter);
@@ -131,7 +131,7 @@ static void sset_iter__state_deleted(void **state) {
 static void sset_iter__state_set_deleted(void **state) {
 	const struct SSet *set = sset_init();
 
-	assert_true(sset_add(set, "a"));
+	assert_false(sset_add(set, "a"));
 
 	const struct SSetIter *iter = sset_iter(set);
 	assert_non_nul(iter);
@@ -164,10 +164,10 @@ static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
 static void sset_filter_iter__(void **state) {
 	const struct SSet *set = sset_init();
 
-	assert_true(sset_add(set, "a1"));
-	assert_true(sset_add(set, "b1"));
-	assert_true(sset_add(set, "a2"));
-	assert_true(sset_add(set, "b2"));
+	assert_false(sset_add(set, "a1"));
+	assert_false(sset_add(set, "b1"));
+	assert_false(sset_add(set, "a2"));
+	assert_false(sset_add(set, "b2"));
 
 	const struct SSetIter *iter = sset_filter_iter(set, fn_equal_starts_with_a, NULL);
 	assert_non_nul(iter);
@@ -185,19 +185,19 @@ static void sset_filter_iter__(void **state) {
 static void sset_equal__case_sensitive(void **state) {
 
 	const struct SSet *actual = sset_init();
-	assert_true(sset_add(actual, "a"));
-	assert_true(sset_add(actual, "b"));
+	assert_false(sset_add(actual, "a"));
+	assert_false(sset_add(actual, "b"));
 
 	assert_sset_not_equal(actual, NULL);
 
 	const struct SSet *expected = sset_init();
-	assert_true(sset_add(expected, "a"));
-	assert_true(sset_add(expected, "b"));
+	assert_false(sset_add(expected, "a"));
+	assert_false(sset_add(expected, "b"));
 
 	assert_sset_equal(actual, expected);
 
-	assert_true(sset_add(actual, "c"));
-	assert_true(sset_add(expected, "C"));
+	assert_false(sset_add(actual, "c"));
+	assert_false(sset_add(expected, "C"));
 
 	assert_sset_not_equal(actual, expected);
 
@@ -209,12 +209,12 @@ static void sset_equal__case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *actual = sset_init_with(params);
 
-	assert_true(sset_add(actual, "a"));
-	assert_true(sset_add(actual, "b"));
+	assert_false(sset_add(actual, "a"));
+	assert_false(sset_add(actual, "b"));
 
 	const struct SSet *expected = sset_init();
-	assert_true(sset_add(expected, "A"));
-	assert_true(sset_add(expected, "B"));
+	assert_false(sset_add(expected, "A"));
+	assert_false(sset_add(expected, "B"));
 
 	assert_sset_equal(actual, expected);
 
@@ -225,9 +225,9 @@ static void sset_equal__case_insensitive(void **state) {
 static void sset_str__(void **state) {
 
 	const struct SSet *set = sset_init();
-	assert_true(sset_add(set, "a"));
-	assert_true(sset_add(set, "b"));
-	assert_true(sset_add(set, "c"));
+	assert_false(sset_add(set, "a"));
+	assert_false(sset_add(set, "b"));
+	assert_false(sset_add(set, "c"));
 
 	char *actual = sset_str(set);
 
@@ -255,10 +255,10 @@ static void sset_sort__empty(void **state) {
 static void sset_sort__one(void **state) {
 	const struct SSet *actual = sset_init();
 
-	assert_true(sset_add(actual, "A"));
+	assert_false(sset_add(actual, "A"));
 
 	const struct SSet *expected = sset_init();
-	assert_true(sset_add(expected, "A"));
+	assert_false(sset_add(expected, "A"));
 
 	sset_sort(actual);
 
@@ -271,16 +271,16 @@ static void sset_sort__one(void **state) {
 static void sset_sort__many(void **state) {
 	const struct SSet *actual = sset_init();
 
-	assert_true(sset_add(actual, "3"));
-	assert_true(sset_add(actual, "1"));
-	assert_true(sset_add(actual, "0"));
-	assert_true(sset_add(actual, "2"));
+	assert_false(sset_add(actual, "3"));
+	assert_false(sset_add(actual, "1"));
+	assert_false(sset_add(actual, "0"));
+	assert_false(sset_add(actual, "2"));
 
 	const struct SSet *expected = sset_init();
-	assert_true(sset_add(expected, "0"));
-	assert_true(sset_add(expected, "1"));
-	assert_true(sset_add(expected, "2"));
-	assert_true(sset_add(expected, "3"));
+	assert_false(sset_add(expected, "0"));
+	assert_false(sset_add(expected, "1"));
+	assert_false(sset_add(expected, "2"));
+	assert_false(sset_add(expected, "3"));
 
 	sset_sort(actual);
 
@@ -296,13 +296,13 @@ static void sset_sort__words(void **state) {
 	const struct SSet *actual = sset_init_with(params);
 
 	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
-		assert_true(sset_add(actual, words_unsorted[i - 1]));
+		assert_false(sset_add(actual, words_unsorted[i - 1]));
 	}
 
 	const struct SSet *expected = sset_init_with(params);
 
 	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
-		assert_true(sset_add(expected, words_sorted[i]));
+		assert_false(sset_add(expected, words_sorted[i]));
 	}
 
 	sset_sort(actual);
@@ -317,16 +317,16 @@ static void sset_sort__many_case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *actual = sset_init_with(params);
 
-	assert_true(sset_add(actual, "Bb3"));
-	assert_true(sset_add(actual, "aa1"));
-	assert_true(sset_add(actual, "Aa0"));
-	assert_true(sset_add(actual, "bb2"));
+	assert_false(sset_add(actual, "Bb3"));
+	assert_false(sset_add(actual, "aa1"));
+	assert_false(sset_add(actual, "Aa0"));
+	assert_false(sset_add(actual, "bb2"));
 
 	const struct SSet *expected = sset_init();
-	assert_true(sset_add(expected, "Aa0"));
-	assert_true(sset_add(expected, "aa1"));
-	assert_true(sset_add(expected, "Bb2"));
-	assert_true(sset_add(expected, "bb3"));
+	assert_false(sset_add(expected, "Aa0"));
+	assert_false(sset_add(expected, "aa1"));
+	assert_false(sset_add(expected, "Bb2"));
+	assert_false(sset_add(expected, "bb3"));
 
 	sset_sort(actual);
 
@@ -361,8 +361,8 @@ static void sset_clone__(void **state) {
 	};
 	const struct SSet *from = sset_init_with(params);
 
-	assert_true(sset_add(from, "a"));
-	assert_true(sset_add(from, "b"));
+	assert_false(sset_add(from, "a"));
+	assert_false(sset_add(from, "b"));
 
 	const struct SSet *to = sset_clone(from);
 

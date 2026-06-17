@@ -261,13 +261,13 @@ const void *ptable_put_if_absent(const struct PTable* const tab, const void* con
 }
 
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val) {
-	const void *replaced = ptable_put(tab, key, val);
+	const void *old = ptable_put(tab, key, val);
 
-	if (replaced) {
+	if (old) {
 		if (tab->params.free_val) {
-			tab->params.free_val(replaced);
+			tab->params.free_val(old);
 		} else {
-			free((void*)replaced);
+			free((void*)old);
 		}
 		return true;
 	} else {
@@ -312,12 +312,12 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 }
 
 bool ptable_remove_free(const struct PTable* const tab, const void* const key) {
-	const void *removed = ptable_remove(tab, key);
-	if (removed) {
+	const void *old = ptable_remove(tab, key);
+	if (old) {
 		if (tab->params.free_val) {
-			tab->params.free_val(removed);
+			tab->params.free_val(old);
 		} else {
-			free((void*)removed);
+			free((void*)old);
 		}
 		return true;
 	} else {
