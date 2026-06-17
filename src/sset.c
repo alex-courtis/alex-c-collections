@@ -55,7 +55,7 @@ const struct SSet *sset_clone(const struct SSet* const from) {
 	return to;
 }
 
-void sset_free(const struct SSet* const set) {
+void sset_free_vals(const struct SSet* const set) {
 	if (!set)
 		return;
 

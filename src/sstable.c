@@ -62,7 +62,7 @@ const struct SSTable *sstable_clone(const struct SSTable* const from) {
 	return to;
 }
 
-void sstable_free(const struct SSTable* const tab) {
+void sstable_free_vals(const struct SSTable* const tab) {
 	if (!tab)
 		return;
 

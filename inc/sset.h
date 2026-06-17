@@ -45,7 +45,7 @@ const struct SSet *sset_init_with(const struct SSetParams params);
 const struct SSet *sset_clone(const struct SSet* const from);
 
 // free set and vals
-void sset_free(const struct SSet* const set);
+void sset_free_vals(const struct SSet* const set);
 
 // free iter
 void sset_iter_free(const struct SSetIter* const iter);

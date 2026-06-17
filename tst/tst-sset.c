@@ -51,7 +51,7 @@ static void sset_add__alloc_val_free_val(void **state) {
 
 	assert_true(sset_contains(set, "a"));
 
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_add_contains_remove__case_sensitive(void **state) {
@@ -69,7 +69,7 @@ static void sset_add_contains_remove__case_sensitive(void **state) {
 	assert_false(sset_remove(set, "b"));
 	assert_true(sset_remove(set, "B"));
 
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_add_contains_remove__case_insensitive(void **state) {
@@ -86,7 +86,7 @@ static void sset_add_contains_remove__case_insensitive(void **state) {
 
 	assert_true(sset_remove(set, "b"));
 
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_iter__(void **state) {
@@ -106,7 +106,7 @@ static void sset_iter__(void **state) {
 
 	sset_iter_free(iter);
 
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_iter__state_deleted(void **state) {
@@ -125,7 +125,7 @@ static void sset_iter__state_deleted(void **state) {
 
 	pset_iter_free(st->pit);
 	free((void*)st);
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_iter__state_set_deleted(void **state) {
@@ -143,7 +143,7 @@ static void sset_iter__state_set_deleted(void **state) {
 	assert_nul(iter);
 
 	pset_iter_free(piter);
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_iter__empty(void **state) {
@@ -154,7 +154,7 @@ static void sset_iter__empty(void **state) {
 
 	assert_nul(iter);
 
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
@@ -179,7 +179,7 @@ static void sset_filter_iter__(void **state) {
 
 	assert_nul(sset_iter_next(iter));
 
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_equal__case_sensitive(void **state) {
@@ -201,8 +201,8 @@ static void sset_equal__case_sensitive(void **state) {
 
 	assert_sset_not_equal(actual, expected);
 
-	sset_free(actual);
-	sset_free(expected);
+	sset_free_vals(actual);
+	sset_free_vals(expected);
 }
 
 static void sset_equal__case_insensitive(void **state) {
@@ -218,8 +218,8 @@ static void sset_equal__case_insensitive(void **state) {
 
 	assert_sset_equal(actual, expected);
 
-	sset_free(actual);
-	sset_free(expected);
+	sset_free_vals(actual);
+	sset_free_vals(expected);
 }
 
 static void sset_str__(void **state) {
@@ -234,7 +234,7 @@ static void sset_str__(void **state) {
 	assert_str_equal(actual, "a\nb\nc\n");
 
 	free(actual);
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 static void sset_sort__empty(void **state) {
@@ -248,8 +248,8 @@ static void sset_sort__empty(void **state) {
 
 	assert_sset_equal(actual, expected);
 
-	sset_free(actual);
-	sset_free(expected);
+	sset_free_vals(actual);
+	sset_free_vals(expected);
 }
 
 static void sset_sort__one(void **state) {
@@ -264,8 +264,8 @@ static void sset_sort__one(void **state) {
 
 	assert_sset_equal(actual, expected);
 
-	sset_free(actual);
-	sset_free(expected);
+	sset_free_vals(actual);
+	sset_free_vals(expected);
 }
 
 static void sset_sort__many(void **state) {
@@ -286,8 +286,8 @@ static void sset_sort__many(void **state) {
 
 	assert_sset_equal(actual, expected);
 
-	sset_free(actual);
-	sset_free(expected);
+	sset_free_vals(actual);
+	sset_free_vals(expected);
 }
 
 static void sset_sort__words(void **state) {
@@ -309,8 +309,8 @@ static void sset_sort__words(void **state) {
 
 	assert_sset_equal(actual, expected);
 
-	sset_free(actual);
-	sset_free(expected);
+	sset_free_vals(actual);
+	sset_free_vals(expected);
 }
 
 static void sset_sort__many_case_insensitive(void **state) {
@@ -332,8 +332,8 @@ static void sset_sort__many_case_insensitive(void **state) {
 
 	assert_sset_equal(actual, expected);
 
-	sset_free(actual);
-	sset_free(expected);
+	sset_free_vals(actual);
+	sset_free_vals(expected);
 }
 
 static void sset_slist__(void **state) {
@@ -349,7 +349,7 @@ static void sset_slist__(void **state) {
 	assert_str_equal(slist_at(list, 1), "b");
 
 	slist_free_vals(&list, NULL);
-	sset_free(set);
+	sset_free_vals(set);
 }
 
 // also tests constructor
@@ -381,13 +381,13 @@ static void sset_clone__(void **state) {
 	assert_true(sset_contains(to, "b"));
 	assert_int_equal(sset_size(to), 2);
 
-	sset_free(from);
-	sset_free(to);
+	sset_free_vals(from);
+	sset_free_vals(to);
 }
 
 static void sset__null_inputs(void **state) {
 	assert_nul(sset_clone(NULL));
-	sset_free(NULL);
+	sset_free_vals(NULL);
 	sset_iter_free(NULL);
 	assert_false(sset_contains(NULL, NULL));
 	assert_nul(sset_iter(NULL));

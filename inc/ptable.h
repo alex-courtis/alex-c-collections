@@ -24,8 +24,6 @@ struct PTableIter {
 	struct PTableIterState *st;
 };
 
-// TODO consider fn_str
-// TODO consider fn_free val
 // TODO consider fn_alloc val for clone
 
 /*

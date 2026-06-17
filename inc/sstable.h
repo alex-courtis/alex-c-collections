@@ -6,6 +6,9 @@
 
 #include "fn.h"
 
+// TODO STableS
+// TODO SMapS
+
 /*
  * `STable` with string vals.
  * Values are strdup'd on successful `sstable_put`, `sstable_clone` and `sstable_vals_slist`
@@ -47,7 +50,7 @@ const struct SSTable *sstable_init_with(const struct SSTableParams params);
 const struct SSTable *sstable_clone(const struct SSTable* const from);
 
 // free table keys and values
-void sstable_free(const struct SSTable* const tab);
+void sstable_free_vals(const struct SSTable* const tab);
 
 // free iter
 void sstable_iter_free(const struct SSTableIter* const iter);

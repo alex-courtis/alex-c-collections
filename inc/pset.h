@@ -23,8 +23,6 @@ struct PSetIter {
 	struct PSetIterState *st;
 };
 
-// TODO consider using free_val for all _free functions
-
 /*
  * Optional constructor params (default)
  */

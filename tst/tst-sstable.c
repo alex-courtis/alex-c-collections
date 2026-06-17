@@ -51,7 +51,7 @@ static void sstable_put_get_remove__case_sensitive(void **state) {
 
 	assert_nul(sstable_get(tab, "b"));
 
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static void sstable_put_get_remove__case_insensitive(void **state) {
@@ -69,7 +69,7 @@ static void sstable_put_get_remove__case_insensitive(void **state) {
 
 	assert_nul(sstable_get(tab, "b"));
 
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static void sstable_iter__(void **state) {
@@ -92,7 +92,7 @@ static void sstable_iter__(void **state) {
 
 	sstable_iter_free(iter);
 
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static void sstable_iter__state_deleted(void **state) {
@@ -111,7 +111,7 @@ static void sstable_iter__state_deleted(void **state) {
 
 	ptable_iter_free(st->pit);
 	free((void*)st);
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static void sstable_iter__state_ptab_deleted(void **state) {
@@ -129,7 +129,7 @@ static void sstable_iter__state_ptab_deleted(void **state) {
 	assert_nul(iter);
 
 	ptable_iter_free(piter);
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static void sstable_iter__empty(void **state) {
@@ -140,7 +140,7 @@ static void sstable_iter__empty(void **state) {
 
 	assert_nul(iter);
 
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
@@ -178,7 +178,7 @@ static void sstable_filter_iter__(void **state) {
 
 	assert_nul(sstable_iter_next(iter));
 
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static void sstable_equal__case_sensitive(void **state) {
@@ -199,8 +199,8 @@ static void sstable_equal__case_sensitive(void **state) {
 
 	assert_sstable_not_equal(actual, expected);
 
-	sstable_free(actual);
-	sstable_free(expected);
+	sstable_free_vals(actual);
+	sstable_free_vals(expected);
 }
 
 static void sstable_equal__case_insensitive_key(void **state) {
@@ -217,8 +217,8 @@ static void sstable_equal__case_insensitive_key(void **state) {
 
 	assert_sstable_equal(actual, expected);
 
-	sstable_free(actual);
-	sstable_free(expected);
+	sstable_free_vals(actual);
+	sstable_free_vals(expected);
 }
 
 static void sstable_equal__case_insensitive_val(void **state) {
@@ -235,8 +235,8 @@ static void sstable_equal__case_insensitive_val(void **state) {
 
 	assert_sstable_equal(actual, expected);
 
-	sstable_free(actual);
-	sstable_free(expected);
+	sstable_free_vals(actual);
+	sstable_free_vals(expected);
 }
 
 static void sstable_str__(void **state) {
@@ -258,7 +258,7 @@ static void sstable_str__(void **state) {
 
 	free(actual);
 	free(expected);
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 static void sstable_keys_slist__many(void **state) {
@@ -273,7 +273,7 @@ static void sstable_keys_slist__many(void **state) {
 	assert_str_equal(slist_at(list, 0), "a");
 	assert_str_equal(slist_at(list, 1), "b");
 
-	sstable_free(tab);
+	sstable_free_vals(tab);
 	slist_free_vals(&list, NULL);
 }
 
@@ -292,7 +292,7 @@ static void sstable_vals_slist__many(void **state) {
 	assert_str_equal(slist_at(list, 2), "cc");
 
 	slist_free(&list);
-	sstable_free(tab);
+	sstable_free_vals(tab);
 }
 
 // also tests constructor
@@ -323,13 +323,13 @@ static void sstable_clone__(void **state) {
 	assert_ptr_equal(to->params.initial, 99);
 	assert_ptr_equal(to->params.grow, 1);
 
-	sstable_free(from);
-	sstable_free(to);
+	sstable_free_vals(from);
+	sstable_free_vals(to);
 }
 
 static void sstable__null_inputs(void **state) {
 	assert_nul(sstable_clone(NULL));
-	sstable_free(NULL);
+	sstable_free_vals(NULL);
 	sstable_iter_free(NULL);
 	assert_false(sstable_get(NULL, NULL));
 	assert_nul(sstable_iter(NULL));
