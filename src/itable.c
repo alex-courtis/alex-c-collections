@@ -196,6 +196,10 @@ const void *itable_remove(const struct ITable* const tab, const size_t key) {
 	return tab ? ptable_remove(tab->ptab, &key) : NULL;
 }
 
+bool itable_remove_free(const struct ITable* const tab, const size_t key) {
+	return tab ? ptable_remove_free(tab->ptab, &key) : false;
+}
+
 bool itable_equal(const struct ITable* const a, const struct ITable* const b) {
 	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }

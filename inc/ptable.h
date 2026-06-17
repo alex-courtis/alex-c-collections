@@ -92,8 +92,11 @@ const void *ptable_put(const struct PTable* const tab, const void* const key, co
 // set key/val, free old val, return true if overwritten
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val);
 
-// remove key, return old val if present
+// remove key/val, return old val if present
 const void *ptable_remove(const struct PTable* const tab, const void* const key);
+
+// remove key/val, if removed free val and return true
+bool ptable_remove_free(const struct PTable* const tab, const void* const key);
 
 /*
  * Comparison

@@ -275,6 +275,20 @@ static void stable_put_free__(void **state) {
 	stable_free(tab);
 }
 
+static void stable_remove_free__(void **state) {
+	const struct STableParams params = { .free_val = mock_free, };
+	const struct STable *tab = stable_init_with(params);
+
+	assert_nul(stable_put(tab, "a", V0));
+
+	assert_false(stable_remove_free(tab, "b"));
+
+	expect_ptr(mock_free, val, V0);
+	assert_true(stable_remove_free(tab, "a"));
+
+	stable_free(tab);
+}
+
 static void stable_str__(void **state) {
 
 	const struct STable *tab = stable_init();
@@ -398,6 +412,7 @@ static void stable__null_inputs(void **state) {
 	assert_nul(stable_put(NULL, NULL, NULL));
 	assert_false(stable_put_free(NULL, NULL, NULL));
 	assert_nul(stable_remove(NULL, NULL));
+	assert_false(stable_remove_free(NULL, NULL));
 	assert_false(stable_equal(NULL, NULL));
 	assert_nul(stable_keys_slist(NULL));
 	assert_nul(stable_vals_slist(NULL));
@@ -425,6 +440,8 @@ int main(void) {
 		TEST(stable_contains_key__),
 
 		TEST(stable_put_free__),
+
+		TEST(stable_remove_free__),
 
 		TEST(stable_str__),
 

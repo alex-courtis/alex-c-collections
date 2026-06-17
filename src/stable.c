@@ -159,6 +159,10 @@ const void *stable_remove(const struct STable* const tab, const char* const key)
 	return tab ? ptable_remove(tab->ptab, key) : NULL;
 }
 
+bool stable_remove_free(const struct STable* const tab, const char* const key) {
+	return tab ? ptable_remove_free(tab->ptab, key) : false;
+}
+
 bool stable_equal(const struct STable* const a, const struct STable* const b) {
 	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }

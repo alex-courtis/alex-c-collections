@@ -86,8 +86,11 @@ const void *stable_put(const struct STable* const tab, const char* const key, co
 // set key/val, free old val, return true if overwritten
 bool stable_put_free(const struct STable* const tab, const  char* const key, const void* const val);
 
-// remove key, return old val if present
+// remove key/val, return old val if present
 const void *stable_remove(const struct STable* const tab, const char* const key);
+
+// remove key/val, if removed free val and return true
+bool stable_remove_free(const struct STable* const tab, const char* const key);
 
 /*
  * Comparison
