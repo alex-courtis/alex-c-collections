@@ -89,6 +89,9 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);
 // set key/val, return old val if overwritten
 const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val);
 
+// set key/val if not present, return existing val if present
+const void *ptable_put_if_absent(const struct PTable* const tab, const void* const key, const void* const val);
+
 // set key/val, free old val, return true if overwritten
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val);
 

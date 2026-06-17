@@ -265,7 +265,7 @@ static void itable_get__key_removed(void **state) {
 static void itable_put_free__(void **state) {
 	const struct ITable *tab = itable_init();
 
-	char *val = strdup("val");
+	const char *val = strdup("val");
 
 	assert_nul(itable_put(tab, 0, val));
 
@@ -276,10 +276,22 @@ static void itable_put_free__(void **state) {
 	itable_free(tab);
 }
 
+static void itable_put_if_absent__(void **state) {
+	const struct ITable *tab = itable_init();
+
+	assert_nul(itable_put_if_absent(tab, 0, V0));
+	assert_ptr_equal(itable_get(tab, 0), V0);
+
+	const void *existing = itable_put_if_absent(tab, 0, V1);
+	assert_ptr_equal(existing, V0);
+
+	itable_free(tab);
+}
+
 static void itable_remove_free__(void **state) {
 	const struct ITable *tab = itable_init();
 
-	char *val = strdup("val");
+	const char *val = strdup("val");
 
 	assert_nul(itable_put(tab, 0, val));
 
@@ -392,6 +404,7 @@ static void itable__null_inputs(void **state) {
 	assert_nul(itable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(itable_iter_next(NULL));
 	assert_false(itable_put(NULL, 0, NULL));
+	assert_nul(itable_put_if_absent(NULL, 0, NULL));
 	assert_false(itable_put_free(NULL, 0, NULL));
 	assert_nul(itable_remove(NULL, 0));
 	assert_false(itable_remove_free(NULL, 0));
@@ -422,6 +435,8 @@ int main(void) {
 		TEST(itable_get__key_removed),
 
 		TEST(itable_put_free__),
+
+		TEST(itable_put_if_absent__),
 
 		TEST(itable_remove_free__),
 

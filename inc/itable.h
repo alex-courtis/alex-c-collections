@@ -85,6 +85,9 @@ const struct ITableIter *itable_iter_next(const struct ITableIter* const iter);
 // set key/val, return old val if overwritten
 const void *itable_put(const struct ITable* const tab, const size_t key, const void* const val);
 
+// set key/val if not present, return existing val if present
+const void *itable_put_if_absent(const struct ITable* const tab, const size_t key, const void* const val);
+
 // set key/val, free old val, return true if overwritten
 bool itable_put_free(const struct ITable* const tab, const size_t key, const char* const val);
 

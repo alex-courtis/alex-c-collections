@@ -188,6 +188,10 @@ const void *itable_put(const struct ITable* const tab, const size_t key, const v
 	return tab ? ptable_put(tab->ptab, &key, val) : NULL;
 }
 
+const void *itable_put_if_absent(const struct ITable* const tab, const size_t key, const void* const val) {
+	return tab ? ptable_put_if_absent(tab->ptab, &key, val) : NULL;
+}
+
 bool itable_put_free(const struct ITable* const tab, const size_t key, const char* const val) {
 	return tab ? ptable_put_free(tab->ptab, &key, val) : false;
 }

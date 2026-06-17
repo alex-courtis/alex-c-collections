@@ -248,6 +248,18 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	return NULL;
 }
 
+const void *ptable_put_if_absent(const struct PTable* const tab, const void* const key, const void* const val) {
+	if (!tab || !key)
+		return NULL;
+
+	if (ptable_contains_key(tab, key)) {
+		return ptable_get(tab, key);
+	} else {
+		ptable_put(tab, key, val);
+		return NULL;
+	}
+}
+
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val) {
 	const void *replaced = ptable_put(tab, key, val);
 

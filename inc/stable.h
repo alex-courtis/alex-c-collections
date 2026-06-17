@@ -83,6 +83,9 @@ const struct STableIter *stable_iter_next(const struct STableIter* const iter);
 // set key/val, return old val if overwritten
 const void *stable_put(const struct STable* const tab, const char* const key, const void* const val);
 
+// set key/val if not present, return existing val if present
+const void *stable_put_if_absent(const struct STable* const tab, const char* const key, const void* const val);
+
 // set key/val, free old val, return true if overwritten
 bool stable_put_free(const struct STable* const tab, const  char* const key, const void* const val);
 
