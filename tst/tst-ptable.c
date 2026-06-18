@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "fn.h"
 #include "slist.h"

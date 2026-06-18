@@ -244,7 +244,7 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	} else {
 		*k = key;
 	}
-	if (*v && tab->params.alloc_val) {
+	if (tab->params.alloc_val) {
 		*v = val ? tab->params.alloc_val(val) : NULL;
 	} else {
 		*v = val;
