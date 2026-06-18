@@ -223,9 +223,9 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 
 		// overwrite existing values
 		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
-			const void *prev = *v;
+			const void *val_old = *v;
 			*v = val;
-			return prev;
+			return val_old;
 		}
 	}
 
@@ -261,13 +261,13 @@ const void *ptable_put_if_absent(const struct PTable* const tab, const void* con
 }
 
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val) {
-	const void *replaced = ptable_put(tab, key, val);
+	const void *val_old = ptable_put(tab, key, val);
 
-	if (replaced) {
+	if (val_old) {
 		if (tab->params.free_val) {
-			tab->params.free_val(replaced);
+			tab->params.free_val(val_old);
 		} else {
-			free((void*)replaced);
+			free((void*)val_old);
 		}
 		return true;
 	} else {
@@ -290,7 +290,7 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 				tab->params.free_key((void*)*k);
 			}
 			*k = NULL;
-			const void* prev = *v;
+			const void* val_old = *v;
 			*v = NULL;
 			tab->size--;
 
@@ -304,7 +304,7 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 			*mk = NULL;
 			*mv = NULL;
 
-			return prev;
+			return val_old;
 		}
 	}
 
@@ -399,9 +399,9 @@ char *ptable_str(const struct PTable* const tab) {
 
 		if (*k) {
 			if (tab->params.str_key) {
-				char *key = tab->params.str_key(*k);
-				out = sprintf_append(out, "%s = ", key);
-				free(key);
+				char *key_old = tab->params.str_key(*k);
+				out = sprintf_append(out, "%s = ", key_old);
+				free(key_old);
 			} else {
 				out = sprintf_append(out, "%p = ", *k);
 			}
@@ -411,9 +411,9 @@ char *ptable_str(const struct PTable* const tab) {
 
 		if (*v) {
 			if (tab->params.str_val) {
-				char *val = tab->params.str_val(*v);
-				out = sprintf_append(out, "%s\n", val);
-				free(val);
+				char *val_old = tab->params.str_val(*v);
+				out = sprintf_append(out, "%s\n", val_old);
+				free(val_old);
 			} else {
 				out = sprintf_append(out, "%p\n", *v);
 			}

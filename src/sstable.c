@@ -139,29 +139,26 @@ const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const iter
 }
 
 bool sstable_put(const struct SSTable* const tab, const char* const key, const char* const val) {
-	if (!tab || !key)
+	if (!tab)
 		return false;
 
-	const char *new = val ? strdup(val) : NULL;
-	const char *old = ptable_put(tab->ptab, key, new);
+	const char *val_new = val ? strdup(val) : NULL;
 
-	if (old) {
-		free((void*)old);
-		return true;
-	} else {
-		return false;
-	}
+	return ptable_put_free(tab->ptab, key, val_new);
 }
 
 const char *sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val) {
-	if (!tab || !key)
+	if (!tab)
 		return NULL;
 
-	if (ptable_contains_key(tab->ptab, key)) {
-		return ptable_get(tab->ptab, key);
+	char *val_new = val ? strdup(val) : NULL;
+
+	const char *val_old = ptable_put_if_absent(tab->ptab, key, val_new);
+
+	if (val_old) {
+		free(val_new);
+		return val_old;
 	} else {
-		const char *new = val ? strdup(val) : NULL;
-		ptable_put(tab->ptab, key, new);
 		return NULL;
 	}
 }

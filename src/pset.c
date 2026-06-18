@@ -212,7 +212,7 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
-			const void *removed = *v;
+			const void *val_old = *v;
 
 			*v = NULL;
 			set->size--;
@@ -224,7 +224,7 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 			}
 			*m = NULL;
 
-			return removed;
+			return val_old;
 		}
 	}
 
