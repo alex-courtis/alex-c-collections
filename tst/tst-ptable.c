@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "fn.h"
 #include "slist.h"
@@ -377,6 +378,27 @@ static void ptable_put_free__free_val(void **state) {
 
 	expect_ptr(mock_free, val, V0);
 	assert_true(ptable_put_free(tab, K0, V0));
+
+	ptable_free(tab);
+}
+
+static void ptable_put__alloc_val(void **state) {
+	const struct PTableParams params = { .alloc_val = mock_alloc, };
+	const struct PTable *tab = ptable_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	assert_nul(ptable_put(tab, K1, NULL));
+
+	expect_ptr(mock_alloc, val, V1);
+	will_return_ptr_type(mock_alloc, V1, void*);
+
+	assert_ptr_equal(ptable_put(tab, K0, V1), V0);
+
+	assert_ptr_equal(ptable_put(tab, K0, NULL), V1);
 
 	ptable_free(tab);
 }
@@ -966,6 +988,29 @@ static void ptable_vals_slist__alloc_key(void **state) {
 	ptable_free(tab);
 }
 
+static void ptable_vals_slist__alloc_val(void **state) {
+	const struct PTableParams params = { .alloc_val = mock_alloc, };
+	const struct PTable *tab = ptable_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	assert_nul(ptable_put(tab, K1, NULL));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	struct SList *list = ptable_vals_slist(tab);
+
+	assert_ptr_equal(slist_at(list, 0), V0);
+	assert_ptr_equal(slist_at(list, 1), NULL);
+
+	slist_free(&list);
+	ptable_free(tab);
+}
+
 static void ptable_vals_slist__empty(void **state) {
 	const struct PTable *tab = ptable_init();
 
@@ -1141,6 +1186,8 @@ int main(void) {
 		TEST(ptable_put_free__free),
 		TEST(ptable_put_free__free_val),
 
+		TEST(ptable_put__alloc_val),
+
 		TEST(ptable_put_if_absent__),
 
 		TEST(ptable_iter__empty),
@@ -1178,6 +1225,7 @@ int main(void) {
 		TEST(ptable_keys_slist__empty),
 		TEST(ptable_keys_slist__many),
 		TEST(ptable_vals_slist__alloc_key),
+		TEST(ptable_vals_slist__alloc_val),
 
 		TEST(ptable_vals_slist__empty),
 		TEST(ptable_vals_slist__many),

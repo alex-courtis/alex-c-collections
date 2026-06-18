@@ -10,9 +10,8 @@
 // TODO SMapS
 
 /*
- * `STable` with string vals.
- * Values are strdup'd on successful `sstable_put`, `sstable_clone` and `sstable_vals_slist`
- * Values are free'd on `sset_free`
+ * `PTable` with string keys and vals.
+ * Keys and values are memory managed.
  */
 struct SSTable; // IWYU pragma: keep
 
@@ -79,13 +78,13 @@ const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const iter
  */
 
 // set key/val, return true if overwritten
-bool sstable_put(const struct SSTable* const tab, const char* const key, const char* const val);
+bool sstable_put_free(const struct SSTable* const tab, const char* const key, const char* const val);
 
-// set key/val if not present, return existing val if present
-const char *sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val);
+// set key/val if not present, return true if overwritten
+bool sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val);
 
 // remove key, return true if removed
-bool sstable_remove(const struct SSTable* const tab, const char* const key);
+bool sstable_remove_free(const struct SSTable* const tab, const char* const key);
 
 /*
  * Comparison

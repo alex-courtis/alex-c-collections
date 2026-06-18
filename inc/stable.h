@@ -8,8 +8,7 @@
 
 /*
  * `PTable` with string keys.
- * Keys are strdup'd on successful `stable_put`, `stable_clone` and `stable_keys_slist`
- * Keys are free'd on `stable_free`
+ * Keys are memory managed.
  */
 struct STable; // IWYU pragma: keep
 

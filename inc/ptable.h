@@ -33,6 +33,7 @@ struct PTableParams {
 	const fn_equal equal_key;   // _get, _contains_key, _put, _equal, _clone (compare key pointers)
 	const fn_equal equal_val;   // _equal                                    (compare val pointers)
 	const fn_alloc alloc_key;   // _clone, _put, must be idempotent          (use key pointer)
+	const fn_alloc alloc_val;   // _put, _vals_slist                         (use key pointer)
 	const fn_free free_key;     // _remove, _free, _free_vals                (NOP)
 	const fn_free free_val;     // _put_free, _free_vals                     (free)
 	const fn_str str_key;       // _str                                      (%p)
@@ -50,6 +51,8 @@ const struct PTable *ptable_init(void);
 
 // construct a table with params
 const struct PTable *ptable_init_with(const struct PTableParams params);
+
+// TODO shallow and deep, using alloc_val
 
 // clone a table, NULL clone_val for shallow clone
 const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val);
@@ -111,6 +114,8 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b);
 /*
  * Conversion
  */
+
+// TODO shallow and deep
 
 // ordered key pointers, caller frees list only
 struct SList *ptable_keys_slist(const struct PTable* const tab);

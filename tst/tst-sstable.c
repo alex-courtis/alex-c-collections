@@ -31,14 +31,14 @@ struct SSTableIterState {
 	const struct PTableIter *pit;
 };
 
-static void sstable_put_get_remove__case_sensitive(void **state) {
+static void sstable_put_free_get_remove_free__case_sensitive(void **state) {
 
 	const struct SSTable *tab = sstable_init();
-	assert_false(sstable_put(tab, "a", "A"));
-	assert_false(sstable_put(tab, "b", "B"));
-	assert_false(sstable_put(tab, "c", "C"));
+	assert_false(sstable_put_free(tab, "a", "A"));
+	assert_false(sstable_put_free(tab, "b", "B"));
+	assert_false(sstable_put_free(tab, "c", "C"));
 
-	assert_true(sstable_put(tab, "c", "duplicate"));
+	assert_true(sstable_put_free(tab, "c", "duplicate"));
 
 	assert_int_equal(sstable_size(tab), 3);
 
@@ -46,26 +46,28 @@ static void sstable_put_get_remove__case_sensitive(void **state) {
 
 	assert_nul(sstable_get(tab, "x"));
 
-	assert_true(sstable_remove(tab, "b"));
-	assert_false(sstable_remove(tab, "b"));
+	assert_true(sstable_remove_free(tab, "b"));
+	assert_false(sstable_remove_free(tab, "b"));
 
 	assert_nul(sstable_get(tab, "b"));
+
+	assert_true(sstable_put_free(tab, "a", NULL));
 
 	sstable_free_vals(tab);
 }
 
-static void sstable_put_get_remove__case_insensitive(void **state) {
+static void sstable_put_free_get_remove_free__case_insensitive(void **state) {
 	const struct SSTableParams params = { .case_insensitive_key = true, };
 	const struct SSTable *tab = sstable_init_with(params);
 
-	assert_false(sstable_put(tab, "A", "aaa"));
-	assert_false(sstable_put(tab, "B", "bbb"));
+	assert_false(sstable_put_free(tab, "A", "aaa"));
+	assert_false(sstable_put_free(tab, "B", "bbb"));
 
 	assert_str_equal(sstable_get(tab, "b"), "bbb");
 
 	assert_nul(sstable_get(tab, "x"));
 
-	assert_true(sstable_remove(tab, "b"));
+	assert_true(sstable_remove_free(tab, "b"));
 
 	assert_nul(sstable_get(tab, "b"));
 
@@ -75,9 +77,9 @@ static void sstable_put_get_remove__case_insensitive(void **state) {
 static void sstable_iter__(void **state) {
 
 	const struct SSTable *tab = sstable_init();
-	assert_false(sstable_put(tab, "a", "aa"));
-	assert_false(sstable_put(tab, "b", NULL));
-	assert_false(sstable_put(tab, "c", "cc"));
+	assert_false(sstable_put_free(tab, "a", "aa"));
+	assert_false(sstable_put_free(tab, "b", NULL));
+	assert_false(sstable_put_free(tab, "c", "cc"));
 
 	const struct SSTableIter *iter = sstable_iter(tab);
 
@@ -98,7 +100,7 @@ static void sstable_iter__(void **state) {
 static void sstable_iter__state_deleted(void **state) {
 	const struct SSTable *tab = sstable_init();
 
-	assert_false(sstable_put(tab, "a", "aa"));
+	assert_false(sstable_put_free(tab, "a", "aa"));
 
 	const struct SSTableIter *iter = sstable_iter(tab);
 	assert_non_nul(iter);
@@ -117,7 +119,7 @@ static void sstable_iter__state_deleted(void **state) {
 static void sstable_iter__state_ptab_deleted(void **state) {
 	const struct SSTable *tab = sstable_init();
 
-	assert_false(sstable_put(tab, "a", "aa"));
+	assert_false(sstable_put_free(tab, "a", "aa"));
 
 	const struct SSTableIter *iter = sstable_iter(tab);
 	assert_non_nul(iter);
@@ -154,12 +156,12 @@ static bool fn_equal_starts_with_b(const void* const a, const void* const b) {
 static void sstable_filter_iter__(void **state) {
 	const struct SSTable *tab = sstable_init();
 
-	assert_false(sstable_put(tab, "a0", "b0"));
-	assert_false(sstable_put(tab, "a1", "x1"));
-	assert_false(sstable_put(tab, "a2", "b2"));
-	assert_false(sstable_put(tab, "x3", "b3"));
-	assert_false(sstable_put(tab, "a4", "b4"));
-	assert_false(sstable_put(tab, "a5", "x5"));
+	assert_false(sstable_put_free(tab, "a0", "b0"));
+	assert_false(sstable_put_free(tab, "a1", "x1"));
+	assert_false(sstable_put_free(tab, "a2", "b2"));
+	assert_false(sstable_put_free(tab, "x3", "b3"));
+	assert_false(sstable_put_free(tab, "a4", "b4"));
+	assert_false(sstable_put_free(tab, "a5", "x5"));
 
 	const struct SSTableIter *iter = sstable_filter_iter(tab, fn_equal_starts_with_a, fn_equal_starts_with_b, NULL);
 	assert_non_nul(iter);
@@ -184,18 +186,18 @@ static void sstable_filter_iter__(void **state) {
 static void sstable_equal__case_sensitive(void **state) {
 
 	const struct SSTable *actual = sstable_init();
-	assert_false(sstable_put(actual, "a", "aa"));
-	assert_false(sstable_put(actual, "b", "aa"));
+	assert_false(sstable_put_free(actual, "a", "aa"));
+	assert_false(sstable_put_free(actual, "b", "aa"));
 
 	assert_sstable_not_equal(actual, NULL);
 
 	const struct SSTable *expected = sstable_init();
-	assert_false(sstable_put(expected, "a", "aa"));
-	assert_false(sstable_put(expected, "b", "aa"));
+	assert_false(sstable_put_free(expected, "a", "aa"));
+	assert_false(sstable_put_free(expected, "b", "aa"));
 
 	assert_sstable_equal(actual, expected);
 
-	assert_false(sstable_put(actual, "c", "cc"));
+	assert_false(sstable_put_free(actual, "c", "cc"));
 
 	assert_sstable_not_equal(actual, expected);
 
@@ -208,12 +210,12 @@ static void sstable_equal__case_insensitive_key(void **state) {
 	const struct SSTableParams params = { .case_insensitive_key = true, };
 	const struct SSTable *actual = sstable_init_with(params);
 
-	assert_false(sstable_put(actual, "a", "aa"));
-	assert_false(sstable_put(actual, "b", "bb"));
+	assert_false(sstable_put_free(actual, "a", "aa"));
+	assert_false(sstable_put_free(actual, "b", "bb"));
 
 	const struct SSTable *expected = sstable_init();
-	assert_false(sstable_put(expected, "A", "aa"));
-	assert_false(sstable_put(expected, "B", "bb"));
+	assert_false(sstable_put_free(expected, "A", "aa"));
+	assert_false(sstable_put_free(expected, "B", "bb"));
 
 	assert_sstable_equal(actual, expected);
 
@@ -226,12 +228,12 @@ static void sstable_equal__case_insensitive_val(void **state) {
 	const struct SSTableParams params = { .case_insensitive_val = true, };
 	const struct SSTable *actual = sstable_init_with(params);
 
-	assert_false(sstable_put(actual, "a", "aa"));
-	assert_false(sstable_put(actual, "b", "bb"));
+	assert_false(sstable_put_free(actual, "a", "aa"));
+	assert_false(sstable_put_free(actual, "b", "bb"));
 
 	const struct SSTable *expected = sstable_init();
-	assert_false(sstable_put(expected, "a", "AA"));
-	assert_false(sstable_put(expected, "b", "BB"));
+	assert_false(sstable_put_free(expected, "a", "AA"));
+	assert_false(sstable_put_free(expected, "b", "BB"));
 
 	assert_sstable_equal(actual, expected);
 
@@ -244,8 +246,8 @@ static void sstable_contains_key__(void **state) {
 
 	assert_false(sstable_contains_key(tab, "a"));
 
-	assert_false(sstable_put(tab, "a", "aa"));
-	assert_false(sstable_put(tab, "b", "bb"));
+	assert_false(sstable_put_free(tab, "a", "aa"));
+	assert_false(sstable_put_free(tab, "b", "bb"));
 
 	assert_true(sstable_contains_key(tab, "a"));
 	assert_true(sstable_contains_key(tab, "b"));
@@ -260,13 +262,12 @@ static void sstable_contains_key__(void **state) {
 static void sstable_put_if_absent__(void **state) {
 	const struct SSTable *tab = sstable_init();
 
-	assert_nul(sstable_put_if_absent(tab, "a", "aa"));
+	assert_false(sstable_put_if_absent(tab, "a", "aa"));
 	assert_str_equal(sstable_get(tab, "a"), "aa");
 
-	const void *existing = sstable_put_if_absent(tab, "a", "xx");
-	assert_str_equal(existing, "aa");
+	assert_true(sstable_put_if_absent(tab, "a", "xx"));
 
-	assert_nul(sstable_put_if_absent(tab, "b", NULL));
+	assert_false(sstable_put_if_absent(tab, "b", NULL));
 	assert_nul(sstable_get(tab, "b"));
 
 	sstable_free_vals(tab);
@@ -275,9 +276,9 @@ static void sstable_put_if_absent__(void **state) {
 static void sstable_str__(void **state) {
 
 	const struct SSTable *tab = sstable_init();
-	assert_false(sstable_put(tab, "a", "aa"));
-	assert_false(sstable_put(tab, "b", NULL));
-	assert_false(sstable_put(tab, "c", "cc"));
+	assert_false(sstable_put_free(tab, "a", "aa"));
+	assert_false(sstable_put_free(tab, "b", NULL));
+	assert_false(sstable_put_free(tab, "c", "cc"));
 
 	char *expected = sprintf_alloc(
 			"a = aa\n"
@@ -297,8 +298,8 @@ static void sstable_str__(void **state) {
 static void sstable_keys_slist__many(void **state) {
 	const struct SSTable *tab = sstable_init();
 
-	sstable_put(tab, "a", "aa");
-	sstable_put(tab, "b", "bb");
+	sstable_put_free(tab, "a", "aa");
+	sstable_put_free(tab, "b", "bb");
 
 	struct SList *list = sstable_keys_slist(tab);
 
@@ -313,9 +314,9 @@ static void sstable_keys_slist__many(void **state) {
 static void sstable_vals_slist__many(void **state) {
 	const struct SSTable *tab = sstable_init();
 
-	sstable_put(tab, "a", "aa");
-	sstable_put(tab, "b", NULL);
-	sstable_put(tab, "c", "cc");
+	sstable_put_free(tab, "a", "aa");
+	sstable_put_free(tab, "b", NULL);
+	sstable_put_free(tab, "c", "cc");
 
 	struct SList *list = sstable_vals_slist(tab);
 
@@ -324,7 +325,7 @@ static void sstable_vals_slist__many(void **state) {
 	assert_nul(slist_at(list, 1));
 	assert_str_equal(slist_at(list, 2), "cc");
 
-	slist_free(&list);
+	slist_free_vals(&list, NULL);
 	sstable_free_vals(tab);
 }
 
@@ -371,11 +372,11 @@ static void sstable__null_inputs(void **state) {
 	assert_nul(sstable_iter(NULL));
 	assert_nul(sstable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(sstable_iter_next(NULL));
-	assert_false(sstable_put(NULL, NULL, NULL));
-	assert_false(sstable_put(tab, NULL, NULL));
+	assert_false(sstable_put_free(NULL, NULL, NULL));
+	assert_false(sstable_put_free(tab, NULL, NULL));
 	assert_false(sstable_put_if_absent(NULL, NULL, NULL));
 	assert_false(sstable_put_if_absent(tab, NULL, NULL));
-	assert_false(sstable_remove(NULL, NULL));
+	assert_false(sstable_remove_free(NULL, NULL));
 	assert_false(sstable_equal(NULL, NULL));
 	assert_nul(sstable_keys_slist(NULL));
 	assert_nul(sstable_vals_slist(NULL));
@@ -387,8 +388,8 @@ static void sstable__null_inputs(void **state) {
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
-		TEST(sstable_put_get_remove__case_sensitive),
-		TEST(sstable_put_get_remove__case_insensitive),
+		TEST(sstable_put_free_get_remove_free__case_sensitive),
+		TEST(sstable_put_free_get_remove_free__case_insensitive),
 
 		TEST(sstable_iter__),
 		TEST(sstable_iter__empty),

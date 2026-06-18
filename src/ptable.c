@@ -86,10 +86,8 @@ void ptable_free(const struct PTable* const tab) {
 		return;
 
 	if (tab->params.free_key) {
-		for (const void **k = tab->keys; k < tab->keys + tab->capacity; k++) {
-			if (*k) {
-				tab->params.free_key(*k);
-			}
+		for (const void **k = tab->keys; k < tab->keys + tab->size; k++) {
+			tab->params.free_key(*k);
 		}
 	}
 
@@ -103,7 +101,7 @@ void ptable_free_vals(const struct PTable* const tab) {
 	if (!tab)
 		return;
 
-	for (const void **v = tab->vals; v < tab->vals + tab->capacity; v++) {
+	for (const void **v = tab->vals; v < tab->vals + tab->size; v++) {
 		if (*v) {
 			if (tab->params.free_val) {
 				tab->params.free_val(*v);
@@ -224,7 +222,11 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 		// overwrite existing values
 		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			const void *val_old = *v;
-			*v = val;
+			if (tab->params.alloc_val) {
+				*v = val ? tab->params.alloc_val(val) : NULL;
+			} else {
+				*v = val;
+			}
 			return val_old;
 		}
 	}
@@ -242,7 +244,12 @@ const void *ptable_put(const struct PTable* const ctab, const void* const key, c
 	} else {
 		*k = key;
 	}
-	*v = val;
+	if (*v && tab->params.alloc_val) {
+		*v = val ? tab->params.alloc_val(val) : NULL;
+	} else {
+		*v = val;
+	}
+
 	tab->size++;
 
 	return NULL;
@@ -381,7 +388,11 @@ struct SList *ptable_vals_slist(const struct PTable* const tab) {
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		slist_append(&list, (void*)*v);
+		if (tab->params.alloc_val) {
+			slist_append(&list, *v ? (void*)tab->params.alloc_val(*v) : NULL);
+		} else {
+			slist_append(&list, (void*)*v);
+		}
 	}
 
 	return list;

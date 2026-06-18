@@ -36,6 +36,7 @@ const struct SSTable *sstable_init_with(const struct SSTableParams params) {
 		.equal_key = params.case_insensitive_key ? fn_equal_strcasecmp : fn_equal_strcmp,
 		.equal_val = params.case_insensitive_val ? fn_equal_strcasecmp : fn_equal_strcmp,
 		.alloc_key = (fn_alloc)strdup,
+		.alloc_val = (fn_alloc)strdup,
 		.free_key = (fn_free)free,
 		.free_val = (fn_free)free,
 		.str_key = fn_str_or_null,
@@ -138,43 +139,23 @@ const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const iter
 	return it;
 }
 
-bool sstable_put(const struct SSTable* const tab, const char* const key, const char* const val) {
-	if (!tab)
-		return false;
-
-	const char *val_new = val ? strdup(val) : NULL;
-
-	return ptable_put_free(tab->ptab, key, val_new);
+bool sstable_put_free(const struct SSTable* const tab, const char* const key, const char* const val) {
+	return tab ? ptable_put_free(tab->ptab, key, val): false;
 }
 
-const char *sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val) {
+bool sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val) {
 	if (!tab)
-		return NULL;
+		return false;
 
-	char *val_new = val ? strdup(val) : NULL;
+	bool present = ptable_contains_key(tab->ptab, key);
 
-	const char *val_old = ptable_put_if_absent(tab->ptab, key, val_new);
+	ptable_put_free(tab->ptab, key, val);
 
-	if (val_old) {
-		free(val_new);
-		return val_old;
-	} else {
-		return NULL;
-	}
+	return present;
 }
 
-bool sstable_remove(const struct SSTable* const tab, const char* const key) {
-	if (!tab)
-		return false;
-
-	const char *old = ptable_remove(tab->ptab, key);
-
-	if (old) {
-		free((void*)old);
-		return true;
-	} else {
-		return false;
-	}
+bool sstable_remove_free(const struct SSTable* const tab, const char* const key) {
+	return tab ? ptable_remove_free(tab->ptab, key) : false;
 }
 
 bool sstable_equal(const struct SSTable* const a, const struct SSTable* const b) {
