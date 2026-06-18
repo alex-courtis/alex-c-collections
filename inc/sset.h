@@ -41,8 +41,8 @@ const struct SSet *sset_init(void);
 // construct a set with params
 const struct SSet *sset_init_with(const struct SSetParams params);
 
-// deep clone
-const struct SSet *sset_clone(const struct SSet* const from);
+// clone a set
+const struct SSet *sset_clone_deep(const struct SSet* const from);
 
 // free set and vals
 void sset_free_vals(const struct SSet* const set);

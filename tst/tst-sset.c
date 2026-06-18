@@ -353,7 +353,7 @@ static void sset_slist__(void **state) {
 }
 
 // also tests constructor
-static void sset_clone__(void **state) {
+static void sset_clone_deep__(void **state) {
 	const struct SSetParams params = {
 		.case_insensitive = true,
 		.initial = 99,
@@ -364,7 +364,7 @@ static void sset_clone__(void **state) {
 	assert_true(sset_add(from, "a"));
 	assert_true(sset_add(from, "b"));
 
-	const struct SSet *to = sset_clone(from);
+	const struct SSet *to = sset_clone_deep(from);
 
 	assert_non_nul(to);
 
@@ -386,7 +386,7 @@ static void sset_clone__(void **state) {
 }
 
 static void sset__null_inputs(void **state) {
-	assert_nul(sset_clone(NULL));
+	assert_nul(sset_clone_deep(NULL));
 	sset_free_vals(NULL);
 	sset_iter_free(NULL);
 	assert_false(sset_contains(NULL, NULL));
@@ -429,7 +429,7 @@ int main(void) {
 
 		TEST(sset_slist__),
 
-		TEST(sset_clone__),
+		TEST(sset_clone_deep__),
 
 		TEST(sset__null_inputs),
 	};

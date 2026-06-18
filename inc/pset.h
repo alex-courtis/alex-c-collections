@@ -45,8 +45,11 @@ const struct PSet *pset_init(void);
 // construct a set with params
 const struct PSet *pset_init_with(const struct PSetParams params);
 
-// clone a table, NULL clone_val for shallow clone
-const struct PSet *pset_clone(const struct PSet* const from, fn_clone clone_val);
+// clone a set, setting val pointers
+const struct PSet *pset_clone_shallow(const struct PSet* const from);
+
+// clone a set, NOP when NULL alloc_val
+const struct PSet *pset_clone_deep(const struct PSet* const from);
 
 // free set
 void pset_free(const struct PSet* const set);
@@ -79,6 +82,8 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
 
 // true if this set did not already contain the specified element
 bool pset_add(const struct PSet* const set, const void* const val);
+
+// TODO remove_free for sset to use
 
 // returns value if removed
 const void *pset_remove(const struct PSet* const set, const void* const val);

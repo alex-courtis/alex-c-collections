@@ -49,6 +49,36 @@ static void grow_pset(struct PSet *set) {
 	set->capacity = new_capacity;
 }
 
+static bool add(const struct PSet* const cset, const void* const val, bool do_alloc_val) {
+	if (!cset || !val)
+		return false;
+
+	struct PSet *set = (struct PSet*)cset;
+
+	const void **v;
+	for (v = set->vals; v < set->vals + set->size; v++) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
+			return false;
+		}
+	}
+
+	// maybe grow for new entry
+	if (set->size >= set->capacity) {
+		grow_pset(set);
+		v = &set->vals[set->size];
+	}
+
+	// new value
+	if (do_alloc_val && set->params.alloc_val) {
+		*v = set->params.alloc_val(val);
+	} else {
+		*v = (void*)val;
+	}
+	set->size++;
+
+	return true;
+}
+
 const struct PSet *pset_init(void) {
 	const struct PSetParams params = { 0 };
 	return pset_init_with(params);
@@ -65,15 +95,27 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	return set;
 }
 
-const struct PSet *pset_clone(const struct PSet* const from, fn_clone clone_val) {
+const struct PSet *pset_clone_shallow(const struct PSet* const from) {
 	if (!from)
 		return NULL;
 
 	const struct PSet *to = pset_init_with(from->params);
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		// TODO don't use clone_val if alloc_val is set
-		pset_add(to, clone_val ? clone_val(*v) : *v);
+		add(to, *v, false);
+	}
+
+	return to;
+}
+
+const struct PSet *pset_clone_deep(const struct PSet* const from) {
+	if (!from)
+		return NULL;
+
+	const struct PSet *to = pset_init_with(from->params);
+
+	for (const void **v = from->vals; v < from->vals + from->size; v++) {
+		add(to, *v, true);
 	}
 
 	return to;
@@ -175,33 +217,7 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
 }
 
 bool pset_add(const struct PSet* const cset, const void* const val) {
-	if (!cset || !val)
-		return false;
-
-	struct PSet *set = (struct PSet*)cset;
-
-	const void **v;
-	for (v = set->vals; v < set->vals + set->size; v++) {
-		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
-			return false;
-		}
-	}
-
-	// maybe grow for new entry
-	if (set->size >= set->capacity) {
-		grow_pset(set);
-		v = &set->vals[set->size];
-	}
-
-	// new value
-	if (set->params.alloc_val) {
-		*v = set->params.alloc_val(val);
-	} else {
-		*v = (void*)val;
-	}
-	set->size++;
-
-	return true;
+	return add(cset, val, true);
 }
 
 const void *pset_remove(const struct PSet* const cset, const void* const val) {

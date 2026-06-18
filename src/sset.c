@@ -44,12 +44,12 @@ const struct SSet *sset_init_with(const struct SSetParams params) {
 	return set;
 }
 
-const struct SSet *sset_clone(const struct SSet* const from) {
+const struct SSet *sset_clone_deep(const struct SSet* const from) {
 	if (!from)
 		return NULL;
 
 	struct SSet *to = calloc(1, sizeof(struct SSet));
-	to->pset = pset_clone(from->pset, NULL);
+	to->pset = pset_clone_deep(from->pset);
 	memcpy((void*)&to->params, &from->params, sizeof(struct SSetParams));
 
 	return to;

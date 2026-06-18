@@ -65,7 +65,7 @@ static void pset_init__defaults(void **state) {
 static void pset_clone__empty(void **state) {
 	const struct PSet *set = pset_init();
 
-	const struct PSet *clone = pset_clone(set, NULL);
+	const struct PSet *clone = pset_clone_shallow(set);
 
 	assert_non_nul(clone);
 
@@ -79,12 +79,13 @@ static void pset_clone__empty(void **state) {
 static void pset_clone__params(void **state) {
 	const struct PSetParams params = {
 		.equal_val = mock_equal,
+		.alloc_val = mock_alloc,
 		.initial = 3,
 		.grow  = 4,
 	};
 	const struct PSet *set = pset_init_with(params);
 
-	const struct PSet *clone = pset_clone(set, mock_clone);
+	const struct PSet *clone = pset_clone_shallow(set);
 
 	assert_non_nul(clone);
 
@@ -103,7 +104,7 @@ static void pset_clone__shallow_many(void **state) {
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	const struct PSet *clone = pset_clone(set, NULL);
+	const struct PSet *clone = pset_clone_shallow(set);
 
 	assert_int_equal(pset_size(clone), 2);
 
@@ -118,17 +119,25 @@ static void pset_clone__shallow_many(void **state) {
 }
 
 static void pset_clone__deep_many(void **state) {
-	const struct PSet *set = pset_init();
+	const struct PSetParams params = { .alloc_val = mock_alloc, };
+	const struct PSet *set = pset_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
 
 	assert_true(pset_add(set, V0));
+
+	expect_ptr(mock_alloc, val, V1);
+	will_return_ptr_type(mock_alloc, V1, void*);
+
 	assert_true(pset_add(set, V1));
 
-	expect_ptr(mock_clone, val, V0);
-	will_return_ptr_type(mock_clone, V2, void*);
-	expect_ptr(mock_clone, val, V1);
-	will_return_ptr_type(mock_clone, V3, void*);
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V2, void*);
+	expect_ptr(mock_alloc, val, V1);
+	will_return_ptr_type(mock_alloc, V3, void*);
 
-	const struct PSet *clone = pset_clone(set, mock_clone);
+	const struct PSet *clone = pset_clone_deep(set);
 
 	assert_int_equal(pset_size(clone), 2);
 
@@ -812,7 +821,8 @@ static void pset_str__str_val(void **state) {
 }
 
 static void pset__null_inputs(void **state) {
-	assert_nul(pset_clone(NULL, NULL));
+	assert_nul(pset_clone_deep(NULL));
+	assert_nul(pset_clone_shallow(NULL));
 	pset_free(NULL);
 	pset_free_vals(NULL);
 	pset_iter_free(NULL);
