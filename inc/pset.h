@@ -83,6 +83,8 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
 // true if this set did not already contain the specified element
 bool pset_add(const struct PSet* const set, const void* const val);
 
+// TODO boolean return only
+
 // remove val, return old val if present
 const void *pset_remove(const struct PSet* const set, const void* const val);
 

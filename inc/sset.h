@@ -74,7 +74,7 @@ const struct SSetIter *sset_iter_next(const struct SSetIter* const iter);
 bool sset_add(const struct SSet* const set, const char* const val);
 
 // true if this set contained the element
-bool sset_remove(const struct SSet* const set, const char* const val);
+bool sset_remove_free(const struct SSet* const set, const char* const val);
 
 // shell sort in place
 void sset_sort(const struct SSet* const set);

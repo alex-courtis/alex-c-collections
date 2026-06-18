@@ -97,10 +97,10 @@ const void *ptable_put_if_absent(const struct PTable* const tab, const void* con
 // set key/val, free old val, return true if overwritten
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val);
 
-// remove key/val, return old val if present
+// remove val, return old val if present
 const void *ptable_remove(const struct PTable* const tab, const void* const key);
 
-// remove key/val, if removed free val and return true
+// remove val, if removed free val and return true
 bool ptable_remove_free(const struct PTable* const tab, const void* const key);
 
 /*

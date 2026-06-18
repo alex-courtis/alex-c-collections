@@ -54,7 +54,7 @@ static void sset_add__alloc_val_free_val(void **state) {
 	sset_free_vals(set);
 }
 
-static void sset_add_contains_remove__case_sensitive(void **state) {
+static void sset_add_contains_remove_free__case_sensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = false, };
 	const struct SSet *set = sset_init_with(params);
 
@@ -66,13 +66,13 @@ static void sset_add_contains_remove__case_sensitive(void **state) {
 	assert_false(sset_contains(set, "b"));
 	assert_true(sset_contains(set, "B"));
 
-	assert_false(sset_remove(set, "b"));
-	assert_true(sset_remove(set, "B"));
+	assert_false(sset_remove_free(set, "b"));
+	assert_true(sset_remove_free(set, "B"));
 
 	sset_free_vals(set);
 }
 
-static void sset_add_contains_remove__case_insensitive(void **state) {
+static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *set = sset_init_with(params);
 
@@ -84,7 +84,7 @@ static void sset_add_contains_remove__case_insensitive(void **state) {
 	assert_true(sset_contains(set, "b"));
 	assert_true(sset_contains(set, "B"));
 
-	assert_true(sset_remove(set, "b"));
+	assert_true(sset_remove_free(set, "b"));
 
 	sset_free_vals(set);
 }
@@ -394,7 +394,7 @@ static void sset__null_inputs(void **state) {
 	assert_nul(sset_filter_iter(NULL, NULL, NULL));
 	assert_nul(sset_iter_next(NULL));
 	assert_false(sset_add(NULL, NULL));
-	assert_false(sset_remove(NULL, NULL));
+	assert_false(sset_remove_free(NULL, NULL));
 	assert_false(sset_equal(NULL, NULL));
 	assert_nul(sset_slist(NULL));
 	assert_nul(sset_str(NULL));
@@ -406,8 +406,8 @@ int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(sset_add__alloc_val_free_val),
 
-		TEST(sset_add_contains_remove__case_insensitive),
-		TEST(sset_add_contains_remove__case_sensitive),
+		TEST(sset_add_contains_remove_free__case_insensitive),
+		TEST(sset_add_contains_remove_free__case_sensitive),
 
 		TEST(sset_iter__),
 		TEST(sset_iter__empty),

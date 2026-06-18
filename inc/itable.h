@@ -95,10 +95,10 @@ const void *itable_put_if_absent(const struct ITable* const tab, const size_t ke
 // set key/val, free old val, return true if overwritten
 bool itable_put_free(const struct ITable* const tab, const size_t key, const char* const val);
 
-// remove key/val, return old val if present
+// remove val, return old val if present
 const void *itable_remove(const struct ITable* const tab, const size_t key);
 
-// remove key/val, if removed free val and return true
+// remove val, if removed free val and return true
 bool itable_remove_free(const struct ITable* const tab, const size_t key);
 
 /*

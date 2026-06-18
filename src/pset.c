@@ -58,6 +58,7 @@ static bool add(const struct PSet* const cset, const void* const val, bool do_al
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
 		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
+			// TODO should this should overwrite as per table?
 			return false;
 		}
 	}

@@ -128,7 +128,7 @@ bool sset_add(const struct SSet* const set, const char* const val) {
 	return set ? pset_add(set->pset, val) : false;
 }
 
-bool sset_remove(const struct SSet* const set, const char* const val) {
+bool sset_remove_free(const struct SSet* const set, const char* const val) {
 	return set ? pset_remove_free(set->pset, val) : false;
 }
 

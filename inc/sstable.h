@@ -83,7 +83,7 @@ bool sstable_put_free(const struct SSTable* const tab, const char* const key, co
 // set key/val if not present, return true if overwritten
 bool sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val);
 
-// remove key, return true if removed
+// remove val, return true if removed
 bool sstable_remove_free(const struct SSTable* const tab, const char* const key);
 
 /*
