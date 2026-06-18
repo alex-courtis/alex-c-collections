@@ -144,14 +144,7 @@ bool sstable_put_free(const struct SSTable* const tab, const char* const key, co
 }
 
 bool sstable_put_if_absent(const struct SSTable* const tab, const char* const key, const char* const val) {
-	if (!tab)
-		return false;
-
-	bool present = ptable_contains_key(tab->ptab, key);
-
-	ptable_put_free(tab->ptab, key, val);
-
-	return present;
+	return tab ? ptable_put_if_absent(tab->ptab, key, val) : false;
 }
 
 bool sstable_remove_free(const struct SSTable* const tab, const char* const key) {
