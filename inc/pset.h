@@ -83,10 +83,11 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
 // true if this set did not already contain the specified element
 bool pset_add(const struct PSet* const set, const void* const val);
 
-// TODO remove_free for sset to use
-
-// returns value if removed
+// remove val, return old val if present
 const void *pset_remove(const struct PSet* const set, const void* const val);
+
+// remove val, if removed free val and return true
+bool pset_remove_free(const struct PSet* const set, const void* const val);
 
 // shell sort in place, NULL less_than_val NOP
 void pset_sort(const struct PSet* const set, fn_less_than less_than_val);

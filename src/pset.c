@@ -79,6 +79,19 @@ static bool add(const struct PSet* const cset, const void* const val, bool do_al
 	return true;
 }
 
+static const struct PSet *clone(const struct PSet* const from, bool deep) {
+	if (!from)
+		return NULL;
+
+	const struct PSet *to = pset_init_with(from->params);
+
+	for (const void **v = from->vals; v < from->vals + from->size; v++) {
+		add(to, *v, deep);
+	}
+
+	return to;
+}
+
 const struct PSet *pset_init(void) {
 	const struct PSetParams params = { 0 };
 	return pset_init_with(params);
@@ -96,29 +109,11 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 }
 
 const struct PSet *pset_clone_shallow(const struct PSet* const from) {
-	if (!from)
-		return NULL;
-
-	const struct PSet *to = pset_init_with(from->params);
-
-	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		add(to, *v, false);
-	}
-
-	return to;
+	return clone(from, false);
 }
 
 const struct PSet *pset_clone_deep(const struct PSet* const from) {
-	if (!from)
-		return NULL;
-
-	const struct PSet *to = pset_init_with(from->params);
-
-	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		add(to, *v, true);
-	}
-
-	return to;
+	return clone(from, true);
 }
 
 void pset_free(const struct PSet * const set) {
@@ -245,6 +240,20 @@ const void *pset_remove(const struct PSet* const cset, const void* const val) {
 	}
 
 	return NULL;
+}
+
+bool pset_remove_free(const struct PSet* const set, const void* const val) {
+	const void *removed = pset_remove(set, val);
+	if (removed) {
+		if (set->params.free_val) {
+			set->params.free_val(removed);
+		} else {
+			free((void*)removed);
+		}
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void pset_sort(const struct PSet* const set, fn_less_than less_than_val) {

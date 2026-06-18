@@ -129,17 +129,7 @@ bool sset_add(const struct SSet* const set, const char* const val) {
 }
 
 bool sset_remove(const struct SSet* const set, const char* const val) {
-	if (!set)
-		return false;
-
-	const char *old = pset_remove(set->pset, val);
-
-	if (old) {
-		free((void*)old);
-		return true;
-	} else {
-		return false;
-	}
+	return set ? pset_remove_free(set->pset, val) : false;
 }
 
 void sset_sort(const struct SSet* const set) {

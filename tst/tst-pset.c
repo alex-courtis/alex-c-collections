@@ -363,6 +363,36 @@ static void pset_remove__equal_val(void **state) {
 	pset_free(set);
 }
 
+static void pset_remove_free__free_val(void **state) {
+	const struct PSetParams params = { .free_val = mock_free, };
+	const struct PSet *set = pset_init_with(params);
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+
+	expect_ptr(mock_free, val, V0);
+
+	assert_true(pset_remove_free(set, V0));
+
+	assert_false(pset_remove_free(set, NULL));
+
+	assert_false(pset_remove_free(set, V2));
+
+	pset_free(set);
+}
+
+static void pset_remove_free__free(void **state) {
+	const struct PSet *set = pset_init();
+
+	const char *val = strdup("0");
+
+	assert_true(pset_add(set, val));
+
+	assert_true(pset_remove_free(set, val));
+
+	pset_free(set);
+}
+
 static void pset_iter__empty(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -861,6 +891,9 @@ int main(void) {
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),
 		TEST(pset_remove__equal_val),
+
+		TEST(pset_remove_free__free_val),
+		TEST(pset_remove_free__free),
 
 		TEST(pset_iter__empty),
 		TEST(pset_iter__free),
