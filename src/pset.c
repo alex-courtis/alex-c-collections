@@ -72,6 +72,7 @@ const struct PSet *pset_clone(const struct PSet* const from, fn_clone clone_val)
 	const struct PSet *to = pset_init_with(from->params);
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
+		// TODO don't use clone_val if alloc_val is set
 		pset_add(to, clone_val ? clone_val(*v) : *v);
 	}
 
