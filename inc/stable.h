@@ -26,12 +26,13 @@ struct STableIter {
  * Optional constructor params (default)
  */
 struct STableParams {
-	const bool case_insensitive; //                            (false)
-	const fn_equal equal_val;    // _get, _put, _equal, _clone (compare key pointers)
-	const fn_free free_val;      // _put_free, _free_vals      (free)
-	const fn_str str_val;        // _str                       (%p)
-	const size_t initial;        // initial capacity           (10)
-	const size_t grow;           // grow capacity by           (10)
+	const bool case_insensitive; //                                (false)
+	const fn_equal equal_val;    // _get, _put, _equal, _clone_    (compare key pointers)
+	const fn_alloc alloc_val;    // _put, _vals_slist, _clone_deep (use key pointer)
+	const fn_free free_val;      // _put_free, _free_vals          (free)
+	const fn_str str_val;        // _str                           (%p)
+	const size_t initial;        // initial capacity               (10)
+	const size_t grow;           // grow capacity by               (10)
 };
 
 /*
@@ -44,8 +45,11 @@ const struct STable *stable_init(void);
 // construct a table with params
 const struct STable *stable_init_with(const struct STableParams params);
 
-// clone a table, NULL clone_val for shallow clone
-const struct STable *stable_clone(const struct STable* const from, fn_clone clone_val);
+// clone a table, setting val pointers
+const struct STable *stable_clone_shallow(const struct STable* const from);
+
+// clone a table, NOP when NULL alloc_val
+const struct STable *stable_clone_deep(const struct STable* const from);
 
 // free table
 void stable_free(const struct STable* const tab);

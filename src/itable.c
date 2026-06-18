@@ -48,6 +48,23 @@ static char *fn_str_key(const void* const val) {
 	return sprintf_alloc("%zu", *(size_t*)val);
 }
 
+static const struct ITable *clone(const struct ITable* const from, bool deep) {
+	if (!from)
+		return NULL;
+
+	struct ITable *to = calloc(1, sizeof(struct ITable));
+
+	if (deep) {
+		to->ptab = ptable_clone_deep(from->ptab);
+	} else {
+		to->ptab = ptable_clone_shallow(from->ptab);
+	}
+
+	memcpy((void*)&to->params, &from->params, sizeof(struct ITableParams));
+
+	return to;
+}
+
 const struct ITable *itable_init(void) {
 	const struct ITableParams params = { 0 };
 	return itable_init_with(params);
@@ -58,6 +75,7 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 		.equal_key = fn_equal_key,
 		.equal_val = params.equal_val,
 		.alloc_key = fn_alloc_key,
+		.alloc_val = params.alloc_val,
 		.free_key = (fn_free)free,
 		.free_val = params.free_val,
 		.str_key = fn_str_key,
@@ -73,15 +91,12 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 	return tab;
 }
 
-const struct ITable *itable_clone(const struct ITable* const from, fn_clone clone_val) {
-	if (!from)
-		return NULL;
+const struct ITable *itable_clone_shallow(const struct ITable* const from) {
+	return clone(from, false);
+}
 
-	struct ITable *to = calloc(1, sizeof(struct ITable));
-	to->ptab = ptable_clone(from->ptab, clone_val);
-	memcpy((void*)&to->params, &from->params, sizeof(struct ITableParams));
-
-	return to;
+const struct ITable *itable_clone_deep(const struct ITable* const from) {
+	return clone(from, true);
 }
 
 void itable_free(const struct ITable* const tab) {

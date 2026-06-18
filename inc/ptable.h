@@ -24,22 +24,20 @@ struct PTableIter {
 	struct PTableIterState *st;
 };
 
-// TODO consider fn_alloc val for clone
-
 /*
  * Optional constructor params (default)
  */
 struct PTableParams {
-	const fn_equal equal_key;   // _get, _contains_key, _put, _equal, _clone (compare key pointers)
-	const fn_equal equal_val;   // _equal                                    (compare val pointers)
-	const fn_alloc alloc_key;   // _clone, _put, must be idempotent          (use key pointer)
-	const fn_alloc alloc_val;   // _put, _vals_slist                         (use key pointer)
-	const fn_free free_key;     // _remove, _free, _free_vals                (NOP)
-	const fn_free free_val;     // _put_free, _free_vals                     (free)
-	const fn_str str_key;       // _str                                      (%p)
-	const fn_str str_val;       // _str                                      (%p)
-	const size_t initial;       // initial capacity                          (10)
-	const size_t grow;          // grow capacity by                          (10)
+	const fn_equal equal_key;   // _get, _contains_key, _put, _equal, _clone_ (compare key pointers)
+	const fn_equal equal_val;   // _equal                                     (compare val pointers)
+	const fn_alloc alloc_key;   // _clone_, _put, must be idempotent          (use key pointer)
+	const fn_alloc alloc_val;   // _put, _vals_slist, _clone_deep             (use key pointer)
+	const fn_free free_key;     // _remove, _free, _free_vals                 (NOP)
+	const fn_free free_val;     // _put_free, _free_vals                      (free)
+	const fn_str str_key;       // _str                                       (%p)
+	const fn_str str_val;       // _str                                       (%p)
+	const size_t initial;       // initial capacity                           (10)
+	const size_t grow;          // grow capacity by                           (10)
 };
 
 /*
@@ -52,10 +50,11 @@ const struct PTable *ptable_init(void);
 // construct a table with params
 const struct PTable *ptable_init_with(const struct PTableParams params);
 
-// TODO shallow and deep, using alloc_val
+// clone a table, setting val pointers
+const struct PTable *ptable_clone_shallow(const struct PTable* const from);
 
-// clone a table, NULL clone_val for shallow clone
-const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val);
+// clone a table, NOP when NULL alloc_val
+const struct PTable *ptable_clone_deep(const struct PTable* const from);
 
 // free table
 void ptable_free(const struct PTable* const tab);

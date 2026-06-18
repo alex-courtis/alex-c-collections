@@ -46,7 +46,7 @@ const struct SSTable *sstable_init(void);
 const struct SSTable *sstable_init_with(const struct SSTableParams params);
 
 // clone a table
-const struct SSTable *sstable_clone(const struct SSTable* const from);
+const struct SSTable *sstable_clone_deep(const struct SSTable* const from);
 
 // free table keys and values
 void sstable_free_vals(const struct SSTable* const tab);

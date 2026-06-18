@@ -49,6 +49,71 @@ static void grow_ptable(struct PTable *tab) {
 	tab->capacity = new_capacity;
 }
 
+static const void *put(const struct PTable* const ctab, const void* const key, const void* const val, const bool do_alloc_val) {
+	if (!ctab || !key)
+		return NULL;
+
+	struct PTable *tab = (struct PTable*)ctab;
+
+	const void **k;
+	const void **v;
+	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
+
+		// overwrite existing values
+		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
+			const void *val_old = *v;
+			if (tab->params.alloc_val) {
+				*v = val ? tab->params.alloc_val(val) : NULL;
+			} else {
+				*v = val;
+			}
+			return val_old;
+		}
+	}
+
+	// grow for new entry
+	if (tab->size >= tab->capacity) {
+		grow_ptable(tab);
+		k = &tab->keys[tab->size];
+		v = &tab->vals[tab->size];
+	}
+
+	// new
+	if (tab->params.alloc_key) {
+		*k = tab->params.alloc_key(key);
+	} else {
+		*k = key;
+	}
+	if (do_alloc_val && tab->params.alloc_val) {
+		*v = val ? tab->params.alloc_val(val) : NULL;
+	} else {
+		*v = val;
+	}
+
+	tab->size++;
+
+	return NULL;
+}
+
+static const struct PTable *clone(const struct PTable* const from, bool deep) {
+	if (!from)
+		return NULL;
+
+	const struct PTable *to =  ptable_init_with(from->params);
+
+	const void **k;
+	const void **v;
+	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
+		if (deep) {
+			put(to, *k, *v, true);
+		} else {
+			put(to, *k, *v, false);
+		}
+	}
+
+	return to;
+}
+
 const struct PTable *ptable_init(void) {
 	const struct PTableParams params = { 0 };
 	return ptable_init_with(params);
@@ -66,19 +131,12 @@ const struct PTable *ptable_init_with(const struct PTableParams params) {
 	return tab;
 }
 
-const struct PTable *ptable_clone(const struct PTable* const from, fn_clone clone_val) {
-	if (!from)
-		return NULL;
+const struct PTable *ptable_clone_shallow(const struct PTable* const from) {
+	return clone(from, false);
+}
 
-	const struct PTable *to =  ptable_init_with(from->params);
-
-	const void **k;
-	const void **v;
-	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
-		ptable_put(to, *k, clone_val ? clone_val(*v) : *v);
-	}
-
-	return to;
+const struct PTable *ptable_clone_deep(const struct PTable* const from) {
+	return clone(from, true);
 }
 
 void ptable_free(const struct PTable* const tab) {
@@ -209,50 +267,9 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
 	return NULL;
 }
 
+
 const void *ptable_put(const struct PTable* const ctab, const void* const key, const void* const val) {
-	if (!ctab || !key)
-		return NULL;
-
-	struct PTable *tab = (struct PTable*)ctab;
-
-	const void **k;
-	const void **v;
-	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-
-		// overwrite existing values
-		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
-			const void *val_old = *v;
-			if (tab->params.alloc_val) {
-				*v = val ? tab->params.alloc_val(val) : NULL;
-			} else {
-				*v = val;
-			}
-			return val_old;
-		}
-	}
-
-	// grow for new entry
-	if (tab->size >= tab->capacity) {
-		grow_ptable(tab);
-		k = &tab->keys[tab->size];
-		v = &tab->vals[tab->size];
-	}
-
-	// new
-	if (tab->params.alloc_key) {
-		*k = tab->params.alloc_key(key);
-	} else {
-		*k = key;
-	}
-	if (tab->params.alloc_val) {
-		*v = val ? tab->params.alloc_val(val) : NULL;
-	} else {
-		*v = val;
-	}
-
-	tab->size++;
-
-	return NULL;
+	return put(ctab, key, val, true);
 }
 
 const void *ptable_put_if_absent(const struct PTable* const tab, const void* const key, const void* const val) {
@@ -262,13 +279,13 @@ const void *ptable_put_if_absent(const struct PTable* const tab, const void* con
 	if (ptable_contains_key(tab, key)) {
 		return ptable_get(tab, key);
 	} else {
-		ptable_put(tab, key, val);
+		put(tab, key, val, true);
 		return NULL;
 	}
 }
 
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val) {
-	const void *val_old = ptable_put(tab, key, val);
+	const void *val_old = put(tab, key, val, true);
 
 	if (val_old) {
 		if (tab->params.free_val) {

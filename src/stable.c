@@ -31,11 +31,29 @@ const struct STable *stable_init(void) {
 	return stable_init_with(params);
 }
 
+static const struct STable *clone(const struct STable* const from, bool deep) {
+	if (!from)
+		return NULL;
+
+	struct STable *to = calloc(1, sizeof(struct STable));
+
+	if (deep) {
+		to->ptab = ptable_clone_deep(from->ptab);
+	} else {
+		to->ptab = ptable_clone_shallow(from->ptab);
+	}
+
+	memcpy((void*)&to->params, &from->params, sizeof(struct STableParams));
+
+	return to;
+}
+
 const struct STable *stable_init_with(const struct STableParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
 		.equal_val = params.equal_val,
 		.alloc_key = (fn_alloc)strdup,
+		.alloc_val = params.alloc_val,
 		.free_key = (fn_free)free,
 		.free_val = params.free_val,
 		.str_key = fn_str_or_null,
@@ -51,15 +69,12 @@ const struct STable *stable_init_with(const struct STableParams params) {
 	return tab;
 }
 
-const struct STable *stable_clone(const struct STable* const from, fn_clone clone_val) {
-	if (!from)
-		return NULL;
+const struct STable *stable_clone_shallow(const struct STable* const from) {
+	return clone(from, false);
+}
 
-	struct STable *to = calloc(1, sizeof(struct STable));
-	to->ptab = ptable_clone(from->ptab, clone_val);
-	memcpy((void*)&to->params, &from->params, sizeof(struct STableParams));
-
-	return to;
+const struct STable *stable_clone_deep(const struct STable* const from) {
+	return clone(from, true);
 }
 
 void stable_free(const struct STable* const tab) {

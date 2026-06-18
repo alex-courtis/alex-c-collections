@@ -52,12 +52,12 @@ const struct SSTable *sstable_init_with(const struct SSTableParams params) {
 	return tab;
 }
 
-const struct SSTable *sstable_clone(const struct SSTable* const from) {
+const struct SSTable *sstable_clone_deep(const struct SSTable* const from) {
 	if (!from)
 		return NULL;
 
 	struct SSTable *to = calloc(1, sizeof(struct SSTable));
-	to->ptab = ptable_clone(from->ptab, (fn_clone)strdup);
+	to->ptab = ptable_clone_deep(from->ptab);
 	memcpy((void*)&to->params, &from->params, sizeof(struct SSTableParams));
 
 	return to;

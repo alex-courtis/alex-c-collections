@@ -34,7 +34,7 @@ struct STableIterState {
 };
 
 /*
-   diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
+   diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/STable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
 
    diff --color=always -U 10000 <(sed -e 's/sstable/xtable/g ; s/SSTable/XTable/g' tst/tst-sstable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
    */
@@ -359,14 +359,14 @@ static void stable_vals_slist__many(void **state) {
 	stable_free(tab);
 }
 
-static void stable_clone__shallow(void **state) {
+static void stable_clone_shallow__many(void **state) {
 	const struct STable *from = stable_init();
 
 	assert_nul(stable_put(from, "a", V0));
 	assert_nul(stable_put(from, "b", NULL));
 	assert_nul(stable_put(from, "c", V2));
 
-	const struct STable *to = stable_clone(from, NULL);
+	const struct STable *to = stable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -379,7 +379,7 @@ static void stable_clone__shallow(void **state) {
 }
 
 // also tests constructor
-static void stable_clone__params(void **state) {
+static void stable_clone_shallow__params(void **state) {
 	const struct STableParams params = {
 		.case_insensitive = true,
 		.equal_val = mock_equal,
@@ -389,7 +389,7 @@ static void stable_clone__params(void **state) {
 	};
 	const struct STable *from = stable_init_with(params);
 
-	const struct STable *to = stable_clone(from, mock_clone);
+	const struct STable *to = stable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -411,8 +411,33 @@ static void stable_clone__params(void **state) {
 	stable_free(to);
 }
 
+static void stable_clone_deep__(void **state) {
+	const struct STableParams params = { .alloc_val = mock_alloc, };
+	const struct STable *from = stable_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(stable_put(from, "a", V0));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct STable *to = stable_clone_deep(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(stable_size(to), 1);
+
+	assert_stable_equal(from, to);
+
+	stable_free(from);
+	stable_free(to);
+}
+
 static void stable__null_inputs(void **state) {
-	assert_nul(stable_clone(NULL, NULL));
+	assert_nul(stable_clone_shallow(NULL));
+	assert_nul(stable_clone_deep(NULL));
 	stable_free(NULL);
 	stable_free_vals(NULL);
 	stable_iter_free(NULL);
@@ -464,8 +489,10 @@ int main(void) {
 
 		TEST(stable_vals_slist__many),
 
-		TEST(stable_clone__shallow),
-		TEST(stable_clone__params),
+		TEST(stable_clone_shallow__many),
+		TEST(stable_clone_shallow__params),
+
+		TEST(stable_clone_deep__),
 
 		TEST(stable__null_inputs),
 	};

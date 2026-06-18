@@ -330,7 +330,7 @@ static void sstable_vals_slist__many(void **state) {
 }
 
 // also tests constructor
-static void sstable_clone__(void **state) {
+static void sstable_clone_deep__(void **state) {
 	const struct SSTableParams params = {
 		.case_insensitive_key = true,
 		.initial = 99,
@@ -338,7 +338,7 @@ static void sstable_clone__(void **state) {
 	};
 	const struct SSTable *from = sstable_init_with(params);
 
-	const struct SSTable *to = sstable_clone(from);
+	const struct SSTable *to = sstable_clone_deep(from);
 
 	assert_non_nul(to);
 
@@ -364,7 +364,7 @@ static void sstable_clone__(void **state) {
 static void sstable__null_inputs(void **state) {
 	const struct SSTable *tab = sstable_init();
 
-	assert_nul(sstable_clone(NULL));
+	assert_nul(sstable_clone_deep(NULL));
 	sstable_free_vals(NULL);
 	sstable_iter_free(NULL);
 	assert_false(sstable_get(NULL, NULL));
@@ -412,7 +412,7 @@ int main(void) {
 
 		TEST(sstable_vals_slist__many),
 
-		TEST(sstable_clone__),
+		TEST(sstable_clone_deep__),
 
 		TEST(sstable__null_inputs),
 	};

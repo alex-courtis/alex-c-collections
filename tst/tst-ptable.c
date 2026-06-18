@@ -69,10 +69,10 @@ static void ptable_init__defaults(void **state) {
 	ptable_free(tab);
 }
 
-static void ptable_clone__empty(void **state) {
+static void ptable_clone_shallow__empty(void **state) {
 	const struct PTable *from = ptable_init();
 
-	const struct PTable *to = ptable_clone(from, NULL);
+	const struct PTable *to = ptable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -83,7 +83,7 @@ static void ptable_clone__empty(void **state) {
 }
 
 // also tests constructor
-static void ptable_clone__params(void **state) {
+static void ptable_clone_shallow__params(void **state) {
 	const struct PTableParams params = {
 		.equal_key = mock_equal,
 		.equal_val = mock_equal,
@@ -94,7 +94,7 @@ static void ptable_clone__params(void **state) {
 	};
 	const struct PTable *from = ptable_init_with(params);
 
-	const struct PTable *to = ptable_clone(from, NULL);
+	const struct PTable *to = ptable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -110,7 +110,7 @@ static void ptable_clone__params(void **state) {
 	ptable_free(to);
 }
 
-static void ptable_clone__shallow_many(void **state) {
+static void ptable_clone_shallow__many(void **state) {
 	const struct PTable *from = ptable_init();
 
 	assert_nul(ptable_put(from, K0, NULL));
@@ -119,7 +119,7 @@ static void ptable_clone__shallow_many(void **state) {
 	assert_nul(ptable_put(from, K3, V3));
 	assert_nul(ptable_put(from, K4, NULL));
 
-	const struct PTable *to = ptable_clone(from, NULL);
+	const struct PTable *to = ptable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -131,34 +131,7 @@ static void ptable_clone__shallow_many(void **state) {
 	ptable_free(to);
 }
 
-static void ptable_clone__deep_many(void **state) {
-	const struct PTable *from = ptable_init();
-
-	assert_nul(ptable_put(from, K0, V0));
-	assert_nul(ptable_put(from, K1, V1));
-
-	expect_ptr(mock_clone, val, V0);
-	will_return_ptr_type(mock_clone, V2, void*);
-
-	expect_ptr(mock_clone, val, V1);
-	will_return_ptr_type(mock_clone, V3, void*);
-
-	const struct PTable *to = ptable_clone(from, mock_clone);
-
-	assert_non_nul(to);
-
-	assert_int_equal(ptable_size(to), 2);
-
-	assert_ptable_not_equal(from, to);
-
-	assert_ptr_equal(ptable_get(to, K0), V2);
-	assert_ptr_equal(ptable_get(to, K1), V3);
-
-	ptable_free(from);
-	ptable_free(to);
-}
-
-static void ptable_clone__alloc_key(void **state) {
+static void ptable_clone_shallow__alloc_key(void **state) {
 	const struct PTableParams params = { .alloc_key = mock_alloc, };
 	const struct PTable *from = ptable_init_with(params);
 
@@ -175,7 +148,7 @@ static void ptable_clone__alloc_key(void **state) {
 	expect_ptr(mock_alloc, val, K1);
 	will_return_ptr_type(mock_alloc, K3, void*);
 
-	const struct PTable *to = ptable_clone(from, NULL);
+	const struct PTable *to = ptable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -185,6 +158,41 @@ static void ptable_clone__alloc_key(void **state) {
 
 	assert_ptr_equal(ptable_get(to, K2), V0);
 	assert_ptr_equal(ptable_get(to, K3), V1);
+
+	ptable_free(from);
+	ptable_free(to);
+}
+
+static void ptable_clone_deep__many(void **state) {
+	const struct PTableParams params = { .alloc_val = mock_alloc, };
+	const struct PTable *from = ptable_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(ptable_put(from, K0, V0));
+
+	expect_ptr(mock_alloc, val, V1);
+	will_return_ptr_type(mock_alloc, V1, void*);
+
+	assert_nul(ptable_put(from, K1, V1));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V2, void*);
+
+	expect_ptr(mock_alloc, val, V1);
+	will_return_ptr_type(mock_alloc, V3, void*);
+
+	const struct PTable *to = ptable_clone_deep(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(ptable_size(to), 2);
+
+	assert_ptable_not_equal(from, to);
+
+	assert_ptr_equal(ptable_get(to, K0), V2);
+	assert_ptr_equal(ptable_get(to, K1), V3);
 
 	ptable_free(from);
 	ptable_free(to);
@@ -1134,7 +1142,8 @@ static void ptable_str__str_key(void **state) {
 static void ptable__null_inputs(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_clone(NULL, NULL));
+	assert_nul(ptable_clone_shallow(NULL));
+	assert_nul(ptable_clone_deep(NULL));
 	ptable_free(NULL);
 	ptable_free_vals(NULL);
 	ptable_iter_free(NULL);
@@ -1166,11 +1175,12 @@ int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(ptable_init__defaults),
 
-		TEST(ptable_clone__empty),
-		TEST(ptable_clone__params),
-		TEST(ptable_clone__shallow_many),
-		TEST(ptable_clone__deep_many),
-		TEST(ptable_clone__alloc_key),
+		TEST(ptable_clone_shallow__empty),
+		TEST(ptable_clone_shallow__params),
+		TEST(ptable_clone_shallow__many),
+		TEST(ptable_clone_shallow__alloc_key),
+
+		TEST(ptable_clone_deep__many),
 
 		TEST(ptable_free_vals__null_free_val),
 		TEST(ptable_free_vals__free_val),

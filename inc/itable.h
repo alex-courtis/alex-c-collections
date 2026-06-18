@@ -25,11 +25,12 @@ struct ITableIter {
  * Optional constructor params (default)
  */
 struct ITableParams {
-	const fn_equal equal_val; // _get, _put, _equal, _clone (compare key pointers)
-	const fn_free free_val;   // _put_free, _free_vals      (free)
-	const fn_str str_val;     // _str                       (%p)
-	const size_t initial;     // initial capacity           (10)
-	const size_t grow;        // grow capacity by           (10)
+	const fn_equal equal_val; // _get, _put, _equal, _clone_    (compare key pointers)
+	const fn_alloc alloc_val; // _put, _vals_slist, _clone_deep (use key pointer)
+	const fn_free free_val;   // _put_free, _free_vals          (free)
+	const fn_str str_val;     // _str                           (%p)
+	const size_t initial;     // initial capacity               (10)
+	const size_t grow;        // grow capacity by               (10)
 };
 
 /*
@@ -47,8 +48,11 @@ const struct ITable *itable_init(void);
 // construct a table with params
 const struct ITable *itable_init_with(const struct ITableParams params);
 
-// clone a table, NULL clone_val for shallow clone
-const struct ITable *itable_clone(const struct ITable* const from, fn_clone clone_val);
+// clone a table, setting val pointers
+const struct ITable *itable_clone_shallow(const struct ITable* const from);
+
+// clone a table, NOP when NULL alloc_val
+const struct ITable *itable_clone_deep(const struct ITable* const from);
 
 // free table
 void itable_free(const struct ITable* const tab);

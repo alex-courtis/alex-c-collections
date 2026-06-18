@@ -344,14 +344,14 @@ static void itable_vals_slist__many(void **state) {
 	itable_free(tab);
 }
 
-static void itable_clone__shallow(void **state) {
+static void itable_clone_shallow__many(void **state) {
 	const struct ITable *from = itable_init();
 
 	assert_nul(itable_put(from, 0, V0));
 	assert_nul(itable_put(from, 1, NULL));
 	assert_nul(itable_put(from, 2, V2));
 
-	const struct ITable *to = itable_clone(from, NULL);
+	const struct ITable *to = itable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -364,7 +364,7 @@ static void itable_clone__shallow(void **state) {
 }
 
 // also tests constructor
-static void itable_clone__params(void **state) {
+static void itable_clone_shallow__params(void **state) {
 	const struct ITableParams params = {
 		.equal_val = mock_equal,
 		.free_val = mock_free,
@@ -373,7 +373,7 @@ static void itable_clone__params(void **state) {
 	};
 	const struct ITable *from = itable_init_with(params);
 
-	const struct ITable *to = itable_clone(from, mock_clone);
+	const struct ITable *to = itable_clone_shallow(from);
 
 	assert_non_nul(to);
 
@@ -393,8 +393,33 @@ static void itable_clone__params(void **state) {
 	itable_free(to);
 }
 
+static void itable_clone_deep__(void **state) {
+	const struct ITableParams params = { .alloc_val = mock_alloc, };
+	const struct ITable *from = itable_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(itable_put(from, 0, V0));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct ITable *to = itable_clone_deep(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(itable_size(to), 1);
+
+	assert_itable_equal(from, to);
+
+	itable_free(from);
+	itable_free(to);
+}
+
 static void itable__null_inputs(void **state) {
-	assert_nul(itable_clone(NULL, NULL));
+	assert_nul(itable_clone_shallow(NULL));
+	assert_nul(itable_clone_deep(NULL));
 	itable_free(NULL);
 	itable_free_vals(NULL);
 	itable_iter_free(NULL);
@@ -444,8 +469,10 @@ int main(void) {
 
 		TEST(itable_vals_slist__many),
 
-		TEST(itable_clone__shallow),
-		TEST(itable_clone__params),
+		TEST(itable_clone_shallow__many),
+		TEST(itable_clone_shallow__params),
+
+		TEST(itable_clone_deep__),
 
 		TEST(itable__null_inputs),
 	};
