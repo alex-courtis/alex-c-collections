@@ -138,28 +138,27 @@ const struct STableIter *stable_filter_iter(const struct STable* const tab, fn_e
 	return it;
 }
 
-const struct STableIter *stable_iter_next(const struct STableIter* const iter) {
-	if (!iter)
+const struct STableIter *stable_iter_next(const struct STableIter* const citer) {
+	if (!citer)
 		return NULL;
 
-	struct STableIter *it = (struct STableIter*)iter;
+	struct STableIter *iter = (struct STableIter*)citer;
 
-	if (!it->st || !it->st->pit) {
-		stable_iter_free(it);
+	if (!iter->st || !iter->st->pit) {
+		stable_iter_free(iter);
 		return NULL;
 	}
 
-	it->st->pit = ptable_iter_next(iter->st->pit);
+	iter->st->pit = ptable_iter_next(citer->st->pit);
 
-	if (it->st->pit) {
-		it->key = it->st->pit->key;
-		it->val = it->st->pit->val;
+	if (iter->st->pit) {
+		iter->key = iter->st->pit->key;
+		iter->val = iter->st->pit->val;
+		return iter;
 	} else {
-		stable_iter_free(it);
-		it = NULL;
+		stable_iter_free(iter);
+		return NULL;
 	}
-
-	return it;
 }
 
 const void *stable_put(const struct STable* const tab, const char* const key, const void* const val) {

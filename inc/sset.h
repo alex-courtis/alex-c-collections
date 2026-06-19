@@ -70,10 +70,10 @@ const struct SSetIter *sset_iter_next(const struct SSetIter* const iter);
  * Mutate
  */
 
-// true if this set did not already contain the specified element
+// add if the set does not contain val, return true if added
 bool sset_add(const struct SSet* const set, const char* const val);
 
-// true if this set contained the element
+// if the set contains val, remove it, free it and return true
 bool sset_remove_free(const struct SSet* const set, const char* const val);
 
 // shell sort in place

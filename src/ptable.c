@@ -231,45 +231,45 @@ const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_e
 	return ptable_iter_next(it);
 }
 
-const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter) {
-	if (!iter)
+const struct PTableIter *ptable_iter_next(const struct PTableIter* const citer) {
+	if (!citer)
 		return NULL;
 
-	struct PTableIter *it = (struct PTableIter*)iter;
-	struct PTableIterState *st = it->st;
+	struct PTableIter *iter = (struct PTableIter*)citer;
+	struct PTableIterState *st = iter->st;
 
-	if (!it->st || !it->st->tab) {
-		ptable_iter_free(it);
+	if (!iter->st || !iter->st->tab) {
+		ptable_iter_free(iter);
 		return NULL;
 	}
 
 	// null key indicates first use, start at the beginning
-	if (it->key) {
+	if (iter->key) {
 		st->position++;
 	}
 
 	for ( ; st->position < st->tab->size; st->position++) {
 
-		it->key = *(st->tab->keys + st->position);
-		it->val = *(st->tab->vals + st->position);
+		iter->key = *(st->tab->keys + st->position);
+		iter->val = *(st->tab->vals + st->position);
 
-		if (st->equal_key && !st->equal_key(it->key, st->data)) {
+		if (st->equal_key && !st->equal_key(iter->key, st->data)) {
 			continue;
 		}
-		if (st->equal_val && !st->equal_val(it->val, st->data)) {
+		if (st->equal_val && !st->equal_val(iter->val, st->data)) {
 			continue;
 		}
 
-		return it;
+		return iter;
 	}
 
-	ptable_iter_free(it);
+	ptable_iter_free(iter);
 	return NULL;
 }
 
 
-const void *ptable_put(const struct PTable* const ctab, const void* const key, const void* const val) {
-	return put(ctab, key, val, true);
+const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val) {
+	return put(tab, key, val, true);
 }
 
 const void *ptable_put_if_absent(const struct PTable* const tab, const void* const key, const void* const val) {

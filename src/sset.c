@@ -101,27 +101,27 @@ const struct SSetIter *sset_filter_iter(const struct SSet* const set, fn_equal e
 	return it;
 }
 
-const struct SSetIter *sset_iter_next(const struct SSetIter* const iter) {
-	if (!iter)
+const struct SSetIter *sset_iter_next(const struct SSetIter* const citer) {
+	if (!citer)
 		return NULL;
 
-	struct SSetIter *it = (struct SSetIter*)iter;
+	struct SSetIter *iter = (struct SSetIter*)citer;
 
-	if (!it->st || !it->st->pit) {
-		sset_iter_free(it);
+	if (!iter->st || !iter->st->pit) {
+		sset_iter_free(iter);
 		return NULL;
 	}
 
-	it->st->pit = pset_iter_next(iter->st->pit);
+	iter->st->pit = pset_iter_next(citer->st->pit);
 
-	if (it->st->pit) {
-		it->val = it->st->pit->val;
+	if (iter->st->pit) {
+		iter->val = iter->st->pit->val;
 	} else {
-		sset_iter_free(it);
-		it = NULL;
+		sset_iter_free(iter);
+		iter = NULL;
 	}
 
-	return it;
+	return iter;
 }
 
 bool sset_add(const struct SSet* const set, const char* const val) {

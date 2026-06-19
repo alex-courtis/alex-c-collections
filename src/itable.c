@@ -175,28 +175,27 @@ const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_e
 	return it;
 }
 
-const struct ITableIter *itable_iter_next(const struct ITableIter* const iter) {
-	if (!iter)
+const struct ITableIter *itable_iter_next(const struct ITableIter* const citer) {
+	if (!citer)
 		return NULL;
 
-	struct ITableIter *it = (struct ITableIter*)iter;
+	struct ITableIter *it = (struct ITableIter*)citer;
 
 	if (!it->st || !it->st->pit) {
 		itable_iter_free(it);
 		return NULL;
 	}
 
-	it->st->pit = ptable_iter_next(iter->st->pit);
+	it->st->pit = ptable_iter_next(citer->st->pit);
 
 	if (it->st->pit) {
 		it->key = *(size_t*)it->st->pit->key;
 		it->val = it->st->pit->val;
+		return it;
 	} else {
 		itable_iter_free(it);
-		it = NULL;
+		return NULL;
 	}
-
-	return it;
 }
 
 const void *itable_put(const struct ITable* const tab, const size_t key, const void* const val) {

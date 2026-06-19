@@ -80,15 +80,15 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
  * Mutate
  */
 
-// true if this set did not already contain the specified element
+// add if the set does not contain val, return true if added
 bool pset_add(const struct PSet* const set, const void* const val);
 
 // TODO boolean return only
 
-// remove val, return old val if present
-const void *pset_remove(const struct PSet* const set, const void* const val);
+// if the set contains val, remove it and return true
+bool pset_remove(const struct PSet* const set, const void* const val);
 
-// remove val, if removed free val and return true
+// if the set contains val, remove it, free it and return true
 bool pset_remove_free(const struct PSet* const set, const void* const val);
 
 // shell sort in place, NULL less_than_val NOP

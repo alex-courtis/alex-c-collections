@@ -115,28 +115,27 @@ const struct SSTableIter *sstable_filter_iter(const struct SSTable* const tab, f
 	return it;
 }
 
-const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const iter) {
-	if (!iter)
+const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const citer) {
+	if (!citer)
 		return NULL;
 
-	struct SSTableIter *it = (struct SSTableIter*)iter;
+	struct SSTableIter *iter = (struct SSTableIter*)citer;
 
-	if (!it->st || !it->st->pit) {
-		sstable_iter_free(it);
+	if (!iter->st || !iter->st->pit) {
+		sstable_iter_free(iter);
 		return NULL;
 	}
 
-	it->st->pit = ptable_iter_next(iter->st->pit);
+	iter->st->pit = ptable_iter_next(citer->st->pit);
 
-	if (it->st->pit) {
-		it->key = it->st->pit->key;
-		it->val = it->st->pit->val;
+	if (iter->st->pit) {
+		iter->key = iter->st->pit->key;
+		iter->val = iter->st->pit->val;
+		return iter;
 	} else {
-		sstable_iter_free(it);
-		it = NULL;
+		sstable_iter_free(iter);
+		return NULL;
 	}
-
-	return it;
 }
 
 bool sstable_put_free(const struct SSTable* const tab, const char* const key, const char* const val) {

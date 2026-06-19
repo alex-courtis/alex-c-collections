@@ -80,6 +80,39 @@ static bool add(const struct PSet* const cset, const void* const val, bool do_al
 	return true;
 }
 
+static bool remove(const struct PSet* const cset, const void* const val, bool do_free) {
+	if (!cset || !val)
+		return false;
+
+	struct PSet *set = (struct PSet*)cset;
+
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
+		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
+			if (do_free) {
+				if (set->params.free_val) {
+					set->params.free_val(*v);
+				} else {
+					free((void*)*v);
+				}
+			}
+
+			*v = NULL;
+			set->size--;
+
+			// shift down over removed
+			const void **m;
+			for (m = v; m < v + set->size; m++) {
+				*m = *(m + 1);
+			}
+			*m = NULL;
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
 static const struct PSet *clone(const struct PSet* const from, bool deep) {
 	if (!from)
 		return NULL;
@@ -181,80 +214,47 @@ const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_equal e
 	return pset_iter_next(it);
 }
 
-const struct PSetIter *pset_iter_next(const struct PSetIter* const iter) {
-	if (!iter)
+const struct PSetIter *pset_iter_next(const struct PSetIter* const citer) {
+	if (!citer)
 		return NULL;
 
-	struct PSetIter *it = (struct PSetIter*)iter;
-	struct PSetIterState *st = it->st;
+	struct PSetIter *iter = (struct PSetIter*)citer;
+	struct PSetIterState *st = iter->st;
 	if (!st || !st->set) {
-		pset_iter_free(it);
+		pset_iter_free(iter);
 		return NULL;
 	}
 
 	// null val indicates first use, start at the beginning
-	if (it->val) {
+	if (iter->val) {
 		st->pos++;
 	}
 
 	for ( ; st->pos < st->set->size; st->pos++) {
 
-		it->val = *(st->set->vals + st->pos);
+		iter->val = *(st->set->vals + st->pos);
 
-		if ((st->equal_val && !st->equal_val(it->val, st->data))) {
+		if ((st->equal_val && !st->equal_val(iter->val, st->data))) {
 			continue;
 		}
 
-		return it;
+		return iter;
 	}
 
-	pset_iter_free(it);
+	pset_iter_free(iter);
 	return NULL;
 }
 
-bool pset_add(const struct PSet* const cset, const void* const val) {
-	return add(cset, val, true);
+bool pset_add(const struct PSet* const set, const void* const val) {
+	return add(set, val, true);
 }
 
-const void *pset_remove(const struct PSet* const cset, const void* const val) {
-	if (!cset || !val)
-		return NULL;
-
-	struct PSet *set = (struct PSet*)cset;
-
-	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
-			const void *val_old = *v;
-
-			*v = NULL;
-			set->size--;
-
-			// shift down over removed
-			const void **m;
-			for (m = v; m < v + set->size; m++) {
-				*m = *(m + 1);
-			}
-			*m = NULL;
-
-			return val_old;
-		}
-	}
-
-	return NULL;
+bool pset_remove(const struct PSet* const set, const void* const val) {
+	return remove(set, val, false);
 }
 
 bool pset_remove_free(const struct PSet* const set, const void* const val) {
-	const void *removed = pset_remove(set, val);
-	if (removed) {
-		if (set->params.free_val) {
-			set->params.free_val(removed);
-		} else {
-			free((void*)removed);
-		}
-		return true;
-	} else {
-		return false;
-	}
+	return remove(set, val, true);
 }
 
 void pset_sort(const struct PSet* const set, fn_less_than less_than_val) {
