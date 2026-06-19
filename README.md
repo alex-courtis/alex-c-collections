@@ -38,7 +38,7 @@ Not thread safe.
 * `PTable` with string keys.
 * Keys are memory managed.
 
-### SSTable
+### SMapS
 
 * `PTable` with string keys and vals.
 * Keys and values are memory managed.
