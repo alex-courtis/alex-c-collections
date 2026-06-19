@@ -10,9 +10,9 @@
 /*
    diff --color=always -U 10000 <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' inc/smap.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/smap/xtable/g ; s/SMap/XTable/g ' inc/smap.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/smap/xtable/g ; s/SMap/XTable/g ' inc/smap.h) <(sed -e 's/imap/xtable/g ; s/IMap/XTable/g' inc/imap.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
+   diff --color=always -U 10000 <(sed -e ' s/imap/xtable/g ; s/IMap/XTable/g ' src/imap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
 
    diff --color=always -U 10000 <(sed -e ' s/ssmap/xtable/g ; s/SSMap/XTable/g ' src/ssmap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
    */

@@ -6,24 +6,24 @@
 #include "ptable.h"
 #include "str.h"
 
-#include "itable.h"
+#include "imap.h"
 
 /*
-   diff --color=always -U 10000 <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' inc/itable.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/imap/xtable/g ; s/IMap/XTable/g' inc/imap.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' inc/itable.h) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' inc/smap.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/imap/xtable/g ; s/IMap/XTable/g ' inc/imap.h) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' inc/smap.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/itable/xtable/g ; s/ITable/XTable/g ' src/itable.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
+   diff --color=always -U 10000 <(sed -e ' s/imap/xtable/g ; s/IMap/XTable/g ' src/imap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
 
    diff --color=always -U 10000 <(sed -e ' s/ssmap/xtable/g ; s/SSMap/XTable/g ' src/ssmap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
    */
 
-struct ITable {
-	const struct ITableParams params;
+struct IMap {
+	const struct IMapParams params;
 	const struct PTable *ptab;
 };
 
-struct ITableIterState {
+struct IMapIterState {
 	const struct PTableIter *pit;
 	fn_equal_size_t equal_key;
 	fn_equal equal_val;
@@ -48,7 +48,7 @@ static char *fn_str_key(const void* const val) {
 	return sprintf_alloc("%zu", *(size_t*)val);
 }
 
-static const struct ITable *clone(const struct ITable* const from, bool deep) {
+static const struct IMap *clone(const struct IMap* const from, bool deep) {
 	if (!from)
 		return NULL;
 
@@ -61,21 +61,21 @@ static const struct ITable *clone(const struct ITable* const from, bool deep) {
 	}
 
 	if (ptab) {
-		struct ITable *to = calloc(1, sizeof(struct ITable));
+		struct IMap *to = calloc(1, sizeof(struct IMap));
 		to->ptab = ptab;
-		memcpy((void*)&to->params, &from->params, sizeof(struct ITableParams));
+		memcpy((void*)&to->params, &from->params, sizeof(struct IMapParams));
 		return to;
 	} else {
 		return NULL;
 	}
 }
 
-const struct ITable *itable_init(void) {
-	const struct ITableParams params = { 0 };
-	return itable_init_with(params);
+const struct IMap *imap_init(void) {
+	const struct IMapParams params = { 0 };
+	return imap_init_with(params);
 }
 
-const struct ITable *itable_init_with(const struct ITableParams params) {
+const struct IMap *imap_init_with(const struct IMapParams params) {
 	const struct PTableParams ptable_params = {
 		.equal_key = fn_equal_key,
 		.equal_val = params.equal_val,
@@ -89,22 +89,22 @@ const struct ITable *itable_init_with(const struct ITableParams params) {
 		.grow = params.grow,
 	};
 
-	struct ITable *tab =  calloc(1, sizeof(struct ITable));
+	struct IMap *tab =  calloc(1, sizeof(struct IMap));
 	tab->ptab = ptable_init_with(ptable_params);;
-	memcpy((void*)&tab->params, &params, sizeof(struct ITableParams));
+	memcpy((void*)&tab->params, &params, sizeof(struct IMapParams));
 
 	return tab;
 }
 
-const struct ITable *itable_clone_shallow(const struct ITable* const from) {
+const struct IMap *imap_clone_shallow(const struct IMap* const from) {
 	return clone(from, false);
 }
 
-const struct ITable *itable_clone_deep(const struct ITable* const from) {
+const struct IMap *imap_clone_deep(const struct IMap* const from) {
 	return clone(from, true);
 }
 
-void itable_free(const struct ITable* const tab) {
+void imap_free(const struct IMap* const tab) {
 	if (!tab)
 		return;
 
@@ -113,7 +113,7 @@ void itable_free(const struct ITable* const tab) {
 	free((void*)tab);
 }
 
-void itable_free_vals(const struct ITable* const tab) {
+void imap_free_vals(const struct IMap* const tab) {
 	if (!tab)
 		return;
 
@@ -122,7 +122,7 @@ void itable_free_vals(const struct ITable* const tab) {
 	free((void*)tab);
 }
 
-void itable_iter_free(const struct ITableIter* const iter) {
+void imap_iter_free(const struct IMapIter* const iter) {
 	if (!iter)
 		return;
 
@@ -133,39 +133,39 @@ void itable_iter_free(const struct ITableIter* const iter) {
 	free((void*)iter);
 }
 
-const void *itable_get(const struct ITable* const tab, const size_t key) {
+const void *imap_get(const struct IMap* const tab, const size_t key) {
 	return tab ? ptable_get(tab->ptab, &key) : NULL;
 }
 
-bool itable_contains_key(const struct ITable* const tab, const size_t key) {
+bool imap_contains_key(const struct IMap* const tab, const size_t key) {
 	return tab ? ptable_contains_key(tab->ptab, &key) : false;
 }
 
-const struct ITableIter *itable_iter(const struct ITable* const tab) {
-	return itable_filter_iter(tab, NULL, NULL, NULL);
+const struct IMapIter *imap_iter(const struct IMap* const tab) {
+	return imap_filter_iter(tab, NULL, NULL, NULL);
 }
 
 static bool fn_equal_key_wrapper(const void* const val, const void* const data) {
-	const struct ITableIterState * const st = data;
+	const struct IMapIterState * const st = data;
 	return st->equal_key(*(size_t*)val, st->data);
 }
 
 static bool fn_equal_val_wrapper(const void* const val, const void* const data) {
-	const struct ITableIterState * const st = data;
+	const struct IMapIterState * const st = data;
 	return st->equal_val(val, st->data);
 }
 
-const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_equal_size_t equal_key, fn_equal equal_val, const void* const data) {
+const struct IMapIter *imap_filter_iter(const struct IMap* const tab, fn_equal_size_t equal_key, fn_equal equal_val, const void* const data) {
 	if (!tab)
 		return NULL;
 
-	struct ITableIter *it = calloc(1, sizeof(struct ITableIter));
-	it->st = calloc(1, sizeof(struct ITableIterState));
+	struct IMapIter *it = calloc(1, sizeof(struct IMapIter));
+	it->st = calloc(1, sizeof(struct IMapIterState));
 	it->st->equal_key = equal_key;
 	it->st->equal_val = equal_val;
 	it->st->data = data;
 
-	// pass the ITableIterState as data, to be passed to the test wrappers
+	// pass the IMapIterState as data, to be passed to the test wrappers
 	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, equal_key ? fn_equal_key_wrapper : NULL, equal_val ? fn_equal_val_wrapper : NULL, it->st);
 
 	if (pit) {
@@ -173,21 +173,21 @@ const struct ITableIter *itable_filter_iter(const struct ITable* const tab, fn_e
 		it->key = *(size_t*)pit->key;
 		it->val = pit->val;
 	} else {
-		itable_iter_free(it);
+		imap_iter_free(it);
 		it = NULL;
 	}
 
 	return it;
 }
 
-const struct ITableIter *itable_iter_next(const struct ITableIter* const citer) {
+const struct IMapIter *imap_iter_next(const struct IMapIter* const citer) {
 	if (!citer)
 		return NULL;
 
-	struct ITableIter *it = (struct ITableIter*)citer;
+	struct IMapIter *it = (struct IMapIter*)citer;
 
 	if (!it->st) {
-		itable_iter_free(it);
+		imap_iter_free(it);
 		return NULL;
 	}
 
@@ -198,47 +198,47 @@ const struct ITableIter *itable_iter_next(const struct ITableIter* const citer) 
 		it->val = it->st->pit->val;
 		return it;
 	} else {
-		itable_iter_free(it);
+		imap_iter_free(it);
 		return NULL;
 	}
 }
 
-const void *itable_put(const struct ITable* const tab, const size_t key, const void* const val) {
+const void *imap_put(const struct IMap* const tab, const size_t key, const void* const val) {
 	return tab ? ptable_put(tab->ptab, &key, val) : NULL;
 }
 
-const void *itable_put_if_absent(const struct ITable* const tab, const size_t key, const void* const val) {
+const void *imap_put_if_absent(const struct IMap* const tab, const size_t key, const void* const val) {
 	return tab ? ptable_put_if_absent(tab->ptab, &key, val) : NULL;
 }
 
-bool itable_put_free(const struct ITable* const tab, const size_t key, const char* const val) {
+bool imap_put_free(const struct IMap* const tab, const size_t key, const char* const val) {
 	return tab ? ptable_put_free(tab->ptab, &key, val) : false;
 }
 
-const void *itable_remove(const struct ITable* const tab, const size_t key) {
+const void *imap_remove(const struct IMap* const tab, const size_t key) {
 	return tab ? ptable_remove(tab->ptab, &key) : NULL;
 }
 
-bool itable_remove_free(const struct ITable* const tab, const size_t key) {
+bool imap_remove_free(const struct IMap* const tab, const size_t key) {
 	return tab ? ptable_remove_free(tab->ptab, &key) : false;
 }
 
-bool itable_equal(const struct ITable* const a, const struct ITable* const b) {
+bool imap_equal(const struct IMap* const a, const struct IMap* const b) {
 	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }
 
-struct SList *itable_vals_slist_shallow(const struct ITable* const tab) {
+struct SList *imap_vals_slist_shallow(const struct IMap* const tab) {
 	return tab ? ptable_vals_slist_shallow(tab->ptab) : NULL;
 }
 
-struct SList *itable_vals_slist_deep(const struct ITable* const tab) {
+struct SList *imap_vals_slist_deep(const struct IMap* const tab) {
 	return tab ? ptable_vals_slist_deep(tab->ptab) : NULL;
 }
 
-char *itable_str(const struct ITable* const tab) {
+char *imap_str(const struct IMap* const tab) {
 	return tab ? ptable_str(tab->ptab) : NULL;
 }
 
-size_t itable_size(const struct ITable* const tab) {
+size_t imap_size(const struct IMap* const tab) {
 	return tab ? ptable_size(tab->ptab) : 0;
 }

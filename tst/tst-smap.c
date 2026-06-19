@@ -30,7 +30,7 @@ struct SMap {
 };
 
 /*
-   diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/SMap/XTable/g' tst/tst-itable.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' tst/tst-smap.c) | less
+   diff --color=always -U 10000 <(sed -e 's/imap/xtable/g ; s/SMap/XTable/g' tst/tst-imap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' tst/tst-smap.c) | less
 
    diff --color=always -U 10000 <(sed -e 's/ssmap/xtable/g ; s/SSMap/XTable/g' tst/tst-ssmap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' tst/tst-smap.c) | less
    */

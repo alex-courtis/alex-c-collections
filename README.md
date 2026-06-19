@@ -29,7 +29,7 @@ Not thread safe.
 * Operations linearly traverse keys.
 * NULL values permitted.
 
-### ITable
+### IMap
 
 * `PTable` with `size_t` keys
 
