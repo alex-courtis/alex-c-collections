@@ -31,7 +31,7 @@ struct SSet {
 	const struct PSet *pset;
 };
 
-static void sset_add__alloc_val_free_val(void **state) {
+static void sset_add__clone_val_free_val(void **state) {
 	const struct SSet *set = sset_init();
 
 	char *added = strdup("a");
@@ -383,7 +383,7 @@ static void sset__null_inputs(void **state) {
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
-		TEST(sset_add__alloc_val_free_val),
+		TEST(sset_add__clone_val_free_val),
 
 		TEST(sset_add_contains_remove_free__case_insensitive),
 		TEST(sset_add_contains_remove_free__case_sensitive),

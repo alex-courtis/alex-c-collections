@@ -49,7 +49,7 @@ static void grow(struct PMap *tab) {
 	tab->capacity = new_capacity;
 }
 
-static const void *put(const struct PMap* const ctab, const void* const key, const void* const val, fn_alloc alloc_val) {
+static const void *put(const struct PMap* const ctab, const void* const key, const void* const val, fn_clone clone_val) {
 	if (!key)
 		return NULL;
 
@@ -62,8 +62,8 @@ static const void *put(const struct PMap* const ctab, const void* const key, con
 		// overwrite existing values
 		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			const void *val_old = *v;
-			if (val && alloc_val) {
-				*v = alloc_val(val);
+			if (val && clone_val) {
+				*v = clone_val(val);
 			} else {
 				*v = val;
 			}
@@ -79,13 +79,13 @@ static const void *put(const struct PMap* const ctab, const void* const key, con
 	}
 
 	// new
-	if (tab->params.alloc_key) {
-		*k = tab->params.alloc_key(key);
+	if (tab->params.clone_key) {
+		*k = tab->params.clone_key(key);
 	} else {
 		*k = key;
 	}
-	if (val && alloc_val) {
-		*v = alloc_val(val);
+	if (val && clone_val) {
+		*v = clone_val(val);
 	} else {
 		*v = val;
 	}
@@ -95,25 +95,25 @@ static const void *put(const struct PMap* const ctab, const void* const key, con
 	return NULL;
 }
 
-static const struct PMap *clone(const struct PMap* const from, fn_alloc alloc_val) {
+static const struct PMap *clone(const struct PMap* const from, fn_clone clone_val) {
 	const struct PMap *to =  pmap_init_with(from->params);
 
 	const void **k;
 	const void **v;
 	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
-		put(to, *k, *v, alloc_val);
+		put(to, *k, *v, clone_val);
 	}
 
 	return to;
 }
 
-static struct SList *keys_slist(const struct PMap* const tab, fn_alloc alloc_key) {
+static struct SList *keys_slist(const struct PMap* const tab, fn_clone clone_key) {
 	struct SList *list = NULL;
 
 	const void **k;
 	for (k = tab->keys; k < tab->keys + tab->size; k++) {
-		if (alloc_key) {
-			slist_append(&list, (void*)alloc_key(*k));
+		if (clone_key) {
+			slist_append(&list, (void*)clone_key(*k));
 		} else {
 			slist_append(&list, (void*)*k);
 		}
@@ -122,14 +122,14 @@ static struct SList *keys_slist(const struct PMap* const tab, fn_alloc alloc_key
 	return list;
 }
 
-static struct SList *vals_slist(const struct PMap* const tab, fn_alloc alloc_val) {
+static struct SList *vals_slist(const struct PMap* const tab, fn_clone clone_val) {
 	struct SList *list = NULL;
 
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		if (*v && alloc_val) {
-			slist_append(&list, (void*)alloc_val(*v));
+		if (*v && clone_val) {
+			slist_append(&list, (void*)clone_val(*v));
 		} else {
 			slist_append(&list, (void*)*v);
 		}
@@ -160,10 +160,10 @@ const struct PMap *pmap_clone_shallow(const struct PMap* const from) {
 }
 
 const struct PMap *pmap_clone_deep(const struct PMap* const from) {
-	if (!from || !from->params.alloc_val)
+	if (!from || !from->params.clone_val)
 		return NULL;
 
-	return clone(from, from->params.alloc_val);
+	return clone(from, from->params.clone_val);
 }
 
 void pmap_free(const struct PMap* const tab) {
@@ -296,7 +296,7 @@ const struct PMapIter *pmap_iter_next(const struct PMapIter* const citer) {
 
 
 const void *pmap_put(const struct PMap* const tab, const void* const key, const void* const val) {
-	return tab ? put(tab, key, val, tab->params.alloc_val) : NULL;
+	return tab ? put(tab, key, val, tab->params.clone_val) : NULL;
 }
 
 const void *pmap_put_if_absent(const struct PMap* const tab, const void* const key, const void* const val) {
@@ -306,7 +306,7 @@ const void *pmap_put_if_absent(const struct PMap* const tab, const void* const k
 	if (pmap_contains_key(tab, key)) {
 		return pmap_get(tab, key);
 	} else {
-		put(tab, key, val, tab->params.alloc_val);
+		put(tab, key, val, tab->params.clone_val);
 		return NULL;
 	}
 }
@@ -315,7 +315,7 @@ bool pmap_put_free(const struct PMap* const tab, const void* const key, const vo
 	if (!tab)
 		return false;
 
-	const void *val_old = put(tab, key, val, tab->params.alloc_val);
+	const void *val_old = put(tab, key, val, tab->params.clone_val);
 
 	if (val_old) {
 		if (tab->params.free_val) {
@@ -415,10 +415,10 @@ struct SList *pmap_keys_slist_shallow(const struct PMap* const tab) {
 }
 
 struct SList *pmap_keys_slist_deep(const struct PMap* const tab) {
-	if (!tab || !tab->params.alloc_key)
+	if (!tab || !tab->params.clone_key)
 		return NULL;
 
-	return keys_slist(tab, tab->params.alloc_key);
+	return keys_slist(tab, tab->params.clone_key);
 }
 
 struct SList *pmap_vals_slist_shallow(const struct PMap* const tab) {
@@ -426,10 +426,10 @@ struct SList *pmap_vals_slist_shallow(const struct PMap* const tab) {
 }
 
 struct SList *pmap_vals_slist_deep(const struct PMap* const tab) {
-	if (!tab || !tab->params.alloc_val)
+	if (!tab || !tab->params.clone_val)
 		return NULL;
 
-	return vals_slist(tab, tab->params.alloc_val);
+	return vals_slist(tab, tab->params.clone_val);
 }
 
 char *pmap_str(const struct PMap* const tab) {

@@ -72,7 +72,7 @@ static void pset_clone_shallow__empty(void **state) {
 static void pset_clone_shallow__params(void **state) {
 	const struct PSetParams params = {
 		.equal_val = mock_equal,
-		.alloc_val = mock_alloc,
+		.clone_val = mock_clone,
 		.initial = 3,
 		.grow  = 4,
 	};
@@ -111,24 +111,24 @@ static void pset_clone_shallow__many(void **state) {
 	pset_free(set);
 }
 
-static void pset_clone_deep__alloc_val(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
+static void pset_clone_deep__clone_val(void **state) {
+	const struct PSetParams params = { .clone_val = mock_clone, };
 	const struct PSet *set = pset_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
 
 	assert_true(pset_add(set, V0));
 
-	expect_ptr(mock_alloc, val, V1);
-	will_return_ptr_type(mock_alloc, V1, void*);
+	expect_ptr(mock_clone, val, V1);
+	will_return_ptr_type(mock_clone, V1, void*);
 
 	assert_true(pset_add(set, V1));
 
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V2, void*);
-	expect_ptr(mock_alloc, val, V1);
-	will_return_ptr_type(mock_alloc, V3, void*);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V2, void*);
+	expect_ptr(mock_clone, val, V1);
+	will_return_ptr_type(mock_clone, V3, void*);
 
 	const struct PSet *clone = pset_clone_deep(set);
 
@@ -141,7 +141,7 @@ static void pset_clone_deep__alloc_val(void **state) {
 	pset_free(set);
 }
 
-static void pset_clone_deep__no_alloc_val(void **state) {
+static void pset_clone_deep__no_clone_val(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -232,12 +232,12 @@ static void pset_add__equal_val(void **state) {
 	pset_free(set);
 }
 
-static void pset_add__alloc_val(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
+static void pset_add__clone_val(void **state) {
+	const struct PSetParams params = { .clone_val = mock_clone, };
 	const struct PSet *set = pset_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
 
 	assert_true(pset_add(set, V0));
 
@@ -758,17 +758,17 @@ static void pset_vals_slist_shallow__many(void **state) {
 	pset_free(set);
 }
 
-static void pset_vals_slist_deep__alloc_val(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
+static void pset_vals_slist_deep__clone_val(void **state) {
+	const struct PSetParams params = { .clone_val = mock_clone, };
 	const struct PSet *set = pset_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
 
 	assert_true(pset_add(set, V0));
 
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
 
 	struct SList *list = pset_slist_deep(set);
 
@@ -776,7 +776,7 @@ static void pset_vals_slist_deep__alloc_val(void **state) {
 	pset_free(set);
 }
 
-static void pset_vals_slist_deep__no_alloc_val(void **state) {
+static void pset_vals_slist_deep__no_clone_val(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -878,8 +878,8 @@ int main(void) {
 		TEST(pset_clone_shallow__params),
 		TEST(pset_clone_shallow__many),
 
-		TEST(pset_clone_deep__alloc_val),
-		TEST(pset_clone_deep__no_alloc_val),
+		TEST(pset_clone_deep__clone_val),
+		TEST(pset_clone_deep__no_clone_val),
 
 		TEST(pset_free_vals__null_free_val),
 		TEST(pset_free_vals__missing_val),
@@ -887,7 +887,7 @@ int main(void) {
 
 		TEST(pset_add__new),
 		TEST(pset_add__equal_val),
-		TEST(pset_add__alloc_val),
+		TEST(pset_add__clone_val),
 		TEST(pset_add__null),
 		TEST(pset_add__grow),
 
@@ -924,8 +924,8 @@ int main(void) {
 
 		TEST(pset_vals_slist_shallow__empty),
 		TEST(pset_vals_slist_shallow__many),
-		TEST(pset_vals_slist_deep__alloc_val),
-		TEST(pset_vals_slist_deep__no_alloc_val),
+		TEST(pset_vals_slist_deep__clone_val),
+		TEST(pset_vals_slist_deep__no_clone_val),
 
 		TEST(pset_str__empty),
 		TEST(pset_str__pointers),

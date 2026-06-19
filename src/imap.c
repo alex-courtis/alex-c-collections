@@ -27,7 +27,7 @@ static bool fn_equal_key(const void* const a, const void* const b) {
 	return *(size_t*)a == *(size_t*)b;
 }
 
-static const void *fn_alloc_key(const void* const val) {
+static void *fn_clone_key(const void* const val) {
 	size_t *out = calloc(1, sizeof(size_t));
 	*out = *(size_t*)val;
 
@@ -69,8 +69,8 @@ const struct IMap *imap_init_with(const struct IMapParams params) {
 	const struct PMapParams pmap_params = {
 		.equal_key = fn_equal_key,
 		.equal_val = params.equal_val,
-		.alloc_key = fn_alloc_key,
-		.alloc_val = params.alloc_val,
+		.clone_key = fn_clone_key,
+		.clone_val = params.clone_val,
 		.free_key = (fn_free)free,
 		.free_val = params.free_val,
 		.str_key = fn_str_key,

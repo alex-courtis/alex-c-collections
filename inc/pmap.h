@@ -24,22 +24,20 @@ struct PMapIter {
 	struct PMapIterState *st;
 };
 
-// TODO move the usages back into function comments
-
 /*
  * Optional constructor params (default)
  */
 struct PMapParams {
-	const fn_equal equal_key;   // _get, _contains_key, _put, _equal, _clone_ (compare key pointers)
-	const fn_equal equal_val;   // _equal                                     (compare val pointers)
-	const fn_alloc alloc_key;   // _clone_, _put, must be idempotent          (use key pointer)
-	const fn_alloc alloc_val;   // _put, _vals_slist, _clone_deep             (use key pointer)
-	const fn_free free_key;     // _remove, _free, _free_vals                 (NOP)
-	const fn_free free_val;     // _put_free, _free_vals                      (free)
-	const fn_str str_key;       // _str                                       (%p)
-	const fn_str str_val;       // _str                                       (%p)
-	const size_t initial;       // initial capacity                           (10)
-	const size_t grow;          // grow capacity by                           (10)
+	const fn_equal equal_key; // compare key pointers
+	const fn_equal equal_val; // compare val pointers
+	const fn_clone clone_key; // assign key pointer
+	const fn_clone clone_val; // assign val pointer
+	const fn_free free_key;   // NOP
+	const fn_free free_val;   // free
+	const fn_str str_key;     // %p
+	const fn_str str_val;     // %p
+	const size_t initial;     // 10
+	const size_t grow;        // 10
 };
 
 /*
@@ -52,16 +50,16 @@ const struct PMap *pmap_init(void);
 // construct with params
 const struct PMap *pmap_init_with(const struct PMapParams params);
 
-// clone, setting val pointers
+// clone, setting val pointers [clone_key]
 const struct PMap *pmap_clone_shallow(const struct PMap* const from);
 
-// clone, NOP when NULL alloc_val
+// clone, NOP when NULL clone_val [clone_key, clone_val]
 const struct PMap *pmap_clone_deep(const struct PMap* const from);
 
 // free map
 void pmap_free(const struct PMap* const tab);
 
-// free map and vals
+// free map and vals [free_val]
 void pmap_free_vals(const struct PMap* const tab);
 
 // free iter
@@ -71,10 +69,10 @@ void pmap_iter_free(const struct PMapIter* const iter);
  * Access
  */
 
-// return val, NULL if not present
+// return val, NULL if not present [equal_key]
 const void *pmap_get(const struct PMap* const tab, const void* const key);
 
-// true if key is present
+// true if key is present [equal_key]
 bool pmap_contains_key(const struct PMap* const tab, const void* const key);
 
 // create an iterator, caller must pmap_iter_free or invoke pmap_next until NULL
@@ -90,26 +88,26 @@ const struct PMapIter *pmap_iter_next(const struct PMapIter* const iter);
  * Mutate
  */
 
-// set key/val, return old val if overwritten
+// set key/val, return old val if overwritten [equal_key, clone_key, clone_val]
 const void *pmap_put(const struct PMap* const tab, const void* const key, const void* const val);
 
-// set key/val if not present, return existing val if present
+// set key/val if not present, return existing val if present [equal_key, clone_key, clone_val]
 const void *pmap_put_if_absent(const struct PMap* const tab, const void* const key, const void* const val);
 
-// set key/val, free old val, return true if overwritten
+// set key/val, free old val, return true if overwritten [equal_key, clone_key, clone_val, free_key, free_val]
 bool pmap_put_free(const struct PMap* const tab, const void* const key, const void* const val);
 
-// remove val, return old val if present
+// remove val, return old val if present [equal_key, free_key]
 const void *pmap_remove(const struct PMap* const tab, const void* const key);
 
-// remove val, if removed free val and return true
+// remove val, if removed free val and return true [equal_key, free_key, free_val]
 bool pmap_remove_free(const struct PMap* const tab, const void* const key);
 
 /*
  * Comparison
  */
 
-// same length, keys and vals equal in order, uses equal_key and equal_val from a
+// same length, keys and vals equal in order, uses params from a [equal_key, equal_val]
 bool pmap_equal(const struct PMap* const a, const struct PMap* const b);
 
 /*
@@ -119,13 +117,13 @@ bool pmap_equal(const struct PMap* const a, const struct PMap* const b);
 // ordered keys, caller frees list only
 struct SList *pmap_keys_slist_shallow(const struct PMap* const tab);
 
-// ordered keys, caller frees list list and vals, NOP when NULL alloc_key
+// ordered keys, caller frees list list and vals, NOP when NULL clone_key [clone_key]
 struct SList *pmap_keys_slist_deep(const struct PMap* const tab);
 
 // ordered vals, caller frees list only
 struct SList *pmap_vals_slist_shallow(const struct PMap* const tab);
 
-// ordered vals, caller frees list and vals, NOP when NULL alloc_val
+// ordered vals, caller frees list and vals, NOP when NULL clone_val [clone_val]
 struct SList *pmap_vals_slist_deep(const struct PMap* const tab);
 
 /*

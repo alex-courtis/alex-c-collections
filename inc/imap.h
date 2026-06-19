@@ -25,16 +25,16 @@ struct IMapIter {
  * Optional constructor params (default)
  */
 struct IMapParams {
-	const fn_equal equal_val; // _get, _put, _equal, _clone_    (compare key pointers)
-	const fn_alloc alloc_val; // _put, _vals_slist, _clone_deep (use key pointer)
-	const fn_free free_val;   // _put_free, _free_vals          (free)
-	const fn_str str_val;     // _str                           (%p)
-	const size_t initial;     // initial capacity               (10)
-	const size_t grow;        // grow capacity by               (10)
+	const fn_equal equal_val; // compare key pointers
+	const fn_clone clone_val; // assign key pointer
+	const fn_free free_val;   // free
+	const fn_str str_val;     // %p
+	const size_t initial;     // 10
+	const size_t grow;        // 10
 };
 
 /*
- * Test for a key
+ * Key (a) equals arbitrary data b
  */
 typedef bool (*fn_equal_size_t)(const size_t a, const void* const b);
 
@@ -51,13 +51,13 @@ const struct IMap *imap_init_with(const struct IMapParams params);
 // clone, setting val pointers
 const struct IMap *imap_clone_shallow(const struct IMap* const from);
 
-// clone, NOP when NULL alloc_val
+// clone, NOP when NULL clone_val [clone_val]
 const struct IMap *imap_clone_deep(const struct IMap* const from);
 
 // free map
 void imap_free(const struct IMap* const tab);
 
-// free map and vals
+// free map and vals [free_val]
 void imap_free_vals(const struct IMap* const tab);
 
 // free iter
@@ -86,26 +86,26 @@ const struct IMapIter *imap_iter_next(const struct IMapIter* const iter);
  * Mutate
  */
 
-// set key/val, return old val if overwritten
+// set key/val, return old val if overwritten [clone_val]
 const void *imap_put(const struct IMap* const tab, const size_t key, const void* const val);
 
-// set key/val if not present, return existing val if present
+// set key/val if not present, return existing val if present [clone_val]
 const void *imap_put_if_absent(const struct IMap* const tab, const size_t key, const void* const val);
 
-// set key/val, free old val, return true if overwritten
+// set key/val, free old val, return true if overwritten [clone_val, free_val]
 bool imap_put_free(const struct IMap* const tab, const size_t key, const char* const val);
 
 // remove val, return old val if present
 const void *imap_remove(const struct IMap* const tab, const size_t key);
 
-// remove val, if removed free val and return true
+// remove val, if removed free val and return true [free_val]
 bool imap_remove_free(const struct IMap* const tab, const size_t key);
 
 /*
  * Comparison
  */
 
-// same length, keys and vals equal in order, uses equal_val from a
+// same length, keys and vals equal in order, uses params from a [equal_val]
 bool imap_equal(const struct IMap* const a, const struct IMap* const b);
 
 /*
@@ -115,7 +115,7 @@ bool imap_equal(const struct IMap* const a, const struct IMap* const b);
 // ordered vals, caller frees list only
 struct SList *imap_vals_slist_shallow(const struct IMap* const tab);
 
-// ordered vals, caller frees list and vals, NOP when NULL alloc_val
+// ordered vals, caller frees list and vals, NOP when NULL clone_val [clone_val]
 struct SList *imap_vals_slist_deep(const struct IMap* const tab);
 
 /*

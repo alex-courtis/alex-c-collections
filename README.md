@@ -19,8 +19,7 @@ Not thread safe.
 ### SSet
 
 * `PSet` with string values
-* Values are strdup'd on successful `sset_add`, `sset_clone` and `sset_slist`
-* Values are free'd on `sset_free`
+* Values are memory managed.
 
 ### PMap
 

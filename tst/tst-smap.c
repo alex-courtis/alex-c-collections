@@ -325,7 +325,7 @@ static void smap_vals_slist_shallow__many(void **state) {
 }
 
 static void smap_vals_slist_deep__many(void **state) {
-	const struct SMapParams params = { .alloc_val = (fn_alloc)strdup, };
+	const struct SMapParams params = { .clone_val = (fn_clone)strdup, };
 	const struct SMap *tab = smap_init_with(params);
 
 	smap_put(tab, "a", "aa");
@@ -382,7 +382,7 @@ static void smap_clone_shallow__params(void **state) {
 	assert_int_equal(to->ptab->params.grow, 1);
 	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
-	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
+	assert_ptr_equal(to->ptab->params.clone_key, (fn_clone)strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->ptab->params.free_val, mock_free);
 
@@ -395,17 +395,17 @@ static void smap_clone_shallow__params(void **state) {
 	smap_free(to);
 }
 
-static void smap_clone_deep__alloc_val(void **state) {
-	const struct SMapParams params = { .alloc_val = mock_alloc, };
+static void smap_clone_deep__clone_val(void **state) {
+	const struct SMapParams params = { .clone_val = mock_clone, };
 	const struct SMap *from = smap_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
 
 	assert_nul(smap_put(from, "a", V0));
 
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
 
 	const struct SMap *to = smap_clone_deep(from);
 
@@ -419,7 +419,7 @@ static void smap_clone_deep__alloc_val(void **state) {
 	smap_free(to);
 }
 
-static void smap_clone_deep__no_alloc_val(void **state) {
+static void smap_clone_deep__no_clone_val(void **state) {
 	const struct SMap *from = smap_init();
 
 	assert_nul(smap_put(from, 0, V0));
@@ -501,8 +501,8 @@ int main(void) {
 		TEST(smap_clone_shallow__many),
 		TEST(smap_clone_shallow__params),
 
-		TEST(smap_clone_deep__alloc_val),
-		TEST(smap_clone_deep__no_alloc_val),
+		TEST(smap_clone_deep__clone_val),
+		TEST(smap_clone_deep__no_clone_val),
 
 		TEST(smap__null_inputs),
 	};

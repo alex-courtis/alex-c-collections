@@ -43,7 +43,7 @@ static void grow(struct PSet *set) {
 	set->capacity = new_capacity;
 }
 
-static bool add(const struct PSet* const cset, const void* const val, fn_alloc alloc_val) {
+static bool add(const struct PSet* const cset, const void* const val, fn_clone clone_val) {
 	if (!val)
 		return false;
 
@@ -63,8 +63,8 @@ static bool add(const struct PSet* const cset, const void* const val, fn_alloc a
 	}
 
 	// new value
-	if (alloc_val) {
-		*v = alloc_val(val);
+	if (clone_val) {
+		*v = clone_val(val);
 	} else {
 		*v = (void*)val;
 	}
@@ -102,22 +102,22 @@ static bool remove(const struct PSet* const cset, const void* const val, fn_free
 	return false;
 }
 
-static const struct PSet *clone(const struct PSet* const from, fn_alloc alloc_val) {
+static const struct PSet *clone(const struct PSet* const from, fn_clone clone_val) {
 	const struct PSet *to = pset_init_with(from->params);
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		add(to, *v, alloc_val);
+		add(to, *v, clone_val);
 	}
 
 	return to;
 }
 
-static struct SList *slist(const struct PSet* const set, fn_alloc alloc_val) {
+static struct SList *slist(const struct PSet* const set, fn_clone clone_val) {
 	struct SList *list = NULL;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (alloc_val) {
-			slist_append(&list, (void*)alloc_val(*v));
+		if (clone_val) {
+			slist_append(&list, (void*)clone_val(*v));
 		} else {
 			slist_append(&list, (void*)*v);
 		}
@@ -147,10 +147,10 @@ const struct PSet *pset_clone_shallow(const struct PSet* const from) {
 }
 
 const struct PSet *pset_clone_deep(const struct PSet* const from) {
-	if (!from || !from->params.alloc_val)
+	if (!from || !from->params.clone_val)
 		return NULL;
 
-	return clone(from, from->params.alloc_val);
+	return clone(from, from->params.clone_val);
 }
 
 void pset_free(const struct PSet * const set) {
@@ -249,7 +249,7 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const citer) {
 }
 
 bool pset_add(const struct PSet* const set, const void* const val) {
-	return set ? add(set, val, set->params.alloc_val) : false;
+	return set ? add(set, val, set->params.clone_val) : false;
 }
 
 bool pset_remove(const struct PSet* const set, const void* const val) {
@@ -300,10 +300,10 @@ struct SList *pset_slist_shallow(const struct PSet* const set) {
 }
 
 struct SList *pset_slist_deep(const struct PSet* const set) {
-	if (!set || !set->params.alloc_val)
+	if (!set || !set->params.clone_val)
 		return NULL;
 
-	return slist(set, set->params.alloc_val);
+	return slist(set, set->params.clone_val);
 }
 
 char *pset_str(const struct PSet* const set) {
