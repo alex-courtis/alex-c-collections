@@ -7,16 +7,6 @@
 
 #include "smap.h"
 
-/*
-   diff --color=always -U 10000 <(sed -e ' s/pmap/xmap/g ; s/PMap/XMap/g ' inc/pmap.h) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' inc/smap.h) | less
-
-   diff --color=always -U 10000 <(sed -e ' s/smap/xmap/g ; s/SMap/XMap/g ' inc/smap.h) <(sed -e 's/imap/xmap/g ; s/IMap/XMap/g' inc/imap.h) | less
-
-   diff --color=always -U 10000 <(sed -e ' s/imap/xmap/g ; s/IMap/XMap/g ' src/imap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' src/smap.c) | less
-
-   diff --color=always -U 10000 <(sed -e ' s/ssmap/xmap/g ; s/SSMap/XMap/g ' src/ssmap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' src/smap.c) | less
-   */
-
 struct SMap {
 	const struct SMapParams params;
 	const struct PMap *ptab;

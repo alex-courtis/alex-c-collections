@@ -11,12 +11,6 @@
 #define PSET_DEFAULT_INITIAL 10
 #define PSET_DEFAULT_GROW 10
 
-/*
-   diff --color=always -U 10000 <(sed -e ' s/pset/xset/g ; s/PSet/XSet/g ' inc/pset.h) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' inc/sset.h) | less
-
-   diff --color=always -U 10000 <(sed -e ' s/pset/xset/g ; s/PSet/XSet/g ' src/pset.c) <(sed -e 's/sset/xset/g ; s/SSet/XSet/g' src/sset.c) | less
-   */
-
 struct PSet {
 	const struct PSetParams params;
 	const void **vals;

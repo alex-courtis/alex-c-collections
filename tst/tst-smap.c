@@ -29,12 +29,6 @@ struct SMap {
 	const struct PMap *ptab;
 };
 
-/*
-   diff --color=always -U 10000 <(sed -e 's/imap/xmap/g ; s/SMap/XMap/g' tst/tst-imap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' tst/tst-smap.c) | less
-
-   diff --color=always -U 10000 <(sed -e 's/ssmap/xmap/g ; s/SSMap/XMap/g' tst/tst-ssmap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' tst/tst-smap.c) | less
-   */
-
 static int vals[3] = { 20, 21, 22, };
 static void *V0 = &vals[0];
 static void *V1 = &vals[1];
