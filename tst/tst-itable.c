@@ -326,14 +326,14 @@ static void itable_str__(void **state) {
 	itable_free(tab);
 }
 
-static void itable_vals_slist__many(void **state) {
+static void itable_vals_slist_shallow__many(void **state) {
 	const struct ITable *tab = itable_init();
 
 	itable_put(tab, 0, V0);
 	itable_put(tab, 1, NULL);
 	itable_put(tab, 2, V2);
 
-	struct SList *list = itable_vals_slist(tab);
+	struct SList *list = itable_vals_slist_shallow(tab);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_ptr_equal(slist_at(list, 0), V0);
@@ -342,6 +342,25 @@ static void itable_vals_slist__many(void **state) {
 
 	slist_free(&list);
 	itable_free(tab);
+}
+
+static void itable_vals_slist_deep__many(void **state) {
+	const struct ITableParams params = { .alloc_val = (fn_alloc)strdup, };
+	const struct ITable *tab = itable_init_with(params);
+
+	itable_put(tab, 0, "0");
+	itable_put(tab, 1, NULL);
+	itable_put(tab, 2, "2");
+
+	struct SList *list = itable_vals_slist_deep(tab);
+
+	assert_int_equal(slist_length(list), 3);
+	assert_str_equal(slist_at(list, 0), "0");
+	assert_nul(slist_at(list, 1));
+	assert_str_equal(slist_at(list, 2), "2");
+
+	slist_free_vals(&list, NULL);
+	itable_free_vals(tab);
 }
 
 static void itable_clone_shallow__many(void **state) {
@@ -393,7 +412,7 @@ static void itable_clone_shallow__params(void **state) {
 	itable_free(to);
 }
 
-static void itable_clone_deep__(void **state) {
+static void itable_clone_deep__alloc_val(void **state) {
 	const struct ITableParams params = { .alloc_val = mock_alloc, };
 	const struct ITable *from = itable_init_with(params);
 
@@ -417,6 +436,16 @@ static void itable_clone_deep__(void **state) {
 	itable_free(to);
 }
 
+static void itable_clone_deep__no_alloc_val(void **state) {
+	const struct ITable *from = itable_init();
+
+	assert_nul(itable_put(from, 0, V0));
+
+	assert_nul(itable_clone_deep(from));
+
+	itable_free(from);
+}
+
 static void itable__null_inputs(void **state) {
 	assert_nul(itable_clone_shallow(NULL));
 	assert_nul(itable_clone_deep(NULL));
@@ -434,7 +463,8 @@ static void itable__null_inputs(void **state) {
 	assert_nul(itable_remove(NULL, 0));
 	assert_false(itable_remove_free(NULL, 0));
 	assert_false(itable_equal(NULL, NULL));
-	assert_nul(itable_vals_slist(NULL));
+	assert_nul(itable_vals_slist_shallow(NULL));
+	assert_nul(itable_vals_slist_deep(NULL));
 	assert_nul(itable_str(NULL));
 	assert_int_equal(itable_size(NULL), 0);
 }
@@ -467,12 +497,14 @@ int main(void) {
 
 		TEST(itable_str__),
 
-		TEST(itable_vals_slist__many),
+		TEST(itable_vals_slist_shallow__many),
+		TEST(itable_vals_slist_deep__many),
 
 		TEST(itable_clone_shallow__many),
 		TEST(itable_clone_shallow__params),
 
-		TEST(itable_clone_deep__),
+		TEST(itable_clone_deep__alloc_val),
+		TEST(itable_clone_deep__no_alloc_val),
 
 		TEST(itable__null_inputs),
 	};

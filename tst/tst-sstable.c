@@ -295,13 +295,13 @@ static void sstable_str__(void **state) {
 	sstable_free_vals(tab);
 }
 
-static void sstable_keys_slist__many(void **state) {
+static void sstable_keys_slist_deep__many(void **state) {
 	const struct SSTable *tab = sstable_init();
 
 	sstable_put_free(tab, "a", "aa");
 	sstable_put_free(tab, "b", "bb");
 
-	struct SList *list = sstable_keys_slist(tab);
+	struct SList *list = sstable_keys_slist_deep(tab);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "a");
@@ -311,14 +311,14 @@ static void sstable_keys_slist__many(void **state) {
 	slist_free_vals(&list, NULL);
 }
 
-static void sstable_vals_slist__many(void **state) {
+static void sstable_vals_slist_deep__many(void **state) {
 	const struct SSTable *tab = sstable_init();
 
 	sstable_put_free(tab, "a", "aa");
 	sstable_put_free(tab, "b", NULL);
 	sstable_put_free(tab, "c", "cc");
 
-	struct SList *list = sstable_vals_slist(tab);
+	struct SList *list = sstable_vals_slist_deep(tab);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_str_equal(slist_at(list, 0), "aa");
@@ -378,8 +378,8 @@ static void sstable__null_inputs(void **state) {
 	assert_false(sstable_put_if_absent(tab, NULL, NULL));
 	assert_false(sstable_remove_free(NULL, NULL));
 	assert_false(sstable_equal(NULL, NULL));
-	assert_nul(sstable_keys_slist(NULL));
-	assert_nul(sstable_vals_slist(NULL));
+	assert_nul(sstable_keys_slist_deep(NULL));
+	assert_nul(sstable_vals_slist_deep(NULL));
 	assert_nul(sstable_str(NULL));
 	assert_int_equal(sstable_size(NULL), 0);
 
@@ -408,9 +408,9 @@ int main(void) {
 
 		TEST(sstable_str__),
 
-		TEST(sstable_keys_slist__many),
+		TEST(sstable_keys_slist_deep__many),
 
-		TEST(sstable_vals_slist__many),
+		TEST(sstable_vals_slist_deep__many),
 
 		TEST(sstable_clone_deep__),
 

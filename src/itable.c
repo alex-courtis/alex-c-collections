@@ -52,17 +52,22 @@ static const struct ITable *clone(const struct ITable* const from, bool deep) {
 	if (!from)
 		return NULL;
 
-	struct ITable *to = calloc(1, sizeof(struct ITable));
+	const struct PTable *ptab;
 
 	if (deep) {
-		to->ptab = ptable_clone_deep(from->ptab);
+		ptab = ptable_clone_deep(from->ptab);
 	} else {
-		to->ptab = ptable_clone_shallow(from->ptab);
+		ptab = ptable_clone_shallow(from->ptab);
 	}
 
-	memcpy((void*)&to->params, &from->params, sizeof(struct ITableParams));
-
-	return to;
+	if (ptab) {
+		struct ITable *to = calloc(1, sizeof(struct ITable));
+		to->ptab = ptab;
+		memcpy((void*)&to->params, &from->params, sizeof(struct ITableParams));
+		return to;
+	} else {
+		return NULL;
+	}
 }
 
 const struct ITable *itable_init(void) {
@@ -222,8 +227,12 @@ bool itable_equal(const struct ITable* const a, const struct ITable* const b) {
 	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }
 
-struct SList *itable_vals_slist(const struct ITable* const tab) {
-	return tab ? ptable_vals_slist(tab->ptab) : NULL;
+struct SList *itable_vals_slist_shallow(const struct ITable* const tab) {
+	return tab ? ptable_vals_slist_shallow(tab->ptab) : NULL;
+}
+
+struct SList *itable_vals_slist_deep(const struct ITable* const tab) {
+	return tab ? ptable_vals_slist_deep(tab->ptab) : NULL;
 }
 
 char *itable_str(const struct ITable* const tab) {

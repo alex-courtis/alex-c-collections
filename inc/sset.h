@@ -90,6 +90,8 @@ bool sset_equal(const struct SSet* const a, const struct SSet* const b);
  * Conversion
  */
 
+// TODO deep
+
 // ordered strings, caller frees list and vals
 struct SList *sset_slist(const struct SSet* const set);
 

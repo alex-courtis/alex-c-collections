@@ -180,7 +180,7 @@ static void ptable_clone_shallow__alloc_key(void **state) {
 	ptable_free(to);
 }
 
-static void ptable_clone_deep__many(void **state) {
+static void ptable_clone_deep__alloc_val(void **state) {
 	const struct PTableParams params = { .alloc_val = mock_alloc, };
 	const struct PTable *from = ptable_init_with(params);
 
@@ -216,6 +216,17 @@ static void ptable_clone_deep__many(void **state) {
 
 	ptable_free(from);
 	ptable_free(to);
+}
+
+static void ptable_clone_deep__no_alloc_val(void **state) {
+	const struct PTable *from = ptable_init();
+
+	assert_nul(ptable_put(from, K0, V0));
+	assert_nul(ptable_put(from, K1, NULL));
+
+	assert_nul(ptable_clone_deep(from));
+
+	ptable_free(from);
 }
 
 static void ptable_free_vals__null_free_val(void **state) {
@@ -974,21 +985,21 @@ static void ptable_equal__equal_key_different(void **state) {
 	ptable_free(b);
 }
 
-static void ptable_keys_slist__empty(void **state) {
+static void ptable_keys_slist_shallow__empty(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_keys_slist(tab));
+	assert_nul(ptable_keys_slist_shallow(tab));
 
 	ptable_free(tab);
 }
 
-static void ptable_keys_slist__many(void **state) {
+static void ptable_keys_slist_shallow__many(void **state) {
 	const struct PTable *tab = ptable_init();
 
 	ptable_put(tab, K0, V0);
 	ptable_put(tab, K1, V1);
 
-	struct SList *list = ptable_keys_slist(tab);
+	struct SList *list = ptable_keys_slist_shallow(tab);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_ptr_equal(slist_at(list, 0), K0);
@@ -998,7 +1009,7 @@ static void ptable_keys_slist__many(void **state) {
 	ptable_free(tab);
 }
 
-static void ptable_vals_slist__alloc_key(void **state) {
+static void ptable_keys_slist_deep__alloc_key(void **state) {
 	const struct PTableParams params = { .alloc_key = mock_alloc, };
 	const struct PTable *tab = ptable_init_with(params);
 
@@ -1010,7 +1021,7 @@ static void ptable_vals_slist__alloc_key(void **state) {
 	expect_ptr(mock_alloc, val, K0);
 	will_return_ptr_type(mock_alloc, K0, void*);
 
-	struct SList *list = ptable_keys_slist(tab);
+	struct SList *list = ptable_keys_slist_deep(tab);
 
 	assert_ptr_equal(slist_at(list, 0), K0);
 
@@ -1018,7 +1029,43 @@ static void ptable_vals_slist__alloc_key(void **state) {
 	ptable_free(tab);
 }
 
-static void ptable_vals_slist__alloc_val(void **state) {
+static void ptable_keys_slist_deep__no_alloc_key(void **state) {
+	const struct PTable *tab = ptable_init();
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	assert_nul(ptable_keys_slist_deep(tab));
+
+	ptable_free(tab);
+}
+
+static void ptable_vals_slist_shallow__empty(void **state) {
+	const struct PTable *tab = ptable_init();
+
+	assert_nul(ptable_vals_slist_shallow(tab));
+
+	ptable_free(tab);
+}
+
+static void ptable_vals_slist_shallow__many(void **state) {
+	const struct PTable *tab = ptable_init();
+
+	ptable_put(tab, K0, V1);
+	ptable_put(tab, K1, NULL);
+	ptable_put(tab, K2, V3);
+
+	struct SList *list = ptable_vals_slist_shallow(tab);
+
+	assert_int_equal(slist_length(list), 3);
+	assert_ptr_equal(slist_at(list, 0), V1);
+	assert_nul(slist_at(list, 1));
+	assert_ptr_equal(slist_at(list, 2), V3);
+
+	slist_free(&list);
+	ptable_free(tab);
+}
+
+static void ptable_vals_slist_deep__alloc_val(void **state) {
 	const struct PTableParams params = { .alloc_val = mock_alloc, };
 	const struct PTable *tab = ptable_init_with(params);
 
@@ -1032,7 +1079,7 @@ static void ptable_vals_slist__alloc_val(void **state) {
 	expect_ptr(mock_alloc, val, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
-	struct SList *list = ptable_vals_slist(tab);
+	struct SList *list = ptable_vals_slist_deep(tab);
 
 	assert_ptr_equal(slist_at(list, 0), V0);
 	assert_ptr_equal(slist_at(list, 1), NULL);
@@ -1041,29 +1088,14 @@ static void ptable_vals_slist__alloc_val(void **state) {
 	ptable_free(tab);
 }
 
-static void ptable_vals_slist__empty(void **state) {
+static void ptable_vals_slist_deep__no_alloc_val(void **state) {
 	const struct PTable *tab = ptable_init();
 
-	assert_nul(ptable_vals_slist(tab));
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, NULL));
 
-	ptable_free(tab);
-}
+	assert_nul(ptable_vals_slist_deep(tab));
 
-static void ptable_vals_slist__many(void **state) {
-	const struct PTable *tab = ptable_init();
-
-	ptable_put(tab, K0, V1);
-	ptable_put(tab, K1, NULL);
-	ptable_put(tab, K2, V3);
-
-	struct SList *list = ptable_vals_slist(tab);
-
-	assert_int_equal(slist_length(list), 3);
-	assert_ptr_equal(slist_at(list, 0), V1);
-	assert_nul(slist_at(list, 1));
-	assert_ptr_equal(slist_at(list, 2), V3);
-
-	slist_free(&list);
 	ptable_free(tab);
 }
 
@@ -1186,8 +1218,10 @@ static void ptable__null_inputs(void **state) {
 	assert_nul(ptable_remove(tab, NULL));
 	assert_false(ptable_equal(NULL, NULL));
 	assert_false(ptable_equal(tab, NULL));
-	assert_nul(ptable_keys_slist(NULL));
-	assert_nul(ptable_vals_slist(NULL));
+	assert_nul(ptable_keys_slist_deep(NULL));
+	assert_nul(ptable_keys_slist_shallow(NULL));
+	assert_nul(ptable_vals_slist_deep(NULL));
+	assert_nul(ptable_vals_slist_shallow(NULL));
 	assert_nul(ptable_str(NULL));
 	assert_int_equal(ptable_size(NULL), 0);
 
@@ -1203,7 +1237,8 @@ int main(void) {
 		TEST(ptable_clone_shallow__many),
 		TEST(ptable_clone_shallow__alloc_key),
 
-		TEST(ptable_clone_deep__many),
+		TEST(ptable_clone_deep__alloc_val),
+		TEST(ptable_clone_deep__no_alloc_val),
 
 		TEST(ptable_free_vals__null_free_val),
 		TEST(ptable_free_vals__free_val),
@@ -1251,13 +1286,17 @@ int main(void) {
 		TEST(ptable_equal__equal_key_ok),
 		TEST(ptable_equal__equal_key_different),
 
-		TEST(ptable_keys_slist__empty),
-		TEST(ptable_keys_slist__many),
-		TEST(ptable_vals_slist__alloc_key),
-		TEST(ptable_vals_slist__alloc_val),
+		TEST(ptable_keys_slist_shallow__empty),
+		TEST(ptable_keys_slist_shallow__many),
 
-		TEST(ptable_vals_slist__empty),
-		TEST(ptable_vals_slist__many),
+		TEST(ptable_keys_slist_deep__alloc_key),
+		TEST(ptable_keys_slist_deep__no_alloc_key),
+
+		TEST(ptable_vals_slist_shallow__empty),
+		TEST(ptable_vals_slist_shallow__many),
+
+		TEST(ptable_vals_slist_deep__alloc_val),
+		TEST(ptable_vals_slist_deep__no_alloc_val),
 
 		TEST(ptable_str__empty),
 		TEST(ptable_str__pointers),

@@ -35,17 +35,23 @@ static const struct STable *clone(const struct STable* const from, bool deep) {
 	if (!from)
 		return NULL;
 
-	struct STable *to = calloc(1, sizeof(struct STable));
+	const struct PTable *ptab;
 
 	if (deep) {
-		to->ptab = ptable_clone_deep(from->ptab);
+		ptab = ptable_clone_deep(from->ptab);
 	} else {
-		to->ptab = ptable_clone_shallow(from->ptab);
+		ptab = ptable_clone_shallow(from->ptab);
 	}
 
-	memcpy((void*)&to->params, &from->params, sizeof(struct STableParams));
+	if (ptab) {
+		struct STable *to = calloc(1, sizeof(struct STable));
+		to->ptab = ptab;
+		memcpy((void*)&to->params, &from->params, sizeof(struct STableParams));
 
-	return to;
+		return to;
+	} else {
+		return NULL;
+	}
 }
 
 const struct STable *stable_init_with(const struct STableParams params) {
@@ -185,12 +191,16 @@ bool stable_equal(const struct STable* const a, const struct STable* const b) {
 	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }
 
-struct SList *stable_keys_slist(const struct STable* const tab) {
-	return tab ? ptable_keys_slist(tab->ptab) : NULL;
+struct SList *stable_keys_slist_deep(const struct STable* const tab) {
+	return tab ? ptable_keys_slist_deep(tab->ptab) : NULL;
 }
 
-struct SList *stable_vals_slist(const struct STable* const tab) {
-	return tab ? ptable_vals_slist(tab->ptab) : NULL;
+struct SList *stable_vals_slist_shallow(const struct STable* const tab) {
+	return tab ? ptable_vals_slist_shallow(tab->ptab) : NULL;
+}
+
+struct SList *stable_vals_slist_deep(const struct STable* const tab) {
+	return tab ? ptable_vals_slist_deep(tab->ptab) : NULL;
 }
 
 char *stable_str(const struct STable* const tab) {

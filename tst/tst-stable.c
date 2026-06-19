@@ -325,13 +325,13 @@ static void stable_str__(void **state) {
 	stable_free(tab);
 }
 
-static void stable_keys_slist__many(void **state) {
+static void stable_keys_slist_deep__many(void **state) {
 	const struct STable *tab = stable_init();
 
 	stable_put(tab, "a", V0);
 	stable_put(tab, "b", V1);
 
-	struct SList *list = stable_keys_slist(tab);
+	struct SList *list = stable_keys_slist_deep(tab);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "a");
@@ -341,14 +341,14 @@ static void stable_keys_slist__many(void **state) {
 	slist_free_vals(&list, NULL);
 }
 
-static void stable_vals_slist__many(void **state) {
+static void stable_vals_slist_shallow__many(void **state) {
 	const struct STable *tab = stable_init();
 
 	stable_put(tab, "a", V0);
 	stable_put(tab, "b", NULL);
 	stable_put(tab, "c", V2);
 
-	struct SList *list = stable_vals_slist(tab);
+	struct SList *list = stable_vals_slist_shallow(tab);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_ptr_equal(slist_at(list, 0), V0);
@@ -357,6 +357,25 @@ static void stable_vals_slist__many(void **state) {
 
 	slist_free(&list);
 	stable_free(tab);
+}
+
+static void stable_vals_slist_deep__many(void **state) {
+	const struct STableParams params = { .alloc_val = (fn_alloc)strdup, };
+	const struct STable *tab = stable_init_with(params);
+
+	stable_put(tab, "a", "aa");
+	stable_put(tab, "b", NULL);
+	stable_put(tab, "c", "bb");
+
+	struct SList *list = stable_vals_slist_deep(tab);
+
+	assert_int_equal(slist_length(list), 3);
+	assert_str_equal(slist_at(list, 0), "aa");
+	assert_nul(slist_at(list, 1));
+	assert_str_equal(slist_at(list, 2), "bb");
+
+	slist_free_vals(&list, NULL);
+	stable_free_vals(tab);
 }
 
 static void stable_clone_shallow__many(void **state) {
@@ -411,7 +430,7 @@ static void stable_clone_shallow__params(void **state) {
 	stable_free(to);
 }
 
-static void stable_clone_deep__(void **state) {
+static void stable_clone_deep__alloc_val(void **state) {
 	const struct STableParams params = { .alloc_val = mock_alloc, };
 	const struct STable *from = stable_init_with(params);
 
@@ -435,6 +454,16 @@ static void stable_clone_deep__(void **state) {
 	stable_free(to);
 }
 
+static void stable_clone_deep__no_alloc_val(void **state) {
+	const struct STable *from = stable_init();
+
+	assert_nul(stable_put(from, 0, V0));
+
+	assert_nul(stable_clone_deep(from));
+
+	stable_free(from);
+}
+
 static void stable__null_inputs(void **state) {
 	assert_nul(stable_clone_shallow(NULL));
 	assert_nul(stable_clone_deep(NULL));
@@ -452,8 +481,9 @@ static void stable__null_inputs(void **state) {
 	assert_nul(stable_remove(NULL, NULL));
 	assert_false(stable_remove_free(NULL, NULL));
 	assert_false(stable_equal(NULL, NULL));
-	assert_nul(stable_keys_slist(NULL));
-	assert_nul(stable_vals_slist(NULL));
+	assert_nul(stable_keys_slist_deep(NULL));
+	assert_nul(stable_vals_slist_shallow(NULL));
+	assert_nul(stable_vals_slist_deep(NULL));
 	assert_nul(stable_str(NULL));
 	assert_int_equal(stable_size(NULL), 0);
 }
@@ -485,14 +515,16 @@ int main(void) {
 
 		TEST(stable_str__),
 
-		TEST(stable_keys_slist__many),
+		TEST(stable_keys_slist_deep__many),
 
-		TEST(stable_vals_slist__many),
+		TEST(stable_vals_slist_deep__many),
+		TEST(stable_vals_slist_shallow__many),
 
 		TEST(stable_clone_shallow__many),
 		TEST(stable_clone_shallow__params),
 
-		TEST(stable_clone_deep__),
+		TEST(stable_clone_deep__alloc_val),
+		TEST(stable_clone_deep__no_alloc_val),
 
 		TEST(stable__null_inputs),
 	};

@@ -62,8 +62,8 @@ static const void *put(const struct PTable* const ctab, const void* const key, c
 		// overwrite existing values
 		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			const void *val_old = *v;
-			if (tab->params.alloc_val) {
-				*v = val ? tab->params.alloc_val(val) : NULL;
+			if (val && tab->params.alloc_val) {
+				*v = tab->params.alloc_val(val);
 			} else {
 				*v = val;
 			}
@@ -114,6 +114,43 @@ static const struct PTable *clone(const struct PTable* const from, bool deep) {
 	return to;
 }
 
+static struct SList *keys_slist(const struct PTable* const tab, fn_alloc alloc_key) {
+	if (!tab)
+		return NULL;
+
+	struct SList *list = NULL;
+
+	const void **k;
+	for (k = tab->keys; k < tab->keys + tab->size; k++) {
+		if (alloc_key) {
+			slist_append(&list, (void*)alloc_key(*k));
+		} else {
+			slist_append(&list, (void*)*k);
+		}
+	}
+
+	return list;
+}
+
+static struct SList *vals_slist(const struct PTable* const tab, fn_alloc alloc_val) {
+	if (!tab)
+		return NULL;
+
+	struct SList *list = NULL;
+
+	const void **k;
+	const void **v;
+	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
+		if (*v && alloc_val) {
+			slist_append(&list, (void*)alloc_val(*v));
+		} else {
+			slist_append(&list, (void*)*v);
+		}
+	}
+
+	return list;
+}
+
 const struct PTable *ptable_init(void) {
 	const struct PTableParams params = { 0 };
 	return ptable_init_with(params);
@@ -136,6 +173,9 @@ const struct PTable *ptable_clone_shallow(const struct PTable* const from) {
 }
 
 const struct PTable *ptable_clone_deep(const struct PTable* const from) {
+	if (!from || !from->params.alloc_val)
+		return NULL;
+
 	return clone(from, true);
 }
 
@@ -380,41 +420,26 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b) {
 	return true;
 }
 
-struct SList *ptable_keys_slist(const struct PTable* const tab) {
-	if (!tab)
-		return NULL;
-
-	struct SList *list = NULL;
-
-	const void **k;
-	for (k = tab->keys; k < tab->keys + tab->size; k++) {
-		if (tab->params.alloc_key) {
-			slist_append(&list, (void*)tab->params.alloc_key(*k));
-		} else {
-			slist_append(&list, (void*)*k);
-		}
-	}
-
-	return list;
+struct SList *ptable_keys_slist_shallow(const struct PTable* const tab) {
+	return keys_slist(tab, NULL);
 }
 
-struct SList *ptable_vals_slist(const struct PTable* const tab) {
-	if (!tab)
+struct SList *ptable_keys_slist_deep(const struct PTable* const tab) {
+	if (!tab || !tab->params.alloc_key)
 		return NULL;
 
-	struct SList *list = NULL;
+	return keys_slist(tab, tab->params.alloc_key);
+}
 
-	const void **k;
-	const void **v;
-	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		if (*v && tab->params.alloc_val) {
-			slist_append(&list, (void*)tab->params.alloc_val(*v));
-		} else {
-			slist_append(&list, (void*)*v);
-		}
-	}
+struct SList *ptable_vals_slist_shallow(const struct PTable* const tab) {
+	return vals_slist(tab, NULL);
+}
 
-	return list;
+struct SList *ptable_vals_slist_deep(const struct PTable* const tab) {
+	if (!tab || !tab->params.alloc_val)
+		return NULL;
+
+	return vals_slist(tab, tab->params.alloc_val);
 }
 
 char *ptable_str(const struct PTable* const tab) {

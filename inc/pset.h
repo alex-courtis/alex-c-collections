@@ -103,6 +103,8 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b);
  * Conversion
  */
 
+// TODO deep
+
 // ordered val pointers, caller frees list, caller frees vals when alloc_val
 struct SList *pset_slist(const struct PSet* const set);
 

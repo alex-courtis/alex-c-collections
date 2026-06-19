@@ -45,7 +45,7 @@ const struct SSTable *sstable_init_with(const struct SSTableParams params) {
 		.grow = params.grow,
 	};
 
-	struct SSTable *tab =  calloc(1, sizeof(struct SSTable));
+	struct SSTable *tab = calloc(1, sizeof(struct SSTable));
 	tab->ptab = ptable_init_with(ptable_params);;
 	memcpy((void*)&tab->params, &params, sizeof(struct SSTableParams));
 
@@ -154,12 +154,12 @@ bool sstable_equal(const struct SSTable* const a, const struct SSTable* const b)
 	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
 }
 
-struct SList *sstable_keys_slist(const struct SSTable* const tab) {
-	return tab ? ptable_keys_slist(tab->ptab) : NULL;
+struct SList *sstable_keys_slist_deep(const struct SSTable* const tab) {
+	return tab ? ptable_keys_slist_deep(tab->ptab) : NULL;
 }
 
-struct SList *sstable_vals_slist(const struct SSTable* const tab) {
-	return tab ? ptable_vals_slist(tab->ptab) : NULL;
+struct SList *sstable_vals_slist_deep(const struct SSTable* const tab) {
+	return tab ? ptable_vals_slist_deep(tab->ptab) : NULL;
 }
 
 char *sstable_str(const struct SSTable* const tab) {

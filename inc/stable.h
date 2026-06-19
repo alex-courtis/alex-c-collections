@@ -110,10 +110,13 @@ bool stable_equal(const struct STable* const a, const struct STable* const b);
  */
 
 // ordered key strings, caller frees list and vals
-struct SList *stable_keys_slist(const struct STable* const tab);
+struct SList *stable_keys_slist_deep(const struct STable* const tab);
 
 // ordered val pointers, caller frees list only
-struct SList *stable_vals_slist(const struct STable* const tab);
+struct SList *stable_vals_slist_shallow(const struct STable* const tab);
+
+// ordered val pointers, caller frees list and vals, NOP when NULL alloc_val
+struct SList *stable_vals_slist_deep(const struct STable* const tab);
 
 /*
  * Info
