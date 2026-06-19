@@ -24,6 +24,6 @@ static int check_smaps_equal(CMockaValueData value, CMockaValueData check_data) 
 }
 
 #define expect_smaps(function, parameter, value) \
-	expect_check_data(function, parameter, check_smaps_equal_strcmp, cast_ptr_to_cmocka_value(value))
+	expect_check_data(function, parameter, check_smaps_equal, cast_ptr_to_cmocka_value(value))
 
 #endif // EXPECT_SMAPS_H
