@@ -342,7 +342,7 @@ static void sset_slist__(void **state) {
 	sset_add(set, "a");
 	sset_add(set, "b");
 
-	struct SList *list = sset_slist(set);
+	struct SList *list = sset_slist_deep(set);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "a");
@@ -396,7 +396,7 @@ static void sset__null_inputs(void **state) {
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_remove_free(NULL, NULL));
 	assert_false(sset_equal(NULL, NULL));
-	assert_nul(sset_slist(NULL));
+	assert_nul(sset_slist_deep(NULL));
 	assert_nul(sset_str(NULL));
 	sset_sort(NULL);
 	assert_int_equal(sset_size(NULL), 0);

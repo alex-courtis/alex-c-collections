@@ -116,16 +116,16 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b);
  * Conversion
  */
 
-// ordered key pointers, caller frees list only
+// ordered keys, caller frees list only
 struct SList *ptable_keys_slist_shallow(const struct PTable* const tab);
 
-// ordered key pointers, caller frees list list and vals, NOP when NULL alloc_key
+// ordered keys, caller frees list list and vals, NOP when NULL alloc_key
 struct SList *ptable_keys_slist_deep(const struct PTable* const tab);
 
-// ordered val pointers, caller frees list only
+// ordered vals, caller frees list only
 struct SList *ptable_vals_slist_shallow(const struct PTable* const tab);
 
-// ordered val pointers, caller frees list and vals, NOP when NULL alloc_val
+// ordered vals, caller frees list and vals, NOP when NULL alloc_val
 struct SList *ptable_vals_slist_deep(const struct PTable* const tab);
 
 /*

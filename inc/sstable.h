@@ -97,10 +97,10 @@ bool sstable_equal(const struct SSTable* const a, const struct SSTable* const b)
  * Conversion
  */
 
-// ordered key strings, caller frees list and vals
+// ordered vals, caller frees list and vals
 struct SList *sstable_keys_slist_deep(const struct SSTable* const tab);
 
-// ordered key strings, caller frees list and vals
+// ordered vals, caller frees list and vals
 struct SList *sstable_vals_slist_deep(const struct SSTable* const tab);
 
 /*

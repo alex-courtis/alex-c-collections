@@ -112,10 +112,10 @@ bool itable_equal(const struct ITable* const a, const struct ITable* const b);
  * Conversion
  */
 
-// ordered val pointers, caller frees list only
+// ordered vals, caller frees list only
 struct SList *itable_vals_slist_shallow(const struct ITable* const tab);
 
-// ordered val pointers, caller frees list and vals, NOP when NULL alloc_val
+// ordered vals, caller frees list and vals, NOP when NULL alloc_val
 struct SList *itable_vals_slist_deep(const struct ITable* const tab);
 
 /*

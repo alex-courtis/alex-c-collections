@@ -49,6 +49,8 @@ static void grow(struct PTable *tab) {
 	tab->capacity = new_capacity;
 }
 
+// TODO normalise "do" with function pointers
+
 static const void *put(const struct PTable* const ctab, const void* const key, const void* const val, const bool do_alloc_new_val) {
 	if (!ctab || !key)
 		return NULL;

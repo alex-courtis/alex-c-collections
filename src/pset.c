@@ -125,6 +125,23 @@ static const struct PSet *clone(const struct PSet* const from, bool deep) {
 	return to;
 }
 
+static struct SList *slist(const struct PSet* const set, fn_alloc alloc_val) {
+	if (!set)
+		return NULL;
+
+	struct SList *list = NULL;
+
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
+		if (alloc_val) {
+			slist_append(&list, (void*)alloc_val(*v));
+		} else {
+			slist_append(&list, (void*)*v);
+		}
+	}
+
+	return list;
+}
+
 const struct PSet *pset_init(void) {
 	const struct PSetParams params = { 0 };
 	return pset_init_with(params);
@@ -292,21 +309,15 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b) {
 	return true;
 }
 
-struct SList *pset_slist(const struct PSet* const set) {
-	if (!set)
+struct SList *pset_slist_shallow(const struct PSet* const set) {
+	return slist(set, NULL);
+}
+
+struct SList *pset_slist_deep(const struct PSet* const set) {
+	if (!set || !set->params.alloc_val)
 		return NULL;
 
-	struct SList *list = NULL;
-
-	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (set->params.alloc_val) {
-			slist_append(&list, (void*)set->params.alloc_val(*v));
-		} else {
-			slist_append(&list, (void*)*v);
-		}
-	}
-
-	return list;
+	return slist(set, set->params.alloc_val);
 }
 
 char *pset_str(const struct PSet* const set) {

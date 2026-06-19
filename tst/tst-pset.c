@@ -754,21 +754,21 @@ static void pset_equal__equal_val_different(void **state) {
 	pset_free(b);
 }
 
-static void pset_vals_slist__empty(void **state) {
+static void pset_vals_slist_shallow__empty(void **state) {
 	const struct PSet *set = pset_init();
 
-	assert_nul(pset_slist(set));
+	assert_nul(pset_slist_shallow(set));
 
 	pset_free(set);
 }
 
-static void pset_vals_slist__many(void **state) {
+static void pset_vals_slist_shallow__many(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	struct SList *list = pset_slist(set);
+	struct SList *list = pset_slist_shallow(set);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), V0);
@@ -778,7 +778,7 @@ static void pset_vals_slist__many(void **state) {
 	pset_free(set);
 }
 
-static void pset_vals_slist__alloc_val(void **state) {
+static void pset_vals_slist_deep__alloc_val(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 	const struct PSet *set = pset_init_with(params);
 
@@ -790,9 +790,19 @@ static void pset_vals_slist__alloc_val(void **state) {
 	expect_ptr(mock_alloc, val, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
-	struct SList *list = pset_slist(set);
+	struct SList *list = pset_slist_deep(set);
 
 	slist_free(&list);
+	pset_free(set);
+}
+
+static void pset_vals_slist_deep__no_alloc_val(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+
+	assert_nul(pset_slist_deep(set));
+
 	pset_free(set);
 }
 
@@ -865,7 +875,8 @@ static void pset__null_inputs(void **state) {
 	assert_false(pset_remove_free(NULL, NULL));
 	pset_sort(NULL, NULL);
 	assert_false(pset_equal(NULL, NULL));
-	assert_nul(pset_slist(NULL));
+	assert_nul(pset_slist_shallow(NULL));
+	assert_nul(pset_slist_deep(NULL));
 	assert_nul(pset_str(NULL));
 	assert_int_equal(pset_size(NULL), 0);
 }
@@ -918,9 +929,10 @@ int main(void) {
 		TEST(pset_equal__equal_val_ok),
 		TEST(pset_equal__equal_val_different),
 
-		TEST(pset_vals_slist__empty),
-		TEST(pset_vals_slist__many),
-		TEST(pset_vals_slist__alloc_val),
+		TEST(pset_vals_slist_shallow__empty),
+		TEST(pset_vals_slist_shallow__many),
+		TEST(pset_vals_slist_deep__alloc_val),
+		TEST(pset_vals_slist_deep__no_alloc_val),
 
 		TEST(pset_str__empty),
 		TEST(pset_str__pointers),
