@@ -150,7 +150,7 @@ const struct STableIter *stable_iter_next(const struct STableIter* const citer) 
 
 	struct STableIter *iter = (struct STableIter*)citer;
 
-	if (!iter->st || !iter->st->pit) {
+	if (!iter->st) {
 		stable_iter_free(iter);
 		return NULL;
 	}

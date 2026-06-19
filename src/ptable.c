@@ -265,7 +265,7 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const citer) 
 	struct PTableIter *iter = (struct PTableIter*)citer;
 	struct PTableIterState *st = iter->st;
 
-	if (!iter->st || !iter->st->tab) {
+	if (!iter->st) {
 		ptable_iter_free(iter);
 		return NULL;
 	}

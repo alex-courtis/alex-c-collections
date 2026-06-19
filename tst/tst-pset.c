@@ -33,13 +33,6 @@ struct PSet {
 	size_t size;
 };
 
-struct PSetIterState {
-	const struct PSet *set;
-	size_t pos;
-	fn_equal equal_val;
-	const void *data;
-};
-
 static char* fn_str_first(const void *val) {
 	return strndup(val, 1);
 }
@@ -468,39 +461,16 @@ static void pset_iter__cleared(void **state) {
 	pset_free(set);
 }
 
-static void pset_iter__state_deleted(void **state) {
-	const struct PSet *set = pset_init();
+static void pset_iter_free__partial(void **state) {
+	const struct PSetIter *iter = calloc(1, sizeof(struct PSetIter));
 
-	assert_true(pset_add(set, V0));
-
-	const struct PSetIter *iter = pset_iter(set);
-	assert_non_nul(iter);
-
-	const struct PSetIterState *st = iter->st;
-	((struct PSetIter*)iter)->st = NULL;
-
-	iter = pset_iter_next(iter);
-	assert_nul(iter);
-
-	free((void*)st);
-	pset_free(set);
+	pset_iter_free(iter);
 }
 
-static void pset_iter__state_set_deleted(void **state) {
-	const struct PSet *set = pset_init();
+static void pset_iter_next__partial(void **state) {
+	const struct PSetIter *iter = calloc(1, sizeof(struct PSetIter));
 
-	assert_true(pset_add(set, V0));
-
-	const struct PSetIter *iter = pset_iter(set);
-	assert_non_nul(iter);
-
-	struct PSetIterState *st = iter->st;
-	st->set = NULL;
-
-	iter = pset_iter_next(iter);
-	assert_nul(iter);
-
-	pset_free(set);
+	assert_nul(pset_iter_next(iter));
 }
 
 static void pset_filter_iter__many(void **state) {
@@ -932,8 +902,10 @@ int main(void) {
 		TEST(pset_iter__free),
 		TEST(pset_iter__many),
 		TEST(pset_iter__cleared),
-		TEST(pset_iter__state_deleted),
-		TEST(pset_iter__state_set_deleted),
+
+		TEST(pset_iter_free__partial),
+
+		TEST(pset_iter_next__partial),
 
 		TEST(pset_filter_iter__many),
 

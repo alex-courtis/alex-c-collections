@@ -29,10 +29,6 @@ struct STable {
 	const struct PTable *ptab;
 };
 
-struct STableIterState {
-	const struct PTableIter *pit;
-};
-
 /*
    diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/STable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
 
@@ -92,7 +88,7 @@ static void stable_free_vals__(void **state) {
 	stable_free_vals(tab);
 }
 
-static void stable_iter__(void **state) {
+static void stable_iter__many(void **state) {
 
 	const struct STable *tab = stable_init();
 	assert_nul(stable_put(tab, "a", V0));
@@ -115,41 +111,16 @@ static void stable_iter__(void **state) {
 	stable_free(tab);
 }
 
-static void stable_iter__state_deleted(void **state) {
-	const struct STable *tab = stable_init();
+static void stable_iter_free__partial(void **state) {
+	const struct STableIter *iter = calloc(1, sizeof(struct STableIter));
 
-	assert_nul(stable_put(tab, "a", V0));
-
-	const struct STableIter *iter = stable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct STableIterState *st = iter->st;
-	((struct STableIter*)iter)->st = NULL;
-
-	iter = stable_iter_next(iter);
-	assert_nul(iter);
-
-	ptable_iter_free(st->pit);
-	free((void*)st);
-	stable_free(tab);
+	stable_iter_free(iter);
 }
 
-static void stable_iter__state_tab_deleted(void **state) {
-	const struct STable *tab = stable_init();
+static void stable_iter_next__partial(void **state) {
+	const struct STableIter *iter = calloc(1, sizeof(struct STableIter));
 
-	assert_nul(stable_put(tab, "a", V0));
-
-	const struct STableIter *iter = stable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct PTableIter *piter = iter->st->pit;
-	iter->st->pit = NULL;
-
-	iter = stable_iter_next(iter);
-	assert_nul(iter);
-
-	ptable_iter_free(piter);
-	stable_free(tab);
+	assert_nul(stable_iter_next(iter));
 }
 
 static void stable_iter__empty(void **state) {
@@ -506,10 +477,12 @@ int main(void) {
 
 		TEST(stable_free_vals__),
 
-		TEST(stable_iter__),
+		TEST(stable_iter__many),
 		TEST(stable_iter__empty),
-		TEST(stable_iter__state_deleted),
-		TEST(stable_iter__state_tab_deleted),
+
+		TEST(stable_iter_free__partial),
+
+		TEST(stable_iter_next__partial),
 
 		TEST(stable_filter_iter__),
 

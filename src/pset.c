@@ -229,7 +229,7 @@ const struct PSetIter *pset_iter_next(const struct PSetIter* const citer) {
 
 	struct PSetIter *iter = (struct PSetIter*)citer;
 	struct PSetIterState *st = iter->st;
-	if (!st || !st->set) {
+	if (!st) {
 		pset_iter_free(iter);
 		return NULL;
 	}

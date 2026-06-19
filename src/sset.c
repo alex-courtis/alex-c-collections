@@ -107,7 +107,7 @@ const struct SSetIter *sset_iter_next(const struct SSetIter* const citer) {
 
 	struct SSetIter *iter = (struct SSetIter*)citer;
 
-	if (!iter->st || !iter->st->pit) {
+	if (!iter->st) {
 		sset_iter_free(iter);
 		return NULL;
 	}

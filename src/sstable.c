@@ -121,7 +121,7 @@ const struct SSTableIter *sstable_iter_next(const struct SSTableIter* const cite
 
 	struct SSTableIter *iter = (struct SSTableIter*)citer;
 
-	if (!iter->st || !iter->st->pit) {
+	if (!iter->st) {
 		sstable_iter_free(iter);
 		return NULL;
 	}

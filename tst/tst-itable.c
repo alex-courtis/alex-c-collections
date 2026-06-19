@@ -29,13 +29,6 @@ struct ITable {
 	const struct PTable *ptab;
 };
 
-struct ITableIterState {
-	const struct PTableIter *pit;
-	fn_equal_size_t equal_key;
-	fn_equal equal_val;
-	const void *data;
-};
-
 /*
    diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/ITable/XTable/g' tst/tst-itable.c) <(sed -e 's/stable/xtable/g ; s/STable/XTable/g' tst/tst-stable.c) | less
    */
@@ -76,7 +69,7 @@ static void itable_free_vals__(void **state) {
 	itable_free_vals(tab);
 }
 
-static void itable_iter__(void **state) {
+static void itable_iter__many(void **state) {
 
 	const struct ITable *tab = itable_init();
 	assert_nul(itable_put(tab, 0, V0));
@@ -110,41 +103,16 @@ static void itable_iter__empty(void **state) {
 	itable_free(tab);
 }
 
-static void itable_iter__state_deleted(void **state) {
-	const struct ITable *tab = itable_init();
+static void itable_iter_free__partial(void **state) {
+	const struct ITableIter *iter = calloc(1, sizeof(struct ITableIter));
 
-	assert_nul(itable_put(tab, 0, V0));
-
-	const struct ITableIter *iter = itable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct ITableIterState *st = iter->st;
-	((struct ITableIter*)iter)->st = NULL;
-
-	iter = itable_iter_next(iter);
-	assert_nul(iter);
-
-	ptable_iter_free(st->pit);
-	free((void*)st);
-	itable_free(tab);
+	itable_iter_free(iter);
 }
 
-static void itable_iter__state_tab_deleted(void **state) {
-	const struct ITable *tab = itable_init();
+static void itable_iter_next__partial(void **state) {
+	const struct ITableIter *iter = calloc(1, sizeof(struct ITableIter));
 
-	assert_nul(itable_put(tab, 0, V0));
-
-	const struct ITableIter *iter = itable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct PTableIter *piter = iter->st->pit;
-	iter->st->pit = NULL;
-
-	iter = itable_iter_next(iter);
-	assert_nul(iter);
-
-	ptable_iter_free(piter);
-	itable_free(tab);
+	assert_nul(itable_iter_next(iter));
 }
 
 static void itable_filter_iter__(void **state) {
@@ -484,10 +452,12 @@ int main(void) {
 
 		TEST(itable_free_vals__),
 
-		TEST(itable_iter__),
+		TEST(itable_iter__many),
 		TEST(itable_iter__empty),
-		TEST(itable_iter__state_deleted),
-		TEST(itable_iter__state_tab_deleted),
+
+		TEST(itable_iter_free__partial),
+
+		TEST(itable_iter_next__partial),
 
 		TEST(itable_filter_iter__),
 

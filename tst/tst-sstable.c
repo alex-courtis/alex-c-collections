@@ -27,10 +27,6 @@ struct SSTable {
 	const struct PTable *ptab;
 };
 
-struct SSTableIterState {
-	const struct PTableIter *pit;
-};
-
 static void sstable_put_free_get_remove_free__case_sensitive(void **state) {
 
 	const struct SSTable *tab = sstable_init();
@@ -74,7 +70,7 @@ static void sstable_put_free_get_remove_free__case_insensitive(void **state) {
 	sstable_free_vals(tab);
 }
 
-static void sstable_iter__(void **state) {
+static void sstable_iter__many(void **state) {
 
 	const struct SSTable *tab = sstable_init();
 	assert_false(sstable_put_free(tab, "a", "aa"));
@@ -97,43 +93,6 @@ static void sstable_iter__(void **state) {
 	sstable_free_vals(tab);
 }
 
-static void sstable_iter__state_deleted(void **state) {
-	const struct SSTable *tab = sstable_init();
-
-	assert_false(sstable_put_free(tab, "a", "aa"));
-
-	const struct SSTableIter *iter = sstable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct SSTableIterState *st = iter->st;
-	((struct SSTableIter*)iter)->st = NULL;
-
-	iter = sstable_iter_next(iter);
-	assert_nul(iter);
-
-	ptable_iter_free(st->pit);
-	free((void*)st);
-	sstable_free_vals(tab);
-}
-
-static void sstable_iter__state_ptab_deleted(void **state) {
-	const struct SSTable *tab = sstable_init();
-
-	assert_false(sstable_put_free(tab, "a", "aa"));
-
-	const struct SSTableIter *iter = sstable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct PTableIter *piter = iter->st->pit;
-	iter->st->pit = NULL;
-
-	iter = sstable_iter_next(iter);
-	assert_nul(iter);
-
-	ptable_iter_free(piter);
-	sstable_free_vals(tab);
-}
-
 static void sstable_iter__empty(void **state) {
 
 	const struct SSTable *tab = sstable_init();
@@ -143,6 +102,18 @@ static void sstable_iter__empty(void **state) {
 	assert_nul(iter);
 
 	sstable_free_vals(tab);
+}
+
+static void sstable_iter_free__partial(void **state) {
+	const struct SSTableIter *iter = calloc(1, sizeof(struct SSTableIter));
+
+	sstable_iter_free(iter);
+}
+
+static void sstable_iter_next__partial(void **state) {
+	const struct SSTableIter *iter = calloc(1, sizeof(struct SSTableIter));
+
+	assert_nul(sstable_iter_next(iter));
 }
 
 static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
@@ -395,10 +366,12 @@ int main(void) {
 		TEST(sstable_put_free_get_remove_free__case_sensitive),
 		TEST(sstable_put_free_get_remove_free__case_insensitive),
 
-		TEST(sstable_iter__),
+		TEST(sstable_iter__many),
 		TEST(sstable_iter__empty),
-		TEST(sstable_iter__state_deleted),
-		TEST(sstable_iter__state_ptab_deleted),
+
+		TEST(sstable_iter_free__partial),
+
+		TEST(sstable_iter_next__partial),
 
 		TEST(sstable_filter_iter__),
 

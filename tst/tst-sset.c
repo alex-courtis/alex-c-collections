@@ -31,10 +31,6 @@ struct SSet {
 	const struct PSet *pset;
 };
 
-struct SSetIterState {
-	const struct PSetIter *pit;
-};
-
 static void sset_add__alloc_val_free_val(void **state) {
 	const struct SSet *set = sset_init();
 
@@ -89,7 +85,7 @@ static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	sset_free_vals(set);
 }
 
-static void sset_iter__(void **state) {
+static void sset_iter__many(void **state) {
 
 	const struct SSet *set = sset_init();
 	assert_true(sset_add(set, "a"));
@@ -109,43 +105,6 @@ static void sset_iter__(void **state) {
 	sset_free_vals(set);
 }
 
-static void sset_iter__state_deleted(void **state) {
-	const struct SSet *set = sset_init();
-
-	assert_true(sset_add(set, "a"));
-
-	const struct SSetIter *iter = sset_iter(set);
-	assert_non_nul(iter);
-
-	const struct SSetIterState *st = iter->st;
-	((struct SSetIter*)iter)->st = NULL;
-
-	iter = sset_iter_next(iter);
-	assert_nul(iter);
-
-	pset_iter_free(st->pit);
-	free((void*)st);
-	sset_free_vals(set);
-}
-
-static void sset_iter__state_set_deleted(void **state) {
-	const struct SSet *set = sset_init();
-
-	assert_true(sset_add(set, "a"));
-
-	const struct SSetIter *iter = sset_iter(set);
-	assert_non_nul(iter);
-
-	const struct PSetIter *piter = iter->st->pit;
-	iter->st->pit = NULL;
-
-	iter = sset_iter_next(iter);
-	assert_nul(iter);
-
-	pset_iter_free(piter);
-	sset_free_vals(set);
-}
-
 static void sset_iter__empty(void **state) {
 
 	const struct SSet *set = sset_init();
@@ -155,6 +114,18 @@ static void sset_iter__empty(void **state) {
 	assert_nul(iter);
 
 	sset_free_vals(set);
+}
+
+static void sset_iter_free__partial(void **state) {
+	const struct SSetIter *iter = calloc(1, sizeof(struct SSetIter));
+
+	sset_iter_free(iter);
+}
+
+static void sset_iter_next__partial(void **state) {
+	const struct SSetIter *iter = calloc(1, sizeof(struct SSetIter));
+
+	assert_nul(sset_iter_next(iter));
 }
 
 static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
@@ -417,10 +388,12 @@ int main(void) {
 		TEST(sset_add_contains_remove_free__case_insensitive),
 		TEST(sset_add_contains_remove_free__case_sensitive),
 
-		TEST(sset_iter__),
+		TEST(sset_iter__many),
 		TEST(sset_iter__empty),
-		TEST(sset_iter__state_deleted),
-		TEST(sset_iter__state_set_deleted),
+
+		TEST(sset_iter_free__partial),
+
+		TEST(sset_iter_next__partial),
 
 		TEST(sset_filter_iter__),
 

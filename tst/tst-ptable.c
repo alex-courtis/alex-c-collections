@@ -23,14 +23,6 @@ struct PTable {
 	size_t size;
 };
 
-struct PTableIterState {
-	const struct PTable *tab;
-	size_t position;
-	fn_equal equal_key;
-	fn_equal equal_val;
-	const void *data;
-};
-
 static int keys[6] = { 10, 11, 12, 13, 14, 15, };
 static void *K0 = &keys[0];
 static void *K1 = &keys[1];
@@ -601,39 +593,16 @@ static void ptable_iter__removed(void **state) {
 	ptable_free(tab);
 }
 
-static void ptable_iter__state_deleted(void **state) {
-	const struct PTable *tab = ptable_init();
+static void ptable_iter_free__partial(void **state) {
+	const struct PTableIter *iter = calloc(1, sizeof(struct PTableIter));
 
-	assert_nul(ptable_put(tab, K0, V0));
-
-	const struct PTableIter *iter = ptable_iter(tab);
-	assert_non_nul(iter);
-
-	const struct PTableIterState *st = iter->st;
-	((struct PTableIter*)iter)->st = NULL;
-
-	iter = ptable_iter_next(iter);
-	assert_nul(iter);
-
-	free((void*)st);
-	ptable_free(tab);
+	ptable_iter_free(iter);
 }
 
-static void ptable_iter__state_tab_deleted(void **state) {
-	const struct PTable *tab = ptable_init();
+static void ptable_iter_next__partial(void **state) {
+	const struct PTableIter *iter = calloc(1, sizeof(struct PTableIter));
 
-	assert_nul(ptable_put(tab, K0, V0));
-
-	const struct PTableIter *iter = ptable_iter(tab);
-	assert_non_nul(iter);
-
-	struct PTableIterState *st = iter->st;
-	st->tab = NULL;
-
-	iter = ptable_iter_next(iter);
-	assert_nul(iter);
-
-	ptable_free(tab);
+	assert_nul(ptable_iter_next(iter));
 }
 
 static void ptable_filter_iter__many(void **state) {
@@ -1263,8 +1232,10 @@ int main(void) {
 		TEST(ptable_iter__free),
 		TEST(ptable_iter__many),
 		TEST(ptable_iter__removed),
-		TEST(ptable_iter__state_deleted),
-		TEST(ptable_iter__state_tab_deleted),
+
+		TEST(ptable_iter_free__partial),
+
+		TEST(ptable_iter_next__partial),
 
 		TEST(ptable_filter_iter__many),
 
