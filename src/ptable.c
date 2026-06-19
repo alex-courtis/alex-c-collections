@@ -28,7 +28,7 @@ struct PTableIterState {
 };
 
 // grow to capacity + grow
-static void grow_ptable(struct PTable *tab) {
+static void grow(struct PTable *tab) {
 	size_t new_capacity = tab->capacity + (tab->params.grow ? tab->params.grow : PTABLE_DEFAULT_GROW);
 
 	// grow new arrays
@@ -49,7 +49,7 @@ static void grow_ptable(struct PTable *tab) {
 	tab->capacity = new_capacity;
 }
 
-static const void *put(const struct PTable* const ctab, const void* const key, const void* const val, const bool do_alloc_val) {
+static const void *put(const struct PTable* const ctab, const void* const key, const void* const val, const bool do_alloc_new_val) {
 	if (!ctab || !key)
 		return NULL;
 
@@ -73,7 +73,7 @@ static const void *put(const struct PTable* const ctab, const void* const key, c
 
 	// grow for new entry
 	if (tab->size >= tab->capacity) {
-		grow_ptable(tab);
+		grow(tab);
 		k = &tab->keys[tab->size];
 		v = &tab->vals[tab->size];
 	}
@@ -84,8 +84,8 @@ static const void *put(const struct PTable* const ctab, const void* const key, c
 	} else {
 		*k = key;
 	}
-	if (do_alloc_val && tab->params.alloc_val) {
-		*v = val ? tab->params.alloc_val(val) : NULL;
+	if (val && do_alloc_new_val && tab->params.alloc_val) {
+		*v = tab->params.alloc_val(val);
 	} else {
 		*v = val;
 	}
@@ -336,12 +336,14 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 }
 
 bool ptable_remove_free(const struct PTable* const tab, const void* const key) {
-	const void *removed = ptable_remove(tab, key);
-	if (removed) {
-		if (tab->params.free_val) {
-			tab->params.free_val(removed);
-		} else {
-			free((void*)removed);
+	if (ptable_contains_key(tab, key)) {
+		const void *removed = ptable_remove(tab, key);
+		if (removed) {
+			if (tab->params.free_val) {
+				tab->params.free_val(removed);
+			} else {
+				free((void*)removed);
+			}
 		}
 		return true;
 	} else {
@@ -405,8 +407,8 @@ struct SList *ptable_vals_slist(const struct PTable* const tab) {
 	const void **k;
 	const void **v;
 	for (k = tab->keys, v = tab->vals; k < tab->keys + tab->size; k++, v++) {
-		if (tab->params.alloc_val) {
-			slist_append(&list, *v ? (void*)tab->params.alloc_val(*v) : NULL);
+		if (*v && tab->params.alloc_val) {
+			slist_append(&list, (void*)tab->params.alloc_val(*v));
 		} else {
 			slist_append(&list, (void*)*v);
 		}

@@ -50,6 +50,10 @@ static void *V5 = &vals[5];
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
 
+static const void *fn_alloc_key_duplicate(const void* const val) {
+	return sprintf_alloc("%s%s", (char*)val, (char*)val);
+}
+
 static void ptable_init__defaults(void **state) {
 	const struct PTable *tab = ptable_init();
 
@@ -127,6 +131,12 @@ static void ptable_clone_shallow__many(void **state) {
 
 	assert_ptable_equal(from, to);
 
+	assert_ptr_equal(ptable_get(to, K0), NULL);
+	assert_ptr_equal(ptable_get(to, K1), V1);
+	assert_ptr_equal(ptable_get(to, K2), NULL);
+	assert_ptr_equal(ptable_get(to, K3), V3);
+	assert_ptr_equal(ptable_get(to, K4), NULL);
+
 	ptable_free(from);
 	ptable_free(to);
 }
@@ -143,21 +153,28 @@ static void ptable_clone_shallow__alloc_key(void **state) {
 	will_return_ptr_type(mock_alloc, K1, void*);
 	assert_nul(ptable_put(from, K1, V1));
 
-	expect_ptr(mock_alloc, val, K0);
+	expect_ptr(mock_alloc, val, K2);
 	will_return_ptr_type(mock_alloc, K2, void*);
-	expect_ptr(mock_alloc, val, K1);
+	assert_nul(ptable_put(from, K2, NULL));
+
+	expect_ptr(mock_alloc, val, K0);
 	will_return_ptr_type(mock_alloc, K3, void*);
+	expect_ptr(mock_alloc, val, K1);
+	will_return_ptr_type(mock_alloc, K4, void*);
+	expect_ptr(mock_alloc, val, K2);
+	will_return_ptr_type(mock_alloc, K5, void*);
 
 	const struct PTable *to = ptable_clone_shallow(from);
 
 	assert_non_nul(to);
 
-	assert_int_equal(ptable_size(to), 2);
+	assert_int_equal(ptable_size(to), 3);
 
 	assert_ptable_not_equal(from, to);
 
-	assert_ptr_equal(ptable_get(to, K2), V0);
-	assert_ptr_equal(ptable_get(to, K3), V1);
+	assert_ptr_equal(ptable_get(to, K3), V0);
+	assert_ptr_equal(ptable_get(to, K4), V1);
+	assert_ptr_equal(ptable_get(to, K5), NULL);
 
 	ptable_free(from);
 	ptable_free(to);
@@ -177,6 +194,8 @@ static void ptable_clone_deep__many(void **state) {
 
 	assert_nul(ptable_put(from, K1, V1));
 
+	assert_nul(ptable_put(from, K2, NULL));
+
 	expect_ptr(mock_alloc, val, V0);
 	will_return_ptr_type(mock_alloc, V2, void*);
 
@@ -187,12 +206,13 @@ static void ptable_clone_deep__many(void **state) {
 
 	assert_non_nul(to);
 
-	assert_int_equal(ptable_size(to), 2);
+	assert_int_equal(ptable_size(to), 3);
 
 	assert_ptable_not_equal(from, to);
 
 	assert_ptr_equal(ptable_get(to, K0), V2);
 	assert_ptr_equal(ptable_get(to, K1), V3);
+	assert_ptr_equal(ptable_get(to, K2), NULL);
 
 	ptable_free(from);
 	ptable_free(to);
@@ -361,6 +381,67 @@ static void ptable_put__grow(void **state) {
 	ptable_free(tab);
 }
 
+static void ptable_put__alloc_key_free_key(void **state) {
+	const struct PTableParams params = {
+		.equal_key = fn_equal_strcmp,
+		.alloc_key = fn_alloc_key_duplicate,
+		.free_key = (fn_free)free,
+	};
+	const struct PTable *tab = ptable_init_with(params);
+
+	assert_nul(ptable_put(tab, "zero", V0));
+	assert_nul(ptable_put(tab, "one", V1));
+
+	assert_ptr_equal(ptable_get(tab, "zerozero"), V0);
+	assert_ptr_equal(ptable_get(tab, "oneone"), V1);
+
+	assert_ptr_equal(ptable_remove(tab, "zerozero"), V0);
+
+	assert_int_equal(ptable_size(tab), 1);
+	assert_ptr_equal(ptable_get(tab, "oneone"), V1);
+
+	ptable_free(tab);
+}
+
+static void ptable_put__equal_key(void **state) {
+	const struct PTableParams params = { .equal_key = fn_equal_ptr, };
+	const struct PTable *tab = ptable_init_with(params);
+
+	assert_nul(ptable_put(tab, K0, V0));
+	assert_nul(ptable_put(tab, K1, V1));
+
+	assert_int_equal(ptable_size(tab), 2);
+	assert_ptr_equal(ptable_get(tab, K0), V0);
+	assert_ptr_equal(ptable_get(tab, K1), V1);
+
+	assert_ptr_equal(ptable_put(tab, K0, V2), V0);
+
+	assert_ptr_equal(ptable_remove(tab, K1), V1);
+
+	ptable_free(tab);
+}
+
+static void ptable_put__alloc_val(void **state) {
+	const struct PTableParams params = { .alloc_val = mock_alloc, };
+	const struct PTable *tab = ptable_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(ptable_put(tab, K0, V0));
+
+	assert_nul(ptable_put(tab, K1, NULL));
+
+	expect_ptr(mock_alloc, val, V1);
+	will_return_ptr_type(mock_alloc, V1, void*);
+
+	assert_ptr_equal(ptable_put(tab, K0, V1), V0);
+
+	assert_ptr_equal(ptable_put(tab, K0, NULL), V1);
+
+	ptable_free(tab);
+}
+
 static void ptable_put_free__free(void **state) {
 	const struct PTable *tab = ptable_init();
 
@@ -389,27 +470,6 @@ static void ptable_put_free__free_val(void **state) {
 	ptable_free(tab);
 }
 
-static void ptable_put__alloc_val(void **state) {
-	const struct PTableParams params = { .alloc_val = mock_alloc, };
-	const struct PTable *tab = ptable_init_with(params);
-
-	expect_ptr(mock_alloc, val, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
-
-	assert_nul(ptable_put(tab, K0, V0));
-
-	assert_nul(ptable_put(tab, K1, NULL));
-
-	expect_ptr(mock_alloc, val, V1);
-	will_return_ptr_type(mock_alloc, V1, void*);
-
-	assert_ptr_equal(ptable_put(tab, K0, V1), V0);
-
-	assert_ptr_equal(ptable_put(tab, K0, NULL), V1);
-
-	ptable_free(tab);
-}
-
 static void ptable_put_if_absent__(void **state) {
 	const struct PTable *tab = ptable_init();
 
@@ -418,50 +478,6 @@ static void ptable_put_if_absent__(void **state) {
 
 	const void *existing = ptable_put_if_absent(tab, K0, V1);
 	assert_ptr_equal(existing, V0);
-
-	ptable_free(tab);
-}
-
-static void ptable__equal_key(void **state) {
-	const struct PTableParams params = { .equal_key = fn_equal_ptr, };
-	const struct PTable *tab = ptable_init_with(params);
-
-	assert_nul(ptable_put(tab, K0, V0));
-	assert_nul(ptable_put(tab, K1, V1));
-
-	assert_int_equal(ptable_size(tab), 2);
-	assert_ptr_equal(ptable_get(tab, K0), V0);
-	assert_ptr_equal(ptable_get(tab, K1), V1);
-
-	assert_ptr_equal(ptable_put(tab, K0, V2), V0);
-
-	assert_ptr_equal(ptable_remove(tab, K1), V1);
-
-	ptable_free(tab);
-}
-
-static const void *fn_alloc_key_duplicate(const void* const val) {
-	return sprintf_alloc("%s%s", (char*)val, (char*)val);
-}
-
-static void ptable__alloc_key_free_key(void **state) {
-	const struct PTableParams params = {
-		.equal_key = fn_equal_strcmp,
-		.alloc_key = fn_alloc_key_duplicate,
-		.free_key = (fn_free)free,
-	};
-	const struct PTable *tab = ptable_init_with(params);
-
-	assert_nul(ptable_put(tab, "zero", V0));
-	assert_nul(ptable_put(tab, "one", V1));
-
-	assert_ptr_equal(ptable_get(tab, "zerozero"), V0);
-	assert_ptr_equal(ptable_get(tab, "oneone"), V1);
-
-	assert_ptr_equal(ptable_remove(tab, "zerozero"), V0);
-
-	assert_int_equal(ptable_size(tab), 1);
-	assert_ptr_equal(ptable_get(tab, "oneone"), V1);
 
 	ptable_free(tab);
 }
@@ -773,10 +789,13 @@ static void ptable_remove_free__free(void **state) {
 	const char *val = strdup("val");
 
 	assert_nul(ptable_put(tab, K0, val));
+	assert_nul(ptable_put(tab, K1, NULL));
 
 	assert_true(ptable_remove_free(tab, K0));
 
-	assert_false(ptable_remove_free(tab, K1));
+	assert_true(ptable_remove_free(tab, K1));
+
+	assert_false(ptable_remove_free(tab, K2));
 
 	ptable_free(tab);
 }
@@ -789,8 +808,12 @@ static void ptable_remove_free__free_val(void **state) {
 
 	assert_false(ptable_remove_free(tab, K1));
 
+	assert_nul(ptable_put(tab, K1, NULL));
+
 	expect_ptr(mock_free, val, V0);
 	assert_true(ptable_remove_free(tab, K0));
+
+	assert_true(ptable_remove_free(tab, K1));
 
 	ptable_free(tab);
 }
@@ -1191,11 +1214,12 @@ int main(void) {
 		TEST(ptable_put__null),
 		TEST(ptable_put__null_overwrite),
 		TEST(ptable_put__grow),
+		TEST(ptable_put__alloc_key_free_key),
+		TEST(ptable_put__equal_key),
+		TEST(ptable_put__alloc_val),
 
 		TEST(ptable_put_free__free),
 		TEST(ptable_put_free__free_val),
-
-		TEST(ptable_put__alloc_val),
 
 		TEST(ptable_put_if_absent__),
 
@@ -1218,10 +1242,6 @@ int main(void) {
 
 		TEST(ptable_contains_key__pointers),
 		TEST(ptable_contains_key__equal_key),
-
-		TEST(ptable__equal_key),
-
-		TEST(ptable__alloc_key_free_key),
 
 		TEST(ptable_equal__length_different),
 		TEST(ptable_equal__key_pointers_ok),

@@ -32,7 +32,7 @@ struct PSetIterState {
 };
 
 // grow to capacity + grow
-static void grow_pset(struct PSet *set) {
+static void grow(struct PSet *set) {
 	size_t new_capacity = set->capacity + (set->params.grow ? set->params.grow : PSET_DEFAULT_GROW);
 
 	// grow new arrays
@@ -58,14 +58,13 @@ static bool add(const struct PSet* const cset, const void* const val, bool do_al
 	const void **v;
 	for (v = set->vals; v < set->vals + set->size; v++) {
 		if (set->params.equal_val ? set->params.equal_val(*v, val) : *v == val) {
-			// TODO should this should overwrite as per table?
 			return false;
 		}
 	}
 
 	// maybe grow for new entry
 	if (set->size >= set->capacity) {
-		grow_pset(set);
+		grow(set);
 		v = &set->vals[set->size];
 	}
 

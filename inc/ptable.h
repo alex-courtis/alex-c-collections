@@ -24,6 +24,8 @@ struct PTableIter {
 	struct PTableIterState *st;
 };
 
+// TODO move the usages back into function comments
+
 /*
  * Optional constructor params (default)
  */
