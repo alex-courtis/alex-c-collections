@@ -45,7 +45,6 @@ const struct SSet *sset_init_with(const struct SSetParams params) {
 }
 
 const struct SSet *sset_clone_deep(const struct SSet* const from) {
-	// TODO NOP
 	if (!from)
 		return NULL;
 

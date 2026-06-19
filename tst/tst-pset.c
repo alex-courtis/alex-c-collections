@@ -62,7 +62,7 @@ static void pset_init__defaults(void **state) {
 	pset_free(set);
 }
 
-static void pset_clone__empty(void **state) {
+static void pset_clone_shallow__empty(void **state) {
 	const struct PSet *set = pset_init();
 
 	const struct PSet *clone = pset_clone_shallow(set);
@@ -76,7 +76,7 @@ static void pset_clone__empty(void **state) {
 }
 
 // also tests constructor
-static void pset_clone__params(void **state) {
+static void pset_clone_shallow__params(void **state) {
 	const struct PSetParams params = {
 		.equal_val = mock_equal,
 		.alloc_val = mock_alloc,
@@ -98,7 +98,7 @@ static void pset_clone__params(void **state) {
 	pset_free(clone);
 }
 
-static void pset_clone__shallow_many(void **state) {
+static void pset_clone_shallow__many(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -118,7 +118,7 @@ static void pset_clone__shallow_many(void **state) {
 	pset_free(set);
 }
 
-static void pset_clone__deep_many(void **state) {
+static void pset_clone_deep__alloc_val(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 	const struct PSet *set = pset_init_with(params);
 
@@ -145,6 +145,16 @@ static void pset_clone__deep_many(void **state) {
 	assert_true(pset_contains(clone, V3));
 
 	pset_free(clone);
+	pset_free(set);
+}
+
+static void pset_clone_deep__no_alloc_val(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+
+	assert_nul(pset_clone_deep(set));
+
 	pset_free(set);
 }
 
@@ -861,34 +871,45 @@ static void pset_str__str_val(void **state) {
 }
 
 static void pset__null_inputs(void **state) {
+	const struct PSet *set = pset_init();
+
 	assert_nul(pset_clone_deep(NULL));
 	assert_nul(pset_clone_shallow(NULL));
 	pset_free(NULL);
 	pset_free_vals(NULL);
 	pset_iter_free(NULL);
 	assert_false(pset_contains(NULL, NULL));
+	assert_false(pset_contains(set, NULL));
 	assert_nul(pset_iter(NULL));
 	assert_nul(pset_filter_iter(NULL, NULL, NULL));
 	assert_nul(pset_iter_next(NULL));
 	assert_false(pset_add(NULL, NULL));
+	assert_false(pset_add(set, NULL));
 	assert_false(pset_remove(NULL, NULL));
+	assert_false(pset_remove(set, NULL));
 	assert_false(pset_remove_free(NULL, NULL));
+	assert_false(pset_remove_free(set, NULL));
 	pset_sort(NULL, NULL);
 	assert_false(pset_equal(NULL, NULL));
+	assert_false(pset_equal(set, NULL));
 	assert_nul(pset_slist_shallow(NULL));
 	assert_nul(pset_slist_deep(NULL));
 	assert_nul(pset_str(NULL));
 	assert_int_equal(pset_size(NULL), 0);
+
+	pset_free(set);
 }
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(pset_init__defaults),
 
-		TEST(pset_clone__empty),
-		TEST(pset_clone__params),
-		TEST(pset_clone__shallow_many),
-		TEST(pset_clone__deep_many),
+		TEST(pset_clone_shallow__empty),
+		TEST(pset_clone_shallow__params),
+		TEST(pset_clone_shallow__many),
+
+		TEST(pset_clone_deep__alloc_val),
+		TEST(pset_clone_deep__no_alloc_val),
 
 		TEST(pset_free_vals__null_free_val),
 		TEST(pset_free_vals__missing_val),

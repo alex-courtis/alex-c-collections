@@ -386,20 +386,28 @@ static void sset_clone_deep__(void **state) {
 }
 
 static void sset__null_inputs(void **state) {
+	const struct SSet *set = sset_init();
+
 	assert_nul(sset_clone_deep(NULL));
 	sset_free_vals(NULL);
 	sset_iter_free(NULL);
 	assert_false(sset_contains(NULL, NULL));
+	assert_false(sset_contains(set, NULL));
 	assert_nul(sset_iter(NULL));
 	assert_nul(sset_filter_iter(NULL, NULL, NULL));
 	assert_nul(sset_iter_next(NULL));
 	assert_false(sset_add(NULL, NULL));
+	assert_false(sset_add(set, NULL));
 	assert_false(sset_remove_free(NULL, NULL));
+	assert_false(sset_remove_free(set, NULL));
 	assert_false(sset_equal(NULL, NULL));
+	assert_false(sset_equal(set, NULL));
 	assert_nul(sset_slist_deep(NULL));
 	assert_nul(sset_str(NULL));
 	sset_sort(NULL);
 	assert_int_equal(sset_size(NULL), 0);
+
+	sset_free_vals(set);
 }
 
 int main(void) {

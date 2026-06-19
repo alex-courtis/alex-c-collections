@@ -447,6 +447,8 @@ static void itable_clone_deep__no_alloc_val(void **state) {
 }
 
 static void itable__null_inputs(void **state) {
+	const struct ITable *tab = itable_init();
+
 	assert_nul(itable_clone_shallow(NULL));
 	assert_nul(itable_clone_deep(NULL));
 	itable_free(NULL);
@@ -459,14 +461,21 @@ static void itable__null_inputs(void **state) {
 	assert_nul(itable_iter_next(NULL));
 	assert_false(itable_put(NULL, 0, NULL));
 	assert_nul(itable_put_if_absent(NULL, 0, NULL));
+	assert_nul(itable_put_if_absent(tab, 0, NULL));
 	assert_false(itable_put_free(NULL, 0, NULL));
+	assert_false(itable_put_free(tab, 0, NULL));
 	assert_nul(itable_remove(NULL, 0));
+	assert_nul(itable_remove(tab, 0));
 	assert_false(itable_remove_free(NULL, 0));
+	assert_false(itable_remove_free(tab, 0));
 	assert_false(itable_equal(NULL, NULL));
+	assert_false(itable_equal(tab, NULL));
 	assert_nul(itable_vals_slist_shallow(NULL));
 	assert_nul(itable_vals_slist_deep(NULL));
 	assert_nul(itable_str(NULL));
 	assert_int_equal(itable_size(NULL), 0);
+
+	itable_free(tab);
 }
 
 int main(void) {

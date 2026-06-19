@@ -49,10 +49,8 @@ static void grow(struct PTable *tab) {
 	tab->capacity = new_capacity;
 }
 
-// TODO normalise "do" with function pointers
-
-static const void *put(const struct PTable* const ctab, const void* const key, const void* const val, const bool do_alloc_new_val) {
-	if (!ctab || !key)
+static const void *put(const struct PTable* const ctab, const void* const key, const void* const val, fn_alloc alloc_val) {
+	if (!key)
 		return NULL;
 
 	struct PTable *tab = (struct PTable*)ctab;
@@ -64,8 +62,8 @@ static const void *put(const struct PTable* const ctab, const void* const key, c
 		// overwrite existing values
 		if (tab->params.equal_key ? tab->params.equal_key(*k, key) : *k == key) {
 			const void *val_old = *v;
-			if (val && tab->params.alloc_val) {
-				*v = tab->params.alloc_val(val);
+			if (val && alloc_val) {
+				*v = alloc_val(val);
 			} else {
 				*v = val;
 			}
@@ -86,8 +84,8 @@ static const void *put(const struct PTable* const ctab, const void* const key, c
 	} else {
 		*k = key;
 	}
-	if (val && do_alloc_new_val && tab->params.alloc_val) {
-		*v = tab->params.alloc_val(val);
+	if (val && alloc_val) {
+		*v = alloc_val(val);
 	} else {
 		*v = val;
 	}
@@ -97,29 +95,19 @@ static const void *put(const struct PTable* const ctab, const void* const key, c
 	return NULL;
 }
 
-static const struct PTable *clone(const struct PTable* const from, bool deep) {
-	if (!from)
-		return NULL;
-
+static const struct PTable *clone(const struct PTable* const from, fn_alloc alloc_val) {
 	const struct PTable *to =  ptable_init_with(from->params);
 
 	const void **k;
 	const void **v;
 	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
-		if (deep) {
-			put(to, *k, *v, true);
-		} else {
-			put(to, *k, *v, false);
-		}
+		put(to, *k, *v, alloc_val);
 	}
 
 	return to;
 }
 
 static struct SList *keys_slist(const struct PTable* const tab, fn_alloc alloc_key) {
-	if (!tab)
-		return NULL;
-
 	struct SList *list = NULL;
 
 	const void **k;
@@ -135,9 +123,6 @@ static struct SList *keys_slist(const struct PTable* const tab, fn_alloc alloc_k
 }
 
 static struct SList *vals_slist(const struct PTable* const tab, fn_alloc alloc_val) {
-	if (!tab)
-		return NULL;
-
 	struct SList *list = NULL;
 
 	const void **k;
@@ -171,14 +156,14 @@ const struct PTable *ptable_init_with(const struct PTableParams params) {
 }
 
 const struct PTable *ptable_clone_shallow(const struct PTable* const from) {
-	return clone(from, false);
+	return from ? clone(from, NULL) : NULL;
 }
 
 const struct PTable *ptable_clone_deep(const struct PTable* const from) {
 	if (!from || !from->params.alloc_val)
 		return NULL;
 
-	return clone(from, true);
+	return clone(from, from->params.alloc_val);
 }
 
 void ptable_free(const struct PTable* const tab) {
@@ -311,7 +296,7 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const citer) 
 
 
 const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val) {
-	return put(tab, key, val, true);
+	return tab ? put(tab, key, val, tab->params.alloc_val) : NULL;
 }
 
 const void *ptable_put_if_absent(const struct PTable* const tab, const void* const key, const void* const val) {
@@ -321,13 +306,16 @@ const void *ptable_put_if_absent(const struct PTable* const tab, const void* con
 	if (ptable_contains_key(tab, key)) {
 		return ptable_get(tab, key);
 	} else {
-		put(tab, key, val, true);
+		put(tab, key, val, tab->params.alloc_val);
 		return NULL;
 	}
 }
 
 bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val) {
-	const void *val_old = put(tab, key, val, true);
+	if (!tab)
+		return false;
+
+	const void *val_old = put(tab, key, val, tab->params.alloc_val);
 
 	if (val_old) {
 		if (tab->params.free_val) {
@@ -423,7 +411,7 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b) {
 }
 
 struct SList *ptable_keys_slist_shallow(const struct PTable* const tab) {
-	return keys_slist(tab, NULL);
+	return tab ? keys_slist(tab, NULL) : NULL;
 }
 
 struct SList *ptable_keys_slist_deep(const struct PTable* const tab) {
@@ -434,7 +422,7 @@ struct SList *ptable_keys_slist_deep(const struct PTable* const tab) {
 }
 
 struct SList *ptable_vals_slist_shallow(const struct PTable* const tab) {
-	return vals_slist(tab, NULL);
+	return tab ? vals_slist(tab, NULL) : NULL;
 }
 
 struct SList *ptable_vals_slist_deep(const struct PTable* const tab) {

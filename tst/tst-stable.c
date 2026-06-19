@@ -465,27 +465,38 @@ static void stable_clone_deep__no_alloc_val(void **state) {
 }
 
 static void stable__null_inputs(void **state) {
+	const struct STable *tab = stable_init();
+
 	assert_nul(stable_clone_shallow(NULL));
 	assert_nul(stable_clone_deep(NULL));
 	stable_free(NULL);
 	stable_free_vals(NULL);
 	stable_iter_free(NULL);
 	assert_false(stable_get(NULL, NULL));
+	assert_false(stable_get(tab, NULL));
 	assert_false(stable_contains_key(NULL, NULL));
 	assert_nul(stable_iter(NULL));
 	assert_nul(stable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(stable_iter_next(NULL));
 	assert_nul(stable_put(NULL, NULL, NULL));
+	assert_nul(stable_put(tab, NULL, NULL));
 	assert_nul(stable_put_if_absent(NULL, NULL, NULL));
+	assert_nul(stable_put_if_absent(tab, NULL, NULL));
 	assert_false(stable_put_free(NULL, NULL, NULL));
+	assert_false(stable_put_free(tab, NULL, NULL));
 	assert_nul(stable_remove(NULL, NULL));
+	assert_nul(stable_remove(tab, NULL));
 	assert_false(stable_remove_free(NULL, NULL));
+	assert_false(stable_remove_free(tab, NULL));
 	assert_false(stable_equal(NULL, NULL));
+	assert_false(stable_equal(tab, NULL));
 	assert_nul(stable_keys_slist_deep(NULL));
 	assert_nul(stable_vals_slist_shallow(NULL));
 	assert_nul(stable_vals_slist_deep(NULL));
 	assert_nul(stable_str(NULL));
 	assert_int_equal(stable_size(NULL), 0);
+
+	stable_free(tab);
 }
 
 int main(void) {

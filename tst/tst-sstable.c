@@ -368,7 +368,9 @@ static void sstable__null_inputs(void **state) {
 	sstable_free_vals(NULL);
 	sstable_iter_free(NULL);
 	assert_false(sstable_get(NULL, NULL));
+	assert_false(sstable_get(tab, NULL));
 	assert_false(sstable_contains_key(NULL, NULL));
+	assert_false(sstable_contains_key(tab, NULL));
 	assert_nul(sstable_iter(NULL));
 	assert_nul(sstable_filter_iter(NULL, NULL, NULL, NULL));
 	assert_nul(sstable_iter_next(NULL));
@@ -377,7 +379,9 @@ static void sstable__null_inputs(void **state) {
 	assert_false(sstable_put_if_absent(NULL, NULL, NULL));
 	assert_false(sstable_put_if_absent(tab, NULL, NULL));
 	assert_false(sstable_remove_free(NULL, NULL));
+	assert_false(sstable_remove_free(tab, NULL));
 	assert_false(sstable_equal(NULL, NULL));
+	assert_false(sstable_equal(tab, NULL));
 	assert_nul(sstable_keys_slist_deep(NULL));
 	assert_nul(sstable_vals_slist_deep(NULL));
 	assert_nul(sstable_str(NULL));

@@ -186,6 +186,7 @@ const struct ITableIter *itable_iter_next(const struct ITableIter* const citer) 
 
 	struct ITableIter *it = (struct ITableIter*)citer;
 
+	// TODO remove unnecessary guard
 	if (!it->st || !it->st->pit) {
 		itable_iter_free(it);
 		return NULL;

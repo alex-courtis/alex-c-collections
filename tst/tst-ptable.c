@@ -1214,6 +1214,7 @@ static void ptable__null_inputs(void **state) {
 	assert_nul(ptable_put_if_absent(NULL, NULL, NULL));
 	assert_nul(ptable_put_if_absent(tab, NULL, NULL));
 	assert_false(ptable_put_free(NULL, NULL, NULL));
+	assert_false(ptable_put_free(tab, NULL, NULL));
 	assert_nul(ptable_remove(NULL, NULL));
 	assert_nul(ptable_remove(tab, NULL));
 	assert_false(ptable_equal(NULL, NULL));
