@@ -6,7 +6,7 @@
 
 #include "fn.h"
 
-// TODO STableS
+// TODO SMapS
 
 /*
  * `PTable` with string keys and vals.

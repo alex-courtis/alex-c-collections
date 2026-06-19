@@ -1,0 +1,518 @@
+#include "tst.h"
+#include "asserts.h"
+#include "assert-smap.h"
+#include "expects.h"
+#include "mock-fn.h"
+
+#include <cmocka.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "fn.h"
+#include "ptable.h"
+#include "slist.h"
+#include "str.h"
+
+#include "smap.h"
+
+struct PTable {
+	const struct PTableParams params;
+	const void **keys;
+	const void **vals;
+	size_t capacity;
+	size_t size;
+};
+
+struct SMap {
+	const struct SMapParams params;
+	const struct PTable *ptab;
+};
+
+/*
+   diff --color=always -U 10000 <(sed -e 's/itable/xtable/g ; s/SMap/XTable/g' tst/tst-itable.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' tst/tst-smap.c) | less
+
+   diff --color=always -U 10000 <(sed -e 's/ssmap/xtable/g ; s/SSMap/XTable/g' tst/tst-ssmap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' tst/tst-smap.c) | less
+   */
+
+static int vals[3] = { 20, 21, 22, };
+static void *V0 = &vals[0];
+static void *V1 = &vals[1];
+static void *V2 = &vals[2];
+
+static int datas[1] = { 30, };
+static void *D0 = &datas[0];
+
+static void smap_put_get_remove__case_sensitive(void **state) {
+
+	const struct SMap *tab = smap_init();
+	assert_nul(smap_put(tab, "a", V0));
+	assert_nul(smap_put(tab, "b", V1));
+	assert_nul(smap_put(tab, "c", V2));
+
+	assert_int_equal(smap_size(tab), 3);
+
+	assert_ptr_equal(smap_get(tab, "b"), V1);
+
+	assert_nul(smap_get(tab, "x"));
+
+	assert_ptr_equal(smap_remove(tab, "b"), V1);
+
+	assert_nul(smap_get(tab, "b"));
+
+	smap_free(tab);
+}
+
+static void smap_put_get_remove__case_insensitive(void **state) {
+	const struct SMapParams params = { .case_insensitive = true, };
+	const struct SMap *tab = smap_init_with(params);
+
+	assert_nul(smap_put(tab, "A", V0));
+	assert_nul(smap_put(tab, "B", V1));
+
+	assert_ptr_equal(smap_get(tab, "b"), V1);
+
+	assert_nul(smap_get(tab, "x"));
+
+	assert_ptr_equal(smap_remove(tab, "b"), V1);
+
+	assert_nul(smap_get(tab, "b"));
+
+	smap_free(tab);
+}
+
+static void smap_free_vals__(void **state) {
+	const struct SMap *tab = smap_init();
+	assert_nul(smap_put(tab, "a", strdup("zero")));
+
+	smap_free_vals(tab);
+}
+
+static void smap_iter__many(void **state) {
+
+	const struct SMap *tab = smap_init();
+	assert_nul(smap_put(tab, "a", V0));
+	assert_nul(smap_put(tab, "b", NULL));
+	assert_nul(smap_put(tab, "c", V2));
+
+	const struct SMapIter *iter = smap_iter(tab);
+
+	assert_non_nul(iter);
+	assert_str_equal(iter->key, "a");
+	assert_ptr_equal(iter->val, V0);
+
+	iter = smap_iter_next(iter);
+	assert_non_nul(iter);
+	assert_str_equal(iter->key, "b");
+	assert_nul(iter->val);
+
+	smap_iter_free(iter);
+
+	smap_free(tab);
+}
+
+static void smap_iter_free__partial(void **state) {
+	const struct SMapIter *iter = calloc(1, sizeof(struct SMapIter));
+
+	smap_iter_free(iter);
+}
+
+static void smap_iter_next__partial(void **state) {
+	const struct SMapIter *iter = calloc(1, sizeof(struct SMapIter));
+
+	assert_nul(smap_iter_next(iter));
+}
+
+static void smap_iter__empty(void **state) {
+
+	const struct SMap *tab = smap_init();
+
+	const struct SMapIter *iter = smap_iter(tab);
+
+	assert_nul(iter);
+
+	smap_free(tab);
+}
+
+static void smap_filter_iter__(void **state) {
+	const struct SMap *tab = smap_init();
+
+	assert_nul(smap_put(tab, "0", V0));
+	assert_nul(smap_put(tab, "1", V1));
+	assert_nul(smap_put(tab, "2", V2));
+
+	// skip "0"
+	expect_string(mock_equal, a, "0");
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
+
+	// get 1
+	expect_string(mock_equal, a, "1");
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
+	expect_ptr(mock_equal, a, V1);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
+
+	const struct SMapIter *iter = smap_filter_iter(tab, mock_equal, mock_equal, D0);
+	assert_non_nul(iter);
+	assert_str_equal(iter->key, "1");
+	assert_ptr_equal(iter->val, V1);
+
+	// skip V2
+	expect_string(mock_equal, a, "2");
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, true);
+	expect_ptr(mock_equal, a, V2);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
+
+	// done
+	iter = smap_iter_next(iter);
+	assert_nul(iter);
+
+	smap_free(tab);
+}
+
+static void smap_equal__case_sensitive(void **state) {
+
+	const struct SMap *actual = smap_init();
+	assert_nul(smap_put(actual, "a", V0));
+	assert_nul(smap_put(actual, "b", V1));
+
+	assert_smap_not_equal(actual, NULL);
+
+	const struct SMap *expected = smap_init();
+	assert_nul(smap_put(expected, "a", V0));
+	assert_nul(smap_put(expected, "b", V1));
+
+	assert_smap_equal(actual, expected);
+
+	smap_free(actual);
+	smap_free(expected);
+}
+
+static void smap_equal__case_insensitive(void **state) {
+
+	const struct SMapParams params = { .case_insensitive = true, };
+	const struct SMap *actual = smap_init_with(params);
+
+	assert_nul(smap_put(actual, "a", V0));
+	assert_nul(smap_put(actual, "b", V1));
+
+	const struct SMap *expected = smap_init();
+	assert_nul(smap_put(expected, "A", V0));
+	assert_nul(smap_put(expected, "B", V1));
+
+	assert_smap_equal(actual, expected);
+
+	assert_nul(smap_put(actual, "c", V2));
+
+	assert_smap_not_equal(actual, expected);
+
+	smap_free(actual);
+	smap_free(expected);
+}
+
+static void smap_contains_key__(void **state) {
+	const struct SMap *tab = smap_init();
+
+	assert_false(smap_contains_key(tab, "a"));
+
+	assert_nul(smap_put(tab, "a", V0));
+	assert_nul(smap_put(tab, "b", V1));
+
+	assert_true(smap_contains_key(tab, "a"));
+	assert_true(smap_contains_key(tab, "b"));
+
+	assert_false(smap_contains_key(tab, "c"));
+
+	assert_false(smap_contains_key(tab, NULL));
+
+	smap_free(tab);
+}
+
+static void smap_put_free__(void **state) {
+	const struct SMapParams params = { .free_val = mock_free, };
+	const struct SMap *tab = smap_init_with(params);
+
+	assert_nul(smap_put(tab, "a", V0));
+
+	assert_false(smap_put_free(tab, "b", V1));
+
+	expect_ptr(mock_free, val, V0);
+	assert_true(smap_put_free(tab, "a", V0));
+
+	smap_free(tab);
+}
+
+static void smap_put_if_absent__(void **state) {
+	const struct SMap *tab = smap_init();
+
+	assert_nul(smap_put_if_absent(tab, "a", V0));
+	assert_ptr_equal(smap_get(tab, "a"), V0);
+
+	const void *existing = smap_put_if_absent(tab, "a", V1);
+	assert_ptr_equal(existing, V0);
+
+	smap_free(tab);
+}
+
+static void smap_remove_free__(void **state) {
+	const struct SMapParams params = { .free_val = mock_free, };
+	const struct SMap *tab = smap_init_with(params);
+
+	assert_nul(smap_put(tab, "a", V0));
+
+	assert_false(smap_remove_free(tab, "b"));
+
+	expect_ptr(mock_free, val, V0);
+	assert_true(smap_remove_free(tab, "a"));
+
+	smap_free(tab);
+}
+
+static void smap_str__(void **state) {
+
+	const struct SMap *tab = smap_init();
+	assert_nul(smap_put(tab, "a", V0));
+	assert_nul(smap_put(tab, "b", NULL));
+	assert_nul(smap_put(tab, "c", V2));
+
+	char *expected = sprintf_alloc(
+			"a = %p\n"
+			"b = (null)\n"
+			"c = %p\n",
+			V0,
+			V2
+			);
+
+	char *actual = smap_str(tab);
+
+	assert_str_equal(actual, expected);
+
+	free(actual);
+	free(expected);
+	smap_free(tab);
+}
+
+static void smap_keys_slist_deep__many(void **state) {
+	const struct SMap *tab = smap_init();
+
+	smap_put(tab, "a", V0);
+	smap_put(tab, "b", V1);
+
+	struct SList *list = smap_keys_slist_deep(tab);
+
+	assert_int_equal(slist_length(list), 2);
+	assert_str_equal(slist_at(list, 0), "a");
+	assert_str_equal(slist_at(list, 1), "b");
+
+	smap_free(tab);
+	slist_free_vals(&list, NULL);
+}
+
+static void smap_vals_slist_shallow__many(void **state) {
+	const struct SMap *tab = smap_init();
+
+	smap_put(tab, "a", V0);
+	smap_put(tab, "b", NULL);
+	smap_put(tab, "c", V2);
+
+	struct SList *list = smap_vals_slist_shallow(tab);
+
+	assert_int_equal(slist_length(list), 3);
+	assert_ptr_equal(slist_at(list, 0), V0);
+	assert_nul(slist_at(list, 1));
+	assert_ptr_equal(slist_at(list, 2), V2);
+
+	slist_free(&list);
+	smap_free(tab);
+}
+
+static void smap_vals_slist_deep__many(void **state) {
+	const struct SMapParams params = { .alloc_val = (fn_alloc)strdup, };
+	const struct SMap *tab = smap_init_with(params);
+
+	smap_put(tab, "a", "aa");
+	smap_put(tab, "b", NULL);
+	smap_put(tab, "c", "bb");
+
+	struct SList *list = smap_vals_slist_deep(tab);
+
+	assert_int_equal(slist_length(list), 3);
+	assert_str_equal(slist_at(list, 0), "aa");
+	assert_nul(slist_at(list, 1));
+	assert_str_equal(slist_at(list, 2), "bb");
+
+	slist_free_vals(&list, NULL);
+	smap_free_vals(tab);
+}
+
+static void smap_clone_shallow__many(void **state) {
+	const struct SMap *from = smap_init();
+
+	assert_nul(smap_put(from, "a", V0));
+	assert_nul(smap_put(from, "b", NULL));
+	assert_nul(smap_put(from, "c", V2));
+
+	const struct SMap *to = smap_clone_shallow(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(smap_size(to), 3);
+
+	assert_smap_equal(from, to);
+
+	smap_free(from);
+	smap_free(to);
+}
+
+// also tests constructor
+static void smap_clone_shallow__params(void **state) {
+	const struct SMapParams params = {
+		.case_insensitive = true,
+		.equal_val = mock_equal,
+		.free_val = mock_free,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SMap *from = smap_init_with(params);
+
+	const struct SMap *to = smap_clone_shallow(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(to->ptab->size, 0);
+	assert_int_equal(to->ptab->capacity, 99);
+	assert_int_equal(to->ptab->params.grow, 1);
+	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
+	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
+	assert_ptr_equal(to->ptab->params.alloc_key, (fn_alloc)strdup);
+	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ptab->params.free_val, mock_free);
+
+	assert_true(to->params.case_insensitive);
+	assert_ptr_equal(to->params.equal_val, mock_equal);
+	assert_ptr_equal(to->params.initial, 99);
+	assert_ptr_equal(to->params.grow, 1);
+
+	smap_free(from);
+	smap_free(to);
+}
+
+static void smap_clone_deep__alloc_val(void **state) {
+	const struct SMapParams params = { .alloc_val = mock_alloc, };
+	const struct SMap *from = smap_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(smap_put(from, "a", V0));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct SMap *to = smap_clone_deep(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(smap_size(to), 1);
+
+	assert_smap_equal(from, to);
+
+	smap_free(from);
+	smap_free(to);
+}
+
+static void smap_clone_deep__no_alloc_val(void **state) {
+	const struct SMap *from = smap_init();
+
+	assert_nul(smap_put(from, 0, V0));
+
+	assert_nul(smap_clone_deep(from));
+
+	smap_free(from);
+}
+
+static void smap__null_inputs(void **state) {
+	const struct SMap *tab = smap_init();
+
+	assert_nul(smap_clone_shallow(NULL));
+	assert_nul(smap_clone_deep(NULL));
+	smap_free(NULL);
+	smap_free_vals(NULL);
+	smap_iter_free(NULL);
+	assert_false(smap_get(NULL, NULL));
+	assert_false(smap_get(tab, NULL));
+	assert_false(smap_contains_key(NULL, NULL));
+	assert_nul(smap_iter(NULL));
+	assert_nul(smap_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(smap_iter_next(NULL));
+	assert_nul(smap_put(NULL, NULL, NULL));
+	assert_nul(smap_put(tab, NULL, NULL));
+	assert_nul(smap_put_if_absent(NULL, NULL, NULL));
+	assert_nul(smap_put_if_absent(tab, NULL, NULL));
+	assert_false(smap_put_free(NULL, NULL, NULL));
+	assert_false(smap_put_free(tab, NULL, NULL));
+	assert_nul(smap_remove(NULL, NULL));
+	assert_nul(smap_remove(tab, NULL));
+	assert_false(smap_remove_free(NULL, NULL));
+	assert_false(smap_remove_free(tab, NULL));
+	assert_false(smap_equal(NULL, NULL));
+	assert_false(smap_equal(tab, NULL));
+	assert_nul(smap_keys_slist_deep(NULL));
+	assert_nul(smap_vals_slist_shallow(NULL));
+	assert_nul(smap_vals_slist_deep(NULL));
+	assert_nul(smap_str(NULL));
+	assert_int_equal(smap_size(NULL), 0);
+
+	smap_free(tab);
+}
+
+int main(void) {
+	const struct CMUnitTest tests[] = {
+		TEST(smap_put_get_remove__case_sensitive),
+		TEST(smap_put_get_remove__case_insensitive),
+
+		TEST(smap_free_vals__),
+
+		TEST(smap_iter__many),
+		TEST(smap_iter__empty),
+
+		TEST(smap_iter_free__partial),
+
+		TEST(smap_iter_next__partial),
+
+		TEST(smap_filter_iter__),
+
+		TEST(smap_equal__case_sensitive),
+		TEST(smap_equal__case_insensitive),
+
+		TEST(smap_contains_key__),
+
+		TEST(smap_put_free__),
+
+		TEST(smap_put_if_absent__),
+
+		TEST(smap_remove_free__),
+
+		TEST(smap_str__),
+
+		TEST(smap_keys_slist_deep__many),
+
+		TEST(smap_vals_slist_deep__many),
+		TEST(smap_vals_slist_shallow__many),
+
+		TEST(smap_clone_shallow__many),
+		TEST(smap_clone_shallow__params),
+
+		TEST(smap_clone_deep__alloc_val),
+		TEST(smap_clone_deep__no_alloc_val),
+
+		TEST(smap__null_inputs),
+	};
+
+	return RUN(tests);
+}
+

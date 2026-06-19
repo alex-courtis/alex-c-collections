@@ -33,7 +33,7 @@ Not thread safe.
 
 * `PTable` with `size_t` keys
 
-### STable
+### SMap
 
 * `PTable` with string keys.
 * Keys are memory managed.
