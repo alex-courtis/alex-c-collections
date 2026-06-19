@@ -8,14 +8,14 @@
 #include <string.h>
 
 #include "fn.h"
-#include "ptable.h"
+#include "pmap.h"
 #include "slist.h"
 #include "str.h"
 
 #include "smaps.h"
 
-struct PTable {
-	const struct PTableParams params;
+struct PMap {
+	const struct PMapParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
@@ -24,7 +24,7 @@ struct PTable {
 
 struct SMapS {
 	const struct SMapSParams params;
-	const struct PTable *ptab;
+	const struct PMap *ptab;
 };
 
 static void smaps_put_free_get_remove_free__case_sensitive(void **state) {

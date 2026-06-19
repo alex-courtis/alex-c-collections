@@ -10,14 +10,14 @@
 #include <string.h>
 
 #include "fn.h"
-#include "ptable.h"
+#include "pmap.h"
 #include "slist.h"
 #include "str.h"
 
 #include "smap.h"
 
-struct PTable {
-	const struct PTableParams params;
+struct PMap {
+	const struct PMapParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
@@ -26,7 +26,7 @@ struct PTable {
 
 struct SMap {
 	const struct SMapParams params;
-	const struct PTable *ptab;
+	const struct PMap *ptab;
 };
 
 /*

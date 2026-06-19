@@ -1,5 +1,5 @@
-#ifndef PTABLE_H
-#define PTABLE_H
+#ifndef PMAP_H
+#define PMAP_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -12,16 +12,16 @@
  * Operations linearly traverse keys.
  * NULL values permitted.
  */
-struct PTable; // IWYU pragma: keep
+struct PMap; // IWYU pragma: keep
 
 /*
  * Entry iterator.
  */
-struct PTableIterState; // IWYU pragma: keep
-struct PTableIter {
+struct PMapIterState; // IWYU pragma: keep
+struct PMapIter {
 	const void *key;
 	const void *val;
-	struct PTableIterState *st;
+	struct PMapIterState *st;
 };
 
 // TODO move the usages back into function comments
@@ -29,7 +29,7 @@ struct PTableIter {
 /*
  * Optional constructor params (default)
  */
-struct PTableParams {
+struct PMapParams {
 	const fn_equal equal_key;   // _get, _contains_key, _put, _equal, _clone_ (compare key pointers)
 	const fn_equal equal_val;   // _equal                                     (compare val pointers)
 	const fn_alloc alloc_key;   // _clone_, _put, must be idempotent          (use key pointer)
@@ -46,97 +46,97 @@ struct PTableParams {
  * Lifecycle
  */
 
-// construct a table with PTableParams defaults
-const struct PTable *ptable_init(void);
+// construct a table with PMapParams defaults
+const struct PMap *pmap_init(void);
 
 // construct a table with params
-const struct PTable *ptable_init_with(const struct PTableParams params);
+const struct PMap *pmap_init_with(const struct PMapParams params);
 
 // clone a table, setting val pointers
-const struct PTable *ptable_clone_shallow(const struct PTable* const from);
+const struct PMap *pmap_clone_shallow(const struct PMap* const from);
 
 // clone a table, NOP when NULL alloc_val
-const struct PTable *ptable_clone_deep(const struct PTable* const from);
+const struct PMap *pmap_clone_deep(const struct PMap* const from);
 
 // free table
-void ptable_free(const struct PTable* const tab);
+void pmap_free(const struct PMap* const tab);
 
 // free table and vals
-void ptable_free_vals(const struct PTable* const tab);
+void pmap_free_vals(const struct PMap* const tab);
 
 // free iter
-void ptable_iter_free(const struct PTableIter* const iter);
+void pmap_iter_free(const struct PMapIter* const iter);
 
 /*
  * Access
  */
 
 // return val, NULL if not present
-const void *ptable_get(const struct PTable* const tab, const void* const key);
+const void *pmap_get(const struct PMap* const tab, const void* const key);
 
 // true if key is present
-bool ptable_contains_key(const struct PTable* const tab, const void* const key);
+bool pmap_contains_key(const struct PMap* const tab, const void* const key);
 
-// create an iterator, caller must ptable_iter_free or invoke ptable_next until NULL
-const struct PTableIter *ptable_iter(const struct PTable* const tab);
+// create an iterator, caller must pmap_iter_free or invoke pmap_next until NULL
+const struct PMapIter *pmap_iter(const struct PMap* const tab);
 
 // create an iterator filtering by equal_key and equal_val, NULL tests match all
-const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
+const struct PMapIter *pmap_filter_iter(const struct PMap* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
 
 // next iterator entry, NULL at end of table
-const struct PTableIter *ptable_iter_next(const struct PTableIter* const iter);
+const struct PMapIter *pmap_iter_next(const struct PMapIter* const iter);
 
 /*
  * Mutate
  */
 
 // set key/val, return old val if overwritten
-const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val);
+const void *pmap_put(const struct PMap* const tab, const void* const key, const void* const val);
 
 // set key/val if not present, return existing val if present
-const void *ptable_put_if_absent(const struct PTable* const tab, const void* const key, const void* const val);
+const void *pmap_put_if_absent(const struct PMap* const tab, const void* const key, const void* const val);
 
 // set key/val, free old val, return true if overwritten
-bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val);
+bool pmap_put_free(const struct PMap* const tab, const void* const key, const void* const val);
 
 // remove val, return old val if present
-const void *ptable_remove(const struct PTable* const tab, const void* const key);
+const void *pmap_remove(const struct PMap* const tab, const void* const key);
 
 // remove val, if removed free val and return true
-bool ptable_remove_free(const struct PTable* const tab, const void* const key);
+bool pmap_remove_free(const struct PMap* const tab, const void* const key);
 
 /*
  * Comparison
  */
 
 // same length, keys and vals equal in order, uses equal_key and equal_val from a
-bool ptable_equal(const struct PTable* const a, const struct PTable* const b);
+bool pmap_equal(const struct PMap* const a, const struct PMap* const b);
 
 /*
  * Conversion
  */
 
 // ordered keys, caller frees list only
-struct SList *ptable_keys_slist_shallow(const struct PTable* const tab);
+struct SList *pmap_keys_slist_shallow(const struct PMap* const tab);
 
 // ordered keys, caller frees list list and vals, NOP when NULL alloc_key
-struct SList *ptable_keys_slist_deep(const struct PTable* const tab);
+struct SList *pmap_keys_slist_deep(const struct PMap* const tab);
 
 // ordered vals, caller frees list only
-struct SList *ptable_vals_slist_shallow(const struct PTable* const tab);
+struct SList *pmap_vals_slist_shallow(const struct PMap* const tab);
 
 // ordered vals, caller frees list and vals, NOP when NULL alloc_val
-struct SList *ptable_vals_slist_deep(const struct PTable* const tab);
+struct SList *pmap_vals_slist_deep(const struct PMap* const tab);
 
 /*
  * Info
  */
 
 // to string, user frees, format "str_key = str_val\n"
-char *ptable_str(const struct PTable* const tab);
+char *pmap_str(const struct PMap* const tab);
 
 // number of entries
-size_t ptable_size(const struct PTable* const tab);
+size_t pmap_size(const struct PMap* const tab);
 
-#endif // PTABLE_H
+#endif // PMAP_H
 

@@ -3,12 +3,12 @@
 #include <string.h>
 
 #include "fn.h"
-#include "ptable.h"
+#include "pmap.h"
 
 #include "smaps.h"
 
 /*
-   diff --color=always -U 10000 <(sed -e ' s/ptable/xtable/g ; s/PTable/XTable/g ' inc/ptable.h) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' inc/smap.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/pmap/xtable/g ; s/PMap/XTable/g ' inc/pmap.h) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' inc/smap.h) | less
 
    diff --color=always -U 10000 <(sed -e ' s/smap/xtable/g ; s/SMap/XTable/g ' inc/smap.h) <(sed -e 's/imap/xtable/g ; s/IMap/XTable/g' inc/imap.h) | less
 
@@ -19,11 +19,11 @@
 
 struct SMapS {
 	const struct SMapSParams params;
-	const struct PTable *ptab;
+	const struct PMap *ptab;
 };
 
 struct SMapSIterState {
-	const struct PTableIter *pit;
+	const struct PMapIter *pit;
 };
 
 const struct SMapS *smaps_init(void) {
@@ -32,7 +32,7 @@ const struct SMapS *smaps_init(void) {
 }
 
 const struct SMapS *smaps_init_with(const struct SMapSParams params) {
-	const struct PTableParams ptable_params = {
+	const struct PMapParams pmap_params = {
 		.equal_key = params.case_insensitive_key ? fn_equal_strcasecmp : fn_equal_strcmp,
 		.equal_val = params.case_insensitive_val ? fn_equal_strcasecmp : fn_equal_strcmp,
 		.alloc_key = (fn_alloc)strdup,
@@ -46,7 +46,7 @@ const struct SMapS *smaps_init_with(const struct SMapSParams params) {
 	};
 
 	struct SMapS *tab = calloc(1, sizeof(struct SMapS));
-	tab->ptab = ptable_init_with(ptable_params);;
+	tab->ptab = pmap_init_with(pmap_params);;
 	memcpy((void*)&tab->params, &params, sizeof(struct SMapSParams));
 
 	return tab;
@@ -57,7 +57,7 @@ const struct SMapS *smaps_clone_deep(const struct SMapS* const from) {
 		return NULL;
 
 	struct SMapS *to = calloc(1, sizeof(struct SMapS));
-	to->ptab = ptable_clone_deep(from->ptab);
+	to->ptab = pmap_clone_deep(from->ptab);
 	memcpy((void*)&to->params, &from->params, sizeof(struct SMapSParams));
 
 	return to;
@@ -67,7 +67,7 @@ void smaps_free_vals(const struct SMapS* const tab) {
 	if (!tab)
 		return;
 
-	ptable_free_vals(tab->ptab);
+	pmap_free_vals(tab->ptab);
 
 	free((void*)tab);
 }
@@ -77,7 +77,7 @@ void smaps_iter_free(const struct SMapSIter* const iter) {
 		return;
 
 	if (iter->st) {
-		ptable_iter_free(iter->st->pit);
+		pmap_iter_free(iter->st->pit);
 	}
 
 	free(iter->st);
@@ -85,11 +85,11 @@ void smaps_iter_free(const struct SMapSIter* const iter) {
 }
 
 const char *smaps_get(const struct SMapS* const tab, const char* const key) {
-	return tab ? ptable_get(tab->ptab, key) : NULL;
+	return tab ? pmap_get(tab->ptab, key) : NULL;
 }
 
 bool smaps_contains_key(const struct SMapS* const tab, const char* const key) {
-	return tab ? ptable_contains_key(tab->ptab, key) : false;
+	return tab ? pmap_contains_key(tab->ptab, key) : false;
 }
 
 const struct SMapSIter *smaps_iter(const struct SMapS* const tab) {
@@ -100,7 +100,7 @@ const struct SMapSIter *smaps_filter_iter(const struct SMapS* const tab, fn_equa
 	if (!tab)
 		return NULL;
 
-	const struct PTableIter *pit = ptable_filter_iter(tab->ptab, equal_key, equal_val, data);
+	const struct PMapIter *pit = pmap_filter_iter(tab->ptab, equal_key, equal_val, data);
 
 	if (!pit)
 		return NULL;
@@ -126,7 +126,7 @@ const struct SMapSIter *smaps_iter_next(const struct SMapSIter* const citer) {
 		return NULL;
 	}
 
-	iter->st->pit = ptable_iter_next(citer->st->pit);
+	iter->st->pit = pmap_iter_next(citer->st->pit);
 
 	if (iter->st->pit) {
 		iter->key = iter->st->pit->key;
@@ -139,33 +139,33 @@ const struct SMapSIter *smaps_iter_next(const struct SMapSIter* const citer) {
 }
 
 bool smaps_put_free(const struct SMapS* const tab, const char* const key, const char* const val) {
-	return tab ? ptable_put_free(tab->ptab, key, val): false;
+	return tab ? pmap_put_free(tab->ptab, key, val): false;
 }
 
 bool smaps_put_if_absent(const struct SMapS* const tab, const char* const key, const char* const val) {
-	return tab ? ptable_put_if_absent(tab->ptab, key, val) : false;
+	return tab ? pmap_put_if_absent(tab->ptab, key, val) : false;
 }
 
 bool smaps_remove_free(const struct SMapS* const tab, const char* const key) {
-	return tab ? ptable_remove_free(tab->ptab, key) : false;
+	return tab ? pmap_remove_free(tab->ptab, key) : false;
 }
 
 bool smaps_equal(const struct SMapS* const a, const struct SMapS* const b) {
-	return a && b ? ptable_equal(a->ptab, b->ptab) : false;
+	return a && b ? pmap_equal(a->ptab, b->ptab) : false;
 }
 
 struct SList *smaps_keys_slist_deep(const struct SMapS* const tab) {
-	return tab ? ptable_keys_slist_deep(tab->ptab) : NULL;
+	return tab ? pmap_keys_slist_deep(tab->ptab) : NULL;
 }
 
 struct SList *smaps_vals_slist_deep(const struct SMapS* const tab) {
-	return tab ? ptable_vals_slist_deep(tab->ptab) : NULL;
+	return tab ? pmap_vals_slist_deep(tab->ptab) : NULL;
 }
 
 char *smaps_str(const struct SMapS* const tab) {
-	return tab ? ptable_str(tab->ptab) : NULL;
+	return tab ? pmap_str(tab->ptab) : NULL;
 }
 
 size_t smaps_size(const struct SMapS* const tab) {
-	return tab ? ptable_size(tab->ptab) : 0;
+	return tab ? pmap_size(tab->ptab) : 0;
 }

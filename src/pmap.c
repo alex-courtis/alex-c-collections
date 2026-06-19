@@ -6,21 +6,21 @@
 #include "slist.h"
 #include "str.h"
 
-#include "ptable.h"
+#include "pmap.h"
 
-#define PTABLE_DEFAULT_INITIAL 10
-#define PTABLE_DEFAULT_GROW 10
+#define PMAP_DEFAULT_INITIAL 10
+#define PMAP_DEFAULT_GROW 10
 
-struct PTable {
-	const struct PTableParams params;
+struct PMap {
+	const struct PMapParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
 	size_t size;
 };
 
-struct PTableIterState {
-	const struct PTable *tab;
+struct PMapIterState {
+	const struct PMap *tab;
 	size_t position;
 	fn_equal equal_key;
 	fn_equal equal_val;
@@ -28,8 +28,8 @@ struct PTableIterState {
 };
 
 // grow to capacity + grow
-static void grow(struct PTable *tab) {
-	size_t new_capacity = tab->capacity + (tab->params.grow ? tab->params.grow : PTABLE_DEFAULT_GROW);
+static void grow(struct PMap *tab) {
+	size_t new_capacity = tab->capacity + (tab->params.grow ? tab->params.grow : PMAP_DEFAULT_GROW);
 
 	// grow new arrays
 	const void **new_keys = calloc(new_capacity, sizeof(void*));
@@ -49,11 +49,11 @@ static void grow(struct PTable *tab) {
 	tab->capacity = new_capacity;
 }
 
-static const void *put(const struct PTable* const ctab, const void* const key, const void* const val, fn_alloc alloc_val) {
+static const void *put(const struct PMap* const ctab, const void* const key, const void* const val, fn_alloc alloc_val) {
 	if (!key)
 		return NULL;
 
-	struct PTable *tab = (struct PTable*)ctab;
+	struct PMap *tab = (struct PMap*)ctab;
 
 	const void **k;
 	const void **v;
@@ -95,8 +95,8 @@ static const void *put(const struct PTable* const ctab, const void* const key, c
 	return NULL;
 }
 
-static const struct PTable *clone(const struct PTable* const from, fn_alloc alloc_val) {
-	const struct PTable *to =  ptable_init_with(from->params);
+static const struct PMap *clone(const struct PMap* const from, fn_alloc alloc_val) {
+	const struct PMap *to =  pmap_init_with(from->params);
 
 	const void **k;
 	const void **v;
@@ -107,7 +107,7 @@ static const struct PTable *clone(const struct PTable* const from, fn_alloc allo
 	return to;
 }
 
-static struct SList *keys_slist(const struct PTable* const tab, fn_alloc alloc_key) {
+static struct SList *keys_slist(const struct PMap* const tab, fn_alloc alloc_key) {
 	struct SList *list = NULL;
 
 	const void **k;
@@ -122,7 +122,7 @@ static struct SList *keys_slist(const struct PTable* const tab, fn_alloc alloc_k
 	return list;
 }
 
-static struct SList *vals_slist(const struct PTable* const tab, fn_alloc alloc_val) {
+static struct SList *vals_slist(const struct PMap* const tab, fn_alloc alloc_val) {
 	struct SList *list = NULL;
 
 	const void **k;
@@ -138,35 +138,35 @@ static struct SList *vals_slist(const struct PTable* const tab, fn_alloc alloc_v
 	return list;
 }
 
-const struct PTable *ptable_init(void) {
-	const struct PTableParams params = { 0 };
-	return ptable_init_with(params);
+const struct PMap *pmap_init(void) {
+	const struct PMapParams params = { 0 };
+	return pmap_init_with(params);
 }
 
-const struct PTable *ptable_init_with(const struct PTableParams params) {
-	struct PTable *tab = calloc(1, sizeof(struct PTable));
+const struct PMap *pmap_init_with(const struct PMapParams params) {
+	struct PMap *tab = calloc(1, sizeof(struct PMap));
 
-	tab->capacity = params.initial ? params.initial : PTABLE_DEFAULT_INITIAL;
+	tab->capacity = params.initial ? params.initial : PMAP_DEFAULT_INITIAL;
 	tab->keys = calloc(tab->capacity, sizeof(void*));
 	tab->vals = calloc(tab->capacity, sizeof(void*));
 
-	memcpy((void*)&tab->params, &params, sizeof(struct PTableParams));
+	memcpy((void*)&tab->params, &params, sizeof(struct PMapParams));
 
 	return tab;
 }
 
-const struct PTable *ptable_clone_shallow(const struct PTable* const from) {
+const struct PMap *pmap_clone_shallow(const struct PMap* const from) {
 	return from ? clone(from, NULL) : NULL;
 }
 
-const struct PTable *ptable_clone_deep(const struct PTable* const from) {
+const struct PMap *pmap_clone_deep(const struct PMap* const from) {
 	if (!from || !from->params.alloc_val)
 		return NULL;
 
 	return clone(from, from->params.alloc_val);
 }
 
-void ptable_free(const struct PTable* const tab) {
+void pmap_free(const struct PMap* const tab) {
 	if (!tab)
 		return;
 
@@ -182,7 +182,7 @@ void ptable_free(const struct PTable* const tab) {
 	free((void*)tab);
 }
 
-void ptable_free_vals(const struct PTable* const tab) {
+void pmap_free_vals(const struct PMap* const tab) {
 	if (!tab)
 		return;
 
@@ -196,10 +196,10 @@ void ptable_free_vals(const struct PTable* const tab) {
 		}
 	}
 
-	ptable_free(tab);
+	pmap_free(tab);
 }
 
-void ptable_iter_free(const struct PTableIter* const iter) {
+void pmap_iter_free(const struct PMapIter* const iter) {
 	if (!iter)
 		return;
 
@@ -207,7 +207,7 @@ void ptable_iter_free(const struct PTableIter* const iter) {
 	free((void*)iter);
 }
 
-const void *ptable_get(const struct PTable* const tab, const void* const key) {
+const void *pmap_get(const struct PMap* const tab, const void* const key) {
 	if (!tab || !key)
 		return NULL;
 
@@ -224,7 +224,7 @@ const void *ptable_get(const struct PTable* const tab, const void* const key) {
 	return NULL;
 }
 
-bool ptable_contains_key(const struct PTable* const tab, const void* const key) {
+bool pmap_contains_key(const struct PMap* const tab, const void* const key) {
 	if (!tab || !key)
 		return false;
 
@@ -240,33 +240,33 @@ bool ptable_contains_key(const struct PTable* const tab, const void* const key) 
 	return false;
 }
 
-const struct PTableIter *ptable_iter(const struct PTable* const tab) {
-	return ptable_filter_iter(tab, NULL, NULL, NULL);
+const struct PMapIter *pmap_iter(const struct PMap* const tab) {
+	return pmap_filter_iter(tab, NULL, NULL, NULL);
 }
 
-const struct PTableIter *ptable_filter_iter(const struct PTable* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data) {
+const struct PMapIter *pmap_filter_iter(const struct PMap* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data) {
 	if (!tab || tab->size == 0)
 		return NULL;
 
-	struct PTableIter *it = calloc(1, sizeof(struct PTableIter));
-	it->st = calloc(1, sizeof(struct PTableIterState));
+	struct PMapIter *it = calloc(1, sizeof(struct PMapIter));
+	it->st = calloc(1, sizeof(struct PMapIterState));
 	it->st->tab = tab;
 	it->st->equal_key = equal_key;
 	it->st->equal_val = equal_val;
 	it->st->data = data;
 
-	return ptable_iter_next(it);
+	return pmap_iter_next(it);
 }
 
-const struct PTableIter *ptable_iter_next(const struct PTableIter* const citer) {
+const struct PMapIter *pmap_iter_next(const struct PMapIter* const citer) {
 	if (!citer)
 		return NULL;
 
-	struct PTableIter *iter = (struct PTableIter*)citer;
-	struct PTableIterState *st = iter->st;
+	struct PMapIter *iter = (struct PMapIter*)citer;
+	struct PMapIterState *st = iter->st;
 
 	if (!iter->st) {
-		ptable_iter_free(iter);
+		pmap_iter_free(iter);
 		return NULL;
 	}
 
@@ -290,28 +290,28 @@ const struct PTableIter *ptable_iter_next(const struct PTableIter* const citer) 
 		return iter;
 	}
 
-	ptable_iter_free(iter);
+	pmap_iter_free(iter);
 	return NULL;
 }
 
 
-const void *ptable_put(const struct PTable* const tab, const void* const key, const void* const val) {
+const void *pmap_put(const struct PMap* const tab, const void* const key, const void* const val) {
 	return tab ? put(tab, key, val, tab->params.alloc_val) : NULL;
 }
 
-const void *ptable_put_if_absent(const struct PTable* const tab, const void* const key, const void* const val) {
+const void *pmap_put_if_absent(const struct PMap* const tab, const void* const key, const void* const val) {
 	if (!tab || !key)
 		return NULL;
 
-	if (ptable_contains_key(tab, key)) {
-		return ptable_get(tab, key);
+	if (pmap_contains_key(tab, key)) {
+		return pmap_get(tab, key);
 	} else {
 		put(tab, key, val, tab->params.alloc_val);
 		return NULL;
 	}
 }
 
-bool ptable_put_free(const struct PTable* const tab, const void* const key, const void* const val) {
+bool pmap_put_free(const struct PMap* const tab, const void* const key, const void* const val) {
 	if (!tab)
 		return false;
 
@@ -329,11 +329,11 @@ bool ptable_put_free(const struct PTable* const tab, const void* const key, cons
 	}
 }
 
-const void *ptable_remove(const struct PTable* const ctab, const void* const key) {
+const void *pmap_remove(const struct PMap* const ctab, const void* const key) {
 	if (!ctab || !key)
 		return NULL;
 
-	struct PTable *tab = (struct PTable*)ctab;
+	struct PMap *tab = (struct PMap*)ctab;
 
 	const void **k;
 	const void **v;
@@ -365,9 +365,9 @@ const void *ptable_remove(const struct PTable* const ctab, const void* const key
 	return NULL;
 }
 
-bool ptable_remove_free(const struct PTable* const tab, const void* const key) {
-	if (ptable_contains_key(tab, key)) {
-		const void *removed = ptable_remove(tab, key);
+bool pmap_remove_free(const struct PMap* const tab, const void* const key) {
+	if (pmap_contains_key(tab, key)) {
+		const void *removed = pmap_remove(tab, key);
 		if (removed) {
 			if (tab->params.free_val) {
 				tab->params.free_val(removed);
@@ -381,7 +381,7 @@ bool ptable_remove_free(const struct PTable* const tab, const void* const key) {
 	}
 }
 
-bool ptable_equal(const struct PTable* const a, const struct PTable* const b) {
+bool pmap_equal(const struct PMap* const a, const struct PMap* const b) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
@@ -410,29 +410,29 @@ bool ptable_equal(const struct PTable* const a, const struct PTable* const b) {
 	return true;
 }
 
-struct SList *ptable_keys_slist_shallow(const struct PTable* const tab) {
+struct SList *pmap_keys_slist_shallow(const struct PMap* const tab) {
 	return tab ? keys_slist(tab, NULL) : NULL;
 }
 
-struct SList *ptable_keys_slist_deep(const struct PTable* const tab) {
+struct SList *pmap_keys_slist_deep(const struct PMap* const tab) {
 	if (!tab || !tab->params.alloc_key)
 		return NULL;
 
 	return keys_slist(tab, tab->params.alloc_key);
 }
 
-struct SList *ptable_vals_slist_shallow(const struct PTable* const tab) {
+struct SList *pmap_vals_slist_shallow(const struct PMap* const tab) {
 	return tab ? vals_slist(tab, NULL) : NULL;
 }
 
-struct SList *ptable_vals_slist_deep(const struct PTable* const tab) {
+struct SList *pmap_vals_slist_deep(const struct PMap* const tab) {
 	if (!tab || !tab->params.alloc_val)
 		return NULL;
 
 	return vals_slist(tab, tab->params.alloc_val);
 }
 
-char *ptable_str(const struct PTable* const tab) {
+char *pmap_str(const struct PMap* const tab) {
 	if (!tab)
 		return NULL;
 
@@ -470,6 +470,6 @@ char *ptable_str(const struct PTable* const tab) {
 	return out;
 }
 
-size_t ptable_size(const struct PTable* const tab) {
+size_t pmap_size(const struct PMap* const tab) {
 	return tab ? tab->size : 0;
 }

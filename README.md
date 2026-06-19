@@ -22,7 +22,7 @@ Not thread safe.
 * Values are strdup'd on successful `sset_add`, `sset_clone` and `sset_slist`
 * Values are free'd on `sset_free`
 
-### PTable
+### PMap
 
 * Array backed pointer indexed table.
 * Entries preserve insertion order.
@@ -31,16 +31,16 @@ Not thread safe.
 
 ### IMap
 
-* `PTable` with `size_t` keys
+* `PMap` with `size_t` keys
 
 ### SMap
 
-* `PTable` with string keys.
+* `PMap` with string keys.
 * Keys are memory managed.
 
 ### SMapS
 
-* `PTable` with string keys and vals.
+* `PMap` with string keys and vals.
 * Keys and values are memory managed.
 
 ## Strings
