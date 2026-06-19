@@ -39,16 +39,16 @@ struct PSetParams {
  * Lifecycle
  */
 
-// construct a set with PSetParams defaults
+// construct with PSetParams defaults
 const struct PSet *pset_init(void);
 
-// construct a set with params
+// construct with params
 const struct PSet *pset_init_with(const struct PSetParams params);
 
-// clone a set, setting val pointers
+// clone, setting val pointers
 const struct PSet *pset_clone_shallow(const struct PSet* const from);
 
-// clone a set, NOP when NULL alloc_val
+// clone, NOP when NULL alloc_val
 const struct PSet *pset_clone_deep(const struct PSet* const from);
 
 // free set

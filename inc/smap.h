@@ -39,22 +39,22 @@ struct SMapParams {
  * Lifecycle
  */
 
-// construct a table with SMapParams defaults
+// construct with SMapParams defaults
 const struct SMap *smap_init(void);
 
-// construct a table with params
+// construct with params
 const struct SMap *smap_init_with(const struct SMapParams params);
 
-// clone a table, setting val pointers
+// clone, setting val pointers
 const struct SMap *smap_clone_shallow(const struct SMap* const from);
 
-// clone a table, NOP when NULL alloc_val
+// clone, NOP when NULL alloc_val
 const struct SMap *smap_clone_deep(const struct SMap* const from);
 
-// free table
+// free map
 void smap_free(const struct SMap* const tab);
 
-// free table and vals
+// free map and vals
 void smap_free_vals(const struct SMap* const tab);
 
 // free iter
@@ -76,7 +76,7 @@ const struct SMapIter *smap_iter(const struct SMap* const tab);
 // create an iterator filtering by equal_key and equal_val, NULL tests match all
 const struct SMapIter *smap_filter_iter(const struct SMap* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
 
-// next iterator entry, NULL at end of table
+// next iterator entry, NULL at end of map
 const struct SMapIter *smap_iter_next(const struct SMapIter* const iter);
 
 /*

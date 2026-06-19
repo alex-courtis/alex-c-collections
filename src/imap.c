@@ -9,13 +9,13 @@
 #include "imap.h"
 
 /*
-   diff --color=always -U 10000 <(sed -e ' s/pmap/xtable/g ; s/PMap/XTable/g ' inc/pmap.h) <(sed -e 's/imap/xtable/g ; s/IMap/XTable/g' inc/imap.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/pmap/xmap/g ; s/PMap/XMap/g ' inc/pmap.h) <(sed -e 's/imap/xmap/g ; s/IMap/XMap/g' inc/imap.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/imap/xtable/g ; s/IMap/XTable/g ' inc/imap.h) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' inc/smap.h) | less
+   diff --color=always -U 10000 <(sed -e ' s/imap/xmap/g ; s/IMap/XMap/g ' inc/imap.h) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' inc/smap.h) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/imap/xtable/g ; s/IMap/XTable/g ' src/imap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
+   diff --color=always -U 10000 <(sed -e ' s/imap/xmap/g ; s/IMap/XMap/g ' src/imap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' src/smap.c) | less
 
-   diff --color=always -U 10000 <(sed -e ' s/ssmap/xtable/g ; s/SSMap/XTable/g ' src/ssmap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' src/smap.c) | less
+   diff --color=always -U 10000 <(sed -e ' s/ssmap/xmap/g ; s/SSMap/XMap/g ' src/ssmap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' src/smap.c) | less
    */
 
 struct IMap {

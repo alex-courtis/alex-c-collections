@@ -7,7 +7,7 @@
 #include "fn.h"
 
 /*
- * Array backed pointer indexed table.
+ * Array backed pointer indexed map.
  * Entries preserve insertion order.
  * Operations linearly traverse keys.
  * NULL values permitted.
@@ -46,22 +46,22 @@ struct PMapParams {
  * Lifecycle
  */
 
-// construct a table with PMapParams defaults
+// construct with PMapParams defaults
 const struct PMap *pmap_init(void);
 
-// construct a table with params
+// construct with params
 const struct PMap *pmap_init_with(const struct PMapParams params);
 
-// clone a table, setting val pointers
+// clone, setting val pointers
 const struct PMap *pmap_clone_shallow(const struct PMap* const from);
 
-// clone a table, NOP when NULL alloc_val
+// clone, NOP when NULL alloc_val
 const struct PMap *pmap_clone_deep(const struct PMap* const from);
 
-// free table
+// free map
 void pmap_free(const struct PMap* const tab);
 
-// free table and vals
+// free map and vals
 void pmap_free_vals(const struct PMap* const tab);
 
 // free iter
@@ -83,7 +83,7 @@ const struct PMapIter *pmap_iter(const struct PMap* const tab);
 // create an iterator filtering by equal_key and equal_val, NULL tests match all
 const struct PMapIter *pmap_filter_iter(const struct PMap* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
 
-// next iterator entry, NULL at end of table
+// next iterator entry, NULL at end of map
 const struct PMapIter *pmap_iter_next(const struct PMapIter* const iter);
 
 /*

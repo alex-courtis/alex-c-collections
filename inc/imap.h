@@ -42,22 +42,22 @@ typedef bool (*fn_equal_size_t)(const size_t a, const void* const b);
  * Lifecycle
  */
 
-// construct a table with IMapParams defaults
+// construct with IMapParams defaults
 const struct IMap *imap_init(void);
 
-// construct a table with params
+// construct with params
 const struct IMap *imap_init_with(const struct IMapParams params);
 
-// clone a table, setting val pointers
+// clone, setting val pointers
 const struct IMap *imap_clone_shallow(const struct IMap* const from);
 
-// clone a table, NOP when NULL alloc_val
+// clone, NOP when NULL alloc_val
 const struct IMap *imap_clone_deep(const struct IMap* const from);
 
-// free table
+// free map
 void imap_free(const struct IMap* const tab);
 
-// free table and vals
+// free map and vals
 void imap_free_vals(const struct IMap* const tab);
 
 // free iter
@@ -79,7 +79,7 @@ const struct IMapIter *imap_iter(const struct IMap* const tab);
 // create an iterator filtering by equal_key and equal_val, NULL tests match all
 const struct IMapIter *imap_filter_iter(const struct IMap* const tab, fn_equal_size_t equal_key, fn_equal equal_val, const void* const data);
 
-// next iterator entry, NULL at end of table
+// next iterator entry, NULL at end of map
 const struct IMapIter *imap_iter_next(const struct IMapIter* const iter);
 
 /*

@@ -30,9 +30,9 @@ struct SMap {
 };
 
 /*
-   diff --color=always -U 10000 <(sed -e 's/imap/xtable/g ; s/SMap/XTable/g' tst/tst-imap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' tst/tst-smap.c) | less
+   diff --color=always -U 10000 <(sed -e 's/imap/xmap/g ; s/SMap/XMap/g' tst/tst-imap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' tst/tst-smap.c) | less
 
-   diff --color=always -U 10000 <(sed -e 's/ssmap/xtable/g ; s/SSMap/XTable/g' tst/tst-ssmap.c) <(sed -e 's/smap/xtable/g ; s/SMap/XTable/g' tst/tst-smap.c) | less
+   diff --color=always -U 10000 <(sed -e 's/ssmap/xmap/g ; s/SSMap/XMap/g' tst/tst-ssmap.c) <(sed -e 's/smap/xmap/g ; s/SMap/XMap/g' tst/tst-smap.c) | less
    */
 
 static int vals[3] = { 20, 21, 22, };

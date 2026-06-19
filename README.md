@@ -24,7 +24,7 @@ Not thread safe.
 
 ### PMap
 
-* Array backed pointer indexed table.
+* Array backed pointer indexed map.
 * Entries preserve insertion order.
 * Operations linearly traverse keys.
 * NULL values permitted.

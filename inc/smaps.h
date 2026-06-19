@@ -6,8 +6,6 @@
 
 #include "fn.h"
 
-// TODO SMapS
-
 /*
  * `PMap` with string keys and vals.
  * Keys and values are memory managed.
@@ -38,16 +36,16 @@ struct SMapSParams {
  * Lifecycle
  */
 
-// construct a table with SMapSParams defaults
+// construct with SMapSParams defaults
 const struct SMapS *smaps_init(void);
 
-// construct a table with params
+// construct with params
 const struct SMapS *smaps_init_with(const struct SMapSParams params);
 
-// clone a table
+// clone
 const struct SMapS *smaps_clone_deep(const struct SMapS* const from);
 
-// free table keys and values
+// free map keys and values
 void smaps_free_vals(const struct SMapS* const tab);
 
 // free iter
@@ -69,7 +67,7 @@ const struct SMapSIter *smaps_iter(const struct SMapS* const tab);
 // create an iterator filtering by equal_key and equal_val, NULL tests match all
 const struct SMapSIter *smaps_filter_iter(const struct SMapS* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
 
-// next iterator entry, NULL at end of table
+// next iterator entry, NULL at end of map
 const struct SMapSIter *smaps_iter_next(const struct SMapSIter* const iter);
 
 /*
