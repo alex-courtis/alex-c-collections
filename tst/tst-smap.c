@@ -340,7 +340,7 @@ static void smap_vals_slist_deep__many(void **state) {
 	assert_str_equal(slist_at(list, 2), "bb");
 
 	slist_free_vals(&list, NULL);
-	smap_free_vals(tab);
+	smap_free(tab);
 }
 
 static void smap_clone_shallow__many(void **state) {
@@ -367,7 +367,9 @@ static void smap_clone_shallow__params(void **state) {
 	const struct SMapParams params = {
 		.case_insensitive = true,
 		.equal_val = mock_equal,
+		.alloc_val = mock_alloc,
 		.free_val = mock_free,
+		.clone_val = mock_clone,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -382,12 +384,17 @@ static void smap_clone_shallow__params(void **state) {
 	assert_int_equal(to->ptab->params.grow, 1);
 	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
-	assert_ptr_equal(to->ptab->params.clone_key, fn_clone_strdup);
+	assert_ptr_equal(to->ptab->params.alloc_key, fn_clone_strdup);
+	assert_ptr_equal(to->ptab->params.alloc_val, mock_alloc);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->ptab->params.free_val, mock_free);
+	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
 
 	assert_true(to->params.case_insensitive);
 	assert_ptr_equal(to->params.equal_val, mock_equal);
+	assert_ptr_equal(to->params.alloc_val, mock_alloc);
+	assert_ptr_equal(to->params.free_val, mock_free);
+	assert_ptr_equal(to->params.clone_val, mock_clone);
 	assert_ptr_equal(to->params.initial, 99);
 	assert_ptr_equal(to->params.grow, 1);
 
@@ -398,9 +405,6 @@ static void smap_clone_shallow__params(void **state) {
 static void smap_clone_deep__clone_val(void **state) {
 	const struct SMapParams params = { .clone_val = mock_clone, };
 	const struct SMap *from = smap_init_with(params);
-
-	expect_ptr(mock_clone, val, V0);
-	will_return_ptr_type(mock_clone, V0, void*);
 
 	assert_nul(smap_put(from, "a", V0));
 
@@ -424,9 +428,12 @@ static void smap_clone_deep__no_clone_val(void **state) {
 
 	assert_nul(smap_put(from, 0, V0));
 
-	assert_nul(smap_clone_deep(from));
+	const struct SMap *to = smap_clone_deep(from);
+	assert_non_nul(to);
+	assert_int_equal(smap_size(to), 0);
 
 	smap_free(from);
+	smap_free(to);
 }
 
 static void smap__null_inputs(void **state) {

@@ -57,12 +57,7 @@ static bool add(const struct PSet* const cset, const void* const val, fn_clone a
 	}
 
 	// create new value
-	const void *new;
-	if (alloc_val) {
-		new = alloc_val(val);
-	} else {
-		new = (void*)val;
-	}
+	const void *new = alloc_val ? alloc_val(val) : val;
 	if (!new)
 		return false;
 

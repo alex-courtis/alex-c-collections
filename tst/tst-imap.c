@@ -324,7 +324,7 @@ static void imap_vals_slist_deep__many(void **state) {
 	assert_str_equal(slist_at(list, 2), "2");
 
 	slist_free_vals(&list, NULL);
-	imap_free_vals(tab);
+	imap_free(tab);
 }
 
 static void imap_clone_shallow__many(void **state) {
@@ -350,7 +350,9 @@ static void imap_clone_shallow__many(void **state) {
 static void imap_clone_shallow__params(void **state) {
 	const struct IMapParams params = {
 		.equal_val = mock_equal,
+		.alloc_val = mock_alloc,
 		.free_val = mock_free,
+		.clone_val = mock_clone,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -365,10 +367,14 @@ static void imap_clone_shallow__params(void **state) {
 	assert_int_equal(to->ptab->capacity, 99);
 	assert_int_equal(to->ptab->params.grow, 1);
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
+	assert_ptr_equal(to->ptab->params.alloc_val, mock_alloc);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->ptab->params.free_val, mock_free);
+	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
 
 	assert_ptr_equal(to->params.equal_val, mock_equal);
+	assert_ptr_equal(to->params.free_val, mock_free);
+	assert_ptr_equal(to->params.clone_val, mock_clone);
 	assert_ptr_equal(to->params.initial, 99);
 	assert_ptr_equal(to->params.grow, 1);
 
@@ -379,9 +385,6 @@ static void imap_clone_shallow__params(void **state) {
 static void imap_clone_deep__clone_val(void **state) {
 	const struct IMapParams params = { .clone_val = mock_clone, };
 	const struct IMap *from = imap_init_with(params);
-
-	expect_ptr(mock_clone, val, V0);
-	will_return_ptr_type(mock_clone, V0, void*);
 
 	assert_nul(imap_put(from, 0, V0));
 
@@ -405,9 +408,12 @@ static void imap_clone_deep__no_clone_val(void **state) {
 
 	assert_nul(imap_put(from, 0, V0));
 
-	assert_nul(imap_clone_deep(from));
+	const struct IMap *to = imap_clone_deep(from);
+	assert_non_nul(to);
+	assert_int_equal(imap_size(to), 0);
 
 	imap_free(from);
+	imap_free(to);
 }
 
 static void imap__null_inputs(void **state) {
