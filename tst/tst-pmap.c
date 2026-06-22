@@ -623,7 +623,7 @@ static void pmap_iter_next__partial(void **state) {
 	assert_nul(pmap_iter_next(iter));
 }
 
-static void pmap_filter_iter__many(void **state) {
+static void pmap_match_iter__many(void **state) {
 	const struct PMap *tab = pmap_init();
 
 	assert_nul(pmap_put(tab, K0, V0));
@@ -635,51 +635,44 @@ static void pmap_filter_iter__many(void **state) {
 	assert_int_equal(pmap_size(tab), 5);
 
 	// skip K0
-	expect_ptr(mock_equal, a, K0);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, false);
+	expect_ptr(mock_match_key_val, key, K0);
+	expect_ptr(mock_match_key_val, val, V0);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, false);
 
 	// get K1
-	expect_ptr(mock_equal, a, K1);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
-	expect_ptr(mock_equal, a, V1);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
+	expect_ptr(mock_match_key_val, key, K1);
+	expect_ptr(mock_match_key_val, val, V1);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, true);
 
-	const struct PMapIter *iter = pmap_filter_iter(tab, mock_equal, mock_equal, D0);
+	const struct PMapIter *iter = pmap_match_iter(tab, mock_match_key_val, D0);
 	assert_non_nul(iter);
 	assert_ptr_equal(iter->key, K1);
 	assert_ptr_equal(iter->val, V1);
 
-	// skip V2
-	expect_ptr(mock_equal, a, K2);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
-	expect_ptr(mock_equal, a, V2);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, false);
+	// skip K2
+	expect_ptr(mock_match_key_val, key, K2);
+	expect_ptr(mock_match_key_val, val, V2);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, false);
 
-	// get V3
-	expect_ptr(mock_equal, a, K3);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
-	expect_ptr(mock_equal, a, V3);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
+	// get K3
+	expect_ptr(mock_match_key_val, key, K3);
+	expect_ptr(mock_match_key_val, val, V3);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, true);
 
 	iter = pmap_iter_next(iter);
 	assert_non_nul(iter);
 	assert_ptr_equal(iter->key, K3);
 	assert_ptr_equal(iter->val, V3);
 
-	// skip V4
-	expect_ptr(mock_equal, a, K4);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
-	expect_ptr(mock_equal, a, V4);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, false);
+	// skip K4
+	expect_ptr(mock_match_key_val, key, K4);
+	expect_ptr(mock_match_key_val, val, V4);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, false);
 
 	// done
 	iter = pmap_iter_next(iter);
@@ -687,6 +680,7 @@ static void pmap_filter_iter__many(void **state) {
 
 	pmap_free(tab);
 }
+
 
 static void pmap_put__again(void **state) {
 	const struct PMap *tab = pmap_init();
@@ -1191,7 +1185,7 @@ static void pmap__null_inputs(void **state) {
 	assert_false(pmap_contains_key(NULL, NULL));
 	assert_false(pmap_contains_key(tab, NULL));
 	assert_nul(pmap_iter(NULL));
-	assert_nul(pmap_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(pmap_match_iter(NULL, NULL, NULL));
 	assert_nul(pmap_iter_next(NULL));
 	assert_false(pmap_put(NULL, NULL, NULL));
 	assert_false(pmap_put(tab, NULL, NULL));
@@ -1253,7 +1247,7 @@ int main(void) {
 
 		TEST(pmap_iter_next__partial),
 
-		TEST(pmap_filter_iter__many),
+		TEST(pmap_match_iter__many),
 
 		TEST(pmap_put__again),
 

@@ -22,8 +22,7 @@ struct PMap {
 struct PMapIterState {
 	const struct PMap *tab;
 	size_t position;
-	fn_equal equal_key;
-	fn_equal equal_val;
+	fn_match_key_val match;
 	const void *data;
 };
 
@@ -245,18 +244,17 @@ bool pmap_contains_key(const struct PMap* const tab, const void* const key) {
 }
 
 const struct PMapIter *pmap_iter(const struct PMap* const tab) {
-	return pmap_filter_iter(tab, NULL, NULL, NULL);
+	return pmap_match_iter(tab, NULL, NULL);
 }
 
-const struct PMapIter *pmap_filter_iter(const struct PMap* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data) {
+const struct PMapIter *pmap_match_iter(const struct PMap* const tab, fn_match_key_val match, const void* const data) {
 	if (!tab || tab->size == 0)
 		return NULL;
 
 	struct PMapIter *it = calloc(1, sizeof(struct PMapIter));
 	it->st = calloc(1, sizeof(struct PMapIterState));
 	it->st->tab = tab;
-	it->st->equal_key = equal_key;
-	it->st->equal_val = equal_val;
+	it->st->match = match;
 	it->st->data = data;
 
 	return pmap_iter_next(it);
@@ -284,10 +282,7 @@ const struct PMapIter *pmap_iter_next(const struct PMapIter* const citer) {
 		iter->key = *(st->tab->keys + st->position);
 		iter->val = *(st->tab->vals + st->position);
 
-		if (st->equal_key && !st->equal_key(iter->key, st->data)) {
-			continue;
-		}
-		if (st->equal_val && !st->equal_val(iter->val, st->data)) {
+		if (st->match && !st->match(iter->key, iter->val, st->data)) {
 			continue;
 		}
 

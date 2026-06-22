@@ -84,14 +84,14 @@ bool smaps_contains_key(const struct SMapS* const tab, const char* const key) {
 }
 
 const struct SMapSIter *smaps_iter(const struct SMapS* const tab) {
-	return smaps_filter_iter(tab, NULL, NULL, NULL);
+	return smaps_match_iter(tab, NULL, NULL);
 }
 
-const struct SMapSIter *smaps_filter_iter(const struct SMapS* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data) {
+const struct SMapSIter *smaps_match_iter(const struct SMapS* const tab, fn_match_key_val match, const void* const data) {
 	if (!tab)
 		return NULL;
 
-	const struct PMapIter *pit = pmap_filter_iter(tab->ptab, equal_key, equal_val, data);
+	const struct PMapIter *pit = pmap_match_iter(tab->ptab, match, data);
 
 	if (!pit)
 		return NULL;

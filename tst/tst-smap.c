@@ -128,7 +128,7 @@ static void smap_iter__empty(void **state) {
 	smap_free(tab);
 }
 
-static void smap_filter_iter__(void **state) {
+static void smap_match_iter__many(void **state) {
 	const struct SMap *tab = smap_init();
 
 	assert_nul(smap_put(tab, "0", V0));
@@ -136,30 +136,27 @@ static void smap_filter_iter__(void **state) {
 	assert_nul(smap_put(tab, "2", V2));
 
 	// skip "0"
-	expect_string(mock_equal, a, "0");
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, false);
+	expect_string(mock_match_key_val, key, "0");
+	expect_ptr(mock_match_key_val, val, V0);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, false);
 
-	// get 1
-	expect_string(mock_equal, a, "1");
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
-	expect_ptr(mock_equal, a, V1);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
+	// get "1"
+	expect_string(mock_match_key_val, key, "1");
+	expect_ptr(mock_match_key_val, val, V1);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, true);
 
-	const struct SMapIter *iter = smap_filter_iter(tab, mock_equal, mock_equal, D0);
+	const struct SMapIter *iter = smap_match_iter(tab, mock_match_key_val, D0);
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "1");
 	assert_ptr_equal(iter->val, V1);
 
 	// skip V2
-	expect_string(mock_equal, a, "2");
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
-	expect_ptr(mock_equal, a, V2);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, false);
+	expect_string(mock_match_key_val, key, "2");
+	expect_ptr(mock_match_key_val, val, V2);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, false);
 
 	// done
 	iter = smap_iter_next(iter);
@@ -448,7 +445,7 @@ static void smap__null_inputs(void **state) {
 	assert_false(smap_get(tab, NULL));
 	assert_false(smap_contains_key(NULL, NULL));
 	assert_nul(smap_iter(NULL));
-	assert_nul(smap_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(smap_match_iter(NULL, NULL, NULL));
 	assert_nul(smap_iter_next(NULL));
 	assert_nul(smap_put(NULL, NULL, NULL));
 	assert_nul(smap_put(tab, NULL, NULL));
@@ -485,7 +482,7 @@ int main(void) {
 
 		TEST(smap_iter_next__partial),
 
-		TEST(smap_filter_iter__),
+		TEST(smap_match_iter__many),
 
 		TEST(smap_equal__case_sensitive),
 		TEST(smap_equal__case_insensitive),

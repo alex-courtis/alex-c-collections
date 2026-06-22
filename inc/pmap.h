@@ -79,8 +79,8 @@ bool pmap_contains_key(const struct PMap* const tab, const void* const key);
 // create an iterator, caller must pmap_iter_free or invoke pmap_next until NULL
 const struct PMapIter *pmap_iter(const struct PMap* const tab);
 
-// create an iterator filtering by equal_key and equal_val, NULL tests match all
-const struct PMapIter *pmap_filter_iter(const struct PMap* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
+// create an iterator filtering by match, NULL match matches all
+const struct PMapIter *pmap_match_iter(const struct PMap* const tab, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map
 const struct PMapIter *pmap_iter_next(const struct PMapIter* const iter);

@@ -111,7 +111,7 @@ static void imap_iter_next__partial(void **state) {
 	assert_nul(imap_iter_next(iter));
 }
 
-static void imap_filter_iter__(void **state) {
+static void imap_match_iter__many(void **state) {
 	const struct IMap *tab = imap_init();
 
 	assert_nul(imap_put(tab, 0, V0));
@@ -119,34 +119,27 @@ static void imap_filter_iter__(void **state) {
 	assert_nul(imap_put(tab, 2, V2));
 
 	// skip K0
-	expect_int_value(mock_equal_size_t, a, 0);
-	expect_ptr(mock_equal_size_t, b, D0);
-	will_return(mock_equal_size_t, false);
+	expect_int_value(mock_match_size_t_val, key, 0);
+	expect_ptr(mock_match_size_t_val, val, V0);
+	expect_ptr(mock_match_size_t_val, data, D0);
+	will_return(mock_match_size_t_val, false);
 
 	// pass K1
-	expect_int_value(mock_equal_size_t, a, 1);
-	expect_ptr(mock_equal_size_t, b, D0);
-	will_return(mock_equal_size_t, true);
+	expect_int_value(mock_match_size_t_val, key, 1);
+	expect_ptr(mock_match_size_t_val, val, V1);
+	expect_ptr(mock_match_size_t_val, data, D0);
+	will_return(mock_match_size_t_val, true);
 
-	// pass V1
-	expect_ptr(mock_equal, a, V1);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, true);
-
-	const struct IMapIter *iter = imap_filter_iter(tab, mock_equal_size_t, mock_equal, D0);
+	const struct IMapIter *iter = imap_match_iter(tab, mock_match_size_t_val, D0);
 	assert_non_nul(iter);
 	assert_int_equal(iter->key, 1);
 	assert_ptr_equal(iter->val, V1);
 
-	// pass K2
-	expect_int_value(mock_equal_size_t, a, 2);
-	expect_ptr(mock_equal_size_t, b, D0);
-	will_return(mock_equal_size_t, true);
-
-	// skip V2
-	expect_ptr(mock_equal, a, V2);
-	expect_ptr(mock_equal, b, D0);
-	will_return(mock_equal, false);
+	// skip K2
+	expect_int_value(mock_match_size_t_val, key, 2);
+	expect_ptr(mock_match_size_t_val, val, V2);
+	expect_ptr(mock_match_size_t_val, data, D0);
+	will_return(mock_match_size_t_val, false);
 
 	// done
 	iter = imap_iter_next(iter);
@@ -427,7 +420,7 @@ static void imap__null_inputs(void **state) {
 	assert_false(imap_get(NULL, 0));
 	assert_false(imap_contains_key(NULL, 0));
 	assert_nul(imap_iter(NULL));
-	assert_nul(imap_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(imap_match_iter(NULL, NULL, NULL));
 	assert_nul(imap_iter_next(NULL));
 	assert_false(imap_put(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(NULL, 0, NULL));
@@ -461,7 +454,7 @@ int main(void) {
 
 		TEST(imap_iter_next__partial),
 
-		TEST(imap_filter_iter__),
+		TEST(imap_match_iter__many),
 
 		TEST(imap_equal__),
 		TEST(imap_equal__key_removed),

@@ -115,38 +115,28 @@ static void smaps_iter_next__partial(void **state) {
 	assert_nul(smaps_iter_next(iter));
 }
 
-static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
-	return *(char*)a == 'a';
+static bool fn_match_both_start_with_a(const void* const key, const void* const val, const void* const data) {
+	return *(char*)key == 'a' && *(char*)val == 'a';
 }
 
-static bool fn_equal_starts_with_b(const void* const a, const void* const b) {
-	return *(char*)a == 'b';
-}
-
-static void smaps_filter_iter__(void **state) {
+static void smaps_match_iter__many(void **state) {
 	const struct SMapS *tab = smaps_init();
 
-	assert_false(smaps_put(tab, "a0", "b0"));
-	assert_false(smaps_put(tab, "a1", "x1"));
-	assert_false(smaps_put(tab, "a2", "b2"));
-	assert_false(smaps_put(tab, "x3", "b3"));
-	assert_false(smaps_put(tab, "a4", "b4"));
-	assert_false(smaps_put(tab, "a5", "x5"));
+	assert_false(smaps_put(tab, "ak0", "bv0"));
+	assert_false(smaps_put(tab, "ak1", "av1"));
+	assert_false(smaps_put(tab, "bk2", "av2"));
+	assert_false(smaps_put(tab, "ak3", "av3"));
+	assert_false(smaps_put(tab, "ak4", "bv4"));
 
-	const struct SMapSIter *iter = smaps_filter_iter(tab, fn_equal_starts_with_a, fn_equal_starts_with_b, NULL);
+	const struct SMapSIter *iter = smaps_match_iter(tab, fn_match_both_start_with_a, NULL);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "a0");
-	assert_str_equal(iter->val, "b0");
-
-	iter = smaps_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "a2");
-	assert_str_equal(iter->val, "b2");
+	assert_str_equal(iter->key, "ak1");
+	assert_str_equal(iter->val, "av1");
 
 	iter = smaps_iter_next(iter);
 	assert_non_nul(iter);
-	assert_str_equal(iter->key, "a4");
-	assert_str_equal(iter->val, "b4");
+	assert_str_equal(iter->key, "ak3");
+	assert_str_equal(iter->val, "av3");
 
 	assert_nul(smaps_iter_next(iter));
 
@@ -344,7 +334,7 @@ static void smaps__null_inputs(void **state) {
 	assert_false(smaps_contains_key(NULL, NULL));
 	assert_false(smaps_contains_key(tab, NULL));
 	assert_nul(smaps_iter(NULL));
-	assert_nul(smaps_filter_iter(NULL, NULL, NULL, NULL));
+	assert_nul(smaps_match_iter(NULL, NULL, NULL));
 	assert_nul(smaps_iter_next(NULL));
 	assert_false(smaps_put(NULL, NULL, NULL));
 	assert_false(smaps_put(tab, NULL, NULL));
@@ -374,7 +364,7 @@ int main(void) {
 
 		TEST(smaps_iter_next__partial),
 
-		TEST(smaps_filter_iter__),
+		TEST(smaps_match_iter__many),
 
 		TEST(smaps_equal__case_sensitive),
 		TEST(smaps_equal__case_insensitive_key),

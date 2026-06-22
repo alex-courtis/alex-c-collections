@@ -32,6 +32,11 @@ bool fn_less_than_strcmp(const void* const a, const void* const b);
 bool fn_less_than_strcasecmp(const void* const a, const void* const b);
 
 //
+// match a pair
+//
+typedef bool (*fn_match_key_val)(const void* const key, const void* const val, const void* const data);
+
+//
 // arbitrary test
 //
 typedef bool (*fn_test)(const void* const data);

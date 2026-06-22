@@ -64,8 +64,8 @@ bool smaps_contains_key(const struct SMapS* const tab, const char* const key);
 // create an iterator, caller must smaps_iter_free or invoke smaps_next until NULL
 const struct SMapSIter *smaps_iter(const struct SMapS* const tab);
 
-// create an iterator filtering by equal_key and equal_val, NULL tests match all
-const struct SMapSIter *smaps_filter_iter(const struct SMapS* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
+// create an iterator filtering by match, NULL match matches all
+const struct SMapSIter *smaps_match_iter(const struct SMapS* const tab, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map
 const struct SMapSIter *smaps_iter_next(const struct SMapSIter* const iter);

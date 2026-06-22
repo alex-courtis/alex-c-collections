@@ -74,8 +74,8 @@ bool smap_contains_key(const struct SMap* const tab, const char* const key);
 // create an iterator, caller must smap_iter_free or invoke smap_next until NULL
 const struct SMapIter *smap_iter(const struct SMap* const tab);
 
-// create an iterator, filtering by equal_key and equal_val, NULL tests match all
-const struct SMapIter *smap_filter_iter(const struct SMap* const tab, fn_equal equal_key, fn_equal equal_val, const void* const data);
+// create an iterator filtering by match, NULL match matches all
+const struct SMapIter *smap_match_iter(const struct SMap* const tab, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map
 const struct SMapIter *smap_iter_next(const struct SMapIter* const iter);

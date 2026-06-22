@@ -39,6 +39,8 @@ struct IMapParams {
  */
 typedef bool (*fn_equal_size_t)(const size_t a, const void* const b);
 
+typedef bool (*fn_match_size_t_val)(const size_t key, const void* const val, const void* const data);
+
 /*
  * Lifecycle
  */
@@ -79,6 +81,9 @@ const struct IMapIter *imap_iter(const struct IMap* const tab);
 
 // create an iterator filtering by equal_key and equal_val, NULL tests match all
 const struct IMapIter *imap_filter_iter(const struct IMap* const tab, fn_equal_size_t equal_key, fn_equal equal_val, const void* const data);
+
+// create an iterator filtering by match, NULL match matches all
+const struct IMapIter *imap_match_iter(const struct IMap* const tab, fn_match_size_t_val match, const void* const data);
 
 // next iterator entry, NULL at end of map
 const struct IMapIter *imap_iter_next(const struct IMapIter* const iter);

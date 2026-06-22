@@ -15,8 +15,7 @@ struct IMap {
 
 struct IMapIterState {
 	const struct PMapIter *pit;
-	fn_equal_size_t equal_key;
-	fn_equal equal_val;
+	fn_match_size_t_val match;
 	const void *data;
 };
 
@@ -124,31 +123,25 @@ bool imap_contains_key(const struct IMap* const tab, const size_t key) {
 }
 
 const struct IMapIter *imap_iter(const struct IMap* const tab) {
-	return imap_filter_iter(tab, NULL, NULL, NULL);
+	return imap_match_iter(tab, NULL, NULL);
 }
 
-static bool fn_equal_key_wrapper(const void* const val, const void* const data) {
+static bool fn_match_wrapper(const void* const key, const void* const val, const void* const data) {
 	const struct IMapIterState * const st = data;
-	return st->equal_key(*(size_t*)val, st->data);
+	return st->match ? st->match(*(size_t*)key, val, st->data) : true;
 }
 
-static bool fn_equal_val_wrapper(const void* const val, const void* const data) {
-	const struct IMapIterState * const st = data;
-	return st->equal_val(val, st->data);
-}
-
-const struct IMapIter *imap_filter_iter(const struct IMap* const tab, fn_equal_size_t equal_key, fn_equal equal_val, const void* const data) {
+const struct IMapIter *imap_match_iter(const struct IMap* const tab, fn_match_size_t_val match, const void* const data) {
 	if (!tab)
 		return NULL;
 
 	struct IMapIter *it = calloc(1, sizeof(struct IMapIter));
 	it->st = calloc(1, sizeof(struct IMapIterState));
-	it->st->equal_key = equal_key;
-	it->st->equal_val = equal_val;
+	it->st->match = match;
 	it->st->data = data;
 
 	// pass the IMapIterState as data, to be passed to the test wrappers
-	const struct PMapIter *pit = pmap_filter_iter(tab->ptab, equal_key ? fn_equal_key_wrapper : NULL, equal_val ? fn_equal_val_wrapper : NULL, it->st);
+	const struct PMapIter *pit = pmap_match_iter(tab->ptab, fn_match_wrapper, it->st);
 
 	if (pit) {
 		it->st->pit = pit;
