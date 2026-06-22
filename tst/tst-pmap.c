@@ -1136,7 +1136,7 @@ static void pmap_str__str_val(void **state) {
 }
 
 static void pmap_str__str_key(void **state) {
-	const struct PMapParams params = { .str_key = (fn_str)strdup, };
+	const struct PMapParams params = { .str_key = fn_str_or_null, };
 	const struct PMap *tab = pmap_init_with(params);
 
 	assert_nul(pmap_put(tab, "zero", V0));

@@ -28,7 +28,7 @@ struct PSetIter {
  */
 struct PSetParams {
 	const fn_equal equal_val; // compare val pointers
-	const fn_clone alloc_val; // use key pointer
+	const fn_alloc alloc_val; // use key pointer
 	const fn_free free_val;   // free
 	const fn_clone clone_val; // use key pointer
 	const fn_str str_val;     // %p

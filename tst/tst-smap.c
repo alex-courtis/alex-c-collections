@@ -325,7 +325,7 @@ static void smap_vals_slist_shallow__many(void **state) {
 }
 
 static void smap_vals_slist_deep__many(void **state) {
-	const struct SMapParams params = { .clone_val = (fn_clone)strdup, };
+	const struct SMapParams params = { .clone_val = fn_clone_strdup, };
 	const struct SMap *tab = smap_init_with(params);
 
 	smap_put(tab, "a", "aa");
@@ -382,7 +382,7 @@ static void smap_clone_shallow__params(void **state) {
 	assert_int_equal(to->ptab->params.grow, 1);
 	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
 	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
-	assert_ptr_equal(to->ptab->params.clone_key, (fn_clone)strdup);
+	assert_ptr_equal(to->ptab->params.clone_key, fn_clone_strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->ptab->params.free_val, mock_free);
 

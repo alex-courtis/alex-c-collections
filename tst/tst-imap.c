@@ -309,7 +309,7 @@ static void imap_vals_slist_shallow__many(void **state) {
 }
 
 static void imap_vals_slist_deep__many(void **state) {
-	const struct IMapParams params = { .clone_val = (fn_clone)strdup, };
+	const struct IMapParams params = { .clone_val = fn_clone_strdup, };
 	const struct IMap *tab = imap_init_with(params);
 
 	imap_put(tab, 0, "0");

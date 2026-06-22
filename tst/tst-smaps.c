@@ -5,7 +5,6 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "fn.h"
 #include "pmap.h"
@@ -320,7 +319,7 @@ static void smaps_clone__(void **state) {
 	assert_int_equal(to->ptab->params.grow, 1);
 	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
 	assert_ptr_equal(to->ptab->params.equal_val, fn_equal_strcmp);
-	assert_ptr_equal(to->ptab->params.clone_key, (fn_clone)strdup);
+	assert_ptr_equal(to->ptab->params.clone_key, fn_clone_strdup);
 	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->ptab->params.free_val, (fn_free)free);
 
