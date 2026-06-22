@@ -26,7 +26,7 @@ struct PMap {
 
 struct IMap {
 	const struct IMapParams params;
-	const struct PMap *ptab;
+	const struct PMap *pmap;
 };
 
 static int vals[3] = { 20, 21, 22, };
@@ -39,40 +39,40 @@ static void *D0 = &datas[0];
 
 static void imap_put_get_remove(void **state) {
 	const struct IMapParams params = { 0 };
-	const struct IMap *tab = imap_init_with(params);
+	const struct IMap *map = imap_init_with(params);
 
-	assert_nul(imap_put(tab, 0, V0));
-	assert_nul(imap_put(tab, 1, V1));
-	assert_nul(imap_put(tab, 2, V2));
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+	assert_nul(imap_put(map, 2, V2));
 
-	assert_int_equal(imap_size(tab), 3);
+	assert_int_equal(imap_size(map), 3);
 
-	assert_ptr_equal(imap_get(tab, 1), V1);
+	assert_ptr_equal(imap_get(map, 1), V1);
 
-	assert_nul(imap_get(tab, 999));
+	assert_nul(imap_get(map, 999));
 
-	assert_ptr_equal(imap_remove(tab, 1), V1);
+	assert_ptr_equal(imap_remove(map, 1), V1);
 
-	assert_nul(imap_get(tab, 1));
+	assert_nul(imap_get(map, 1));
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_free_vals__(void **state) {
-	const struct IMap *tab = imap_init();
-	assert_nul(imap_put(tab, 0, strdup("zero")));
+	const struct IMap *map = imap_init();
+	assert_nul(imap_put(map, 0, strdup("zero")));
 
-	imap_free_vals(tab);
+	imap_free_vals(map);
 }
 
 static void imap_iter__many(void **state) {
 
-	const struct IMap *tab = imap_init();
-	assert_nul(imap_put(tab, 0, V0));
-	assert_nul(imap_put(tab, 1, NULL));
-	assert_nul(imap_put(tab, 2, V2));
+	const struct IMap *map = imap_init();
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, NULL));
+	assert_nul(imap_put(map, 2, V2));
 
-	const struct IMapIter *iter = imap_iter(tab);
+	const struct IMapIter *iter = imap_iter(map);
 
 	assert_non_nul(iter);
 	assert_int_equal(iter->key, 0);
@@ -85,18 +85,18 @@ static void imap_iter__many(void **state) {
 
 	imap_iter_free(iter);
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_iter__empty(void **state) {
 
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
-	const struct IMapIter *iter = imap_iter(tab);
+	const struct IMapIter *iter = imap_iter(map);
 
 	assert_nul(iter);
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_iter_free__partial(void **state) {
@@ -112,11 +112,11 @@ static void imap_iter_next__partial(void **state) {
 }
 
 static void imap_match_iter__many(void **state) {
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
-	assert_nul(imap_put(tab, 0, V0));
-	assert_nul(imap_put(tab, 1, V1));
-	assert_nul(imap_put(tab, 2, V2));
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+	assert_nul(imap_put(map, 2, V2));
 
 	// skip K0
 	expect_int_value(mock_match_size_t_val, key, 0);
@@ -130,7 +130,7 @@ static void imap_match_iter__many(void **state) {
 	expect_ptr(mock_match_size_t_val, data, D0);
 	will_return(mock_match_size_t_val, true);
 
-	const struct IMapIter *iter = imap_match_iter(tab, mock_match_size_t_val, D0);
+	const struct IMapIter *iter = imap_match_iter(map, mock_match_size_t_val, D0);
 	assert_non_nul(iter);
 	assert_int_equal(iter->key, 1);
 	assert_ptr_equal(iter->val, V1);
@@ -145,7 +145,7 @@ static void imap_match_iter__many(void **state) {
 	iter = imap_iter_next(iter);
 	assert_nul(iter);
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_equal__(void **state) {
@@ -179,8 +179,8 @@ static void imap_equal__key_removed(void **state) {
 	assert_nul(imap_put(b, 0, V0));
 	assert_nul(imap_put(b, 1, V1));
 
-	int *removed_key = (int*)b->ptab->keys[0];
-	b->ptab->keys[0] = NULL;
+	int *removed_key = (int*)b->pmap->keys[0];
+	b->pmap->keys[0] = NULL;
 
 	assert_imap_not_equal(a, b);
 
@@ -190,19 +190,19 @@ static void imap_equal__key_removed(void **state) {
 }
 
 static void imap_contains_key__(void **state) {
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
-	assert_false(imap_contains_key(tab, 0));
+	assert_false(imap_contains_key(map, 0));
 
-	assert_nul(imap_put(tab, 0, V0));
-	assert_nul(imap_put(tab, 1, V1));
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
 
-	assert_true(imap_contains_key(tab, 0));
-	assert_true(imap_contains_key(tab, 1));
+	assert_true(imap_contains_key(map, 0));
+	assert_true(imap_contains_key(map, 1));
 
-	assert_false(imap_contains_key(tab, 2));
+	assert_false(imap_contains_key(map, 2));
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_get__key_removed(void **state) {
@@ -210,8 +210,8 @@ static void imap_get__key_removed(void **state) {
 	const struct IMap *actual = imap_init();
 	assert_nul(imap_put(actual, 0, V0));
 
-	int *removed_key = (int*)actual->ptab->keys[0];
-	actual->ptab->keys[0] = NULL;
+	int *removed_key = (int*)actual->pmap->keys[0];
+	actual->pmap->keys[0] = NULL;
 
 	assert_nul(imap_get(actual, 0));
 
@@ -220,51 +220,51 @@ static void imap_get__key_removed(void **state) {
 }
 
 static void imap_put_free__(void **state) {
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
 	const char *val = strdup("val");
 
-	assert_nul(imap_put(tab, 0, val));
+	assert_nul(imap_put(map, 0, val));
 
-	assert_false(imap_put_free(tab, 1, V1));
+	assert_false(imap_put_free(map, 1, V1));
 
-	assert_true(imap_put_free(tab, 0, V0));
+	assert_true(imap_put_free(map, 0, V0));
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_put_if_absent__(void **state) {
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
-	assert_nul(imap_put_if_absent(tab, 0, V0));
-	assert_ptr_equal(imap_get(tab, 0), V0);
+	assert_nul(imap_put_if_absent(map, 0, V0));
+	assert_ptr_equal(imap_get(map, 0), V0);
 
-	const void *existing = imap_put_if_absent(tab, 0, V1);
+	const void *existing = imap_put_if_absent(map, 0, V1);
 	assert_ptr_equal(existing, V0);
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_remove_free__(void **state) {
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
 	const char *val = strdup("val");
 
-	assert_nul(imap_put(tab, 0, val));
+	assert_nul(imap_put(map, 0, val));
 
-	assert_true(imap_remove_free(tab, 0));
+	assert_true(imap_remove_free(map, 0));
 
-	assert_false(imap_remove_free(tab, 1));
+	assert_false(imap_remove_free(map, 1));
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_str__(void **state) {
 
-	const struct IMap *tab = imap_init();
-	assert_nul(imap_put(tab, 0, V0));
-	assert_nul(imap_put(tab, 1, NULL));
-	assert_nul(imap_put(tab, 999, V2));
+	const struct IMap *map = imap_init();
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, NULL));
+	assert_nul(imap_put(map, 999, V2));
 
 	char *expected = sprintf_alloc(
 			"0 = %p\n"
@@ -274,23 +274,23 @@ static void imap_str__(void **state) {
 			V2
 			);
 
-	char *actual = imap_str(tab);
+	char *actual = imap_str(map);
 
 	assert_str_equal(actual, expected);
 
 	free(actual);
 	free(expected);
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_vals_slist_shallow__many(void **state) {
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
-	imap_put(tab, 0, V0);
-	imap_put(tab, 1, NULL);
-	imap_put(tab, 2, V2);
+	imap_put(map, 0, V0);
+	imap_put(map, 1, NULL);
+	imap_put(map, 2, V2);
 
-	struct SList *list = imap_vals_slist_shallow(tab);
+	struct SList *list = imap_vals_slist_shallow(map);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_ptr_equal(slist_at(list, 0), V0);
@@ -298,18 +298,18 @@ static void imap_vals_slist_shallow__many(void **state) {
 	assert_ptr_equal(slist_at(list, 2), V2);
 
 	slist_free(&list);
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_vals_slist_deep__many(void **state) {
 	const struct IMapParams params = { .clone_val = fn_clone_strdup, };
-	const struct IMap *tab = imap_init_with(params);
+	const struct IMap *map = imap_init_with(params);
 
-	imap_put(tab, 0, "0");
-	imap_put(tab, 1, NULL);
-	imap_put(tab, 2, "2");
+	imap_put(map, 0, "0");
+	imap_put(map, 1, NULL);
+	imap_put(map, 2, "2");
 
-	struct SList *list = imap_vals_slist_deep(tab);
+	struct SList *list = imap_vals_slist_deep(map);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_str_equal(slist_at(list, 0), "0");
@@ -317,7 +317,7 @@ static void imap_vals_slist_deep__many(void **state) {
 	assert_str_equal(slist_at(list, 2), "2");
 
 	slist_free_vals(&list, NULL);
-	imap_free(tab);
+	imap_free(map);
 }
 
 static void imap_clone_shallow__many(void **state) {
@@ -356,14 +356,14 @@ static void imap_clone_shallow__params(void **state) {
 	assert_non_nul(to);
 
 	// commented out are tested elsewhere
-	assert_int_equal(to->ptab->size, 0);
-	assert_int_equal(to->ptab->capacity, 99);
-	assert_int_equal(to->ptab->params.grow, 1);
-	assert_ptr_equal(to->ptab->params.equal_val, mock_equal);
-	assert_ptr_equal(to->ptab->params.alloc_val, mock_alloc);
-	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->ptab->params.free_val, mock_free);
-	assert_ptr_equal(to->ptab->params.clone_val, mock_clone);
+	assert_int_equal(to->pmap->size, 0);
+	assert_int_equal(to->pmap->capacity, 99);
+	assert_int_equal(to->pmap->params.grow, 1);
+	assert_ptr_equal(to->pmap->params.equal_val, mock_equal);
+	assert_ptr_equal(to->pmap->params.alloc_val, mock_alloc);
+	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->pmap->params.free_val, mock_free);
+	assert_ptr_equal(to->pmap->params.clone_val, mock_clone);
 
 	assert_ptr_equal(to->params.equal_val, mock_equal);
 	assert_ptr_equal(to->params.free_val, mock_free);
@@ -410,7 +410,7 @@ static void imap_clone_deep__no_clone_val(void **state) {
 }
 
 static void imap__null_inputs(void **state) {
-	const struct IMap *tab = imap_init();
+	const struct IMap *map = imap_init();
 
 	assert_nul(imap_clone_shallow(NULL));
 	assert_nul(imap_clone_deep(NULL));
@@ -424,21 +424,21 @@ static void imap__null_inputs(void **state) {
 	assert_nul(imap_iter_next(NULL));
 	assert_false(imap_put(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(NULL, 0, NULL));
-	assert_nul(imap_put_if_absent(tab, 0, NULL));
+	assert_nul(imap_put_if_absent(map, 0, NULL));
 	assert_false(imap_put_free(NULL, 0, NULL));
-	assert_false(imap_put_free(tab, 0, NULL));
+	assert_false(imap_put_free(map, 0, NULL));
 	assert_nul(imap_remove(NULL, 0));
-	assert_nul(imap_remove(tab, 0));
+	assert_nul(imap_remove(map, 0));
 	assert_false(imap_remove_free(NULL, 0));
-	assert_false(imap_remove_free(tab, 0));
+	assert_false(imap_remove_free(map, 0));
 	assert_false(imap_equal(NULL, NULL));
-	assert_false(imap_equal(tab, NULL));
+	assert_false(imap_equal(map, NULL));
 	assert_nul(imap_vals_slist_shallow(NULL));
 	assert_nul(imap_vals_slist_deep(NULL));
 	assert_nul(imap_str(NULL));
 	assert_int_equal(imap_size(NULL), 0);
 
-	imap_free(tab);
+	imap_free(map);
 }
 
 int main(void) {

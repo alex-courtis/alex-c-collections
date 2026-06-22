@@ -46,7 +46,7 @@ const struct SMapS *smaps_init_with(const struct SMapSParams params);
 const struct SMapS *smaps_clone(const struct SMapS* const from);
 
 // free map
-void smaps_free(const struct SMapS* const tab);
+void smaps_free(const struct SMapS* const map);
 
 // free iter
 void smaps_iter_free(const struct SMapSIter* const iter);
@@ -56,16 +56,16 @@ void smaps_iter_free(const struct SMapSIter* const iter);
  */
 
 // return val, NULL if not present
-const char *smaps_get(const struct SMapS* const tab, const char* const key);
+const char *smaps_get(const struct SMapS* const map, const char* const key);
 
 // true if key is present
-bool smaps_contains_key(const struct SMapS* const tab, const char* const key);
+bool smaps_contains_key(const struct SMapS* const map, const char* const key);
 
 // create an iterator, caller must smaps_iter_free or invoke smaps_next until NULL
-const struct SMapSIter *smaps_iter(const struct SMapS* const tab);
+const struct SMapSIter *smaps_iter(const struct SMapS* const map);
 
 // create an iterator filtering by match, NULL match matches all
-const struct SMapSIter *smaps_match_iter(const struct SMapS* const tab, fn_match_key_val match, const void* const data);
+const struct SMapSIter *smaps_match_iter(const struct SMapS* const map, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map
 const struct SMapSIter *smaps_iter_next(const struct SMapSIter* const iter);
@@ -75,13 +75,13 @@ const struct SMapSIter *smaps_iter_next(const struct SMapSIter* const iter);
  */
 
 // set key/val, return true if overwritten
-bool smaps_put(const struct SMapS* const tab, const char* const key, const char* const val);
+bool smaps_put(const struct SMapS* const map, const char* const key, const char* const val);
 
 // set key/val if not present, return true if overwritten
-bool smaps_put_if_absent(const struct SMapS* const tab, const char* const key, const char* const val);
+bool smaps_put_if_absent(const struct SMapS* const map, const char* const key, const char* const val);
 
 // remove val, return true if removed
-bool smaps_remove(const struct SMapS* const tab, const char* const key);
+bool smaps_remove(const struct SMapS* const map, const char* const key);
 
 /*
  * Comparison
@@ -95,20 +95,20 @@ bool smaps_equal(const struct SMapS* const a, const struct SMapS* const b);
  */
 
 // ordered vals, caller frees list and vals
-struct SList *smaps_keys_slist_deep(const struct SMapS* const tab);
+struct SList *smaps_keys_slist_deep(const struct SMapS* const map);
 
 // ordered vals, caller frees list and vals
-struct SList *smaps_vals_slist_deep(const struct SMapS* const tab);
+struct SList *smaps_vals_slist_deep(const struct SMapS* const map);
 
 /*
  * Info
  */
 
 // to string, user frees, format "k = v\n"
-char *smaps_str(const struct SMapS* const tab);
+char *smaps_str(const struct SMapS* const map);
 
 // number of entries
-size_t smaps_size(const struct SMapS* const tab);
+size_t smaps_size(const struct SMapS* const map);
 
 #endif // SMAPS_H
 

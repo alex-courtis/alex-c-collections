@@ -10,7 +10,7 @@
 
 struct IMap {
 	const struct IMapParams params;
-	const struct PMap *ptab;
+	const struct PMap *pmap;
 };
 
 struct IMapIterState {
@@ -43,7 +43,7 @@ static const struct IMap *clone(const struct IMap* const from, bool deep) {
 
 	struct IMap *to = calloc(1, sizeof(struct IMap));
 
-	to->ptab = deep ? pmap_clone_deep(from->ptab) : pmap_clone_shallow(from->ptab);
+	to->pmap = deep ? pmap_clone_deep(from->pmap) : pmap_clone_shallow(from->pmap);
 
 	memcpy((void*)&to->params, &from->params, sizeof(struct IMapParams));
 
@@ -70,11 +70,11 @@ const struct IMap *imap_init_with(const struct IMapParams params) {
 		.grow = params.grow,
 	};
 
-	struct IMap *tab =  calloc(1, sizeof(struct IMap));
-	tab->ptab = pmap_init_with(pmap_params);;
-	memcpy((void*)&tab->params, &params, sizeof(struct IMapParams));
+	struct IMap *map =  calloc(1, sizeof(struct IMap));
+	map->pmap = pmap_init_with(pmap_params);;
+	memcpy((void*)&map->params, &params, sizeof(struct IMapParams));
 
-	return tab;
+	return map;
 }
 
 const struct IMap *imap_clone_shallow(const struct IMap* const from) {
@@ -85,22 +85,22 @@ const struct IMap *imap_clone_deep(const struct IMap* const from) {
 	return clone(from, true);
 }
 
-void imap_free(const struct IMap* const tab) {
-	if (!tab)
+void imap_free(const struct IMap* const map) {
+	if (!map)
 		return;
 
-	pmap_free(tab->ptab);
+	pmap_free(map->pmap);
 
-	free((void*)tab);
+	free((void*)map);
 }
 
-void imap_free_vals(const struct IMap* const tab) {
-	if (!tab)
+void imap_free_vals(const struct IMap* const map) {
+	if (!map)
 		return;
 
-	pmap_free_vals(tab->ptab);
+	pmap_free_vals(map->pmap);
 
-	free((void*)tab);
+	free((void*)map);
 }
 
 void imap_iter_free(const struct IMapIter* const iter) {
@@ -114,16 +114,16 @@ void imap_iter_free(const struct IMapIter* const iter) {
 	free((void*)iter);
 }
 
-const void *imap_get(const struct IMap* const tab, const size_t key) {
-	return tab ? pmap_get(tab->ptab, &key) : NULL;
+const void *imap_get(const struct IMap* const map, const size_t key) {
+	return map ? pmap_get(map->pmap, &key) : NULL;
 }
 
-bool imap_contains_key(const struct IMap* const tab, const size_t key) {
-	return tab ? pmap_contains_key(tab->ptab, &key) : false;
+bool imap_contains_key(const struct IMap* const map, const size_t key) {
+	return map ? pmap_contains_key(map->pmap, &key) : false;
 }
 
-const struct IMapIter *imap_iter(const struct IMap* const tab) {
-	return imap_match_iter(tab, NULL, NULL);
+const struct IMapIter *imap_iter(const struct IMap* const map) {
+	return imap_match_iter(map, NULL, NULL);
 }
 
 static bool fn_match_wrapper(const void* const key, const void* const val, const void* const data) {
@@ -131,8 +131,8 @@ static bool fn_match_wrapper(const void* const key, const void* const val, const
 	return st->match ? st->match(*(size_t*)key, val, st->data) : true;
 }
 
-const struct IMapIter *imap_match_iter(const struct IMap* const tab, fn_match_size_t_val match, const void* const data) {
-	if (!tab)
+const struct IMapIter *imap_match_iter(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
+	if (!map)
 		return NULL;
 
 	struct IMapIter *it = calloc(1, sizeof(struct IMapIter));
@@ -141,7 +141,7 @@ const struct IMapIter *imap_match_iter(const struct IMap* const tab, fn_match_si
 	it->st->data = data;
 
 	// pass the IMapIterState as data, to be passed to the test wrappers
-	const struct PMapIter *pit = pmap_match_iter(tab->ptab, fn_match_wrapper, it->st);
+	const struct PMapIter *pit = pmap_match_iter(map->pmap, fn_match_wrapper, it->st);
 
 	if (pit) {
 		it->st->pit = pit;
@@ -178,42 +178,42 @@ const struct IMapIter *imap_iter_next(const struct IMapIter* const citer) {
 	}
 }
 
-const void *imap_put(const struct IMap* const tab, const size_t key, const void* const val) {
-	return tab ? pmap_put(tab->ptab, &key, val) : NULL;
+const void *imap_put(const struct IMap* const map, const size_t key, const void* const val) {
+	return map ? pmap_put(map->pmap, &key, val) : NULL;
 }
 
-const void *imap_put_if_absent(const struct IMap* const tab, const size_t key, const void* const val) {
-	return tab ? pmap_put_if_absent(tab->ptab, &key, val) : NULL;
+const void *imap_put_if_absent(const struct IMap* const map, const size_t key, const void* const val) {
+	return map ? pmap_put_if_absent(map->pmap, &key, val) : NULL;
 }
 
-bool imap_put_free(const struct IMap* const tab, const size_t key, const char* const val) {
-	return tab ? pmap_put_free(tab->ptab, &key, val) : false;
+bool imap_put_free(const struct IMap* const map, const size_t key, const char* const val) {
+	return map ? pmap_put_free(map->pmap, &key, val) : false;
 }
 
-const void *imap_remove(const struct IMap* const tab, const size_t key) {
-	return tab ? pmap_remove(tab->ptab, &key) : NULL;
+const void *imap_remove(const struct IMap* const map, const size_t key) {
+	return map ? pmap_remove(map->pmap, &key) : NULL;
 }
 
-bool imap_remove_free(const struct IMap* const tab, const size_t key) {
-	return tab ? pmap_remove_free(tab->ptab, &key) : false;
+bool imap_remove_free(const struct IMap* const map, const size_t key) {
+	return map ? pmap_remove_free(map->pmap, &key) : false;
 }
 
 bool imap_equal(const struct IMap* const a, const struct IMap* const b) {
-	return a && b ? pmap_equal(a->ptab, b->ptab) : false;
+	return a && b ? pmap_equal(a->pmap, b->pmap) : false;
 }
 
-struct SList *imap_vals_slist_shallow(const struct IMap* const tab) {
-	return tab ? pmap_vals_slist_shallow(tab->ptab) : NULL;
+struct SList *imap_vals_slist_shallow(const struct IMap* const map) {
+	return map ? pmap_vals_slist_shallow(map->pmap) : NULL;
 }
 
-struct SList *imap_vals_slist_deep(const struct IMap* const tab) {
-	return tab ? pmap_vals_slist_deep(tab->ptab) : NULL;
+struct SList *imap_vals_slist_deep(const struct IMap* const map) {
+	return map ? pmap_vals_slist_deep(map->pmap) : NULL;
 }
 
-char *imap_str(const struct IMap* const tab) {
-	return tab ? pmap_str(tab->ptab) : NULL;
+char *imap_str(const struct IMap* const map) {
+	return map ? pmap_str(map->pmap) : NULL;
 }
 
-size_t imap_size(const struct IMap* const tab) {
-	return tab ? pmap_size(tab->ptab) : 0;
+size_t imap_size(const struct IMap* const map) {
+	return map ? pmap_size(map->pmap) : 0;
 }

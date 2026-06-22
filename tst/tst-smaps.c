@@ -23,60 +23,60 @@ struct PMap {
 
 struct SMapS {
 	const struct SMapSParams params;
-	const struct PMap *ptab;
+	const struct PMap *pmap;
 };
 
 static void smaps_put_get_remove_free__case_sensitive(void **state) {
 
-	const struct SMapS *tab = smaps_init();
-	assert_false(smaps_put(tab, "a", "A"));
-	assert_false(smaps_put(tab, "b", "B"));
-	assert_false(smaps_put(tab, "c", "C"));
+	const struct SMapS *map = smaps_init();
+	assert_false(smaps_put(map, "a", "A"));
+	assert_false(smaps_put(map, "b", "B"));
+	assert_false(smaps_put(map, "c", "C"));
 
-	assert_true(smaps_put(tab, "c", "duplicate"));
+	assert_true(smaps_put(map, "c", "duplicate"));
 
-	assert_int_equal(smaps_size(tab), 3);
+	assert_int_equal(smaps_size(map), 3);
 
-	assert_str_equal(smaps_get(tab, "b"), "B");
+	assert_str_equal(smaps_get(map, "b"), "B");
 
-	assert_nul(smaps_get(tab, "x"));
+	assert_nul(smaps_get(map, "x"));
 
-	assert_true(smaps_remove(tab, "b"));
-	assert_false(smaps_remove(tab, "b"));
+	assert_true(smaps_remove(map, "b"));
+	assert_false(smaps_remove(map, "b"));
 
-	assert_nul(smaps_get(tab, "b"));
+	assert_nul(smaps_get(map, "b"));
 
-	assert_true(smaps_put(tab, "a", NULL));
+	assert_true(smaps_put(map, "a", NULL));
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_put_get_remove_free__case_insensitive(void **state) {
 	const struct SMapSParams params = { .case_insensitive_key = true, };
-	const struct SMapS *tab = smaps_init_with(params);
+	const struct SMapS *map = smaps_init_with(params);
 
-	assert_false(smaps_put(tab, "A", "aaa"));
-	assert_false(smaps_put(tab, "B", "bbb"));
+	assert_false(smaps_put(map, "A", "aaa"));
+	assert_false(smaps_put(map, "B", "bbb"));
 
-	assert_str_equal(smaps_get(tab, "b"), "bbb");
+	assert_str_equal(smaps_get(map, "b"), "bbb");
 
-	assert_nul(smaps_get(tab, "x"));
+	assert_nul(smaps_get(map, "x"));
 
-	assert_true(smaps_remove(tab, "b"));
+	assert_true(smaps_remove(map, "b"));
 
-	assert_nul(smaps_get(tab, "b"));
+	assert_nul(smaps_get(map, "b"));
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_iter__many(void **state) {
 
-	const struct SMapS *tab = smaps_init();
-	assert_false(smaps_put(tab, "a", "aa"));
-	assert_false(smaps_put(tab, "b", NULL));
-	assert_false(smaps_put(tab, "c", "cc"));
+	const struct SMapS *map = smaps_init();
+	assert_false(smaps_put(map, "a", "aa"));
+	assert_false(smaps_put(map, "b", NULL));
+	assert_false(smaps_put(map, "c", "cc"));
 
-	const struct SMapSIter *iter = smaps_iter(tab);
+	const struct SMapSIter *iter = smaps_iter(map);
 
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "a");
@@ -89,18 +89,18 @@ static void smaps_iter__many(void **state) {
 
 	smaps_iter_free(iter);
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_iter__empty(void **state) {
 
-	const struct SMapS *tab = smaps_init();
+	const struct SMapS *map = smaps_init();
 
-	const struct SMapSIter *iter = smaps_iter(tab);
+	const struct SMapSIter *iter = smaps_iter(map);
 
 	assert_nul(iter);
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_iter_free__partial(void **state) {
@@ -120,15 +120,15 @@ static bool fn_match_both_start_with_a(const void* const key, const void* const 
 }
 
 static void smaps_match_iter__many(void **state) {
-	const struct SMapS *tab = smaps_init();
+	const struct SMapS *map = smaps_init();
 
-	assert_false(smaps_put(tab, "ak0", "bv0"));
-	assert_false(smaps_put(tab, "ak1", "av1"));
-	assert_false(smaps_put(tab, "bk2", "av2"));
-	assert_false(smaps_put(tab, "ak3", "av3"));
-	assert_false(smaps_put(tab, "ak4", "bv4"));
+	assert_false(smaps_put(map, "ak0", "bv0"));
+	assert_false(smaps_put(map, "ak1", "av1"));
+	assert_false(smaps_put(map, "bk2", "av2"));
+	assert_false(smaps_put(map, "ak3", "av3"));
+	assert_false(smaps_put(map, "ak4", "bv4"));
 
-	const struct SMapSIter *iter = smaps_match_iter(tab, fn_match_both_start_with_a, NULL);
+	const struct SMapSIter *iter = smaps_match_iter(map, fn_match_both_start_with_a, NULL);
 	assert_non_nul(iter);
 	assert_str_equal(iter->key, "ak1");
 	assert_str_equal(iter->val, "av1");
@@ -140,7 +140,7 @@ static void smaps_match_iter__many(void **state) {
 
 	assert_nul(smaps_iter_next(iter));
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_equal__case_sensitive(void **state) {
@@ -202,43 +202,43 @@ static void smaps_equal__case_insensitive_val(void **state) {
 }
 
 static void smaps_contains_key__(void **state) {
-	const struct SMapS *tab = smaps_init();
+	const struct SMapS *map = smaps_init();
 
-	assert_false(smaps_contains_key(tab, "a"));
+	assert_false(smaps_contains_key(map, "a"));
 
-	assert_false(smaps_put(tab, "a", "aa"));
-	assert_false(smaps_put(tab, "b", "bb"));
+	assert_false(smaps_put(map, "a", "aa"));
+	assert_false(smaps_put(map, "b", "bb"));
 
-	assert_true(smaps_contains_key(tab, "a"));
-	assert_true(smaps_contains_key(tab, "b"));
+	assert_true(smaps_contains_key(map, "a"));
+	assert_true(smaps_contains_key(map, "b"));
 
-	assert_false(smaps_contains_key(tab, "c"));
+	assert_false(smaps_contains_key(map, "c"));
 
-	assert_false(smaps_contains_key(tab, NULL));
+	assert_false(smaps_contains_key(map, NULL));
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_put_if_absent__(void **state) {
-	const struct SMapS *tab = smaps_init();
+	const struct SMapS *map = smaps_init();
 
-	assert_false(smaps_put_if_absent(tab, "a", "aa"));
-	assert_str_equal(smaps_get(tab, "a"), "aa");
+	assert_false(smaps_put_if_absent(map, "a", "aa"));
+	assert_str_equal(smaps_get(map, "a"), "aa");
 
-	assert_true(smaps_put_if_absent(tab, "a", "xx"));
+	assert_true(smaps_put_if_absent(map, "a", "xx"));
 
-	assert_false(smaps_put_if_absent(tab, "b", NULL));
-	assert_nul(smaps_get(tab, "b"));
+	assert_false(smaps_put_if_absent(map, "b", NULL));
+	assert_nul(smaps_get(map, "b"));
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_str__(void **state) {
 
-	const struct SMapS *tab = smaps_init();
-	assert_false(smaps_put(tab, "a", "aa"));
-	assert_false(smaps_put(tab, "b", NULL));
-	assert_false(smaps_put(tab, "c", "cc"));
+	const struct SMapS *map = smaps_init();
+	assert_false(smaps_put(map, "a", "aa"));
+	assert_false(smaps_put(map, "b", NULL));
+	assert_false(smaps_put(map, "c", "cc"));
 
 	char *expected = sprintf_alloc(
 			"a = aa\n"
@@ -246,39 +246,39 @@ static void smaps_str__(void **state) {
 			"c = cc\n"
 			);
 
-	char *actual = smaps_str(tab);
+	char *actual = smaps_str(map);
 
 	assert_str_equal(actual, expected);
 
 	free(actual);
 	free(expected);
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 static void smaps_keys_slist_deep__many(void **state) {
-	const struct SMapS *tab = smaps_init();
+	const struct SMapS *map = smaps_init();
 
-	smaps_put(tab, "a", "aa");
-	smaps_put(tab, "b", "bb");
+	smaps_put(map, "a", "aa");
+	smaps_put(map, "b", "bb");
 
-	struct SList *list = smaps_keys_slist_deep(tab);
+	struct SList *list = smaps_keys_slist_deep(map);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "a");
 	assert_str_equal(slist_at(list, 1), "b");
 
-	smaps_free(tab);
+	smaps_free(map);
 	slist_free_vals(&list, NULL);
 }
 
 static void smaps_vals_slist_deep__many(void **state) {
-	const struct SMapS *tab = smaps_init();
+	const struct SMapS *map = smaps_init();
 
-	smaps_put(tab, "a", "aa");
-	smaps_put(tab, "b", NULL);
-	smaps_put(tab, "c", "cc");
+	smaps_put(map, "a", "aa");
+	smaps_put(map, "b", NULL);
+	smaps_put(map, "c", "cc");
 
-	struct SList *list = smaps_vals_slist_deep(tab);
+	struct SList *list = smaps_vals_slist_deep(map);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_str_equal(slist_at(list, 0), "aa");
@@ -286,7 +286,7 @@ static void smaps_vals_slist_deep__many(void **state) {
 	assert_str_equal(slist_at(list, 2), "cc");
 
 	slist_free_vals(&list, NULL);
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 // also tests constructor
@@ -304,16 +304,16 @@ static void smaps_clone__(void **state) {
 
 	assert_non_nul(to);
 
-	assert_int_equal(to->ptab->size, 0);
-	assert_int_equal(to->ptab->capacity, 99);
-	assert_int_equal(to->ptab->params.grow, 1);
-	assert_ptr_equal(to->ptab->params.equal_key, fn_equal_strcasecmp);
-	assert_ptr_equal(to->ptab->params.equal_val, fn_equal_strcmp);
-	assert_ptr_equal(to->ptab->params.alloc_key, fn_clone_strdup);
-	assert_ptr_equal(to->ptab->params.alloc_val, fn_clone_strdup);
-	assert_ptr_equal(to->ptab->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->ptab->params.free_val, (fn_free)free);
-	assert_ptr_equal(to->ptab->params.clone_val, fn_clone_strdup);
+	assert_int_equal(to->pmap->size, 0);
+	assert_int_equal(to->pmap->capacity, 99);
+	assert_int_equal(to->pmap->params.grow, 1);
+	assert_ptr_equal(to->pmap->params.equal_key, fn_equal_strcasecmp);
+	assert_ptr_equal(to->pmap->params.equal_val, fn_equal_strcmp);
+	assert_ptr_equal(to->pmap->params.alloc_key, fn_clone_strdup);
+	assert_ptr_equal(to->pmap->params.alloc_val, fn_clone_strdup);
+	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->pmap->params.free_val, (fn_free)free);
+	assert_ptr_equal(to->pmap->params.clone_val, fn_clone_strdup);
 
 	assert_true(to->params.case_insensitive_key);
 	assert_ptr_equal(to->params.initial, 99);
@@ -324,32 +324,32 @@ static void smaps_clone__(void **state) {
 }
 
 static void smaps__null_inputs(void **state) {
-	const struct SMapS *tab = smaps_init();
+	const struct SMapS *map = smaps_init();
 
 	assert_nul(smaps_clone(NULL));
 	smaps_free(NULL);
 	smaps_iter_free(NULL);
 	assert_false(smaps_get(NULL, NULL));
-	assert_false(smaps_get(tab, NULL));
+	assert_false(smaps_get(map, NULL));
 	assert_false(smaps_contains_key(NULL, NULL));
-	assert_false(smaps_contains_key(tab, NULL));
+	assert_false(smaps_contains_key(map, NULL));
 	assert_nul(smaps_iter(NULL));
 	assert_nul(smaps_match_iter(NULL, NULL, NULL));
 	assert_nul(smaps_iter_next(NULL));
 	assert_false(smaps_put(NULL, NULL, NULL));
-	assert_false(smaps_put(tab, NULL, NULL));
+	assert_false(smaps_put(map, NULL, NULL));
 	assert_false(smaps_put_if_absent(NULL, NULL, NULL));
-	assert_false(smaps_put_if_absent(tab, NULL, NULL));
+	assert_false(smaps_put_if_absent(map, NULL, NULL));
 	assert_false(smaps_remove(NULL, NULL));
-	assert_false(smaps_remove(tab, NULL));
+	assert_false(smaps_remove(map, NULL));
 	assert_false(smaps_equal(NULL, NULL));
-	assert_false(smaps_equal(tab, NULL));
+	assert_false(smaps_equal(map, NULL));
 	assert_nul(smaps_keys_slist_deep(NULL));
 	assert_nul(smaps_vals_slist_deep(NULL));
 	assert_nul(smaps_str(NULL));
 	assert_int_equal(smaps_size(NULL), 0);
 
-	smaps_free(tab);
+	smaps_free(map);
 }
 
 int main(void) {
