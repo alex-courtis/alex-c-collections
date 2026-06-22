@@ -236,7 +236,7 @@ static void pset_add__equal_val(void **state) {
 	pset_free(set);
 }
 
-static void pset_add__clone_val(void **state) {
+static void pset_add__alloc_val(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 	const struct PSet *set = pset_init_with(params);
 
@@ -244,6 +244,22 @@ static void pset_add__clone_val(void **state) {
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	assert_true(pset_add(set, V0));
+
+	pset_free(set);
+}
+
+static void pset_add__alloc_val_returned_null(void **state) {
+	const struct PSetParams params = { .alloc_val = mock_alloc, };
+	const struct PSet *set = pset_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, NULL, void*);
+
+	assert_false(pset_add(set, V0));
+
+	assert_false(pset_contains(set, V0));
+
+	assert_int_equal(pset_size(set), 0);
 
 	pset_free(set);
 }
@@ -888,7 +904,8 @@ int main(void) {
 
 		TEST(pset_add__new),
 		TEST(pset_add__equal_val),
-		TEST(pset_add__clone_val),
+		TEST(pset_add__alloc_val),
+		TEST(pset_add__alloc_val_returned_null),
 		TEST(pset_add__null),
 		TEST(pset_add__grow),
 

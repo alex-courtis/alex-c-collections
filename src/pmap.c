@@ -78,6 +78,8 @@ static const void *put(const struct PMap* const ctab, const void* const key, con
 		v = &tab->vals[tab->size];
 	}
 
+	// TODO do not put if clone fails
+
 	// new
 	if (tab->params.clone_key) {
 		*k = tab->params.clone_key(key);

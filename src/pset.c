@@ -56,18 +56,24 @@ static bool add(const struct PSet* const cset, const void* const val, fn_clone a
 		}
 	}
 
+	// create new value
+	const void *new;
+	if (alloc_val) {
+		new = alloc_val(val);
+	} else {
+		new = (void*)val;
+	}
+	if (!new)
+		return false;
+
 	// maybe grow for new entry
 	if (set->size >= set->capacity) {
 		grow(set);
 		v = &set->vals[set->size];
 	}
 
-	// new value
-	if (alloc_val) {
-		*v = alloc_val(val);
-	} else {
-		*v = (void*)val;
-	}
+	// assign new value
+	*v = new;
 	set->size++;
 
 	return true;
