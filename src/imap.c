@@ -122,6 +122,27 @@ bool imap_contains_key(const struct IMap* const map, const size_t key) {
 	return map ? pmap_contains_key(map->pmap, &key) : false;
 }
 
+struct IMapPair imap_find(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
+	struct IMapPair res = { 0 };
+
+	if (!map || !match)
+		return res;
+
+	const struct PMapIter *it;
+	for (it = pmap_iter(map->pmap); it; it = pmap_iter_next(it)) {
+		size_t k = *(size_t*)it->key;
+		if (match(k, it->val, data)) {
+			res.key = k;
+			res.val = it->val;
+			break;
+		}
+	}
+
+	pmap_iter_free(it);
+
+	return res;
+}
+
 const struct IMapIter *imap_iter(const struct IMap* const map) {
 	return imap_match_iter(map, NULL, NULL);
 }
@@ -134,6 +155,8 @@ static bool fn_match_wrapper(const void* const key, const void* const val, const
 const struct IMapIter *imap_match_iter(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
 	if (!map)
 		return NULL;
+
+	// TODO replace with iter as per imap_find
 
 	struct IMapIter *it = calloc(1, sizeof(struct IMapIter));
 	it->st = calloc(1, sizeof(struct IMapIterState));
