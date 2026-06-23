@@ -204,6 +204,19 @@ bool pset_contains(const struct PSet* const set, const void* const val) {
 	return false;
 }
 
+const void *pset_match(const struct PSet* const set, fn_match_val match, const void* const data) {
+	if (!set || !match)
+		return NULL;
+
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
+		if (match(*v, data)) {
+			return *v;
+		}
+	}
+
+	return NULL;
+}
+
 const struct PSetIt *pset_it(const struct PSet* const set) {
 	if (!set || set->size == 0)
 		return NULL;

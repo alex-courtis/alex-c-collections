@@ -23,6 +23,13 @@ bool mock_less_than(const void* const a, const void* const b) {
 	return mock_type(bool);
 }
 
+bool mock_match_val(const void* const val, const void* const data) {
+	check_expected_ptr(val);
+	check_expected_ptr(data);
+
+	return mock_type(bool);
+}
+
 bool mock_match_key_val(const void* const key, const void* const val, const void* const data) {
 	check_expected_ptr(key);
 	check_expected_ptr(val);

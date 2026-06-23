@@ -1,6 +1,7 @@
 #include "tst.h"
 #include "asserts.h"
 #include "assert-sset.h"
+#include "mock-fn.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -30,6 +31,10 @@ struct SSet {
 	const struct SSetParams params;
 	const struct PSet *pset;
 };
+
+static bool fn_match_starts_with_a(const void* const a, const void* const b) {
+	return *(char*)a == 'a';
+}
 
 static void sset_add__clone_val_free_val(void **state) {
 	const struct SSet *set = sset_init();
@@ -85,6 +90,19 @@ static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	sset_free(set);
 }
 
+static void sset_match__matches(void **state) {
+	const struct SSet *set = sset_init();
+
+	assert_true(sset_add(set, "x0"));
+	assert_true(sset_add(set, "x1"));
+	assert_true(sset_add(set, "a2"));
+	assert_true(sset_add(set, "x3"));
+
+	assert_str_equal(sset_match(set, fn_match_starts_with_a, NULL), "a2");
+
+	sset_free(set);
+}
+
 static void sset_it__many(void **state) {
 
 	const struct SSet *set = sset_init();
@@ -126,10 +144,6 @@ static void sset_it_next__partial(void **state) {
 	const struct SSetIt *it = calloc(1, sizeof(struct SSetIt));
 
 	assert_nul(sset_it_next(it));
-}
-
-static bool fn_match_starts_with_a(const void* const a, const void* const b) {
-	return *(char*)a == 'a';
 }
 
 static void sset_match_it__(void **state) {
@@ -364,6 +378,8 @@ static void sset__null_inputs(void **state) {
 	sset_it_free(NULL);
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
+	sset_match(NULL, NULL, NULL);
+	sset_match(NULL, mock_match_val, NULL);
 	assert_nul(sset_it(NULL));
 	assert_nul(sset_match_it(NULL, NULL, NULL));
 	assert_nul(sset_match_it(set, NULL, NULL));
@@ -389,6 +405,8 @@ int main(void) {
 
 		TEST(sset_add_contains_remove_free__case_insensitive),
 		TEST(sset_add_contains_remove_free__case_sensitive),
+
+		TEST(sset_match__matches),
 
 		TEST(sset_it__many),
 		TEST(sset_it__empty),

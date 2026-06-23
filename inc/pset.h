@@ -68,6 +68,9 @@ void pset_it_free(const struct PSetIt* const it);
 // true if this set contains the specified element [equal_val]
 bool pset_contains(const struct PSet* const set, const void* const val);
 
+// find the first match, NULL when no match or NULL match
+const void *pset_match(const struct PSet* const set, fn_match_val match, const void* const data);
+
 // create an iterator, caller must pset_it_free or invoke pset_next until NULL
 const struct PSetIt *pset_it(const struct PSet* const set);
 

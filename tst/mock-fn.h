@@ -10,6 +10,8 @@ bool mock_equal_size_t(const size_t a, const void* const b);
 
 bool mock_less_than(const void* const a, const void* const b);
 
+bool mock_match_val(const void* const val, const void* const data);
+
 bool mock_match_key_val(const void* const key, const void* const val, const void* const data);
 
 bool mock_match_size_t_val(const size_t key, const void* const val, const void* const data);
