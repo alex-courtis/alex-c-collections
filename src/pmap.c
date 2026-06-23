@@ -263,11 +263,18 @@ struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match,
 }
 
 const struct PMapIter *pmap_iter(const struct PMap* const map) {
-	return pmap_match_iter(map, NULL, NULL);
+	if (!map)
+		return NULL;
+
+	struct PMapIter *it = calloc(1, sizeof(struct PMapIter));
+	it->st = calloc(1, sizeof(struct PMapIterState));
+	it->st->map = map;
+
+	return pmap_iter_next(it);
 }
 
 const struct PMapIter *pmap_match_iter(const struct PMap* const map, fn_match_key_val match, const void* const data) {
-	if (!map || map->size == 0)
+	if (!map || !match || map->size == 0)
 		return NULL;
 
 	struct PMapIter *it = calloc(1, sizeof(struct PMapIter));

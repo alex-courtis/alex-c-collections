@@ -117,7 +117,22 @@ struct SMapPair smap_match(const struct SMap* const map, fn_match_key_val match,
 }
 
 const struct SMapIter *smap_iter(const struct SMap* const map) {
-	return smap_match_iter(map, NULL, NULL);
+	if (!map)
+		return NULL;
+
+	const struct PMapIter *pit = pmap_iter(map->pmap);
+
+	if (!pit)
+		return NULL;
+
+	struct SMapIter *it = calloc(1, sizeof(struct SMapIter));
+	it->st = calloc(1, sizeof(struct SMapIterState));
+
+	it->st->pit = pit;
+	it->key = pit->key;
+	it->val = pit->val;
+
+	return it;
 }
 
 const struct SMapIter *smap_match_iter(const struct SMap* const map, fn_match_key_val match, const void* const data) {

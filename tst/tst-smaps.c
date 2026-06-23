@@ -70,7 +70,7 @@ static void smaps_put_get_remove_free__case_insensitive(void **state) {
 	smaps_free(map);
 }
 
-static void smaps_find__matches(void **state) {
+static void smaps_match__matches(void **state) {
 	const struct SMapS *map = smaps_init();
 
 	assert_false(smaps_put(map, "0", "aaa"));
@@ -89,7 +89,7 @@ static void smaps_find__matches(void **state) {
 	expect_string(mock_match_key_val, data, "x");
 	will_return(mock_match_key_val, true);
 
-	const struct SMapSPair pair = smaps_find(map, mock_match_key_val, "x");
+	const struct SMapSPair pair = smaps_match(map, mock_match_key_val, "x");
 	assert_str_equal(pair.key, "1");
 	assert_str_equal(pair.val, "bbb");
 
@@ -360,10 +360,12 @@ static void smaps__null_inputs(void **state) {
 	assert_false(smaps_get(map, NULL));
 	assert_false(smaps_contains_key(NULL, NULL));
 	assert_false(smaps_contains_key(map, NULL));
-	smaps_find(NULL, NULL, NULL);
-	smaps_find(NULL, mock_match_key_val, NULL);
+	smaps_match(NULL, NULL, NULL);
+	smaps_match(NULL, mock_match_key_val, NULL);
 	assert_nul(smaps_iter(NULL));
 	assert_nul(smaps_match_iter(NULL, NULL, NULL));
+	assert_nul(smaps_match_iter(map, NULL, NULL));
+	assert_nul(smaps_match_iter(map, mock_match_key_val, NULL));
 	assert_nul(smaps_iter_next(NULL));
 	assert_false(smaps_put(NULL, NULL, NULL));
 	assert_false(smaps_put(map, NULL, NULL));
@@ -386,7 +388,7 @@ int main(void) {
 		TEST(smaps_put_get_remove_free__case_sensitive),
 		TEST(smaps_put_get_remove_free__case_insensitive),
 
-		TEST(smaps_find__matches),
+		TEST(smaps_match__matches),
 
 		TEST(smaps_iter__many),
 		TEST(smaps_iter__empty),

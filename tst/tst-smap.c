@@ -473,6 +473,8 @@ static void smap__null_inputs(void **state) {
 	smap_match(NULL, NULL, NULL);
 	smap_match(NULL, mock_match_key_val, NULL);
 	assert_nul(smap_iter(NULL));
+	assert_nul(smap_match_iter(map, NULL, NULL));
+	assert_nul(smap_match_iter(map, mock_match_key_val, NULL));
 	assert_nul(smap_match_iter(NULL, NULL, NULL));
 	assert_nul(smap_iter_next(NULL));
 	assert_nul(smap_put(NULL, NULL, NULL));

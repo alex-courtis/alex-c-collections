@@ -485,6 +485,8 @@ static void imap__null_inputs(void **state) {
 	assert_false(imap_contains_key(NULL, 0));
 	assert_nul(imap_iter(NULL));
 	assert_nul(imap_match_iter(NULL, NULL, NULL));
+	assert_nul(imap_match_iter(map, NULL, NULL));
+	assert_nul(imap_match_iter(map, mock_match_size_t_val, NULL));
 	assert_nul(imap_iter_next(NULL));
 	imap_match(NULL, NULL, NULL);
 	imap_match(NULL, mock_match_size_t_val, NULL);

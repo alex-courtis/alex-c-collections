@@ -1252,6 +1252,8 @@ static void pmap__null_inputs(void **state) {
 	pmap_match(NULL, mock_match_key_val, NULL);
 	assert_nul(pmap_iter(NULL));
 	assert_nul(pmap_match_iter(NULL, NULL, NULL));
+	assert_nul(pmap_match_iter(map, NULL, NULL));
+	assert_nul(pmap_match_iter(map, mock_match_key_val, NULL));
 	assert_nul(pmap_iter_next(NULL));
 	assert_false(pmap_put(NULL, NULL, NULL));
 	assert_false(pmap_put(map, NULL, NULL));
