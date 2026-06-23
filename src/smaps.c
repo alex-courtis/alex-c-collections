@@ -93,7 +93,7 @@ struct SMapSPair smaps_find(const struct SMapS* const map, fn_match_key_val matc
 	if (!map)
 		return res;
 
-	struct PMapPair pres = pmap_find(map->pmap, match, data);
+	struct PMapPair pres = pmap_match(map->pmap, match, data);
 
 	res.key = pres.key;
 	res.val = pres.val;

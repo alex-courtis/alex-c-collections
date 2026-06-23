@@ -69,13 +69,13 @@ const char *smaps_get(const struct SMapS* const map, const char* const key);
 // true if key is present
 bool smaps_contains_key(const struct SMapS* const map, const char* const key);
 
-// find the first match, (NULL,NULL) on no match
+// find the first match, (NULL,NULL) when no matches or NULL match
 struct SMapSPair smaps_find(const struct SMapS* const map, fn_match_key_val match, const void* const data);
 
 // create an iterator, caller must smaps_iter_free or invoke smaps_next until NULL
 const struct SMapSIter *smaps_iter(const struct SMapS* const map);
 
-// create an iterator filtering by match, NULL match matches all
+// create an iterator filtering by match, return NULL when no matches or NULL match
 const struct SMapSIter *smaps_match_iter(const struct SMapS* const map, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map

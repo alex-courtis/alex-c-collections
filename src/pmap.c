@@ -243,7 +243,7 @@ bool pmap_contains_key(const struct PMap* const map, const void* const key) {
 	return false;
 }
 
-struct PMapPair pmap_find(const struct PMap* const map, fn_match_key_val match, const void* const data) {
+struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match, const void* const data) {
 	struct PMapPair res = { 0 };
 
 	if (!map || !match)

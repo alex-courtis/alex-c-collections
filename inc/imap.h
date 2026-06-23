@@ -84,13 +84,13 @@ const void *imap_get(const struct IMap* const map, const size_t key);
 // true if key is present
 bool imap_contains_key(const struct IMap* const map, const size_t key);
 
-// find the first match, (0,NULL) on no match
-struct IMapPair imap_find(const struct IMap* const map, fn_match_size_t_val match, const void* const data);
+// find the first match, (0,NULL) when no matches or NULL match
+struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_val match, const void* const data);
 
 // create an iterator, caller must imap_iter_free or invoke imap_next until NULL
 const struct IMapIter *imap_iter(const struct IMap* const map);
 
-// create an iterator filtering by match, NULL match matches all
+// create an iterator filtering by match, return NULL when no matches or NULL match
 const struct IMapIter *imap_match_iter(const struct IMap* const map, fn_match_size_t_val match, const void* const data);
 
 // next iterator entry, NULL at end of map

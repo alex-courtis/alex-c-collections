@@ -84,14 +84,13 @@ const void *pmap_get(const struct PMap* const map, const void* const key);
 // true if key is present [equal_key]
 bool pmap_contains_key(const struct PMap* const map, const void* const key);
 
-// find the first match, (NULL,NULL) on no match
-struct PMapPair pmap_find(const struct PMap* const map, fn_match_key_val match, const void* const data);
+// find the first match, (NULL,NULL) when no matches or NULL match
+struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match, const void* const data);
 
 // create an iterator, caller must pmap_iter_free or invoke pmap_next until NULL
 const struct PMapIter *pmap_iter(const struct PMap* const map);
 
-// TODO NULL should match nothing
-// create an iterator filtering by match, NULL match matches all
+// create an iterator filtering by match, return NULL when no matches or NULL match
 const struct PMapIter *pmap_match_iter(const struct PMap* const map, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map

@@ -148,7 +148,7 @@ static void imap_match_iter__many(void **state) {
 	imap_free(map);
 }
 
-static void imap_find__matches(void **state) {
+static void imap_match__matches(void **state) {
 	const struct IMap *map = imap_init();
 
 	assert_nul(imap_put(map, 0, V0));
@@ -167,14 +167,14 @@ static void imap_find__matches(void **state) {
 	expect_ptr(mock_match_size_t_val, data, D0);
 	will_return(mock_match_size_t_val, true);
 
-	const struct IMapPair pair = imap_find(map, mock_match_size_t_val, D0);
+	const struct IMapPair pair = imap_match(map, mock_match_size_t_val, D0);
 	assert_ptr_equal(pair.key, 1);
 	assert_ptr_equal(pair.val, V1);
 
 	imap_free(map);
 }
 
-static void imap_find__no_match(void **state) {
+static void imap_match__no_match(void **state) {
 	const struct IMap *map = imap_init();
 
 	assert_nul(imap_put(map, 0, V0));
@@ -192,20 +192,20 @@ static void imap_find__no_match(void **state) {
 	expect_ptr(mock_match_size_t_val, data, D0);
 	will_return(mock_match_size_t_val, false);
 
-	const struct IMapPair pair = imap_find(map, mock_match_size_t_val, D0);
+	const struct IMapPair pair = imap_match(map, mock_match_size_t_val, D0);
 	assert_int_equal(pair.key, 0);
 	assert_nul(pair.val);
 
 	imap_free(map);
 }
 
-static void imap_find__null_match(void **state) {
+static void imap_match__null_match(void **state) {
 	const struct IMap *map = imap_init();
 
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, V1));
 
-	const struct IMapPair pair = imap_find(map, NULL, D0);
+	const struct IMapPair pair = imap_match(map, NULL, D0);
 	assert_int_equal(pair.key, 0);
 	assert_nul(pair.val);
 
@@ -486,8 +486,8 @@ static void imap__null_inputs(void **state) {
 	assert_nul(imap_iter(NULL));
 	assert_nul(imap_match_iter(NULL, NULL, NULL));
 	assert_nul(imap_iter_next(NULL));
-	imap_find(NULL, NULL, NULL);
-	imap_find(NULL, mock_match_size_t_val, NULL);
+	imap_match(NULL, NULL, NULL);
+	imap_match(NULL, mock_match_size_t_val, NULL);
 	assert_false(imap_put(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(map, 0, NULL));
@@ -522,9 +522,9 @@ int main(void) {
 
 		TEST(imap_match_iter__many),
 
-		TEST(imap_find__matches),
-		TEST(imap_find__no_match),
-		TEST(imap_find__null_match),
+		TEST(imap_match__matches),
+		TEST(imap_match__no_match),
+		TEST(imap_match__null_match),
 
 		TEST(imap_equal__),
 		TEST(imap_equal__key_removed),
