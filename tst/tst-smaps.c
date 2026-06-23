@@ -78,18 +78,18 @@ static void smaps_match__matches(void **state) {
 	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_match_key_val, key, "0");
-	expect_string(mock_match_key_val, val, "aaa");
-	expect_string(mock_match_key_val, data, "x");
-	will_return(mock_match_key_val, false);
+	expect_string(mock_match_smaps, key, "0");
+	expect_string(mock_match_smaps, val, "aaa");
+	expect_string(mock_match_smaps, data, "x");
+	will_return(mock_match_smaps, false);
 
 	// get 1
-	expect_string(mock_match_key_val, key, "1");
-	expect_string(mock_match_key_val, val, "bbb");
-	expect_string(mock_match_key_val, data, "x");
-	will_return(mock_match_key_val, true);
+	expect_string(mock_match_smaps, key, "1");
+	expect_string(mock_match_smaps, val, "bbb");
+	expect_string(mock_match_smaps, data, "x");
+	will_return(mock_match_smaps, true);
 
-	const struct SMapSPair pair = smaps_match(map, mock_match_key_val, "x");
+	const struct SMapSPair pair = smaps_match(map, mock_match_smaps, "x");
 	assert_str_equal(pair.key, "1");
 	assert_str_equal(pair.val, "bbb");
 
@@ -142,8 +142,8 @@ static void smaps_it_next__partial(void **state) {
 	assert_nul(smaps_it_next(it));
 }
 
-static bool fn_match_both_start_with_a(const void* const key, const void* const val, const void* const data) {
-	return *(char*)key == 'a' && *(char*)val == 'a';
+static bool fn_match_both_start_with_a(const char* const key, const char* const val, const void* const data) {
+	return *key == 'a' && *val == 'a';
 }
 
 static void smaps_match_it__many(void **state) {
@@ -361,11 +361,11 @@ static void smaps__null_inputs(void **state) {
 	assert_false(smaps_contains_key(NULL, NULL));
 	assert_false(smaps_contains_key(map, NULL));
 	smaps_match(NULL, NULL, NULL);
-	smaps_match(NULL, mock_match_key_val, NULL);
+	smaps_match(NULL, mock_match_smaps, NULL);
 	assert_nul(smaps_it(NULL));
 	assert_nul(smaps_match_it(NULL, NULL, NULL));
 	assert_nul(smaps_match_it(map, NULL, NULL));
-	assert_nul(smaps_match_it(map, mock_match_key_val, NULL));
+	assert_nul(smaps_match_it(map, mock_match_smaps, NULL));
 	assert_nul(smaps_it_next(NULL));
 	assert_false(smaps_put(NULL, NULL, NULL));
 	assert_false(smaps_put(map, NULL, NULL));

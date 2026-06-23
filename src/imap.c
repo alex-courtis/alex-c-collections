@@ -14,7 +14,7 @@ struct IMap {
 };
 
 struct IMapItMatchData {
-	fn_match_size_t_val match;
+	fn_match_imap match;
 	const void *data;
 };
 
@@ -147,7 +147,7 @@ bool imap_contains_key(const struct IMap* const map, const size_t key) {
 	return map ? pmap_contains_key(map->pmap, &key) : false;
 }
 
-struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
+struct IMapPair imap_match(const struct IMap* const map, fn_match_imap match, const void* const data) {
 	struct IMapPair res = { 0 };
 
 	if (!map || !match)
@@ -170,7 +170,7 @@ const struct IMapIt *imap_it(const struct IMap* const map) {
 	return map ? it_init(map, pmap_it(map->pmap)) : NULL;
 }
 
-const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
+const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_imap match, const void* const data) {
 	if (!map || !match)
 		return NULL;
 

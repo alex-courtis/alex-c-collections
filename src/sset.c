@@ -87,16 +87,16 @@ bool sset_contains(const struct SSet* const set, const char* const val) {
 	return set ? pset_contains(set->pset, val) : false;
 }
 
-const void *sset_match(const struct SSet* const set, fn_match_val match, const void* const data) {
-	return set ? pset_match(set->pset, match, data) : NULL;
+const void *sset_match(const struct SSet* const set, fn_match_sset match, const void* const data) {
+	return set ? pset_match(set->pset, (fn_match_val)match, data) : NULL;
 }
 
 const struct SSetIt *sset_it(const struct SSet* const set) {
 	return set ? it_init(set, pset_it(set->pset)) : NULL;
 }
 
-const struct SSetIt *sset_match_it(const struct SSet* const set, fn_match_val match, const void* const data) {
-	return set ? it_init(set, pset_match_it(set->pset, match, data)) : NULL;
+const struct SSetIt *sset_match_it(const struct SSet* const set, fn_match_sset match, const void* const data) {
+	return set ? it_init(set, pset_match_it(set->pset, (fn_match_val)match, data)) : NULL;
 }
 
 const struct SSetIt *sset_it_next(const struct SSetIt* const cit) {

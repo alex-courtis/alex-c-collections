@@ -97,13 +97,13 @@ bool smaps_contains_key(const struct SMapS* const map, const char* const key) {
 	return map ? pmap_contains_key(map->pmap, key) : false;
 }
 
-struct SMapSPair smaps_match(const struct SMapS* const map, fn_match_key_val match, const void* const data) {
+struct SMapSPair smaps_match(const struct SMapS* const map, fn_match_smaps match, const void* const data) {
 	struct SMapSPair res = { 0 };
 
 	if (!map)
 		return res;
 
-	struct PMapPair pres = pmap_match(map->pmap, match, data);
+	struct PMapPair pres = pmap_match(map->pmap, (fn_match_key_val)match, data);
 
 	res.key = pres.key;
 	res.val = pres.val;
@@ -115,8 +115,8 @@ const struct SMapSIt *smaps_it(const struct SMapS* const map) {
 	return map ? it_init(map, pmap_it(map->pmap)) : NULL;
 }
 
-const struct SMapSIt *smaps_match_it(const struct SMapS* const map, fn_match_key_val match, const void* const data) {
-	return map ? it_init(map, pmap_match_it(map->pmap, match, data)) : NULL;
+const struct SMapSIt *smaps_match_it(const struct SMapS* const map, fn_match_smaps match, const void* const data) {
+	return map ? it_init(map, pmap_match_it(map->pmap, (fn_match_key_val)match, data)) : NULL;
 }
 
 const struct SMapSIt *smaps_it_next(const struct SMapSIt* const cit) {

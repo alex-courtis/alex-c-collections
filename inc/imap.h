@@ -43,11 +43,9 @@ struct IMapParams {
 };
 
 /*
- * Key (a) equals arbitrary data b
+ * match against supplied data
  */
-typedef bool (*fn_equal_size_t)(const size_t a, const void* const b);
-
-typedef bool (*fn_match_size_t_val)(const size_t key, const void* const val, const void* const data);
+typedef bool (*fn_match_imap)(const size_t key, const void* const val, const void* const data);
 
 /*
  * Lifecycle
@@ -85,13 +83,13 @@ const void *imap_get(const struct IMap* const map, const size_t key);
 bool imap_contains_key(const struct IMap* const map, const size_t key);
 
 // find the first match, {0,NULL} when no matches or NULL match
-struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_val match, const void* const data);
+struct IMapPair imap_match(const struct IMap* const map, fn_match_imap match, const void* const data);
 
 // create an iterator, caller must imap_it_free or invoke imap_next until NULL
 const struct IMapIt *imap_it(const struct IMap* const map);
 
 // create an iterator filtering by match, return NULL when no matches or NULL match
-const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t_val match, const void* const data);
+const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_imap match, const void* const data);
 
 // next iterator entry, NULL at end of map
 const struct IMapIt *imap_it_next(const struct IMapIt* const it);

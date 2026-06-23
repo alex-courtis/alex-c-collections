@@ -32,8 +32,8 @@ struct SSet {
 	const struct PSet *pset;
 };
 
-static bool fn_match_starts_with_a(const void* const a, const void* const b) {
-	return *(char*)a == 'a';
+static bool fn_match_starts_with_a(const char* const a, const void* const b) {
+	return *a == 'a';
 }
 
 static void sset_add__clone_val_free_val(void **state) {
@@ -379,7 +379,7 @@ static void sset__null_inputs(void **state) {
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
 	sset_match(NULL, NULL, NULL);
-	sset_match(NULL, mock_match_val, NULL);
+	sset_match(NULL, mock_match_sset, NULL);
 	assert_nul(sset_it(NULL));
 	assert_nul(sset_match_it(NULL, NULL, NULL));
 	assert_nul(sset_match_it(set, NULL, NULL));
