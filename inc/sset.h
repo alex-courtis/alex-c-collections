@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "fn.h"
-
 /*
  * `PSet` with string values
  * Values are memory managed.

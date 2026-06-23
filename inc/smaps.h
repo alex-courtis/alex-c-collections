@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "fn.h"
-
 /*
  * `PMap` with string keys and vals.
  * Keys and values are memory managed.
