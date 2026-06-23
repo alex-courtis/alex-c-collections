@@ -1,6 +1,7 @@
 #include "tst.h"
 #include "asserts.h"
 #include "assert-smaps.h"
+#include "mock-fn.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -65,6 +66,32 @@ static void smaps_put_get_remove_free__case_insensitive(void **state) {
 	assert_true(smaps_remove(map, "b"));
 
 	assert_nul(smaps_get(map, "b"));
+
+	smaps_free(map);
+}
+
+static void smaps_find__matches(void **state) {
+	const struct SMapS *map = smaps_init();
+
+	assert_false(smaps_put(map, "0", "aaa"));
+	assert_false(smaps_put(map, "1", "bbb"));
+	assert_false(smaps_put(map, "2", "ccc"));
+
+	// skip 0
+	expect_string(mock_match_key_val, key, "0");
+	expect_string(mock_match_key_val, val, "aaa");
+	expect_string(mock_match_key_val, data, "x");
+	will_return(mock_match_key_val, false);
+
+	// get 1
+	expect_string(mock_match_key_val, key, "1");
+	expect_string(mock_match_key_val, val, "bbb");
+	expect_string(mock_match_key_val, data, "x");
+	will_return(mock_match_key_val, true);
+
+	const struct SMapSPair pair = smaps_find(map, mock_match_key_val, "x");
+	assert_str_equal(pair.key, "1");
+	assert_str_equal(pair.val, "bbb");
 
 	smaps_free(map);
 }
@@ -333,6 +360,8 @@ static void smaps__null_inputs(void **state) {
 	assert_false(smaps_get(map, NULL));
 	assert_false(smaps_contains_key(NULL, NULL));
 	assert_false(smaps_contains_key(map, NULL));
+	smaps_find(NULL, NULL, NULL);
+	smaps_find(NULL, mock_match_key_val, NULL);
 	assert_nul(smaps_iter(NULL));
 	assert_nul(smaps_match_iter(NULL, NULL, NULL));
 	assert_nul(smaps_iter_next(NULL));
@@ -356,6 +385,8 @@ int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(smaps_put_get_remove_free__case_sensitive),
 		TEST(smaps_put_get_remove_free__case_insensitive),
+
+		TEST(smaps_find__matches),
 
 		TEST(smaps_iter__many),
 		TEST(smaps_iter__empty),

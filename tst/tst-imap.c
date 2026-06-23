@@ -118,13 +118,13 @@ static void imap_match_iter__many(void **state) {
 	assert_nul(imap_put(map, 1, V1));
 	assert_nul(imap_put(map, 2, V2));
 
-	// skip K0
+	// skip 0
 	expect_int_value(mock_match_size_t_val, key, 0);
 	expect_ptr(mock_match_size_t_val, val, V0);
 	expect_ptr(mock_match_size_t_val, data, D0);
 	will_return(mock_match_size_t_val, false);
 
-	// pass K1
+	// pass 1
 	expect_int_value(mock_match_size_t_val, key, 1);
 	expect_ptr(mock_match_size_t_val, val, V1);
 	expect_ptr(mock_match_size_t_val, data, D0);
@@ -135,7 +135,7 @@ static void imap_match_iter__many(void **state) {
 	assert_int_equal(iter->key, 1);
 	assert_ptr_equal(iter->val, V1);
 
-	// skip K2
+	// skip 2
 	expect_int_value(mock_match_size_t_val, key, 2);
 	expect_ptr(mock_match_size_t_val, val, V2);
 	expect_ptr(mock_match_size_t_val, data, D0);
@@ -155,13 +155,13 @@ static void imap_find__matches(void **state) {
 	assert_nul(imap_put(map, 1, V1));
 	assert_nul(imap_put(map, 2, V2));
 
-	// skip K0
+	// skip 0
 	expect_int_value(mock_match_size_t_val, key, 0);
 	expect_ptr(mock_match_size_t_val, val, V0);
 	expect_ptr(mock_match_size_t_val, data, D0);
 	will_return(mock_match_size_t_val, false);
 
-	// get K1
+	// get 1
 	expect_int_value(mock_match_size_t_val, key, 1);
 	expect_ptr(mock_match_size_t_val, val, V1);
 	expect_ptr(mock_match_size_t_val, data, D0);

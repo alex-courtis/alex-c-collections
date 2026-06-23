@@ -87,6 +87,20 @@ const struct SMapSIter *smaps_iter(const struct SMapS* const map) {
 	return smaps_match_iter(map, NULL, NULL);
 }
 
+struct SMapSPair smaps_find(const struct SMapS* const map, fn_match_key_val match, const void* const data) {
+	struct SMapSPair res = { 0 };
+
+	if (!map)
+		return res;
+
+	struct PMapPair pres = pmap_find(map->pmap, match, data);
+
+	res.key = pres.key;
+	res.val = pres.val;
+
+	return res;
+}
+
 const struct SMapSIter *smaps_match_iter(const struct SMapS* const map, fn_match_key_val match, const void* const data) {
 	if (!map)
 		return NULL;

@@ -37,6 +37,14 @@ struct SMapParams {
 };
 
 /*
+ * Key/Val
+ */
+struct SMapPair {
+	const char *key;
+	const void *val;
+};
+
+/*
  * Lifecycle
  */
 
@@ -70,6 +78,9 @@ const void *smap_get(const struct SMap* const map, const char* const key);
 
 // true if key is present
 bool smap_contains_key(const struct SMap* const map, const char* const key);
+
+// find the first match, (NULL,NULL) on no match
+struct SMapPair smap_find(const struct SMap* const map, fn_match_key_val match, const void* const data);
 
 // create an iterator, caller must smap_iter_free or invoke smap_next until NULL
 const struct SMapIter *smap_iter(const struct SMap* const map);
