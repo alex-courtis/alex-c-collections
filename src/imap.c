@@ -41,6 +41,11 @@ static char *fn_str_key(const void* const val) {
 	return sprintf_alloc("%zu", *(size_t*)val);
 }
 
+static bool fn_match_data_wrapper(const void* const key, const void* const val, const void* const data) {
+	const struct IMapItMatchData* const matcher = data;
+	return matcher->match(*(size_t*)key, val, matcher->data);
+}
+
 static const struct IMap *clone(const struct IMap* const from, bool deep) {
 	if (!from)
 		return NULL;
@@ -148,17 +153,15 @@ struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_val mat
 	if (!map || !match)
 		return res;
 
-	const struct PMapIt *it;
-	for (it = pmap_it(map->pmap); it; it = pmap_it_next(it)) {
-		size_t k = *(size_t*)it->key;
-		if (match(k, it->val, data)) {
-			res.key = k;
-			res.val = it->val;
-			break;
-		}
-	}
+	struct IMapItMatchData match_data = {
+		.match = match,
+		.data = data,
+	};
 
-	pmap_it_free(it);
+	struct PMapPair pres = pmap_match(map->pmap, fn_match_data_wrapper, &match_data);
+
+	res.key = pres.key ? *(size_t*)pres.key : 0;
+	res.val = pres.val;
 
 	return res;
 }
@@ -167,26 +170,21 @@ const struct IMapIt *imap_it(const struct IMap* const map) {
 	return map ? it_init(map, pmap_it(map->pmap)) : NULL;
 }
 
-static bool fn_match_data_wrapper(const void* const key, const void* const val, const void* const data) {
-	const struct IMapItMatchData* const matcher = data;
-	return matcher->match(*(size_t*)key, val, matcher->data);
-}
-
 const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
 	if (!map || !match)
 		return NULL;
 
-	struct IMapItMatchData *matcher = calloc(1, sizeof(struct IMapItMatchData));
-	matcher->match = match;
-	matcher->data = data;
+	struct IMapItMatchData *match_data = calloc(1, sizeof(struct IMapItMatchData));
+	match_data->match = match;
+	match_data->data = data;
 
-	struct IMapIt *it = it_init(map, pmap_match_it(map->pmap, fn_match_data_wrapper, matcher));
+	struct IMapIt *it = it_init(map, pmap_match_it(map->pmap, fn_match_data_wrapper, match_data));
 
 	if (it) {
-		it->st->match_data = matcher;
+		it->st->match_data = match_data;
 		return it;
 	} else {
-		free(matcher);
+		free(match_data);
 		return NULL;
 	}
 }
