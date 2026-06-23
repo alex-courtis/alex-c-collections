@@ -34,6 +34,20 @@ static const struct SMap *clone(const struct SMap* const from, bool deep) {
 	return to;
 }
 
+static const struct SMapIter *iter_init(const struct SMap *map, const struct PMapIter *pit) {
+	if (!pit)
+		return NULL;
+
+	struct SMapIter *it = calloc(1, sizeof(struct SMapIter));
+	it->st = calloc(1, sizeof(struct SMapIterState));
+
+	it->st->pit = pit;
+	it->key = pit->key;
+	it->val = pit->val;
+
+	return it;
+}
+
 const struct SMap *smap_init_with(const struct SMapParams params) {
 	const struct PMapParams pmap_params = {
 		.equal_key = params.case_insensitive ? fn_equal_strcasecmp : fn_equal_strcmp,
@@ -117,41 +131,11 @@ struct SMapPair smap_match(const struct SMap* const map, fn_match_key_val match,
 }
 
 const struct SMapIter *smap_iter(const struct SMap* const map) {
-	if (!map)
-		return NULL;
-
-	const struct PMapIter *pit = pmap_iter(map->pmap);
-
-	if (!pit)
-		return NULL;
-
-	struct SMapIter *it = calloc(1, sizeof(struct SMapIter));
-	it->st = calloc(1, sizeof(struct SMapIterState));
-
-	it->st->pit = pit;
-	it->key = pit->key;
-	it->val = pit->val;
-
-	return it;
+	return map ? iter_init(map, pmap_iter(map->pmap)) : NULL;
 }
 
 const struct SMapIter *smap_match_iter(const struct SMap* const map, fn_match_key_val match, const void* const data) {
-	if (!map)
-		return NULL;
-
-	const struct PMapIter *pit = pmap_match_iter(map->pmap, match, data);
-
-	if (!pit)
-		return NULL;
-
-	struct SMapIter *it = calloc(1, sizeof(struct SMapIter));
-	it->st = calloc(1, sizeof(struct SMapIterState));
-
-	it->st->pit = pit;
-	it->key = pit->key;
-	it->val = pit->val;
-
-	return it;
+	return map ? iter_init(map, pmap_match_iter(map->pmap, match, data)) : NULL;
 }
 
 const struct SMapIter *smap_iter_next(const struct SMapIter* const citer) {

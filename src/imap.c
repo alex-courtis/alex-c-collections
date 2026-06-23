@@ -13,10 +13,14 @@ struct IMap {
 	const struct PMap *pmap;
 };
 
-struct IMapIterState {
-	const struct PMapIter *pit;
+struct IMapIterMatchData {
 	fn_match_size_t_val match;
 	const void *data;
+};
+
+struct IMapIterState {
+	const struct PMapIter *pit;
+	const struct IMapIterMatchData *match_data;
 };
 
 static bool fn_equal_key(const void* const a, const void* const b) {
@@ -48,6 +52,20 @@ static const struct IMap *clone(const struct IMap* const from, bool deep) {
 	memcpy((void*)&to->params, &from->params, sizeof(struct IMapParams));
 
 	return to;
+}
+
+static struct IMapIter *iter_init(const struct IMap *map, const struct PMapIter *pit) {
+	if (!pit)
+		return NULL;
+
+	struct IMapIter *it = calloc(1, sizeof(struct IMapIter));
+	it->st = calloc(1, sizeof(struct IMapIterState));
+
+	it->st->pit = pit;
+	it->key = *(size_t*)pit->key;
+	it->val = pit->val;
+
+	return it;
 }
 
 const struct IMap *imap_init(void) {
@@ -107,8 +125,10 @@ void imap_iter_free(const struct IMapIter* const iter) {
 	if (!iter)
 		return;
 
-	if (iter->st)
+	if (iter->st) {
+		free((void*)iter->st->match_data);
 		pmap_iter_free(iter->st->pit);
+	}
 
 	free(iter->st);
 	free((void*)iter);
@@ -144,38 +164,31 @@ struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_val mat
 }
 
 const struct IMapIter *imap_iter(const struct IMap* const map) {
-	return imap_match_iter(map, NULL, NULL);
+	return map ? iter_init(map, pmap_iter(map->pmap)) : NULL;
 }
 
-static bool fn_match_wrapper(const void* const key, const void* const val, const void* const data) {
-	const struct IMapIterState * const st = data;
-	return st->match ? st->match(*(size_t*)key, val, st->data) : true;
+static bool fn_match_data_wrapper(const void* const key, const void* const val, const void* const data) {
+	const struct IMapIterMatchData* const matcher = data;
+	return matcher->match(*(size_t*)key, val, matcher->data);
 }
 
 const struct IMapIter *imap_match_iter(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
-	if (!map)
+	if (!map || !match)
 		return NULL;
 
-	// TODO replace with iter as per imap_match
+	struct IMapIterMatchData *matcher = calloc(1, sizeof(struct IMapIterMatchData));
+	matcher->match = match;
+	matcher->data = data;
 
-	struct IMapIter *it = calloc(1, sizeof(struct IMapIter));
-	it->st = calloc(1, sizeof(struct IMapIterState));
-	it->st->match = match;
-	it->st->data = data;
+	struct IMapIter *it = iter_init(map, pmap_match_iter(map->pmap, fn_match_data_wrapper, matcher));
 
-	// pass the IMapIterState as data, to be passed to the test wrappers
-	const struct PMapIter *pit = pmap_match_iter(map->pmap, fn_match_wrapper, it->st);
-
-	if (pit) {
-		it->st->pit = pit;
-		it->key = *(size_t*)pit->key;
-		it->val = pit->val;
+	if (it) {
+		it->st->match_data = matcher;
+		return it;
 	} else {
-		imap_iter_free(it);
-		it = NULL;
+		free(matcher);
+		return NULL;
 	}
-
-	return it;
 }
 
 const struct IMapIter *imap_iter_next(const struct IMapIter* const citer) {

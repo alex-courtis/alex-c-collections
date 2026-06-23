@@ -263,7 +263,7 @@ struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match,
 }
 
 const struct PMapIter *pmap_iter(const struct PMap* const map) {
-	if (!map)
+	if (!map || map->size == 0)
 		return NULL;
 
 	struct PMapIter *it = calloc(1, sizeof(struct PMapIter));

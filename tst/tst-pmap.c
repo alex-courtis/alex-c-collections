@@ -745,6 +745,36 @@ static void pmap_match_iter__many(void **state) {
 	pmap_free(map);
 }
 
+static void pmap_match_iter__none(void **state) {
+	const struct PMap *map = pmap_init();
+
+	assert_nul(pmap_put(map, K0, V0));
+	assert_nul(pmap_put(map, K1, V1));
+
+	// skip K0
+	expect_ptr(mock_match_key_val, key, K0);
+	expect_ptr(mock_match_key_val, val, V0);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, false);
+
+	// skip K1
+	expect_ptr(mock_match_key_val, key, K1);
+	expect_ptr(mock_match_key_val, val, V1);
+	expect_ptr(mock_match_key_val, data, D0);
+	will_return(mock_match_key_val, false);
+
+	assert_nul(pmap_match_iter(map, mock_match_key_val, D0));
+
+	pmap_free(map);
+}
+
+static void pmap_match_iter__empty(void **state) {
+	const struct PMap *map = pmap_init();
+
+	assert_nul(pmap_match_iter(map, mock_match_key_val, D0));
+
+	pmap_free(map);
+}
 
 static void pmap_put__again(void **state) {
 	const struct PMap *map = pmap_init();
@@ -1249,11 +1279,9 @@ static void pmap__null_inputs(void **state) {
 	assert_false(pmap_contains_key(NULL, NULL));
 	assert_false(pmap_contains_key(map, NULL));
 	pmap_match(NULL, NULL, NULL);
-	pmap_match(NULL, mock_match_key_val, NULL);
 	assert_nul(pmap_iter(NULL));
 	assert_nul(pmap_match_iter(NULL, NULL, NULL));
 	assert_nul(pmap_match_iter(map, NULL, NULL));
-	assert_nul(pmap_match_iter(map, mock_match_key_val, NULL));
 	assert_nul(pmap_iter_next(NULL));
 	assert_false(pmap_put(NULL, NULL, NULL));
 	assert_false(pmap_put(map, NULL, NULL));
@@ -1320,6 +1348,8 @@ int main(void) {
 		TEST(pmap_iter_next__partial),
 
 		TEST(pmap_match_iter__many),
+		TEST(pmap_match_iter__none),
+		TEST(pmap_match_iter__empty),
 
 		TEST(pmap_put__again),
 
