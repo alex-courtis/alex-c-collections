@@ -21,7 +21,7 @@ struct PSet {
 struct PSetItState {
 	const struct PSet *set;
 	size_t pos;
-	fn_equal equal_val;
+	fn_match_val match;
 	const void *data;
 };
 
@@ -205,17 +205,24 @@ bool pset_contains(const struct PSet* const set, const void* const val) {
 }
 
 const struct PSetIt *pset_it(const struct PSet* const set) {
-	return pset_filter_it(set, NULL, NULL);
-}
-
-const struct PSetIt *pset_filter_it(const struct PSet* const set, fn_equal equal_val, const void* const data) {
 	if (!set || set->size == 0)
 		return NULL;
 
 	struct PSetIt *it = calloc(1, sizeof(struct PSetIt));
 	it->st = calloc(1, sizeof(struct PSetItState));
 	it->st->set = set;
-	it->st->equal_val = equal_val;
+
+	return pset_it_next(it);
+}
+
+const struct PSetIt *pset_match_it(const struct PSet* const set, fn_match_val match, const void* const data) {
+	if (!set || !match || set->size == 0)
+		return NULL;
+
+	struct PSetIt *it = calloc(1, sizeof(struct PSetIt));
+	it->st = calloc(1, sizeof(struct PSetItState));
+	it->st->set = set;
+	it->st->match = match;
 	it->st->data = data;
 
 	return pset_it_next(it);
@@ -241,7 +248,7 @@ const struct PSetIt *pset_it_next(const struct PSetIt* const cit) {
 
 		it->val = *(st->set->vals + st->pos);
 
-		if ((st->equal_val && !st->equal_val(it->val, st->data))) {
+		if ((st->match && !st->match(it->val, st->data))) {
 			continue;
 		}
 

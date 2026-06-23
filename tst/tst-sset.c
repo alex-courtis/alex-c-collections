@@ -128,11 +128,11 @@ static void sset_it_next__partial(void **state) {
 	assert_nul(sset_it_next(it));
 }
 
-static bool fn_equal_starts_with_a(const void* const a, const void* const b) {
+static bool fn_match_starts_with_a(const void* const a, const void* const b) {
 	return *(char*)a == 'a';
 }
 
-static void sset_filter_it__(void **state) {
+static void sset_match_it__(void **state) {
 	const struct SSet *set = sset_init();
 
 	assert_true(sset_add(set, "a1"));
@@ -140,7 +140,7 @@ static void sset_filter_it__(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "b2"));
 
-	const struct SSetIt *it = sset_filter_it(set, fn_equal_starts_with_a, NULL);
+	const struct SSetIt *it = sset_match_it(set, fn_match_starts_with_a, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->val, "a1");
 
@@ -365,7 +365,9 @@ static void sset__null_inputs(void **state) {
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
 	assert_nul(sset_it(NULL));
-	assert_nul(sset_filter_it(NULL, NULL, NULL));
+	assert_nul(sset_match_it(NULL, NULL, NULL));
+	assert_nul(sset_match_it(set, NULL, NULL));
+	assert_nul(sset_match_it(set, fn_match_starts_with_a, NULL));
 	assert_nul(sset_it_next(NULL));
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_add(set, NULL));
@@ -395,7 +397,7 @@ int main(void) {
 
 		TEST(sset_it_next__partial),
 
-		TEST(sset_filter_it__),
+		TEST(sset_match_it__),
 
 		TEST(sset_equal__case_sensitive),
 		TEST(sset_equal__case_insensitive),

@@ -16,6 +16,19 @@ struct SSetItState {
 	const struct PSetIt *pit;
 };
 
+static const struct SSetIt *it_init(const struct SSet *set, const struct PSetIt *pit) {
+	if (!pit)
+		return NULL;
+
+	struct SSetIt *it = calloc(1, sizeof(struct SSetIt));
+	it->st = calloc(1, sizeof(struct SSetItState));
+
+	it->st->pit = pit;
+	it->val = pit->val;
+
+	return it;
+}
+
 const struct SSet *sset_init(void) {
 	const struct SSetParams params = { 0 };
 	return sset_init_with(params);
@@ -75,25 +88,11 @@ bool sset_contains(const struct SSet* const set, const char* const val) {
 }
 
 const struct SSetIt *sset_it(const struct SSet* const set) {
-	return set ? sset_filter_it(set, NULL, NULL) : NULL;
+	return set ? it_init(set, pset_it(set->pset)) : NULL;
 }
 
-const struct SSetIt *sset_filter_it(const struct SSet* const set, fn_equal equal_val, const void* const data) {
-	if (!set)
-		return NULL;
-
-	const struct PSetIt *pit = pset_filter_it(set->pset, equal_val, data);
-
-	if (!pit)
-		return NULL;
-
-	struct SSetIt *it = calloc(1, sizeof(struct SSetIt));
-	it->st = calloc(1, sizeof(struct SSetItState));
-
-	it->st->pit = pit;
-	it->val = pit->val;
-
-	return it;
+const struct SSetIt *sset_match_it(const struct SSet* const set, fn_equal equal_val, const void* const data) {
+	return set ? it_init(set, pset_match_it(set->pset, equal_val, data)) : NULL;
 }
 
 const struct SSetIt *sset_it_next(const struct SSetIt* const cit) {

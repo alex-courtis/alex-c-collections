@@ -493,7 +493,7 @@ static void pset_it_next__partial(void **state) {
 	assert_nul(pset_it_next(it));
 }
 
-static void pset_filter_it__many(void **state) {
+static void pset_match_it__many(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -514,7 +514,7 @@ static void pset_filter_it__many(void **state) {
 	expect_ptr(mock_equal, b, D0);
 	will_return(mock_equal, true);
 
-	const struct PSetIt *it = pset_filter_it(set, mock_equal, D0);
+	const struct PSetIt *it = pset_match_it(set, mock_equal, D0);
 	assert_non_nul(it);
 	assert_ptr_equal(it->val, V1);
 
@@ -540,6 +540,35 @@ static void pset_filter_it__many(void **state) {
 	// done
 	it = pset_it_next(it);
 	assert_nul(it);
+
+	pset_free(set);
+}
+
+static void pset_match_it__none(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+
+	// skip V0
+	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
+
+	// skip V1
+	expect_ptr(mock_equal, a, V1);
+	expect_ptr(mock_equal, b, D0);
+	will_return(mock_equal, false);
+
+	assert_nul(pset_match_it(set, mock_equal, D0));
+
+	pset_free(set);
+}
+
+static void pset_match_it__empty(void **state) {
+	const struct PSet *set = pset_init();
+
+	assert_nul(pset_match_it(set, mock_equal, D0));
 
 	pset_free(set);
 }
@@ -868,7 +897,8 @@ static void pset__null_inputs(void **state) {
 	assert_false(pset_contains(NULL, NULL));
 	assert_false(pset_contains(set, NULL));
 	assert_nul(pset_it(NULL));
-	assert_nul(pset_filter_it(NULL, NULL, NULL));
+	assert_nul(pset_match_it(NULL, NULL, NULL));
+	assert_nul(pset_match_it(set, NULL, NULL));
 	assert_nul(pset_it_next(NULL));
 	assert_false(pset_add(NULL, NULL));
 	assert_false(pset_add(set, NULL));
@@ -925,7 +955,9 @@ int main(void) {
 
 		TEST(pset_it_next__partial),
 
-		TEST(pset_filter_it__many),
+		TEST(pset_match_it__many),
+		TEST(pset_match_it__none),
+		TEST(pset_match_it__empty),
 
 		TEST(pset_add__again),
 
