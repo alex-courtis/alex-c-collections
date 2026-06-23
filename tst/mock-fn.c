@@ -9,13 +9,6 @@ bool mock_equal(const void* const a, const void* const b) {
 	return mock_type(bool);
 }
 
-bool mock_equal_key_imap(const size_t key, const void* const data) {
-	check_expected_int(key);
-	check_expected_ptr(data);
-
-	return mock_type(bool);
-}
-
 bool mock_less_than(const void* const a, const void* const b) {
 	check_expected_ptr(a);
 	check_expected_ptr(b);

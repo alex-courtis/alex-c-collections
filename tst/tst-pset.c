@@ -797,7 +797,7 @@ static void pset_equal__val_pointers_different(void **state) {
 }
 
 static void pset_equal__equal_val_ok(void **state) {
-	const struct PSetParams params = { .equal_val = fn_equal_strcmp, };
+	const struct PSetParams params = { .equal_val = (fn_equal)fn_equal_strcmp, };
 	const struct PSet *a = pset_init_with(params);
 	const struct PSet *b = pset_init_with(params);
 
@@ -818,7 +818,7 @@ static void pset_equal__equal_val_ok(void **state) {
 }
 
 static void pset_equal__equal_val_different(void **state) {
-	const struct PSetParams params = { .equal_val = fn_equal_strcmp, };
+	const struct PSetParams params = { .equal_val = (fn_equal)fn_equal_strcmp, };
 	const struct PSet *a = pset_init_with(params);
 	const struct PSet *b = pset_init_with(params);
 

@@ -6,8 +6,6 @@
 
 bool mock_equal(const void* const a, const void* const b);
 
-bool mock_equal_key_imap(const size_t val, const void* const data);
-
 bool mock_less_than(const void* const a, const void* const b);
 
 bool mock_match_val(const void* const val, const void* const data);
