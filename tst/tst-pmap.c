@@ -567,31 +567,31 @@ static void pmap_match__null_match(void **state) {
 	pmap_free(map);
 }
 
-static void pmap_iter__empty(void **state) {
+static void pmap_it__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
-	assert_nul(pmap_iter(map));
+	assert_nul(pmap_it(map));
 
 	pmap_free(map);
 }
 
-static void pmap_iter__free(void **state) {
+static void pmap_it__free(void **state) {
 	const struct PMap *map = pmap_init();
 
 	assert_nul(pmap_put(map, K0, V0));
 	assert_nul(pmap_put(map, K1, V1));
 
-	const struct PMapIter *iter = pmap_iter(map);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K0);
-	assert_ptr_equal(iter->val, V0);
+	const struct PMapIt *it = pmap_it(map);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K0);
+	assert_ptr_equal(it->val, V0);
 
-	pmap_iter_free(iter);
+	pmap_it_free(it);
 
 	pmap_free(map);
 }
 
-static void pmap_iter__many(void **state) {
+static void pmap_it__many(void **state) {
 	const struct PMap *map = pmap_init();
 
 	assert_nul(pmap_put(map, K0, NULL));
@@ -603,43 +603,43 @@ static void pmap_iter__many(void **state) {
 	assert_int_equal(pmap_size(map), 5);
 
 	// zero
-	const struct PMapIter *iter = pmap_iter(map);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K0);
-	assert_nul(iter->val);
+	const struct PMapIt *it = pmap_it(map);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K0);
+	assert_nul(it->val);
 
 	// one
-	iter = pmap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K1);
-	assert_ptr_equal(iter->val, V1);
+	it = pmap_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K1);
+	assert_ptr_equal(it->val, V1);
 
 	// two
-	iter = pmap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K2);
-	assert_nul(iter->val);
+	it = pmap_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K2);
+	assert_nul(it->val);
 
 	// three
-	iter = pmap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K3);
-	assert_ptr_equal(iter->val, V3);
+	it = pmap_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K3);
+	assert_ptr_equal(it->val, V3);
 
 	// four
-	iter = pmap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K4);
-	assert_nul(iter->val);
+	it = pmap_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K4);
+	assert_nul(it->val);
 
 	// end
-	iter = pmap_iter_next(iter);
-	assert_nul(iter);
+	it = pmap_it_next(it);
+	assert_nul(it);
 
 	pmap_free(map);
 }
 
-static void pmap_iter__removed(void **state) {
+static void pmap_it__removed(void **state) {
 	const struct PMap *map = pmap_init();
 
 	assert_nul(pmap_put(map, K0, V0));
@@ -657,37 +657,37 @@ static void pmap_iter__removed(void **state) {
 	assert_int_equal(pmap_size(map), 2);
 
 	// one
-	const struct PMapIter *iter = pmap_iter(map);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K1);
-	assert_ptr_equal(iter->val, V1);
+	const struct PMapIt *it = pmap_it(map);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K1);
+	assert_ptr_equal(it->val, V1);
 
 	// three
-	iter = pmap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K3);
-	assert_ptr_equal(iter->val, V3);
+	it = pmap_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K3);
+	assert_ptr_equal(it->val, V3);
 
 	// end
-	iter = pmap_iter_next(iter);
-	assert_nul(iter);
+	it = pmap_it_next(it);
+	assert_nul(it);
 
 	pmap_free(map);
 }
 
-static void pmap_iter_free__partial(void **state) {
-	const struct PMapIter *iter = calloc(1, sizeof(struct PMapIter));
+static void pmap_it_free__partial(void **state) {
+	const struct PMapIt *it = calloc(1, sizeof(struct PMapIt));
 
-	pmap_iter_free(iter);
+	pmap_it_free(it);
 }
 
-static void pmap_iter_next__partial(void **state) {
-	const struct PMapIter *iter = calloc(1, sizeof(struct PMapIter));
+static void pmap_it_next__partial(void **state) {
+	const struct PMapIt *it = calloc(1, sizeof(struct PMapIt));
 
-	assert_nul(pmap_iter_next(iter));
+	assert_nul(pmap_it_next(it));
 }
 
-static void pmap_match_iter__many(void **state) {
+static void pmap_match_it__many(void **state) {
 	const struct PMap *map = pmap_init();
 
 	assert_nul(pmap_put(map, K0, V0));
@@ -710,10 +710,10 @@ static void pmap_match_iter__many(void **state) {
 	expect_ptr(mock_match_key_val, data, D0);
 	will_return(mock_match_key_val, true);
 
-	const struct PMapIter *iter = pmap_match_iter(map, mock_match_key_val, D0);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K1);
-	assert_ptr_equal(iter->val, V1);
+	const struct PMapIt *it = pmap_match_it(map, mock_match_key_val, D0);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K1);
+	assert_ptr_equal(it->val, V1);
 
 	// skip K2
 	expect_ptr(mock_match_key_val, key, K2);
@@ -727,10 +727,10 @@ static void pmap_match_iter__many(void **state) {
 	expect_ptr(mock_match_key_val, data, D0);
 	will_return(mock_match_key_val, true);
 
-	iter = pmap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K3);
-	assert_ptr_equal(iter->val, V3);
+	it = pmap_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K3);
+	assert_ptr_equal(it->val, V3);
 
 	// skip K4
 	expect_ptr(mock_match_key_val, key, K4);
@@ -739,13 +739,13 @@ static void pmap_match_iter__many(void **state) {
 	will_return(mock_match_key_val, false);
 
 	// done
-	iter = pmap_iter_next(iter);
-	assert_nul(iter);
+	it = pmap_it_next(it);
+	assert_nul(it);
 
 	pmap_free(map);
 }
 
-static void pmap_match_iter__none(void **state) {
+static void pmap_match_it__none(void **state) {
 	const struct PMap *map = pmap_init();
 
 	assert_nul(pmap_put(map, K0, V0));
@@ -763,15 +763,15 @@ static void pmap_match_iter__none(void **state) {
 	expect_ptr(mock_match_key_val, data, D0);
 	will_return(mock_match_key_val, false);
 
-	assert_nul(pmap_match_iter(map, mock_match_key_val, D0));
+	assert_nul(pmap_match_it(map, mock_match_key_val, D0));
 
 	pmap_free(map);
 }
 
-static void pmap_match_iter__empty(void **state) {
+static void pmap_match_it__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
-	assert_nul(pmap_match_iter(map, mock_match_key_val, D0));
+	assert_nul(pmap_match_it(map, mock_match_key_val, D0));
 
 	pmap_free(map);
 }
@@ -797,20 +797,20 @@ static void pmap_put__again(void **state) {
 	assert_int_equal(pmap_size(map), 2);
 
 	// one
-	const struct PMapIter *iter = pmap_iter(map);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K1);
-	assert_ptr_equal(iter->val, V1);
+	const struct PMapIt *it = pmap_it(map);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K1);
+	assert_ptr_equal(it->val, V1);
 
 	// zero moved later
-	iter = pmap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->key, K0);
-	assert_ptr_equal(iter->val, V0);
+	it = pmap_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->key, K0);
+	assert_ptr_equal(it->val, V0);
 
 	// end
-	iter = pmap_iter_next(iter);
-	assert_nul(iter);
+	it = pmap_it_next(it);
+	assert_nul(it);
 
 	pmap_free(map);
 }
@@ -1273,16 +1273,16 @@ static void pmap__null_inputs(void **state) {
 	assert_nul(pmap_clone_deep(NULL));
 	pmap_free(NULL);
 	pmap_free_vals(NULL);
-	pmap_iter_free(NULL);
+	pmap_it_free(NULL);
 	assert_false(pmap_get(NULL, NULL));
 	assert_false(pmap_get(map, NULL));
 	assert_false(pmap_contains_key(NULL, NULL));
 	assert_false(pmap_contains_key(map, NULL));
 	pmap_match(NULL, NULL, NULL);
-	assert_nul(pmap_iter(NULL));
-	assert_nul(pmap_match_iter(NULL, NULL, NULL));
-	assert_nul(pmap_match_iter(map, NULL, NULL));
-	assert_nul(pmap_iter_next(NULL));
+	assert_nul(pmap_it(NULL));
+	assert_nul(pmap_match_it(NULL, NULL, NULL));
+	assert_nul(pmap_match_it(map, NULL, NULL));
+	assert_nul(pmap_it_next(NULL));
 	assert_false(pmap_put(NULL, NULL, NULL));
 	assert_false(pmap_put(map, NULL, NULL));
 	assert_nul(pmap_put_if_absent(NULL, NULL, NULL));
@@ -1338,18 +1338,18 @@ int main(void) {
 		TEST(pmap_match__no_match),
 		TEST(pmap_match__null_match),
 
-		TEST(pmap_iter__empty),
-		TEST(pmap_iter__free),
-		TEST(pmap_iter__many),
-		TEST(pmap_iter__removed),
+		TEST(pmap_it__empty),
+		TEST(pmap_it__free),
+		TEST(pmap_it__many),
+		TEST(pmap_it__removed),
 
-		TEST(pmap_iter_free__partial),
+		TEST(pmap_it_free__partial),
 
-		TEST(pmap_iter_next__partial),
+		TEST(pmap_it_next__partial),
 
-		TEST(pmap_match_iter__many),
-		TEST(pmap_match_iter__none),
-		TEST(pmap_match_iter__empty),
+		TEST(pmap_match_it__many),
+		TEST(pmap_match_it__none),
+		TEST(pmap_match_it__empty),
 
 		TEST(pmap_put__again),
 

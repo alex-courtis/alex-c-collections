@@ -19,7 +19,7 @@ struct PMap {
 	size_t size;
 };
 
-struct PMapIterState {
+struct PMapItState {
 	const struct PMap *map;
 	size_t position;
 	fn_match_key_val match;
@@ -202,12 +202,12 @@ void pmap_free_vals(const struct PMap* const map) {
 	pmap_free(map);
 }
 
-void pmap_iter_free(const struct PMapIter* const iter) {
-	if (!iter)
+void pmap_it_free(const struct PMapIt* const it) {
+	if (!it)
 		return;
 
-	free(iter->st);
-	free((void*)iter);
+	free(it->st);
+	free((void*)it);
 }
 
 const void *pmap_get(const struct PMap* const map, const void* const key) {
@@ -262,60 +262,60 @@ struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match,
 	return res;
 }
 
-const struct PMapIter *pmap_iter(const struct PMap* const map) {
+const struct PMapIt *pmap_it(const struct PMap* const map) {
 	if (!map || map->size == 0)
 		return NULL;
 
-	struct PMapIter *it = calloc(1, sizeof(struct PMapIter));
-	it->st = calloc(1, sizeof(struct PMapIterState));
+	struct PMapIt *it = calloc(1, sizeof(struct PMapIt));
+	it->st = calloc(1, sizeof(struct PMapItState));
 	it->st->map = map;
 
-	return pmap_iter_next(it);
+	return pmap_it_next(it);
 }
 
-const struct PMapIter *pmap_match_iter(const struct PMap* const map, fn_match_key_val match, const void* const data) {
+const struct PMapIt *pmap_match_it(const struct PMap* const map, fn_match_key_val match, const void* const data) {
 	if (!map || !match || map->size == 0)
 		return NULL;
 
-	struct PMapIter *it = calloc(1, sizeof(struct PMapIter));
-	it->st = calloc(1, sizeof(struct PMapIterState));
+	struct PMapIt *it = calloc(1, sizeof(struct PMapIt));
+	it->st = calloc(1, sizeof(struct PMapItState));
 	it->st->map = map;
 	it->st->match = match;
 	it->st->data = data;
 
-	return pmap_iter_next(it);
+	return pmap_it_next(it);
 }
 
-const struct PMapIter *pmap_iter_next(const struct PMapIter* const citer) {
-	if (!citer)
+const struct PMapIt *pmap_it_next(const struct PMapIt* const cit) {
+	if (!cit)
 		return NULL;
 
-	struct PMapIter *iter = (struct PMapIter*)citer;
-	struct PMapIterState *st = iter->st;
+	struct PMapIt *it = (struct PMapIt*)cit;
+	struct PMapItState *st = it->st;
 
-	if (!iter->st) {
-		pmap_iter_free(iter);
+	if (!it->st) {
+		pmap_it_free(it);
 		return NULL;
 	}
 
 	// null key indicates first use, start at the beginning
-	if (iter->key) {
+	if (it->key) {
 		st->position++;
 	}
 
 	for ( ; st->position < st->map->size; st->position++) {
 
-		iter->key = *(st->map->keys + st->position);
-		iter->val = *(st->map->vals + st->position);
+		it->key = *(st->map->keys + st->position);
+		it->val = *(st->map->vals + st->position);
 
-		if (st->match && !st->match(iter->key, iter->val, st->data)) {
+		if (st->match && !st->match(it->key, it->val, st->data)) {
 			continue;
 		}
 
-		return iter;
+		return it;
 	}
 
-	pmap_iter_free(iter);
+	pmap_it_free(it);
 	return NULL;
 }
 

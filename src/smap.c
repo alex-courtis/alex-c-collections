@@ -12,8 +12,8 @@ struct SMap {
 	const struct PMap *pmap;
 };
 
-struct SMapIterState {
-	const struct PMapIter *pit;
+struct SMapItState {
+	const struct PMapIt *pit;
 };
 
 const struct SMap *smap_init(void) {
@@ -34,12 +34,12 @@ static const struct SMap *clone(const struct SMap* const from, bool deep) {
 	return to;
 }
 
-static const struct SMapIter *iter_init(const struct SMap *map, const struct PMapIter *pit) {
+static const struct SMapIt *it_init(const struct SMap *map, const struct PMapIt *pit) {
 	if (!pit)
 		return NULL;
 
-	struct SMapIter *it = calloc(1, sizeof(struct SMapIter));
-	it->st = calloc(1, sizeof(struct SMapIterState));
+	struct SMapIt *it = calloc(1, sizeof(struct SMapIt));
+	it->st = calloc(1, sizeof(struct SMapItState));
 
 	it->st->pit = pit;
 	it->key = pit->key;
@@ -96,16 +96,16 @@ void smap_free_vals(const struct SMap* const map) {
 	free((void*)map);
 }
 
-void smap_iter_free(const struct SMapIter* const iter) {
-	if (!iter)
+void smap_it_free(const struct SMapIt* const it) {
+	if (!it)
 		return;
 
-	if (iter->st) {
-		pmap_iter_free(iter->st->pit);
+	if (it->st) {
+		pmap_it_free(it->st->pit);
 	}
 
-	free(iter->st);
-	free((void*)iter);
+	free(it->st);
+	free((void*)it);
 }
 
 const void *smap_get(const struct SMap* const map, const char* const key) {
@@ -130,33 +130,33 @@ struct SMapPair smap_match(const struct SMap* const map, fn_match_key_val match,
 	return res;
 }
 
-const struct SMapIter *smap_iter(const struct SMap* const map) {
-	return map ? iter_init(map, pmap_iter(map->pmap)) : NULL;
+const struct SMapIt *smap_it(const struct SMap* const map) {
+	return map ? it_init(map, pmap_it(map->pmap)) : NULL;
 }
 
-const struct SMapIter *smap_match_iter(const struct SMap* const map, fn_match_key_val match, const void* const data) {
-	return map ? iter_init(map, pmap_match_iter(map->pmap, match, data)) : NULL;
+const struct SMapIt *smap_match_it(const struct SMap* const map, fn_match_key_val match, const void* const data) {
+	return map ? it_init(map, pmap_match_it(map->pmap, match, data)) : NULL;
 }
 
-const struct SMapIter *smap_iter_next(const struct SMapIter* const citer) {
-	if (!citer)
+const struct SMapIt *smap_it_next(const struct SMapIt* const cit) {
+	if (!cit)
 		return NULL;
 
-	struct SMapIter *iter = (struct SMapIter*)citer;
+	struct SMapIt *it = (struct SMapIt*)cit;
 
-	if (!iter->st) {
-		smap_iter_free(iter);
+	if (!it->st) {
+		smap_it_free(it);
 		return NULL;
 	}
 
-	iter->st->pit = pmap_iter_next(citer->st->pit);
+	it->st->pit = pmap_it_next(cit->st->pit);
 
-	if (iter->st->pit) {
-		iter->key = iter->st->pit->key;
-		iter->val = iter->st->pit->val;
-		return iter;
+	if (it->st->pit) {
+		it->key = it->st->pit->key;
+		it->val = it->st->pit->val;
+		return it;
 	} else {
-		smap_iter_free(iter);
+		smap_it_free(it);
 		return NULL;
 	}
 }

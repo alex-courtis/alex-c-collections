@@ -416,32 +416,32 @@ static void pset_remove_free__free(void **state) {
 	pset_free(set);
 }
 
-static void pset_iter__empty(void **state) {
+static void pset_it__empty(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_int_equal(pset_size(set), 0);
 
-	assert_nul(pset_iter(set));
+	assert_nul(pset_it(set));
 
 	pset_free(set);
 }
 
-static void pset_iter__free(void **state) {
+static void pset_it__free(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	const struct PSetIter *iter = pset_iter(set);
-	assert_non_nul(iter);
-	assert_str_equal(iter->val, V0);
+	const struct PSetIt *it = pset_it(set);
+	assert_non_nul(it);
+	assert_str_equal(it->val, V0);
 
-	pset_iter_free(iter);
+	pset_it_free(it);
 
 	pset_free(set);
 }
 
-static void pset_iter__many(void **state) {
+static void pset_it__many(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -449,21 +449,21 @@ static void pset_iter__many(void **state) {
 
 	assert_int_equal(pset_size(set), 2);
 
-	const struct PSetIter *iter = pset_iter(set);
-	assert_non_nul(iter);
-	assert_str_equal(iter->val, V0);
+	const struct PSetIt *it = pset_it(set);
+	assert_non_nul(it);
+	assert_str_equal(it->val, V0);
 
-	iter = pset_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->val, V1);
+	it = pset_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->val, V1);
 
-	iter = pset_iter_next(iter);
-	assert_nul(iter);
+	it = pset_it_next(it);
+	assert_nul(it);
 
 	pset_free(set);
 }
 
-static void pset_iter__cleared(void **state) {
+static void pset_it__cleared(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -476,24 +476,24 @@ static void pset_iter__cleared(void **state) {
 
 	assert_int_equal(pset_size(set), 0);
 
-	assert_nul(pset_iter(set));
+	assert_nul(pset_it(set));
 
 	pset_free(set);
 }
 
-static void pset_iter_free__partial(void **state) {
-	const struct PSetIter *iter = calloc(1, sizeof(struct PSetIter));
+static void pset_it_free__partial(void **state) {
+	const struct PSetIt *it = calloc(1, sizeof(struct PSetIt));
 
-	pset_iter_free(iter);
+	pset_it_free(it);
 }
 
-static void pset_iter_next__partial(void **state) {
-	const struct PSetIter *iter = calloc(1, sizeof(struct PSetIter));
+static void pset_it_next__partial(void **state) {
+	const struct PSetIt *it = calloc(1, sizeof(struct PSetIt));
 
-	assert_nul(pset_iter_next(iter));
+	assert_nul(pset_it_next(it));
 }
 
-static void pset_filter_iter__many(void **state) {
+static void pset_filter_it__many(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -514,9 +514,9 @@ static void pset_filter_iter__many(void **state) {
 	expect_ptr(mock_equal, b, D0);
 	will_return(mock_equal, true);
 
-	const struct PSetIter *iter = pset_filter_iter(set, mock_equal, D0);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->val, V1);
+	const struct PSetIt *it = pset_filter_it(set, mock_equal, D0);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V1);
 
 	// skip V2
 	expect_ptr(mock_equal, a, V2);
@@ -528,9 +528,9 @@ static void pset_filter_iter__many(void **state) {
 	expect_ptr(mock_equal, b, D0);
 	will_return(mock_equal, true);
 
-	iter = pset_iter_next(iter);
-	assert_non_nul(iter);
-	assert_ptr_equal(iter->val, V3);
+	it = pset_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V3);
 
 	// skip V4
 	expect_ptr(mock_equal, a, V4);
@@ -538,8 +538,8 @@ static void pset_filter_iter__many(void **state) {
 	will_return(mock_equal, false);
 
 	// done
-	iter = pset_iter_next(iter);
-	assert_nul(iter);
+	it = pset_it_next(it);
+	assert_nul(it);
 
 	pset_free(set);
 }
@@ -563,28 +563,28 @@ static void pset_add__again(void **state) {
 	assert_int_equal(pset_size(set), 4);
 
 	// 0
-	const struct PSetIter *iter = pset_iter(set);
-	assert_non_nul(iter);
-	assert_str_equal(iter->val, V0);
+	const struct PSetIt *it = pset_it(set);
+	assert_non_nul(it);
+	assert_str_equal(it->val, V0);
 
 	// 2
-	iter = pset_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->val, V2);
+	it = pset_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->val, V2);
 
 	// 3
-	iter = pset_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->val, V3);
+	it = pset_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->val, V3);
 
 	// 0 moved later
-	iter = pset_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->val, V1);
+	it = pset_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->val, V1);
 
 	// end
-	iter = pset_iter_next(iter);
-	assert_nul(iter);
+	it = pset_it_next(it);
+	assert_nul(it);
 
 	pset_free(set);
 }
@@ -864,12 +864,12 @@ static void pset__null_inputs(void **state) {
 	assert_nul(pset_clone_shallow(NULL));
 	pset_free(NULL);
 	pset_free_vals(NULL);
-	pset_iter_free(NULL);
+	pset_it_free(NULL);
 	assert_false(pset_contains(NULL, NULL));
 	assert_false(pset_contains(set, NULL));
-	assert_nul(pset_iter(NULL));
-	assert_nul(pset_filter_iter(NULL, NULL, NULL));
-	assert_nul(pset_iter_next(NULL));
+	assert_nul(pset_it(NULL));
+	assert_nul(pset_filter_it(NULL, NULL, NULL));
+	assert_nul(pset_it_next(NULL));
 	assert_false(pset_add(NULL, NULL));
 	assert_false(pset_add(set, NULL));
 	assert_false(pset_remove(NULL, NULL));
@@ -916,16 +916,16 @@ int main(void) {
 		TEST(pset_remove_free__free_val),
 		TEST(pset_remove_free__free),
 
-		TEST(pset_iter__empty),
-		TEST(pset_iter__free),
-		TEST(pset_iter__many),
-		TEST(pset_iter__cleared),
+		TEST(pset_it__empty),
+		TEST(pset_it__free),
+		TEST(pset_it__many),
+		TEST(pset_it__cleared),
 
-		TEST(pset_iter_free__partial),
+		TEST(pset_it_free__partial),
 
-		TEST(pset_iter_next__partial),
+		TEST(pset_it_next__partial),
 
-		TEST(pset_filter_iter__many),
+		TEST(pset_filter_it__many),
 
 		TEST(pset_add__again),
 

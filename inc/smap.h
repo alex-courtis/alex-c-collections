@@ -15,11 +15,11 @@ struct SMap; // IWYU pragma: keep
 /*
  * Entry iterator.
  */
-struct SMapIterState; // IWYU pragma: keep
-struct SMapIter {
+struct SMapItState; // IWYU pragma: keep
+struct SMapIt {
 	const char *key;
 	const void *val;
-	struct SMapIterState *st;
+	struct SMapItState *st;
 };
 
 /*
@@ -66,8 +66,8 @@ void smap_free(const struct SMap* const map);
 // free map and vals [free_val]
 void smap_free_vals(const struct SMap* const map);
 
-// free iter
-void smap_iter_free(const struct SMapIter* const iter);
+// free iterator
+void smap_it_free(const struct SMapIt* const it);
 
 /*
  * Access
@@ -82,14 +82,14 @@ bool smap_contains_key(const struct SMap* const map, const char* const key);
 // find the first match, (NULL,NULL) when no matches or NULL match
 struct SMapPair smap_match(const struct SMap* const map, fn_match_key_val match, const void* const data);
 
-// create an iterator, caller must smap_iter_free or invoke smap_next until NULL
-const struct SMapIter *smap_iter(const struct SMap* const map);
+// create an iterator, caller must smap_it_free or invoke smap_next until NULL
+const struct SMapIt *smap_it(const struct SMap* const map);
 
 // create an iterator filtering by match, return NULL when no matches or NULL match
-const struct SMapIter *smap_match_iter(const struct SMap* const map, fn_match_key_val match, const void* const data);
+const struct SMapIt *smap_match_it(const struct SMap* const map, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map
-const struct SMapIter *smap_iter_next(const struct SMapIter* const iter);
+const struct SMapIt *smap_it_next(const struct SMapIt* const it);
 
 /*
  * Mutate

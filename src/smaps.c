@@ -12,16 +12,16 @@ struct SMapS {
 	const struct PMap *pmap;
 };
 
-struct SMapSIterState {
-	const struct PMapIter *pit;
+struct SMapSItState {
+	const struct PMapIt *pit;
 };
 
-static const struct SMapSIter *iter_init(const struct SMapS *map, const struct PMapIter *pit) {
+static const struct SMapSIt *it_init(const struct SMapS *map, const struct PMapIt *pit) {
 	if (!pit)
 		return NULL;
 
-	struct SMapSIter *it = calloc(1, sizeof(struct SMapSIter));
-	it->st = calloc(1, sizeof(struct SMapSIterState));
+	struct SMapSIt *it = calloc(1, sizeof(struct SMapSIt));
+	it->st = calloc(1, sizeof(struct SMapSItState));
 
 	it->st->pit = pit;
 	it->key = pit->key;
@@ -77,16 +77,16 @@ void smaps_free(const struct SMapS* const map) {
 	free((void*)map);
 }
 
-void smaps_iter_free(const struct SMapSIter* const iter) {
-	if (!iter)
+void smaps_it_free(const struct SMapSIt* const it) {
+	if (!it)
 		return;
 
-	if (iter->st) {
-		pmap_iter_free(iter->st->pit);
+	if (it->st) {
+		pmap_it_free(it->st->pit);
 	}
 
-	free(iter->st);
-	free((void*)iter);
+	free(it->st);
+	free((void*)it);
 }
 
 const char *smaps_get(const struct SMapS* const map, const char* const key) {
@@ -111,33 +111,33 @@ struct SMapSPair smaps_match(const struct SMapS* const map, fn_match_key_val mat
 	return res;
 }
 
-const struct SMapSIter *smaps_iter(const struct SMapS* const map) {
-	return map ? iter_init(map, pmap_iter(map->pmap)) : NULL;
+const struct SMapSIt *smaps_it(const struct SMapS* const map) {
+	return map ? it_init(map, pmap_it(map->pmap)) : NULL;
 }
 
-const struct SMapSIter *smaps_match_iter(const struct SMapS* const map, fn_match_key_val match, const void* const data) {
-	return map ? iter_init(map, pmap_match_iter(map->pmap, match, data)) : NULL;
+const struct SMapSIt *smaps_match_it(const struct SMapS* const map, fn_match_key_val match, const void* const data) {
+	return map ? it_init(map, pmap_match_it(map->pmap, match, data)) : NULL;
 }
 
-const struct SMapSIter *smaps_iter_next(const struct SMapSIter* const citer) {
-	if (!citer)
+const struct SMapSIt *smaps_it_next(const struct SMapSIt* const cit) {
+	if (!cit)
 		return NULL;
 
-	struct SMapSIter *iter = (struct SMapSIter*)citer;
+	struct SMapSIt *it = (struct SMapSIt*)cit;
 
-	if (!iter->st) {
-		smaps_iter_free(iter);
+	if (!it->st) {
+		smaps_it_free(it);
 		return NULL;
 	}
 
-	iter->st->pit = pmap_iter_next(citer->st->pit);
+	it->st->pit = pmap_it_next(cit->st->pit);
 
-	if (iter->st->pit) {
-		iter->key = iter->st->pit->key;
-		iter->val = iter->st->pit->val;
-		return iter;
+	if (it->st->pit) {
+		it->key = it->st->pit->key;
+		it->val = it->st->pit->val;
+		return it;
 	} else {
-		smaps_iter_free(iter);
+		smaps_it_free(it);
 		return NULL;
 	}
 }

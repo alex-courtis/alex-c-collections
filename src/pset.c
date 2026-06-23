@@ -18,7 +18,7 @@ struct PSet {
 	size_t size;
 };
 
-struct PSetIterState {
+struct PSetItState {
 	const struct PSet *set;
 	size_t pos;
 	fn_equal equal_val;
@@ -183,12 +183,12 @@ void pset_free_vals(const struct PSet* const set) {
 	pset_free(set);
 }
 
-void pset_iter_free(const struct PSetIter* const iter) {
-	if (!iter)
+void pset_it_free(const struct PSetIt* const it) {
+	if (!it)
 		return;
 
-	free((void*)iter->st);
-	free((void*)iter);
+	free((void*)it->st);
+	free((void*)it);
 }
 
 bool pset_contains(const struct PSet* const set, const void* const val) {
@@ -204,51 +204,51 @@ bool pset_contains(const struct PSet* const set, const void* const val) {
 	return false;
 }
 
-const struct PSetIter *pset_iter(const struct PSet* const set) {
-	return pset_filter_iter(set, NULL, NULL);
+const struct PSetIt *pset_it(const struct PSet* const set) {
+	return pset_filter_it(set, NULL, NULL);
 }
 
-const struct PSetIter *pset_filter_iter(const struct PSet* const set, fn_equal equal_val, const void* const data) {
+const struct PSetIt *pset_filter_it(const struct PSet* const set, fn_equal equal_val, const void* const data) {
 	if (!set || set->size == 0)
 		return NULL;
 
-	struct PSetIter *it = calloc(1, sizeof(struct PSetIter));
-	it->st = calloc(1, sizeof(struct PSetIterState));
+	struct PSetIt *it = calloc(1, sizeof(struct PSetIt));
+	it->st = calloc(1, sizeof(struct PSetItState));
 	it->st->set = set;
 	it->st->equal_val = equal_val;
 	it->st->data = data;
 
-	return pset_iter_next(it);
+	return pset_it_next(it);
 }
 
-const struct PSetIter *pset_iter_next(const struct PSetIter* const citer) {
-	if (!citer)
+const struct PSetIt *pset_it_next(const struct PSetIt* const cit) {
+	if (!cit)
 		return NULL;
 
-	struct PSetIter *iter = (struct PSetIter*)citer;
-	struct PSetIterState *st = iter->st;
+	struct PSetIt *it = (struct PSetIt*)cit;
+	struct PSetItState *st = it->st;
 	if (!st) {
-		pset_iter_free(iter);
+		pset_it_free(it);
 		return NULL;
 	}
 
 	// null val indicates first use, start at the beginning
-	if (iter->val) {
+	if (it->val) {
 		st->pos++;
 	}
 
 	for ( ; st->pos < st->set->size; st->pos++) {
 
-		iter->val = *(st->set->vals + st->pos);
+		it->val = *(st->set->vals + st->pos);
 
-		if ((st->equal_val && !st->equal_val(iter->val, st->data))) {
+		if ((st->equal_val && !st->equal_val(it->val, st->data))) {
 			continue;
 		}
 
-		return iter;
+		return it;
 	}
 
-	pset_iter_free(iter);
+	pset_it_free(it);
 	return NULL;
 }
 

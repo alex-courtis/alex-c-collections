@@ -17,11 +17,11 @@ struct PMap; // IWYU pragma: keep
 /*
  * Entry iterator.
  */
-struct PMapIterState; // IWYU pragma: keep
-struct PMapIter {
+struct PMapItState; // IWYU pragma: keep
+struct PMapIt {
 	const void *key;
 	const void *val;
-	struct PMapIterState *st;
+	struct PMapItState *st;
 };
 
 /*
@@ -71,8 +71,8 @@ void pmap_free(const struct PMap* const map);
 // free map and vals [free_val]
 void pmap_free_vals(const struct PMap* const map);
 
-// free iter
-void pmap_iter_free(const struct PMapIter* const iter);
+// free iterator
+void pmap_it_free(const struct PMapIt* const it);
 
 /*
  * Access
@@ -87,14 +87,14 @@ bool pmap_contains_key(const struct PMap* const map, const void* const key);
 // find the first match, (NULL,NULL) when no matches or NULL match
 struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match, const void* const data);
 
-// create an iterator, caller must pmap_iter_free or invoke pmap_next until NULL
-const struct PMapIter *pmap_iter(const struct PMap* const map);
+// create an iterator, caller must pmap_it_free or invoke pmap_next until NULL
+const struct PMapIt *pmap_it(const struct PMap* const map);
 
 // create an iterator filtering by match, return NULL when no matches or NULL match
-const struct PMapIter *pmap_match_iter(const struct PMap* const map, fn_match_key_val match, const void* const data);
+const struct PMapIt *pmap_match_it(const struct PMap* const map, fn_match_key_val match, const void* const data);
 
 // next iterator entry, NULL at end of map
-const struct PMapIter *pmap_iter_next(const struct PMapIter* const iter);
+const struct PMapIt *pmap_it_next(const struct PMapIt* const it);
 
 /*
  * Mutate

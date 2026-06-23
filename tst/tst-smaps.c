@@ -96,57 +96,57 @@ static void smaps_match__matches(void **state) {
 	smaps_free(map);
 }
 
-static void smaps_iter__many(void **state) {
+static void smaps_it__many(void **state) {
 
 	const struct SMapS *map = smaps_init();
 	assert_false(smaps_put(map, "a", "aa"));
 	assert_false(smaps_put(map, "b", NULL));
 	assert_false(smaps_put(map, "c", "cc"));
 
-	const struct SMapSIter *iter = smaps_iter(map);
+	const struct SMapSIt *it = smaps_it(map);
 
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "a");
-	assert_str_equal(iter->val, "aa");
+	assert_non_nul(it);
+	assert_str_equal(it->key, "a");
+	assert_str_equal(it->val, "aa");
 
-	iter = smaps_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "b");
-	assert_nul(iter->val);
+	it = smaps_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "b");
+	assert_nul(it->val);
 
-	smaps_iter_free(iter);
+	smaps_it_free(it);
 
 	smaps_free(map);
 }
 
-static void smaps_iter__empty(void **state) {
+static void smaps_it__empty(void **state) {
 
 	const struct SMapS *map = smaps_init();
 
-	const struct SMapSIter *iter = smaps_iter(map);
+	const struct SMapSIt *it = smaps_it(map);
 
-	assert_nul(iter);
+	assert_nul(it);
 
 	smaps_free(map);
 }
 
-static void smaps_iter_free__partial(void **state) {
-	const struct SMapSIter *iter = calloc(1, sizeof(struct SMapSIter));
+static void smaps_it_free__partial(void **state) {
+	const struct SMapSIt *it = calloc(1, sizeof(struct SMapSIt));
 
-	smaps_iter_free(iter);
+	smaps_it_free(it);
 }
 
-static void smaps_iter_next__partial(void **state) {
-	const struct SMapSIter *iter = calloc(1, sizeof(struct SMapSIter));
+static void smaps_it_next__partial(void **state) {
+	const struct SMapSIt *it = calloc(1, sizeof(struct SMapSIt));
 
-	assert_nul(smaps_iter_next(iter));
+	assert_nul(smaps_it_next(it));
 }
 
 static bool fn_match_both_start_with_a(const void* const key, const void* const val, const void* const data) {
 	return *(char*)key == 'a' && *(char*)val == 'a';
 }
 
-static void smaps_match_iter__many(void **state) {
+static void smaps_match_it__many(void **state) {
 	const struct SMapS *map = smaps_init();
 
 	assert_false(smaps_put(map, "ak0", "bv0"));
@@ -155,17 +155,17 @@ static void smaps_match_iter__many(void **state) {
 	assert_false(smaps_put(map, "ak3", "av3"));
 	assert_false(smaps_put(map, "ak4", "bv4"));
 
-	const struct SMapSIter *iter = smaps_match_iter(map, fn_match_both_start_with_a, NULL);
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "ak1");
-	assert_str_equal(iter->val, "av1");
+	const struct SMapSIt *it = smaps_match_it(map, fn_match_both_start_with_a, NULL);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "ak1");
+	assert_str_equal(it->val, "av1");
 
-	iter = smaps_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "ak3");
-	assert_str_equal(iter->val, "av3");
+	it = smaps_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "ak3");
+	assert_str_equal(it->val, "av3");
 
-	assert_nul(smaps_iter_next(iter));
+	assert_nul(smaps_it_next(it));
 
 	smaps_free(map);
 }
@@ -355,18 +355,18 @@ static void smaps__null_inputs(void **state) {
 
 	assert_nul(smaps_clone(NULL));
 	smaps_free(NULL);
-	smaps_iter_free(NULL);
+	smaps_it_free(NULL);
 	assert_false(smaps_get(NULL, NULL));
 	assert_false(smaps_get(map, NULL));
 	assert_false(smaps_contains_key(NULL, NULL));
 	assert_false(smaps_contains_key(map, NULL));
 	smaps_match(NULL, NULL, NULL);
 	smaps_match(NULL, mock_match_key_val, NULL);
-	assert_nul(smaps_iter(NULL));
-	assert_nul(smaps_match_iter(NULL, NULL, NULL));
-	assert_nul(smaps_match_iter(map, NULL, NULL));
-	assert_nul(smaps_match_iter(map, mock_match_key_val, NULL));
-	assert_nul(smaps_iter_next(NULL));
+	assert_nul(smaps_it(NULL));
+	assert_nul(smaps_match_it(NULL, NULL, NULL));
+	assert_nul(smaps_match_it(map, NULL, NULL));
+	assert_nul(smaps_match_it(map, mock_match_key_val, NULL));
+	assert_nul(smaps_it_next(NULL));
 	assert_false(smaps_put(NULL, NULL, NULL));
 	assert_false(smaps_put(map, NULL, NULL));
 	assert_false(smaps_put_if_absent(NULL, NULL, NULL));
@@ -390,14 +390,14 @@ int main(void) {
 
 		TEST(smaps_match__matches),
 
-		TEST(smaps_iter__many),
-		TEST(smaps_iter__empty),
+		TEST(smaps_it__many),
+		TEST(smaps_it__empty),
 
-		TEST(smaps_iter_free__partial),
+		TEST(smaps_it_free__partial),
 
-		TEST(smaps_iter_next__partial),
+		TEST(smaps_it_next__partial),
 
-		TEST(smaps_match_iter__many),
+		TEST(smaps_match_it__many),
 
 		TEST(smaps_equal__case_sensitive),
 		TEST(smaps_equal__case_insensitive_key),

@@ -12,8 +12,8 @@ struct SSet {
 	const struct PSet *pset;
 };
 
-struct SSetIterState {
-	const struct PSetIter *pit;
+struct SSetItState {
+	const struct PSetIt *pit;
 };
 
 const struct SSet *sset_init(void) {
@@ -59,36 +59,36 @@ void sset_free(const struct SSet* const set) {
 	free((void*)set);
 }
 
-void sset_iter_free(const struct SSetIter* const iter) {
-	if (!iter)
+void sset_it_free(const struct SSetIt* const it) {
+	if (!it)
 		return;
 
-	if (iter->st)
-		pset_iter_free(iter->st->pit);
+	if (it->st)
+		pset_it_free(it->st->pit);
 
-	free((void*)iter->st);
-	free((void*)iter);
+	free((void*)it->st);
+	free((void*)it);
 }
 
 bool sset_contains(const struct SSet* const set, const char* const val) {
 	return set ? pset_contains(set->pset, val) : false;
 }
 
-const struct SSetIter *sset_iter(const struct SSet* const set) {
-	return set ? sset_filter_iter(set, NULL, NULL) : NULL;
+const struct SSetIt *sset_it(const struct SSet* const set) {
+	return set ? sset_filter_it(set, NULL, NULL) : NULL;
 }
 
-const struct SSetIter *sset_filter_iter(const struct SSet* const set, fn_equal equal_val, const void* const data) {
+const struct SSetIt *sset_filter_it(const struct SSet* const set, fn_equal equal_val, const void* const data) {
 	if (!set)
 		return NULL;
 
-	const struct PSetIter *pit = pset_filter_iter(set->pset, equal_val, data);
+	const struct PSetIt *pit = pset_filter_it(set->pset, equal_val, data);
 
 	if (!pit)
 		return NULL;
 
-	struct SSetIter *it = calloc(1, sizeof(struct SSetIter));
-	it->st = calloc(1, sizeof(struct SSetIterState));
+	struct SSetIt *it = calloc(1, sizeof(struct SSetIt));
+	it->st = calloc(1, sizeof(struct SSetItState));
 
 	it->st->pit = pit;
 	it->val = pit->val;
@@ -96,27 +96,27 @@ const struct SSetIter *sset_filter_iter(const struct SSet* const set, fn_equal e
 	return it;
 }
 
-const struct SSetIter *sset_iter_next(const struct SSetIter* const citer) {
-	if (!citer)
+const struct SSetIt *sset_it_next(const struct SSetIt* const cit) {
+	if (!cit)
 		return NULL;
 
-	struct SSetIter *iter = (struct SSetIter*)citer;
+	struct SSetIt *it = (struct SSetIt*)cit;
 
-	if (!iter->st) {
-		sset_iter_free(iter);
+	if (!it->st) {
+		sset_it_free(it);
 		return NULL;
 	}
 
-	iter->st->pit = pset_iter_next(citer->st->pit);
+	it->st->pit = pset_it_next(cit->st->pit);
 
-	if (iter->st->pit) {
-		iter->val = iter->st->pit->val;
+	if (it->st->pit) {
+		it->val = it->st->pit->val;
 	} else {
-		sset_iter_free(iter);
-		iter = NULL;
+		sset_it_free(it);
+		it = NULL;
 	}
 
-	return iter;
+	return it;
 }
 
 bool sset_add(const struct SSet* const set, const char* const val) {

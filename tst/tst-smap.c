@@ -108,53 +108,53 @@ static void smap_match__matches(void **state) {
 	smap_free(map);
 }
 
-static void smap_iter__many(void **state) {
+static void smap_it__many(void **state) {
 
 	const struct SMap *map = smap_init();
 	assert_nul(smap_put(map, "a", V0));
 	assert_nul(smap_put(map, "b", NULL));
 	assert_nul(smap_put(map, "c", V2));
 
-	const struct SMapIter *iter = smap_iter(map);
+	const struct SMapIt *it = smap_it(map);
 
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "a");
-	assert_ptr_equal(iter->val, V0);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "a");
+	assert_ptr_equal(it->val, V0);
 
-	iter = smap_iter_next(iter);
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "b");
-	assert_nul(iter->val);
+	it = smap_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "b");
+	assert_nul(it->val);
 
-	smap_iter_free(iter);
+	smap_it_free(it);
 
 	smap_free(map);
 }
 
-static void smap_iter_free__partial(void **state) {
-	const struct SMapIter *iter = calloc(1, sizeof(struct SMapIter));
+static void smap_it_free__partial(void **state) {
+	const struct SMapIt *it = calloc(1, sizeof(struct SMapIt));
 
-	smap_iter_free(iter);
+	smap_it_free(it);
 }
 
-static void smap_iter_next__partial(void **state) {
-	const struct SMapIter *iter = calloc(1, sizeof(struct SMapIter));
+static void smap_it_next__partial(void **state) {
+	const struct SMapIt *it = calloc(1, sizeof(struct SMapIt));
 
-	assert_nul(smap_iter_next(iter));
+	assert_nul(smap_it_next(it));
 }
 
-static void smap_iter__empty(void **state) {
+static void smap_it__empty(void **state) {
 
 	const struct SMap *map = smap_init();
 
-	const struct SMapIter *iter = smap_iter(map);
+	const struct SMapIt *it = smap_it(map);
 
-	assert_nul(iter);
+	assert_nul(it);
 
 	smap_free(map);
 }
 
-static void smap_match_iter__many(void **state) {
+static void smap_match_it__many(void **state) {
 	const struct SMap *map = smap_init();
 
 	assert_nul(smap_put(map, "0", V0));
@@ -173,10 +173,10 @@ static void smap_match_iter__many(void **state) {
 	expect_ptr(mock_match_key_val, data, D0);
 	will_return(mock_match_key_val, true);
 
-	const struct SMapIter *iter = smap_match_iter(map, mock_match_key_val, D0);
-	assert_non_nul(iter);
-	assert_str_equal(iter->key, "1");
-	assert_ptr_equal(iter->val, V1);
+	const struct SMapIt *it = smap_match_it(map, mock_match_key_val, D0);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "1");
+	assert_ptr_equal(it->val, V1);
 
 	// skip V2
 	expect_string(mock_match_key_val, key, "2");
@@ -185,8 +185,8 @@ static void smap_match_iter__many(void **state) {
 	will_return(mock_match_key_val, false);
 
 	// done
-	iter = smap_iter_next(iter);
-	assert_nul(iter);
+	it = smap_it_next(it);
+	assert_nul(it);
 
 	smap_free(map);
 }
@@ -466,17 +466,17 @@ static void smap__null_inputs(void **state) {
 	assert_nul(smap_clone_deep(NULL));
 	smap_free(NULL);
 	smap_free_vals(NULL);
-	smap_iter_free(NULL);
+	smap_it_free(NULL);
 	assert_false(smap_get(NULL, NULL));
 	assert_false(smap_get(map, NULL));
 	assert_false(smap_contains_key(NULL, NULL));
 	smap_match(NULL, NULL, NULL);
 	smap_match(NULL, mock_match_key_val, NULL);
-	assert_nul(smap_iter(NULL));
-	assert_nul(smap_match_iter(map, NULL, NULL));
-	assert_nul(smap_match_iter(map, mock_match_key_val, NULL));
-	assert_nul(smap_match_iter(NULL, NULL, NULL));
-	assert_nul(smap_iter_next(NULL));
+	assert_nul(smap_it(NULL));
+	assert_nul(smap_match_it(map, NULL, NULL));
+	assert_nul(smap_match_it(map, mock_match_key_val, NULL));
+	assert_nul(smap_match_it(NULL, NULL, NULL));
+	assert_nul(smap_it_next(NULL));
 	assert_nul(smap_put(NULL, NULL, NULL));
 	assert_nul(smap_put(map, NULL, NULL));
 	assert_nul(smap_put_if_absent(NULL, NULL, NULL));
@@ -507,14 +507,14 @@ int main(void) {
 
 		TEST(smap_match__matches),
 
-		TEST(smap_iter__many),
-		TEST(smap_iter__empty),
+		TEST(smap_it__many),
+		TEST(smap_it__empty),
 
-		TEST(smap_iter_free__partial),
+		TEST(smap_it_free__partial),
 
-		TEST(smap_iter_next__partial),
+		TEST(smap_it_next__partial),
 
-		TEST(smap_match_iter__many),
+		TEST(smap_match_it__many),
 
 		TEST(smap_equal__case_sensitive),
 		TEST(smap_equal__case_insensitive),

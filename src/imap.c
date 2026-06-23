@@ -13,14 +13,14 @@ struct IMap {
 	const struct PMap *pmap;
 };
 
-struct IMapIterMatchData {
+struct IMapItMatchData {
 	fn_match_size_t_val match;
 	const void *data;
 };
 
-struct IMapIterState {
-	const struct PMapIter *pit;
-	const struct IMapIterMatchData *match_data;
+struct IMapItState {
+	const struct PMapIt *pit;
+	const struct IMapItMatchData *match_data;
 };
 
 static bool fn_equal_key(const void* const a, const void* const b) {
@@ -54,12 +54,12 @@ static const struct IMap *clone(const struct IMap* const from, bool deep) {
 	return to;
 }
 
-static struct IMapIter *iter_init(const struct IMap *map, const struct PMapIter *pit) {
+static struct IMapIt *it_init(const struct IMap *map, const struct PMapIt *pit) {
 	if (!pit)
 		return NULL;
 
-	struct IMapIter *it = calloc(1, sizeof(struct IMapIter));
-	it->st = calloc(1, sizeof(struct IMapIterState));
+	struct IMapIt *it = calloc(1, sizeof(struct IMapIt));
+	it->st = calloc(1, sizeof(struct IMapItState));
 
 	it->st->pit = pit;
 	it->key = *(size_t*)pit->key;
@@ -121,17 +121,17 @@ void imap_free_vals(const struct IMap* const map) {
 	free((void*)map);
 }
 
-void imap_iter_free(const struct IMapIter* const iter) {
-	if (!iter)
+void imap_it_free(const struct IMapIt* const it) {
+	if (!it)
 		return;
 
-	if (iter->st) {
-		free((void*)iter->st->match_data);
-		pmap_iter_free(iter->st->pit);
+	if (it->st) {
+		free((void*)it->st->match_data);
+		pmap_it_free(it->st->pit);
 	}
 
-	free(iter->st);
-	free((void*)iter);
+	free(it->st);
+	free((void*)it);
 }
 
 const void *imap_get(const struct IMap* const map, const size_t key) {
@@ -148,8 +148,8 @@ struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_val mat
 	if (!map || !match)
 		return res;
 
-	const struct PMapIter *it;
-	for (it = pmap_iter(map->pmap); it; it = pmap_iter_next(it)) {
+	const struct PMapIt *it;
+	for (it = pmap_it(map->pmap); it; it = pmap_it_next(it)) {
 		size_t k = *(size_t*)it->key;
 		if (match(k, it->val, data)) {
 			res.key = k;
@@ -158,29 +158,29 @@ struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_val mat
 		}
 	}
 
-	pmap_iter_free(it);
+	pmap_it_free(it);
 
 	return res;
 }
 
-const struct IMapIter *imap_iter(const struct IMap* const map) {
-	return map ? iter_init(map, pmap_iter(map->pmap)) : NULL;
+const struct IMapIt *imap_it(const struct IMap* const map) {
+	return map ? it_init(map, pmap_it(map->pmap)) : NULL;
 }
 
 static bool fn_match_data_wrapper(const void* const key, const void* const val, const void* const data) {
-	const struct IMapIterMatchData* const matcher = data;
+	const struct IMapItMatchData* const matcher = data;
 	return matcher->match(*(size_t*)key, val, matcher->data);
 }
 
-const struct IMapIter *imap_match_iter(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
+const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t_val match, const void* const data) {
 	if (!map || !match)
 		return NULL;
 
-	struct IMapIterMatchData *matcher = calloc(1, sizeof(struct IMapIterMatchData));
+	struct IMapItMatchData *matcher = calloc(1, sizeof(struct IMapItMatchData));
 	matcher->match = match;
 	matcher->data = data;
 
-	struct IMapIter *it = iter_init(map, pmap_match_iter(map->pmap, fn_match_data_wrapper, matcher));
+	struct IMapIt *it = it_init(map, pmap_match_it(map->pmap, fn_match_data_wrapper, matcher));
 
 	if (it) {
 		it->st->match_data = matcher;
@@ -191,25 +191,25 @@ const struct IMapIter *imap_match_iter(const struct IMap* const map, fn_match_si
 	}
 }
 
-const struct IMapIter *imap_iter_next(const struct IMapIter* const citer) {
-	if (!citer)
+const struct IMapIt *imap_it_next(const struct IMapIt* const cit) {
+	if (!cit)
 		return NULL;
 
-	struct IMapIter *it = (struct IMapIter*)citer;
+	struct IMapIt *it = (struct IMapIt*)cit;
 
 	if (!it->st) {
-		imap_iter_free(it);
+		imap_it_free(it);
 		return NULL;
 	}
 
-	it->st->pit = pmap_iter_next(citer->st->pit);
+	it->st->pit = pmap_it_next(cit->st->pit);
 
 	if (it->st->pit) {
 		it->key = *(size_t*)it->st->pit->key;
 		it->val = it->st->pit->val;
 		return it;
 	} else {
-		imap_iter_free(it);
+		imap_it_free(it);
 		return NULL;
 	}
 }
