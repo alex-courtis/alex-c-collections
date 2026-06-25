@@ -52,7 +52,6 @@ static const void *put(const struct PMap* const map, const void* const key, cons
 	if (!key)
 		return NULL;
 
-
 	const void **k;
 	const void **v;
 	for (k = map->keys, v = map->vals; k < map->keys + map->size; k++, v++) {

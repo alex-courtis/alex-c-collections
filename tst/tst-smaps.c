@@ -320,6 +320,7 @@ static void smaps_vals_slist_deep__many(void **state) {
 static void smaps_clone__(void **state) {
 	const struct SMapSParams params = {
 		.case_insensitive_key = true,
+		.case_insensitive_val = true,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -329,13 +330,11 @@ static void smaps_clone__(void **state) {
 
 	assert_non_nul(to);
 
-	assert_non_nul(to);
-
 	assert_int_equal(to->pmap->size, 0);
 	assert_int_equal(to->pmap->capacity, 99);
 	assert_int_equal(to->pmap->params.grow, 1);
 	assert_ptr_equal(to->pmap->params.equal_key, fn_equal_strcasecmp);
-	assert_ptr_equal(to->pmap->params.equal_val, fn_equal_strcmp);
+	assert_ptr_equal(to->pmap->params.equal_val, fn_equal_strcasecmp);
 	assert_ptr_equal(to->pmap->params.alloc_key, fn_clone_strdup);
 	assert_ptr_equal(to->pmap->params.alloc_val, fn_clone_strdup);
 	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
@@ -343,8 +342,11 @@ static void smaps_clone__(void **state) {
 	assert_ptr_equal(to->pmap->params.clone_val, fn_clone_strdup);
 
 	assert_true(to->params.case_insensitive_key);
+	assert_true(to->params.case_insensitive_val);
 	assert_ptr_equal(to->params.initial, 99);
 	assert_ptr_equal(to->params.grow, 1);
+
+	assert_smaps_equal(from, to);
 
 	smaps_free(from);
 	smaps_free(to);
