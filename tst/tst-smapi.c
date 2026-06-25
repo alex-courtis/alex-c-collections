@@ -1,7 +1,7 @@
-#include "tst.h"
-#include "asserts.h"
 #include "assert-smapi.h"
+#include "asserts.h"
 #include "mock-fn.h"
+#include "tst.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
