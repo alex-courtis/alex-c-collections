@@ -73,6 +73,7 @@ const struct SMapI *smapi_init_with(const struct SMapIParams params) {
 		.clone_val = fn_clone_val,
 		.str_key = (fn_str)str_or_null,
 		.str_val = fn_str_val,
+		.allow_null_val = false,
 		.initial = params.initial,
 		.grow = params.grow,
 	};

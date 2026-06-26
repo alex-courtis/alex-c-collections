@@ -66,8 +66,9 @@ static void imap_free_vals__(void **state) {
 }
 
 static void imap_it__many(void **state) {
+	const struct IMapParams params = { .allow_null_val = true, };
+	const struct IMap *map = imap_init_with(params);
 
-	const struct IMap *map = imap_init();
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, NULL));
 	assert_nul(imap_put(map, 2, V2));
@@ -355,8 +356,9 @@ static void imap_remove_free__(void **state) {
 }
 
 static void imap_str__(void **state) {
+	const struct IMapParams params = { .allow_null_val = true, };
+	const struct IMap *map = imap_init_with(params);
 
-	const struct IMap *map = imap_init();
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, NULL));
 	assert_nul(imap_put(map, 999, V2));
@@ -379,7 +381,8 @@ static void imap_str__(void **state) {
 }
 
 static void imap_vals_slist_shallow__many(void **state) {
-	const struct IMap *map = imap_init();
+	const struct IMapParams params = { .allow_null_val = true, };
+	const struct IMap *map = imap_init_with(params);
 
 	imap_put(map, 0, V0);
 	imap_put(map, 1, NULL);
@@ -397,7 +400,10 @@ static void imap_vals_slist_shallow__many(void **state) {
 }
 
 static void imap_vals_slist_deep__many(void **state) {
-	const struct IMapParams params = { .clone_val = clone_strdup, };
+	const struct IMapParams params = {
+		.allow_null_val = true,
+		.clone_val = clone_strdup,
+	};
 	const struct IMap *map = imap_init_with(params);
 
 	imap_put(map, 0, "0");
@@ -416,7 +422,8 @@ static void imap_vals_slist_deep__many(void **state) {
 }
 
 static void imap_clone_shallow__many(void **state) {
-	const struct IMap *from = imap_init();
+	const struct IMapParams params = { .allow_null_val = true, };
+	const struct IMap *from = imap_init_with(params);
 
 	assert_nul(imap_put(from, 0, V0));
 	assert_nul(imap_put(from, 1, NULL));
@@ -441,6 +448,7 @@ static void imap_clone_shallow__params(void **state) {
 		.alloc_val = mock_alloc,
 		.free_val = mock_free,
 		.clone_val = mock_clone,
+		.allow_null_val = true,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -453,6 +461,7 @@ static void imap_clone_shallow__params(void **state) {
 	// commented out are tested elsewhere
 	assert_int_equal(to->pmap->size, 0);
 	assert_int_equal(to->pmap->capacity, 99);
+	assert_true(to->pmap->params.allow_null_val);
 	assert_int_equal(to->pmap->params.grow, 1);
 	assert_ptr_equal(to->pmap->params.equal_val, mock_equal);
 	assert_ptr_equal(to->pmap->params.alloc_val, mock_alloc);

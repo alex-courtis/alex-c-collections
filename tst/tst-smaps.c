@@ -28,17 +28,22 @@ struct SMapS {
 };
 
 static void smaps_put_get_remove_free__case_sensitive(void **state) {
+	const struct SMapSParams params = { .allow_null_val = true, };
+	const struct SMapS *map = smaps_init_with(params);
 
-	const struct SMapS *map = smaps_init();
 	assert_false(smaps_put(map, "a", "A"));
 	assert_false(smaps_put(map, "b", "B"));
 	assert_false(smaps_put(map, "c", "C"));
+	assert_false(smaps_put(map, "d", NULL));
 
 	assert_true(smaps_put(map, "c", "duplicate"));
 
-	assert_int_equal(smaps_size(map), 3);
+	assert_int_equal(smaps_size(map), 4);
 
 	assert_str_equal(smaps_get(map, "b"), "B");
+
+	assert_nul(smaps_get(map, "d"));
+	assert_true(smaps_contains_key(map, "d"));
 
 	assert_nul(smaps_get(map, "x"));
 
@@ -97,8 +102,9 @@ static void smaps_match__matches(void **state) {
 }
 
 static void smaps_it__many(void **state) {
+	const struct SMapSParams params = { .allow_null_val = true, };
+	const struct SMapS *map = smaps_init_with(params);
 
-	const struct SMapS *map = smaps_init();
 	assert_false(smaps_put(map, "a", "aa"));
 	assert_false(smaps_put(map, "b", NULL));
 	assert_false(smaps_put(map, "c", "cc"));
@@ -261,8 +267,9 @@ static void smaps_put_if_absent__(void **state) {
 }
 
 static void smaps_str__(void **state) {
+	const struct SMapSParams params = { .allow_null_val = true, };
+	const struct SMapS *map = smaps_init_with(params);
 
-	const struct SMapS *map = smaps_init();
 	assert_false(smaps_put(map, "a", "aa"));
 	assert_false(smaps_put(map, "b", NULL));
 	assert_false(smaps_put(map, "c", "cc"));
@@ -299,7 +306,8 @@ static void smaps_keys_slist_deep__many(void **state) {
 }
 
 static void smaps_vals_slist_deep__many(void **state) {
-	const struct SMapS *map = smaps_init();
+	const struct SMapSParams params = { .allow_null_val = true, };
+	const struct SMapS *map = smaps_init_with(params);
 
 	smaps_put(map, "a", "aa");
 	smaps_put(map, "b", NULL);
@@ -321,6 +329,7 @@ static void smaps_clone__(void **state) {
 	const struct SMapSParams params = {
 		.case_insensitive_key = true,
 		.case_insensitive_val = true,
+		.allow_null_val = true,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -333,6 +342,7 @@ static void smaps_clone__(void **state) {
 	assert_int_equal(to->pmap->size, 0);
 	assert_int_equal(to->pmap->capacity, 99);
 	assert_int_equal(to->pmap->params.grow, 1);
+	assert_true(to->pmap->params.allow_null_val);
 	assert_ptr_equal(to->pmap->params.equal_key, equal_strcasecmp);
 	assert_ptr_equal(to->pmap->params.equal_val, equal_strcasecmp);
 	assert_ptr_equal(to->pmap->params.alloc_key, clone_strdup);

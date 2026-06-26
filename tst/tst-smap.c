@@ -109,8 +109,9 @@ static void smap_match__matches(void **state) {
 }
 
 static void smap_it__many(void **state) {
+	const struct SMapParams params = { .allow_null_val = true, };
+	const struct SMap *map = smap_init_with(params);
 
-	const struct SMap *map = smap_init();
 	assert_nul(smap_put(map, "a", V0));
 	assert_nul(smap_put(map, "b", NULL));
 	assert_nul(smap_put(map, "c", V2));
@@ -290,8 +291,9 @@ static void smap_remove_free__(void **state) {
 }
 
 static void smap_str__(void **state) {
+	const struct SMapParams params = { .allow_null_val = true, };
+	const struct SMap *map = smap_init_with(params);
 
-	const struct SMap *map = smap_init();
 	assert_nul(smap_put(map, "a", V0));
 	assert_nul(smap_put(map, "b", NULL));
 	assert_nul(smap_put(map, "c", V2));
@@ -330,7 +332,8 @@ static void smap_keys_slist_deep__many(void **state) {
 }
 
 static void smap_vals_slist_shallow__many(void **state) {
-	const struct SMap *map = smap_init();
+	const struct SMapParams params = { .allow_null_val = true, };
+	const struct SMap *map = smap_init_with(params);
 
 	smap_put(map, "a", V0);
 	smap_put(map, "b", NULL);
@@ -348,7 +351,10 @@ static void smap_vals_slist_shallow__many(void **state) {
 }
 
 static void smap_vals_slist_deep__many(void **state) {
-	const struct SMapParams params = { .clone_val = clone_strdup, };
+	const struct SMapParams params = {
+		.allow_null_val = true,
+		.clone_val = clone_strdup,
+	};
 	const struct SMap *map = smap_init_with(params);
 
 	smap_put(map, "a", "aa");
@@ -367,7 +373,8 @@ static void smap_vals_slist_deep__many(void **state) {
 }
 
 static void smap_clone_shallow__many(void **state) {
-	const struct SMap *from = smap_init();
+	const struct SMapParams params = { .allow_null_val = true, };
+	const struct SMap *from = smap_init_with(params);
 
 	assert_nul(smap_put(from, "a", V0));
 	assert_nul(smap_put(from, "b", NULL));
@@ -393,6 +400,7 @@ static void smap_clone_shallow__params(void **state) {
 		.alloc_val = mock_alloc,
 		.free_val = mock_free,
 		.clone_val = mock_clone,
+		.allow_null_val = true,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -404,6 +412,7 @@ static void smap_clone_shallow__params(void **state) {
 
 	assert_int_equal(to->pmap->size, 0);
 	assert_int_equal(to->pmap->capacity, 99);
+	assert_true(to->pmap->params.allow_null_val);
 	assert_int_equal(to->pmap->params.grow, 1);
 	assert_ptr_equal(to->pmap->params.equal_key, equal_strcasecmp);
 	assert_ptr_equal(to->pmap->params.equal_val, mock_equal);

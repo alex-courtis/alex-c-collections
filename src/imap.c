@@ -30,6 +30,7 @@ static bool fn_equal_key(const void* const a, const void* const b) {
 	return *(size_t*)a == *(size_t*)b;
 }
 
+// TODO rename
 static void *fn_clone_key(const void* const val) {
 	size_t *out = calloc(1, sizeof(size_t));
 	*out = *(size_t*)val;
@@ -89,6 +90,7 @@ const struct IMap *imap_init_with(const struct IMapParams params) {
 		.clone_val = params.clone_val,
 		.str_key = fn_str_key,
 		.str_val = params.str_val,
+		.allow_null_val = params.allow_null_val,
 		.initial = params.initial,
 		.grow = params.grow,
 	};

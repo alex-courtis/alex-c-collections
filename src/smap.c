@@ -59,6 +59,7 @@ const struct SMap *smap_init_with(const struct SMapParams params) {
 		.clone_val = params.clone_val,
 		.str_key = (fn_str)str_or_null,
 		.str_val = params.str_val,
+		.allow_null_val = params.allow_null_val,
 		.initial = params.initial,
 		.grow = params.grow,
 	};

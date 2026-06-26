@@ -47,6 +47,7 @@ const struct SMapS *smaps_init_with(const struct SMapSParams params) {
 		.str_key = (fn_str)str_or_null,
 		.str_val = (fn_str)str_or_null,
 		.initial = params.initial,
+		.allow_null_val = params.allow_null_val,
 		.grow = params.grow,
 	};
 
