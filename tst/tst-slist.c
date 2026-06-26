@@ -17,7 +17,7 @@
 #include "data/words-sorted.c"
 #include "data/words-unsorted.c"
 
-static char* fn_str_first(const void *val) {
+static char* str_first(const void *val) {
 	return strndup(val, 1);
 }
 
@@ -745,7 +745,7 @@ static void slist_str__fn_str(void **state) {
 	slist_append(&list, "two");
 	slist_append(&list, NULL);
 
-	char *str = slist_str(list, fn_str_first);
+	char *str = slist_str(list, str_first);
 	assert_str_equal(str,
 			"z\n"
 			"o\n"

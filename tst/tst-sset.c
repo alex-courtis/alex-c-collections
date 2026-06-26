@@ -32,7 +32,7 @@ struct SSet {
 	const struct PSet *pset;
 };
 
-static bool fn_match_starts_with_a(const char* const a, const void* const b) {
+static bool match_starts_with_a(const char* const a, const void* const b) {
 	return *a == 'a';
 }
 
@@ -98,7 +98,7 @@ static void sset_match__matches(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "x3"));
 
-	assert_str_equal(sset_match(set, fn_match_starts_with_a, NULL), "a2");
+	assert_str_equal(sset_match(set, match_starts_with_a, NULL), "a2");
 
 	sset_free(set);
 }
@@ -154,7 +154,7 @@ static void sset_match_it__(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "b2"));
 
-	const struct SSetIt *it = sset_match_it(set, fn_match_starts_with_a, NULL);
+	const struct SSetIt *it = sset_match_it(set, match_starts_with_a, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->val, "a1");
 
@@ -383,7 +383,7 @@ static void sset__null_inputs(void **state) {
 	assert_nul(sset_it(NULL));
 	assert_nul(sset_match_it(NULL, NULL, NULL));
 	assert_nul(sset_match_it(set, NULL, NULL));
-	assert_nul(sset_match_it(set, fn_match_starts_with_a, NULL));
+	assert_nul(sset_match_it(set, match_starts_with_a, NULL));
 	assert_nul(sset_it_next(NULL));
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_add(set, NULL));

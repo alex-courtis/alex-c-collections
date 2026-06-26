@@ -16,11 +16,6 @@ struct SMapItState {
 	const struct PMapIt *pit;
 };
 
-const struct SMap *smap_init(void) {
-	const struct SMapParams params = { 0 };
-	return smap_init_with(params);
-}
-
 static const struct SMap *clone(const struct SMap* const from, bool deep) {
 	if (!from)
 		return NULL;
@@ -46,6 +41,11 @@ static const struct SMapIt *it_init(const struct PMapIt *pit) {
 	it->val = pit->val;
 
 	return it;
+}
+
+const struct SMap *smap_init(void) {
+	const struct SMapParams params = { 0 };
+	return smap_init_with(params);
 }
 
 const struct SMap *smap_init_with(const struct SMapParams params) {

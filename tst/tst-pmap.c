@@ -42,7 +42,7 @@ static void *V5 = &vals[5];
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
 
-static void *fn_clone_key_duplicate(const void* const val) {
+static void *alloc_key_duplicate(const void* const val) {
 	return sprintf_alloc("%s%s", (char*)val, (char*)val);
 }
 
@@ -294,12 +294,12 @@ static void pmap_free_vals__free_val(void **state) {
 	pmap_free_vals(map);
 }
 
-static void fn_free_pmap(const void *val) {
+static void free_pmap(const void *val) {
 	pmap_free_vals(val);
 }
 
 static void pmap_free_vals__free_val_hierarchical(void **state) {
-	const struct PMapParams params_outer = { .free_val = fn_free_pmap, };
+	const struct PMapParams params_outer = { .free_val = free_pmap, };
 	const struct PMap *outer = pmap_init_with(params_outer);
 
 	const struct PMapParams params_inner = { .free_val = mock_free, };
@@ -447,7 +447,7 @@ static void pmap_put__grow(void **state) {
 static void pmap_put__alloc_key_free_key(void **state) {
 	const struct PMapParams params = {
 		.equal_key = (fn_equal)equal_strcmp,
-		.alloc_key = fn_clone_key_duplicate,
+		.alloc_key = alloc_key_duplicate,
 		.free_key = (fn_free)free,
 	};
 	const struct PMap *map = pmap_init_with(params);
@@ -1308,14 +1308,14 @@ static void pmap_str__pointers(void **state) {
 	pmap_free(map);
 }
 
-static char* fn_str_first(const void *val) {
+static char* str_first(const void *val) {
 	return strndup(val, 1);
 }
 
 static void pmap_str__str_val(void **state) {
 	const struct PMapParams params = {
 		.allow_null_val = true,
-		.str_val = fn_str_first,
+		.str_val = str_first,
 	};
 	const struct PMap *map = pmap_init_with(params);
 

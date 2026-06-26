@@ -186,7 +186,7 @@ static void smapi_it_next__partial(void **state) {
 	assert_nul(smapi_it_next(it));
 }
 
-static bool fn_match_key_a_val_lt_100(const char* const key, const size_t val, const void* const data) {
+static bool match_key_a_val_lt_100(const char* const key, const size_t val, const void* const data) {
 	return *key == 'a' && val < 100;
 }
 
@@ -199,7 +199,7 @@ static void smapi_match_it__many(void **state) {
 	assert_false(smapi_put(map, "ak3", 13));
 	assert_false(smapi_put(map, "ak4", 101));
 
-	const struct SMapIIt *it = smapi_match_it(map, fn_match_key_a_val_lt_100, NULL);
+	const struct SMapIIt *it = smapi_match_it(map, match_key_a_val_lt_100, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak1");
 	assert_int_equal(it->val, 11);

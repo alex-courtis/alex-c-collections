@@ -33,7 +33,7 @@ struct PSet {
 	size_t size;
 };
 
-static char* fn_str_first(const void *val) {
+static char* str_first(const void *val) {
 	return strndup(val, 1);
 }
 
@@ -919,7 +919,7 @@ static void pset_str__pointers(void **state) {
 }
 
 static void pset_str__str_val(void **state) {
-	const struct PSetParams params = { .str_val = fn_str_first, };
+	const struct PSetParams params = { .str_val = str_first, };
 	const struct PSet *set = pset_init_with(params);
 
 	assert_true(pset_add(set, "ONE"));
