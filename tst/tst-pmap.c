@@ -389,7 +389,7 @@ static void pmap_put__grow(void **state) {
 
 static void pmap_put__alloc_key_free_key(void **state) {
 	const struct PMapParams params = {
-		.equal_key = (fn_equal)fn_equal_strcmp,
+		.equal_key = (fn_equal)equal_strcmp,
 		.alloc_key = fn_clone_key_duplicate,
 		.free_key = (fn_free)free,
 	};
@@ -425,7 +425,7 @@ static void pmap_put__alloc_key_returned_null(void **state) {
 
 
 static void pmap_put__equal_key(void **state) {
-	const struct PMapParams params = { .equal_key = fn_equal_ptr, };
+	const struct PMapParams params = { .equal_key = equal_ptr, };
 	const struct PMap *map = pmap_init_with(params);
 
 	assert_nul(pmap_put(map, K0, V0));
@@ -923,7 +923,7 @@ static void pmap_contains_key__pointers(void **state) {
 }
 
 static void pmap_contains_key__equal_key(void **state) {
-	const struct PMapParams params = { .equal_key = fn_equal_ptr, };
+	const struct PMapParams params = { .equal_key = equal_ptr, };
 	const struct PMap *map = pmap_init_with(params);
 
 	assert_false(pmap_contains_key(map, K0));
@@ -993,7 +993,7 @@ static void pmap_equal__key_pointers_different(void **state) {
 }
 
 static void pmap_equal__equal_val_ok(void **state) {
-	const struct PMapParams params = { .equal_val = (fn_equal)fn_equal_strcmp, };
+	const struct PMapParams params = { .equal_val = (fn_equal)equal_strcmp, };
 	const struct PMap *a = pmap_init_with(params);
 	const struct PMap *b = pmap_init_with(params);
 
@@ -1008,7 +1008,7 @@ static void pmap_equal__equal_val_ok(void **state) {
 }
 
 static void pmap_equal__equal_val_different(void **state) {
-	const struct PMapParams params = { .equal_val = (fn_equal)fn_equal_strcmp, };
+	const struct PMapParams params = { .equal_val = (fn_equal)equal_strcmp, };
 	const struct PMap *a = pmap_init_with(params);
 	const struct PMap *b = pmap_init_with(params);
 
@@ -1023,7 +1023,7 @@ static void pmap_equal__equal_val_different(void **state) {
 }
 
 static void pmap_equal__equal_key_ok(void **state) {
-	const struct PMapParams params = { .equal_key = (fn_equal)fn_equal_strcasecmp, };
+	const struct PMapParams params = { .equal_key = (fn_equal)equal_strcasecmp, };
 	const struct PMap *a = pmap_init_with(params);
 	const struct PMap *b = pmap_init_with(params);
 
@@ -1042,7 +1042,7 @@ static void pmap_equal__equal_key_ok(void **state) {
 }
 
 static void pmap_equal__equal_key_different(void **state) {
-	const struct PMapParams params = { .equal_key = (fn_equal)fn_equal_strcasecmp, };
+	const struct PMapParams params = { .equal_key = (fn_equal)equal_strcasecmp, };
 	const struct PMap *a = pmap_init_with(params);
 	const struct PMap *b = pmap_init_with(params);
 
@@ -1239,7 +1239,7 @@ static void pmap_str__str_val(void **state) {
 }
 
 static void pmap_str__str_key(void **state) {
-	const struct PMapParams params = { .str_key = (fn_str)fn_str_or_null, };
+	const struct PMapParams params = { .str_key = (fn_str)str_or_null, };
 	const struct PMap *map = pmap_init_with(params);
 
 	assert_nul(pmap_put(map, "zero", V0));

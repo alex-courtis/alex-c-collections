@@ -348,7 +348,7 @@ static void smap_vals_slist_shallow__many(void **state) {
 }
 
 static void smap_vals_slist_deep__many(void **state) {
-	const struct SMapParams params = { .clone_val = fn_clone_strdup, };
+	const struct SMapParams params = { .clone_val = clone_strdup, };
 	const struct SMap *map = smap_init_with(params);
 
 	smap_put(map, "a", "aa");
@@ -405,9 +405,9 @@ static void smap_clone_shallow__params(void **state) {
 	assert_int_equal(to->pmap->size, 0);
 	assert_int_equal(to->pmap->capacity, 99);
 	assert_int_equal(to->pmap->params.grow, 1);
-	assert_ptr_equal(to->pmap->params.equal_key, fn_equal_strcasecmp);
+	assert_ptr_equal(to->pmap->params.equal_key, equal_strcasecmp);
 	assert_ptr_equal(to->pmap->params.equal_val, mock_equal);
-	assert_ptr_equal(to->pmap->params.alloc_key, fn_clone_strdup);
+	assert_ptr_equal(to->pmap->params.alloc_key, clone_strdup);
 	assert_ptr_equal(to->pmap->params.alloc_val, mock_alloc);
 	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->pmap->params.free_val, mock_free);

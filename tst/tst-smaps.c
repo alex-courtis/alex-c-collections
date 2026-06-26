@@ -142,7 +142,7 @@ static void smaps_it_next__partial(void **state) {
 	assert_nul(smaps_it_next(it));
 }
 
-static bool fn_match_both_start_with_a(const char* const key, const char* const val, const void* const data) {
+static bool match_both_start_with_a(const char* const key, const char* const val, const void* const data) {
 	return *key == 'a' && *val == 'a';
 }
 
@@ -155,7 +155,7 @@ static void smaps_match_it__many(void **state) {
 	assert_false(smaps_put(map, "ak3", "av3"));
 	assert_false(smaps_put(map, "ak4", "bv4"));
 
-	const struct SMapSIt *it = smaps_match_it(map, fn_match_both_start_with_a, NULL);
+	const struct SMapSIt *it = smaps_match_it(map, match_both_start_with_a, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak1");
 	assert_str_equal(it->val, "av1");
@@ -333,13 +333,13 @@ static void smaps_clone__(void **state) {
 	assert_int_equal(to->pmap->size, 0);
 	assert_int_equal(to->pmap->capacity, 99);
 	assert_int_equal(to->pmap->params.grow, 1);
-	assert_ptr_equal(to->pmap->params.equal_key, fn_equal_strcasecmp);
-	assert_ptr_equal(to->pmap->params.equal_val, fn_equal_strcasecmp);
-	assert_ptr_equal(to->pmap->params.alloc_key, fn_clone_strdup);
-	assert_ptr_equal(to->pmap->params.alloc_val, fn_clone_strdup);
+	assert_ptr_equal(to->pmap->params.equal_key, equal_strcasecmp);
+	assert_ptr_equal(to->pmap->params.equal_val, equal_strcasecmp);
+	assert_ptr_equal(to->pmap->params.alloc_key, clone_strdup);
+	assert_ptr_equal(to->pmap->params.alloc_val, clone_strdup);
 	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->pmap->params.free_val, (fn_free)free);
-	assert_ptr_equal(to->pmap->params.clone_val, fn_clone_strdup);
+	assert_ptr_equal(to->pmap->params.clone_val, clone_strdup);
 
 	assert_true(to->params.case_insensitive_key);
 	assert_true(to->params.case_insensitive_val);

@@ -356,7 +356,7 @@ static void sset_clone__(void **state) {
 	assert_int_equal(to->pset->size, 2);
 	assert_int_equal(to->pset->capacity, 99);
 	assert_int_equal(to->pset->params.grow, 1);
-	assert_ptr_equal(to->pset->params.equal_val, fn_equal_strcasecmp);
+	assert_ptr_equal(to->pset->params.equal_val, equal_strcasecmp);
 
 	assert_ptr_equal(to->params.case_insensitive, true);
 	assert_ptr_equal(to->params.initial, 99);

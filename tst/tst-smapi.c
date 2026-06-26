@@ -343,11 +343,11 @@ static void smapi_clone__(void **state) {
 	assert_int_equal(to->pmap->size, 0);
 	assert_int_equal(to->pmap->capacity, 99);
 	assert_int_equal(to->pmap->params.grow, 1);
-	assert_ptr_equal(to->pmap->params.equal_key, fn_equal_strcasecmp);
-	assert_ptr_equal(to->pmap->params.alloc_key, fn_clone_strdup);
+	assert_ptr_equal(to->pmap->params.equal_key, equal_strcasecmp);
+	assert_ptr_equal(to->pmap->params.alloc_key, clone_strdup);
 	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->pmap->params.free_val, (fn_free)free);
-	assert_ptr_equal(to->pmap->params.str_key, (fn_str)fn_str_or_null);
+	assert_ptr_equal(to->pmap->params.str_key, (fn_str)str_or_null);
 
 	assert_true(to->params.case_insensitive_key);
 	assert_ptr_equal(to->params.initial, 99);
