@@ -96,6 +96,24 @@ static void smapi_getp__zero(void **state) {
 	smapi_free(map);
 }
 
+static void smapi_match__none(void **state) {
+	const struct SMapI *map = smapi_init();
+
+	assert_false(smapi_put(map, "0", 10));
+
+	// skip
+	expect_string(mock_match_smapi, key, "0");
+	expect_int_value(mock_match_smapi, val, 10);
+	expect_string(mock_match_smapi, data, "x");
+	will_return(mock_match_smapi, false);
+
+	const struct SMapIPair pair = smapi_match(map, mock_match_smapi, "x");
+	assert_nul(pair.key);
+	assert_int_equal(pair.val, 0);
+
+	smapi_free(map);
+}
+
 static void smapi_match__matches(void **state) {
 	const struct SMapI *map = smapi_init();
 
@@ -383,6 +401,7 @@ int main(void) {
 
 		TEST(smapi_getp__zero),
 
+		TEST(smapi_match__none),
 		TEST(smapi_match__matches),
 
 		TEST(smapi_it__many),
