@@ -148,6 +148,10 @@ bool imap_contains_key(const struct IMap* const map, const size_t key) {
 	return map ? pmap_contains_key(map->pmap, &key) : false;
 }
 
+bool imap_contains_val(const struct IMap* const map, const void* const val) {
+	return map ? pmap_contains_val(map->pmap, val) : false;
+}
+
 struct IMapPair imap_match(const struct IMap* const map, fn_match_imap match, const void* const data) {
 	struct IMapPair res = { 0 };
 

@@ -250,6 +250,24 @@ static void smap_contains_key__(void **state) {
 	smap_free(map);
 }
 
+static void smap_contains_val__(void **state) {
+	const struct SMap *map = smap_init();
+
+	assert_false(smap_contains_key(map, V0));
+
+	assert_nul(smap_put(map, "a", V0));
+	assert_nul(smap_put(map, "b", V1));
+
+	assert_true(smap_contains_val(map, V0));
+	assert_true(smap_contains_val(map, V1));
+
+	assert_false(smap_contains_val(map, V2));
+
+	assert_false(smap_contains_val(map, NULL));
+
+	smap_free(map);
+}
+
 static void smap_put_free__(void **state) {
 	const struct SMapParams params = { .free_val = mock_free, };
 	const struct SMap *map = smap_init_with(params);
@@ -479,6 +497,7 @@ static void smap__null_inputs(void **state) {
 	assert_false(smap_get(NULL, NULL));
 	assert_false(smap_get(map, NULL));
 	assert_false(smap_contains_key(NULL, NULL));
+	assert_false(smap_contains_val(NULL, NULL));
 	smap_match(NULL, NULL, NULL);
 	smap_match(NULL, mock_match_smap, NULL);
 	assert_nul(smap_it(NULL));
@@ -529,6 +548,8 @@ int main(void) {
 		TEST(smap_equal__case_insensitive),
 
 		TEST(smap_contains_key__),
+
+		TEST(smap_contains_val__),
 
 		TEST(smap_put_free__),
 

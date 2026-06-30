@@ -85,6 +85,9 @@ const void *smap_get(const struct SMap* const map, const char* const key);
 // true if key is present
 bool smap_contains_key(const struct SMap* const map, const char* const key);
 
+// true if val is present [equal_val]
+bool smap_contains_val(const struct SMap* const map, const void* const val);
+
 // find the first match, {NULL,NULL} when no matches or NULL match
 struct SMapPair smap_match(const struct SMap* const map, fn_match_smap match, const void* const data);
 

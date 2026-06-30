@@ -98,6 +98,10 @@ bool smaps_contains_key(const struct SMapS* const map, const char* const key) {
 	return map ? pmap_contains_key(map->pmap, key) : false;
 }
 
+bool smaps_contains_val(const struct SMapS* const map, const char* const val) {
+	return map ? pmap_contains_val(map->pmap, val) : false;
+}
+
 struct SMapSPair smaps_match(const struct SMapS* const map, fn_match_smaps match, const void* const data) {
 	struct SMapSPair res = { 0 };
 

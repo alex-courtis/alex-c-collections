@@ -272,6 +272,22 @@ static void smapi_contains_key__(void **state) {
 	smapi_free(map);
 }
 
+static void smapi_contains_val__(void **state) {
+	const struct SMapI *map = smapi_init();
+
+	assert_false(smapi_contains_val(map, 10));
+
+	assert_false(smapi_put(map, "a", 10));
+	assert_false(smapi_put(map, "b", 11));
+
+	assert_true(smapi_contains_val(map, 10));
+	assert_true(smapi_contains_val(map, 11));
+
+	assert_false(smapi_contains_val(map, 12));
+
+	smapi_free(map);
+}
+
 static void smapi_put_if_absent__(void **state) {
 	const struct SMapI *map = smapi_init();
 
@@ -372,6 +388,7 @@ static void smapi__null_inputs(void **state) {
 	assert_false(smapi_getp(NULL, map, NULL));
 	assert_false(smapi_contains_key(NULL, NULL));
 	assert_false(smapi_contains_key(map, NULL));
+	assert_false(smapi_contains_val(NULL, 0));
 	smapi_match(NULL, NULL, NULL);
 	smapi_match(map, NULL, NULL);
 	smapi_match(NULL, mock_match_smapi, NULL);
@@ -418,6 +435,8 @@ int main(void) {
 		TEST(smapi_equal__case_insensitive_key),
 
 		TEST(smapi_contains_key__),
+
+		TEST(smapi_contains_val__),
 
 		TEST(smapi_put_if_absent__),
 

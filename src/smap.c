@@ -117,6 +117,10 @@ bool smap_contains_key(const struct SMap* const map, const char* const key) {
 	return map ? pmap_contains_key(map->pmap, key) : false;
 }
 
+bool smap_contains_val(const struct SMap* const map, const void* const val) {
+	return map ? pmap_contains_val(map->pmap, val) : false;
+}
+
 struct SMapPair smap_match(const struct SMap* const map, fn_match_smap match, const void* const data) {
 	struct SMapPair res = { 0 };
 

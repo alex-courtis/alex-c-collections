@@ -85,6 +85,9 @@ const void *pmap_get(const struct PMap* const map, const void* const key);
 // true if key is present [equal_key]
 bool pmap_contains_key(const struct PMap* const map, const void* const key);
 
+// true if val is present [equal_val]
+bool pmap_contains_val(const struct PMap* const map, const void* const val);
+
 // find the first match, {NULL,NULL} when no matches or NULL match
 struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match, const void* const data);
 

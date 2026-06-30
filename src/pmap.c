@@ -250,6 +250,22 @@ bool pmap_contains_key(const struct PMap* const map, const void* const key) {
 	return false;
 }
 
+bool pmap_contains_val(const struct PMap* const map, const void* const val) {
+	if (!map || !val)
+		return false;
+
+	const void **v;
+	for (v = map->vals;
+			v < map->vals + map->size;
+			v++) {
+		if (map->params.equal_val ? map->params.equal_val(*v, val) : *v == val) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match, const void* const data) {
 	struct PMapPair res = { 0 };
 

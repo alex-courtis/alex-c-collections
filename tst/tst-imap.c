@@ -301,6 +301,22 @@ static void imap_contains_key__(void **state) {
 	imap_free(map);
 }
 
+static void imap_contains_val__(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_false(imap_contains_val(map, 0));
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+
+	assert_true(imap_contains_val(map, V0));
+	assert_true(imap_contains_val(map, V1));
+
+	assert_false(imap_contains_val(map, V2));
+
+	imap_free(map);
+}
+
 static void imap_get__key_removed(void **state) {
 
 	const struct IMap *actual = imap_init();
@@ -523,6 +539,7 @@ static void imap__null_inputs(void **state) {
 	imap_it_free(NULL);
 	assert_false(imap_get(NULL, 0));
 	assert_false(imap_contains_key(NULL, 0));
+	assert_false(imap_contains_val(NULL, 0));
 	assert_nul(imap_it(NULL));
 	assert_nul(imap_match_it(NULL, NULL, NULL));
 	assert_nul(imap_match_it(map, NULL, NULL));
@@ -573,6 +590,8 @@ int main(void) {
 		TEST(imap_equal__key_removed),
 
 		TEST(imap_contains_key__),
+
+		TEST(imap_contains_val__),
 
 		TEST(imap_get__key_removed),
 

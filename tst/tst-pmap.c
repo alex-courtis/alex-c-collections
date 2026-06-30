@@ -1038,6 +1038,43 @@ static void pmap_contains_key__equal_key(void **state) {
 	pmap_free(map);
 }
 
+static void pmap_contains_val__pointers(void **state) {
+	const struct PMap *map = pmap_init();
+
+	assert_false(pmap_contains_val(map, K0));
+
+	assert_nul(pmap_put(map, K0, V0));
+	assert_nul(pmap_put(map, K1, V1));
+
+	assert_true(pmap_contains_val(map, V0));
+	assert_true(pmap_contains_val(map, V1));
+
+	assert_false(pmap_contains_val(map, V2));
+
+	assert_false(pmap_contains_val(map, NULL));
+
+	pmap_free(map);
+}
+
+static void pmap_contains_val__equal_val(void **state) {
+	const struct PMapParams params = { .equal_val = equal_ptr, };
+	const struct PMap *map = pmap_init_with(params);
+
+	assert_false(pmap_contains_val(map, V0));
+
+	assert_nul(pmap_put(map, K0, V0));
+	assert_nul(pmap_put(map, K1, V1));
+
+	assert_true(pmap_contains_val(map, V0));
+	assert_true(pmap_contains_val(map, V1));
+
+	assert_false(pmap_contains_val(map, V2));
+
+	assert_false(pmap_contains_val(map, NULL));
+
+	pmap_free(map);
+}
+
 static void pmap_equal__length_different(void **state) {
 	const struct PMap *a = pmap_init();
 	const struct PMap *b = pmap_init();
@@ -1383,6 +1420,8 @@ static void pmap__null_inputs(void **state) {
 	assert_false(pmap_get(map, NULL));
 	assert_false(pmap_contains_key(NULL, NULL));
 	assert_false(pmap_contains_key(map, NULL));
+	assert_false(pmap_contains_val(NULL, NULL));
+	assert_false(pmap_contains_val(map, NULL));
 	pmap_match(NULL, NULL, NULL);
 	assert_nul(pmap_it(NULL));
 	assert_nul(pmap_match_it(NULL, NULL, NULL));
@@ -1469,6 +1508,9 @@ int main(void) {
 
 		TEST(pmap_contains_key__pointers),
 		TEST(pmap_contains_key__equal_key),
+
+		TEST(pmap_contains_val__pointers),
+		TEST(pmap_contains_val__equal_val),
 
 		TEST(pmap_equal__length_different),
 		TEST(pmap_equal__key_pointers_ok),

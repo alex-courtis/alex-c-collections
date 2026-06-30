@@ -150,6 +150,10 @@ bool smapi_contains_key(const struct SMapI* const map, const char* const key) {
 	return map ? pmap_contains_key(map->pmap, key) : false;
 }
 
+bool smapi_contains_val(const struct SMapI* const map, const size_t val) {
+	return map ? pmap_contains_val(map->pmap, &val) : false;
+}
+
 struct SMapIPair smapi_match(const struct SMapI* const map, fn_match_smapi match, const void* const data) {
 	struct SMapIPair res = { 0 };
 

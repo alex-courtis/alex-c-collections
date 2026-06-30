@@ -252,6 +252,24 @@ static void smaps_contains_key__(void **state) {
 	smaps_free(map);
 }
 
+static void smaps_contains_val__(void **state) {
+	const struct SMapS *map = smaps_init();
+
+	assert_false(smaps_contains_key(map, "aa"));
+
+	assert_false(smaps_put(map, "a", "aa"));
+	assert_false(smaps_put(map, "b", "bb"));
+
+	assert_true(smaps_contains_val(map, "aa"));
+	assert_true(smaps_contains_val(map, "bb"));
+
+	assert_false(smaps_contains_val(map, "c"));
+
+	assert_false(smaps_contains_val(map, NULL));
+
+	smaps_free(map);
+}
+
 static void smaps_put_if_absent__(void **state) {
 	const struct SMapS *map = smaps_init();
 
@@ -371,7 +389,7 @@ static void smaps__null_inputs(void **state) {
 	assert_false(smaps_get(NULL, NULL));
 	assert_false(smaps_get(map, NULL));
 	assert_false(smaps_contains_key(NULL, NULL));
-	assert_false(smaps_contains_key(map, NULL));
+	assert_false(smaps_contains_val(NULL, NULL));
 	smaps_match(NULL, NULL, NULL);
 	smaps_match(NULL, mock_match_smaps, NULL);
 	assert_nul(smaps_it(NULL));
@@ -416,6 +434,8 @@ int main(void) {
 		TEST(smaps_equal__case_insensitive_val),
 
 		TEST(smaps_contains_key__),
+
+		TEST(smaps_contains_val__),
 
 		TEST(smaps_put_if_absent__),
 
