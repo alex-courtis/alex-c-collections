@@ -14,7 +14,7 @@ struct IMap {
 };
 
 struct IMapMatchData {
-	fn_match_size_t_ptr match;
+	fn_match_size_t_ptr match_key_val;
 	fn_match_ptr match_val;
 	const void *data;
 };
@@ -44,7 +44,7 @@ static char *str_key_size_t(const void* const val) {
 
 static bool match_key_val_wrapper(const void* const key, const void* const val, const void* const data) {
 	const struct IMapMatchData* const matcher = data;
-	return matcher->match(*(size_t*)key, val, matcher->data);
+	return matcher->match_key_val(*(size_t*)key, val, matcher->data);
 }
 
 static bool match_val_wrapper(const void* const val, const void* const data) {
@@ -165,7 +165,7 @@ struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_ptr mat
 		return res;
 
 	struct IMapMatchData match_data = {
-		.match = match,
+		.match_key_val = match,
 		.data = data,
 	};
 
@@ -200,13 +200,12 @@ const struct IMapIt *imap_it(const struct IMap* const map) {
 	return map ? it_init(pmap_it(map->pmap)) : NULL;
 }
 
-// TODO common it init
 const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t_ptr match, const void* const data) {
 	if (!map || !match)
 		return NULL;
 
 	struct IMapMatchData *match_data = calloc(1, sizeof(struct IMapMatchData));
-	match_data->match = match;
+	match_data->match_key_val = match;
 	match_data->data = data;
 
 	struct IMapIt *it = it_init(pmap_match_it(map->pmap, match_key_val_wrapper, match_data));

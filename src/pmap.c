@@ -22,7 +22,7 @@ struct PMap {
 struct PMapItState {
 	const struct PMap *map;
 	size_t position;
-	fn_match_ptr_ptr match;
+	fn_match_ptr_ptr match_key_val;
 	fn_match_ptr match_val;
 	const void *data;
 };
@@ -333,7 +333,7 @@ const struct PMapIt *pmap_match_it(const struct PMap* const map, fn_match_ptr_pt
 	if (!it)
 		return NULL;
 
-	it->st->match = match;
+	it->st->match_key_val = match;
 	it->st->data = data;
 
 	return pmap_it_next(it);
@@ -376,7 +376,7 @@ const struct PMapIt *pmap_it_next(const struct PMapIt* const it) {
 		it_m->key = *(st->map->keys + st->position);
 		it_m->val = *(st->map->vals + st->position);
 
-		if (st->match && !st->match(it->key, it->val, st->data)) {
+		if (st->match_key_val && !st->match_key_val(it->key, it->val, st->data)) {
 			continue;
 		}
 		if (st->match_val && !st->match_val(it->val, st->data)) {

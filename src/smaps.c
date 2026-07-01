@@ -102,7 +102,6 @@ bool smaps_contains_val(const struct SMapS* const map, const char* const val) {
 	return map ? pmap_contains_val(map->pmap, val) : false;
 }
 
-// TODO extract common
 struct SMapSPair smaps_match(const struct SMapS* const map, fn_match_str_str match, const void* const data) {
 	struct SMapSPair res = { 0 };
 

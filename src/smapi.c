@@ -14,7 +14,7 @@ struct SMapI {
 };
 
 struct SMapIMatchData {
-	fn_match_str_size_t match;
+	fn_match_str_size_t match_key_val;
 	fn_match_size_t match_val;
 	const void *data;
 };
@@ -41,7 +41,7 @@ static char *str_val_size_t(const void* const val) {
 
 static bool match_key_val_wrapper(const void* const key, const void* const val, const void* const data) {
 	const struct SMapIMatchData* const matcher = data;
-	return matcher->match(key, *(size_t*)val, matcher->data);
+	return matcher->match_key_val(key, *(size_t*)val, matcher->data);
 }
 
 static bool match_val_wrapper(const void* const val, const void* const data) {
@@ -167,7 +167,7 @@ struct SMapIPair smapi_match(const struct SMapI* const map, fn_match_str_size_t 
 		return res;
 
 	struct SMapIMatchData match_data = {
-		.match = match,
+		.match_key_val = match,
 		.data = data,
 	};
 
@@ -207,7 +207,7 @@ const struct SMapIIt *smapi_match_it(const struct SMapI* const map, fn_match_str
 		return NULL;
 
 	struct SMapIMatchData *match_data = calloc(1, sizeof(struct SMapIMatchData));
-	match_data->match = match;
+	match_data->match_key_val = match;
 	match_data->data = data;
 
 	struct SMapIIt *it = it_init(pmap_match_it(map->pmap, match_key_val_wrapper, match_data));
