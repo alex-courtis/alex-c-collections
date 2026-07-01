@@ -123,16 +123,16 @@ static void smap_match__matches(void **state) {
 	//
 
 	// skip 0
-	expect_string(mock_match_ptr, val, "0");
-	expect_ptr(mock_match_ptr, data, V2);
-	will_return(mock_match_ptr, false);
+	expect_string(mock_match_str, val, "0");
+	expect_ptr(mock_match_str, data, V2);
+	will_return(mock_match_str, false);
 
 	// get 1
-	expect_string(mock_match_ptr, val, "1");
-	expect_ptr(mock_match_ptr, data, V2);
-	will_return(mock_match_ptr, true);
+	expect_string(mock_match_str, val, "1");
+	expect_ptr(mock_match_str, data, V2);
+	will_return(mock_match_str, true);
 
-	const struct SMapPair k_pair = smap_match_key(map, mock_match_ptr, V2);
+	const struct SMapPair k_pair = smap_match_key(map, mock_match_str, V2);
 	assert_str_equal(k_pair.key, "1");
 	assert_ptr_equal(k_pair.val, V1);
 
