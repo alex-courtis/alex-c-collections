@@ -131,14 +131,20 @@ bool smap_equal(const struct SMap* const a, const struct SMap* const b);
  * Conversion
  */
 
-// ordered keys, caller frees list and vals
+// map ordered keys, caller frees list and vals
 struct SList *smap_keys_slist_deep(const struct SMap* const map);
 
-// ordered vals, caller frees list only
+// map ordered keys, same parameters
+const struct SSet *smap_keys_sset(const struct SMap* const map);
+
+// map ordered vals, caller frees list only
 struct SList *smap_vals_slist_shallow(const struct SMap* const map);
 
-// ordered vals, caller frees list and vals, empty when NULL clone_val [clone_val]
+// map ordered vals, caller frees list and vals, empty when NULL clone_val [clone_val]
 struct SList *smap_vals_slist_deep(const struct SMap* const map);
+
+// map ordered vals, same parameters, shallow when alloc_val is NULL
+const struct PSet *smap_vals_pset(const struct SMap* const map);
 
 /*
  * Info

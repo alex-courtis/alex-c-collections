@@ -1,8 +1,9 @@
-#include "tst.h"
-#include "asserts.h"
 #include "assert-imap.h"
+#include "assert-pset.h"
+#include "asserts.h"
 #include "expects.h"
 #include "mock-fn.h"
+#include "tst.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -12,6 +13,7 @@
 #include "fn.h"
 #include "pmap.h"
 #include "slist.h"
+#include "pset.h"
 #include "str.h"
 
 #include "imap.h"
@@ -547,6 +549,27 @@ static void imap_vals_slist_deep__many(void **state) {
 	imap_free(map);
 }
 
+static void imap_vals_pset__many(void **state) {
+	const struct IMapParams params = { .allow_null_val = true, };
+	const struct IMap *map = imap_init_with(params);
+
+	imap_put(map, 0, V0);
+	imap_put(map, 1, NULL);
+	imap_put(map, 2, V2);
+
+	const struct PSet *expected = pset_init();
+	pset_add(expected, V0);
+	pset_add(expected, V2);
+
+	const struct PSet *actual = imap_vals_pset(map);
+
+	assert_pset_equal(actual, expected);
+
+	imap_free(map);
+	pset_free(expected);
+	pset_free(actual);
+}
+
 static void imap_clone_shallow__many(void **state) {
 	const struct IMapParams params = { .allow_null_val = true, };
 	const struct IMap *from = imap_init_with(params);
@@ -673,6 +696,7 @@ static void imap__null_inputs(void **state) {
 	assert_false(imap_equal(map, NULL));
 	assert_nul(imap_vals_slist_shallow(NULL));
 	assert_nul(imap_vals_slist_deep(NULL));
+	assert_nul(imap_vals_pset(NULL));
 	assert_nul(imap_str(NULL));
 	assert_int_equal(imap_size(NULL), 0);
 
@@ -719,6 +743,8 @@ int main(void) {
 
 		TEST(imap_vals_slist_shallow__many),
 		TEST(imap_vals_slist_deep__many),
+
+		TEST(imap_vals_pset__many),
 
 		TEST(imap_clone_shallow__many),
 		TEST(imap_clone_shallow__params),

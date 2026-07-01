@@ -92,7 +92,7 @@ bool sset_equal(const struct SSet* const a, const struct SSet* const b);
  * Conversion
  */
 
-// ordered vals, caller frees list and vals
+// set ordered vals, caller frees list and vals
 struct SList *sset_slist_deep(const struct SSet* const set);
 
 /*

@@ -1,9 +1,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include "fn.h"
 #include "pmap.h"
+#include "sset.h"
 #include "str.h"
 
 #include "smapi.h"
@@ -281,6 +283,24 @@ bool smapi_equal(const struct SMapI* const a, const struct SMapI* const b) {
 
 struct SList *smapi_keys_slist_deep(const struct SMapI* const map) {
 	return map ? pmap_keys_slist_deep(map->pmap) : NULL;
+}
+
+const struct SSet *smapi_keys_sset(const struct SMapI* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SSetParams params = {
+		.case_insensitive = map->params.case_insensitive_key,
+		.initial = MAX(pmap_size(map->pmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct SSet *set = sset_init_with(params);
+
+	for (const struct SMapIIt *it = smapi_it(map); it; it = smapi_it_next(it)) {
+		sset_add(set, it->key);
+	}
+
+	return set;
 }
 
 char *smapi_str(const struct SMapI* const map) {

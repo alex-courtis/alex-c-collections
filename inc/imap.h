@@ -129,11 +129,14 @@ bool imap_equal(const struct IMap* const a, const struct IMap* const b);
  * Conversion
  */
 
-// ordered vals, caller frees list only
+// map ordered vals, caller frees list only
 struct SList *imap_vals_slist_shallow(const struct IMap* const map);
 
-// ordered vals, caller frees list and vals, empty when NULL clone_val [clone_val]
+// map ordered vals, caller frees list and vals, empty when NULL clone_val [clone_val]
 struct SList *imap_vals_slist_deep(const struct IMap* const map);
+
+// map ordered vals, same parameters, shallow when alloc_val is NULL
+const struct PSet *imap_vals_pset(const struct IMap* const map);
 
 /*
  * Info

@@ -1,15 +1,18 @@
-#include "tst.h"
-#include "asserts.h"
 #include "assert-pmap.h"
+#include "assert-pset.h"
+#include "asserts.h"
 #include "expects.h"
 #include "mock-fn.h"
+#include "tst.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "fn.h"
+#include "pset.h"
 #include "slist.h"
 #include "str.h"
 
@@ -18,6 +21,13 @@
 struct PMap {
 	const struct PMapParams params;
 	const void **keys;
+	const void **vals;
+	size_t capacity;
+	size_t size;
+};
+
+struct PSet {
+	const struct PSetParams params;
 	const void **vals;
 	size_t capacity;
 	size_t size;
@@ -1373,6 +1383,73 @@ static void pmap_keys_slist_deep__no_alloc_key(void **state) {
 	pmap_free(map);
 }
 
+static void pmap_keys_pset__empty(void **state) {
+	const struct PMap *map = pmap_init();
+
+	const struct PSet *set = pmap_keys_pset(map);
+
+	assert_non_nul(set);
+	assert_int_equal(pset_size(set), 0);
+
+	pmap_free(map);
+	pset_free(set);
+}
+
+static void pmap_keys_pset__many(void **state) {
+	const struct PMapParams params = {
+		.initial = 1,
+		.grow = 1,
+	};
+	const struct PMap *map = pmap_init_with(params);
+
+	pmap_put(map, K0, V0);
+	pmap_put(map, K1, V1);
+	pmap_put(map, K2, V1);
+
+	const struct PSet *expected = pset_init();
+	pset_add(expected, K0);
+	pset_add(expected, K1);
+	pset_add(expected, K2);
+
+	const struct PSet *actual = pmap_keys_pset(map);
+
+	assert_pset_equal(actual, expected);
+
+	assert_int_equal(actual->size, 3);
+	assert_int_equal(actual->capacity, 3);
+
+	pmap_free(map);
+	pset_free(expected);
+	pset_free(actual);
+}
+
+static void pmap_keys_pset__params(void **state) {
+	const struct PMapParams params = {
+		.equal_key = mock_equal,
+		.alloc_key = mock_alloc,
+		.free_key = mock_free,
+		.str_key = mock_str,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct PMap *map = pmap_init_with(params);
+
+	const struct PSet *set = pmap_keys_pset(map);
+
+	assert_int_equal(set->size, 0);
+	assert_int_equal(set->capacity, 99);
+	assert_int_equal(set->params.grow, 1);
+	assert_ptr_equal(set->params.equal_val, mock_equal);
+	assert_ptr_equal(set->params.alloc_val, mock_alloc);
+	assert_ptr_equal(set->params.free_val, mock_free);
+	assert_ptr_equal(set->params.clone_val, mock_alloc);
+	assert_ptr_equal(set->params.str_val, mock_str);
+
+	pmap_free(map);
+
+	pset_free(set);
+}
+
 static void pmap_vals_slist_shallow__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
@@ -1398,6 +1475,75 @@ static void pmap_vals_slist_shallow__many(void **state) {
 
 	slist_free(&list);
 	pmap_free(map);
+}
+
+static void pmap_vals_pset__empty(void **state) {
+	const struct PMap *map = pmap_init();
+
+	const struct PSet *set = pmap_vals_pset(map);
+
+	assert_non_nul(set);
+	assert_int_equal(pset_size(set), 0);
+
+	pmap_free(map);
+	pset_free(set);
+}
+
+static void pmap_vals_pset__many(void **state) {
+	const struct PMapParams params = {
+		.initial = 1,
+		.grow = 1,
+		.allow_null_val = true,
+	};
+	const struct PMap *map = pmap_init_with(params);
+
+	pmap_put(map, K0, V0);
+	pmap_put(map, K1, V1);
+	pmap_put(map, K2, V1);
+	pmap_put(map, K3, NULL);
+
+	const struct PSet *expected = pset_init();
+	pset_add(expected, V0);
+	pset_add(expected, V1);
+
+	const struct PSet *actual = pmap_vals_pset(map);
+
+	assert_pset_equal(actual, expected);
+
+	assert_int_equal(actual->size, 2);
+	assert_int_equal(actual->capacity, 4);
+
+	pmap_free(map);
+	pset_free(expected);
+	pset_free(actual);
+}
+
+static void pmap_vals_pset__params(void **state) {
+	const struct PMapParams params = {
+		.equal_val = mock_equal,
+		.alloc_val = mock_alloc,
+		.free_val = mock_free,
+		.clone_val = mock_clone,
+		.str_val = mock_str,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct PMap *map = pmap_init_with(params);
+
+	const struct PSet *set = pmap_vals_pset(map);
+
+	assert_int_equal(set->size, 0);
+	assert_int_equal(set->capacity, 99);
+	assert_int_equal(set->params.grow, 1);
+	assert_ptr_equal(set->params.equal_val, mock_equal);
+	assert_ptr_equal(set->params.alloc_val, mock_alloc);
+	assert_ptr_equal(set->params.free_val, mock_free);
+	assert_ptr_equal(set->params.clone_val, mock_clone);
+	assert_ptr_equal(set->params.str_val, mock_str);
+
+	pmap_free(map);
+
+	pset_free(set);
 }
 
 static void pmap_vals_slist_deep__clone_val(void **state) {
@@ -1569,8 +1715,10 @@ static void pmap__null_inputs(void **state) {
 	assert_false(pmap_equal(map, NULL));
 	assert_nul(pmap_keys_slist_deep(NULL));
 	assert_nul(pmap_keys_slist_shallow(NULL));
+	assert_nul(pmap_keys_pset(NULL));
 	assert_nul(pmap_vals_slist_deep(NULL));
 	assert_nul(pmap_vals_slist_shallow(NULL));
+	assert_nul(pmap_vals_pset(NULL));
 	assert_nul(pmap_str(NULL));
 	assert_int_equal(pmap_size(NULL), 0);
 
@@ -1656,11 +1804,19 @@ int main(void) {
 		TEST(pmap_keys_slist_deep__clone_key),
 		TEST(pmap_keys_slist_deep__no_alloc_key),
 
+		TEST(pmap_keys_pset__empty),
+		TEST(pmap_keys_pset__many),
+		TEST(pmap_keys_pset__params),
+
 		TEST(pmap_vals_slist_shallow__empty),
 		TEST(pmap_vals_slist_shallow__many),
 
 		TEST(pmap_vals_slist_deep__clone_val),
 		TEST(pmap_vals_slist_deep__no_clone_val),
+
+		TEST(pmap_vals_pset__empty),
+		TEST(pmap_vals_pset__many),
+		TEST(pmap_vals_pset__params),
 
 		TEST(pmap_str__empty),
 		TEST(pmap_str__pointers),

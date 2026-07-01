@@ -1,8 +1,11 @@
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include "fn.h"
+#include "pset.h"
 #include "slist.h"
 #include "str.h"
 
@@ -518,6 +521,29 @@ struct SList *pmap_keys_slist_deep(const struct PMap* const map) {
 	return keys_slist(map, map->params.alloc_key);
 }
 
+const struct PSet *pmap_keys_pset(const struct PMap* const map) {
+	if (!map)
+		return NULL;
+
+	const struct PSetParams params = {
+		.equal_val = map->params.equal_key,
+		.alloc_val = map->params.alloc_key,
+		.free_val = map->params.free_key,
+		.clone_val = map->params.alloc_key,
+		.str_val = map->params.str_key,
+		.initial = MAX(map->size, map->params.initial),
+		.grow  = map->params.grow,
+	};
+	const struct PSet *set = pset_init_with(params);
+
+	const void **k;
+	for (k = map->keys; k < map->keys + map->size; k++) {
+		pset_add(set, *k);
+	}
+
+	return set;
+}
+
 struct SList *pmap_vals_slist_shallow(const struct PMap* const map) {
 	return map ? vals_slist(map, NULL) : NULL;
 }
@@ -527,6 +553,29 @@ struct SList *pmap_vals_slist_deep(const struct PMap* const map) {
 		return NULL;
 
 	return vals_slist(map, map->params.clone_val);
+}
+
+const struct PSet *pmap_vals_pset(const struct PMap* const map) {
+	if (!map)
+		return NULL;
+
+	const struct PSetParams params = {
+		.equal_val = map->params.equal_val,
+		.alloc_val = map->params.alloc_val,
+		.free_val = map->params.free_val,
+		.clone_val = map->params.clone_val,
+		.str_val = map->params.str_val,
+		.initial = MAX(map->size, map->params.initial),
+		.grow  = map->params.grow,
+	};
+	const struct PSet *set = pset_init_with(params);
+
+	const void **v;
+	for (v = map->vals; v < map->vals + map->size; v++) {
+		pset_add(set, *v);
+	}
+
+	return set;
 }
 
 char *pmap_str(const struct PMap* const map) {

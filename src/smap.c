@@ -1,9 +1,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include "fn.h"
 #include "pmap.h"
+#include "sset.h"
 
 #include "smap.h"
 
@@ -212,12 +214,34 @@ struct SList *smap_keys_slist_deep(const struct SMap* const map) {
 	return map ? pmap_keys_slist_deep(map->pmap) : NULL;
 }
 
+const struct SSet *smap_keys_sset(const struct SMap* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SSetParams params = {
+		.case_insensitive = map->params.case_insensitive,
+		.initial = MAX(pmap_size(map->pmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct SSet *set = sset_init_with(params);
+
+	for (const struct SMapIt *it = smap_it(map); it; it = smap_it_next(it)) {
+		sset_add(set, it->key);
+	}
+
+	return set;
+}
+
 struct SList *smap_vals_slist_shallow(const struct SMap* const map) {
 	return map ? pmap_vals_slist_shallow(map->pmap) : NULL;
 }
 
 struct SList *smap_vals_slist_deep(const struct SMap* const map) {
 	return map ? pmap_vals_slist_deep(map->pmap) : NULL;
+}
+
+const struct PSet *smap_vals_pset(const struct SMap* const map) {
+	return map ? pmap_vals_pset(map->pmap) : NULL;
 }
 
 char *smap_str(const struct SMap* const map) {

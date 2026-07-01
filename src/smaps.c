@@ -1,9 +1,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include "fn.h"
 #include "pmap.h"
+#include "sset.h"
 
 #include "smaps.h"
 
@@ -185,8 +187,44 @@ struct SList *smaps_keys_slist_deep(const struct SMapS* const map) {
 	return map ? pmap_keys_slist_deep(map->pmap) : NULL;
 }
 
+const struct SSet *smaps_keys_sset(const struct SMapS* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SSetParams params = {
+		.case_insensitive = map->params.case_insensitive_key,
+		.initial = MAX(pmap_size(map->pmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct SSet *set = sset_init_with(params);
+
+	for (const struct SMapSIt *it = smaps_it(map); it; it = smaps_it_next(it)) {
+		sset_add(set, it->key);
+	}
+
+	return set;
+}
+
 struct SList *smaps_vals_slist_deep(const struct SMapS* const map) {
 	return map ? pmap_vals_slist_deep(map->pmap) : NULL;
+}
+
+const struct SSet *smaps_vals_sset(const struct SMapS* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SSetParams params = {
+		.case_insensitive = map->params.case_insensitive_val,
+		.initial = MAX(pmap_size(map->pmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct SSet *set = sset_init_with(params);
+
+	for (const struct SMapSIt *it = smaps_it(map); it; it = smaps_it_next(it)) {
+		sset_add(set, it->val);
+	}
+
+	return set;
 }
 
 char *smaps_str(const struct SMapS* const map) {

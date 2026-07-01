@@ -1,4 +1,5 @@
 #include "assert-smapi.h"
+#include "assert-sset.h"
 #include "asserts.h"
 #include "mock-fn.h"
 #include "tst.h"
@@ -10,6 +11,7 @@
 #include "fn.h"
 #include "pmap.h"
 #include "slist.h"
+#include "sset.h"
 #include "str.h"
 
 #include "smapi.h"
@@ -20,6 +22,11 @@ struct PMap {
 	const void **vals;
 	size_t capacity;
 	size_t size;
+};
+
+struct SSet {
+	const struct SSetParams params;
+	const struct PSet *pset;
 };
 
 struct SMapI {
@@ -431,6 +438,44 @@ static void smapi_keys_slist_deep__many(void **state) {
 	slist_free_vals(&list, NULL);
 }
 
+static void smapi_keys_sset__many(void **state) {
+	const struct SMapI *map = smapi_init();
+
+	smapi_put(map, "a", 0);
+	smapi_put(map, "b", 1);
+
+	const struct SSet *expected = sset_init();
+	sset_add(expected, "a");
+	sset_add(expected, "b");
+
+	const struct SSet *actual = smapi_keys_sset(map);
+
+	assert_sset_equal(actual, expected);
+
+	smapi_free(map);
+	sset_free(expected);
+	sset_free(actual);
+}
+
+static void smapi_keys_sset__params(void **state) {
+	const struct SMapIParams params = {
+		.case_insensitive_key = true,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SMapI *map = smapi_init_with(params);
+
+	const struct SSet *set = smapi_keys_sset(map);
+
+	assert_true(set->params.case_insensitive);
+	assert_int_equal(set->params.initial, 99);
+	assert_int_equal(set->params.grow, 1);
+
+	smapi_free(map);
+
+	sset_free(set);
+}
+
 // also tests constructor
 static void smapi_clone__(void **state) {
 	const struct SMapIParams params = {
@@ -497,6 +542,7 @@ static void smapi__null_inputs(void **state) {
 	assert_false(smapi_equal(NULL, NULL));
 	assert_false(smapi_equal(map, NULL));
 	assert_nul(smapi_keys_slist_deep(NULL));
+	assert_nul(smapi_keys_sset(NULL));
 	assert_nul(smapi_str(NULL));
 	assert_int_equal(smapi_size(NULL), 0);
 
@@ -536,6 +582,9 @@ int main(void) {
 		TEST(smapi_str__),
 
 		TEST(smapi_keys_slist_deep__many),
+
+		TEST(smapi_keys_sset__many),
+		TEST(smapi_keys_sset__params),
 
 		TEST(smapi_clone__),
 

@@ -107,10 +107,10 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b);
  * Conversion
  */
 
-// ordered vals, caller frees list only
+// set ordered vals, caller frees list only
 struct SList *pset_slist_shallow(const struct PSet* const set);
 
-// ordered vals, caller frees list and vals, empty when NULL clone_val [clone_val]
+// set ordered vals, caller frees list and vals, empty when NULL clone_val [clone_val]
 struct SList *pset_slist_deep(const struct PSet* const set);
 
 /*

@@ -1,8 +1,10 @@
-#include "tst.h"
-#include "asserts.h"
+#include "assert-pset.h"
 #include "assert-smap.h"
+#include "assert-sset.h"
+#include "asserts.h"
 #include "expects.h"
 #include "mock-fn.h"
+#include "tst.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -11,7 +13,9 @@
 
 #include "fn.h"
 #include "pmap.h"
+#include "pset.h"
 #include "slist.h"
+#include "sset.h"
 #include "str.h"
 
 #include "smap.h"
@@ -22,6 +26,11 @@ struct PMap {
 	const void **vals;
 	size_t capacity;
 	size_t size;
+};
+
+struct SSet {
+	const struct SSetParams params;
+	const struct PSet *pset;
 };
 
 struct SMap {
@@ -403,6 +412,44 @@ static void smap_keys_slist_deep__many(void **state) {
 	slist_free_vals(&list, NULL);
 }
 
+static void smap_keys_sset__many(void **state) {
+	const struct SMap *map = smap_init();
+
+	smap_put(map, "a", V0);
+	smap_put(map, "b", V1);
+
+	const struct SSet *expected = sset_init();
+	sset_add(expected, "a");
+	sset_add(expected, "b");
+
+	const struct SSet *actual = smap_keys_sset(map);
+
+	assert_sset_equal(actual, expected);
+
+	smap_free(map);
+	sset_free(expected);
+	sset_free(actual);
+}
+
+static void smap_keys_sset__params(void **state) {
+	const struct SMapParams params = {
+		.case_insensitive = true,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SMap *map = smap_init_with(params);
+
+	const struct SSet *set = smap_keys_sset(map);
+
+	assert_true(set->params.case_insensitive);
+	assert_int_equal(set->params.initial, 99);
+	assert_int_equal(set->params.grow, 1);
+
+	smap_free(map);
+
+	sset_free(set);
+}
+
 static void smap_vals_slist_shallow__many(void **state) {
 	const struct SMapParams params = { .allow_null_val = true, };
 	const struct SMap *map = smap_init_with(params);
@@ -420,6 +467,27 @@ static void smap_vals_slist_shallow__many(void **state) {
 
 	slist_free(&list);
 	smap_free(map);
+}
+
+static void smap_vals_pset__many(void **state) {
+	const struct SMapParams params = { .allow_null_val = true, };
+	const struct SMap *map = smap_init_with(params);
+
+	smap_put(map, "a", V0);
+	smap_put(map, "b", NULL);
+	smap_put(map, "c", V2);
+
+	const struct PSet *expected = pset_init();
+	pset_add(expected, V0);
+	pset_add(expected, V2);
+
+	const struct PSet *actual = smap_vals_pset(map);
+
+	assert_pset_equal(actual, expected);
+
+	smap_free(map);
+	pset_free(expected);
+	pset_free(actual);
 }
 
 static void smap_vals_slist_deep__many(void **state) {
@@ -577,8 +645,10 @@ static void smap__null_inputs(void **state) {
 	assert_false(smap_equal(NULL, NULL));
 	assert_false(smap_equal(map, NULL));
 	assert_nul(smap_keys_slist_deep(NULL));
+	assert_nul(smap_keys_sset(NULL));
 	assert_nul(smap_vals_slist_shallow(NULL));
 	assert_nul(smap_vals_slist_deep(NULL));
+	assert_nul(smap_vals_pset(NULL));
 	assert_nul(smap_str(NULL));
 	assert_int_equal(smap_size(NULL), 0);
 
@@ -620,8 +690,13 @@ int main(void) {
 
 		TEST(smap_keys_slist_deep__many),
 
+		TEST(smap_keys_sset__many),
+		TEST(smap_keys_sset__params),
+
 		TEST(smap_vals_slist_deep__many),
 		TEST(smap_vals_slist_shallow__many),
+
+		TEST(smap_vals_pset__many),
 
 		TEST(smap_clone_shallow__many),
 		TEST(smap_clone_shallow__params),
