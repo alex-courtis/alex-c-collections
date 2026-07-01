@@ -241,6 +241,10 @@ static void imap_match__matches(void **state) {
 	assert_nul(imap_put(map, 1, V1));
 	assert_nul(imap_put(map, 2, V2));
 
+	//
+	// key/val
+	//
+
 	// skip 0
 	expect_int_value(mock_match_size_t_ptr, key, 0);
 	expect_ptr(mock_match_size_t_ptr, val, V0);
@@ -253,9 +257,27 @@ static void imap_match__matches(void **state) {
 	expect_ptr(mock_match_size_t_ptr, data, D0);
 	will_return(mock_match_size_t_ptr, true);
 
-	const struct IMapPair pair = imap_match(map, mock_match_size_t_ptr, D0);
-	assert_ptr_equal(pair.key, 1);
-	assert_ptr_equal(pair.val, V1);
+	const struct IMapPair v_pair = imap_match(map, mock_match_size_t_ptr, D0);
+	assert_ptr_equal(v_pair.key, 1);
+	assert_ptr_equal(v_pair.val, V1);
+
+	//
+	// val
+	//
+
+	// skip 0
+	expect_ptr(mock_match_ptr, val, V0);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, false);
+
+	// get 1
+	expect_ptr(mock_match_ptr, val, V1);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, true);
+
+	const struct IMapPair kv_pair = imap_match_val(map, mock_match_ptr, D0);
+	assert_ptr_equal(kv_pair.key, 1);
+	assert_ptr_equal(kv_pair.val, V1);
 
 	imap_free(map);
 }
@@ -265,6 +287,10 @@ static void imap_match__no_match(void **state) {
 
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, V1));
+
+	//
+	// key/val
+	//
 
 	// skip 0
 	expect_int_value(mock_match_size_t_ptr, key, 0);
@@ -278,9 +304,27 @@ static void imap_match__no_match(void **state) {
 	expect_ptr(mock_match_size_t_ptr, data, D0);
 	will_return(mock_match_size_t_ptr, false);
 
-	const struct IMapPair pair = imap_match(map, mock_match_size_t_ptr, D0);
-	assert_int_equal(pair.key, 0);
-	assert_nul(pair.val);
+	const struct IMapPair kv_pair = imap_match(map, mock_match_size_t_ptr, D0);
+	assert_int_equal(kv_pair.key, 0);
+	assert_nul(kv_pair.val);
+
+	//
+	// val
+	//
+
+	// skip 0
+	expect_ptr(mock_match_ptr, val, V0);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, false);
+
+	// skip 1
+	expect_ptr(mock_match_ptr, val, V1);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, false);
+
+	const struct IMapPair v_pair = imap_match_val(map, mock_match_ptr, D0);
+	assert_int_equal(v_pair.key, 0);
+	assert_nul(v_pair.val);
 
 	imap_free(map);
 }
@@ -291,9 +335,21 @@ static void imap_match__null_match(void **state) {
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, V1));
 
-	const struct IMapPair pair = imap_match(map, NULL, D0);
-	assert_int_equal(pair.key, 0);
-	assert_nul(pair.val);
+	//
+	// key/val
+	//
+
+	const struct IMapPair kv_pair = imap_match(map, NULL, D0);
+	assert_int_equal(kv_pair.key, 0);
+	assert_nul(kv_pair.val);
+
+	//
+	// val
+	//
+
+	const struct IMapPair v_pair = imap_match_val(map, NULL, D0);
+	assert_int_equal(v_pair.key, 0);
+	assert_nul(v_pair.val);
 
 	imap_free(map);
 }
@@ -602,6 +658,8 @@ static void imap__null_inputs(void **state) {
 	assert_nul(imap_it_next(NULL));
 	imap_match(NULL, NULL, NULL);
 	imap_match(map, NULL, NULL);
+	imap_match_val(NULL, NULL, NULL);
+	imap_match_val(map, NULL, NULL);
 	assert_false(imap_put(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(map, 0, NULL));

@@ -13,7 +13,7 @@ struct SMapI {
 	const struct PMap *pmap;
 };
 
-struct SMapIItMatchData {
+struct SMapIMatchData {
 	fn_match_str_size_t match;
 	fn_match_size_t match_val;
 	const void *data;
@@ -21,7 +21,7 @@ struct SMapIItMatchData {
 
 struct SMapIItState {
 	const struct PMapIt *pit;
-	const struct SMapIItMatchData *match_data;
+	const struct SMapIMatchData *match_data;
 };
 
 static bool equal_val_size_t(const void* const a, const void* const b) {
@@ -40,12 +40,12 @@ static char *str_val_size_t(const void* const val) {
 }
 
 static bool match_key_val_wrapper(const void* const key, const void* const val, const void* const data) {
-	const struct SMapIItMatchData* const matcher = data;
+	const struct SMapIMatchData* const matcher = data;
 	return matcher->match(key, *(size_t*)val, matcher->data);
 }
 
 static bool match_val_wrapper(const void* const val, const void* const data) {
-	const struct SMapIItMatchData* const matcher = data;
+	const struct SMapIMatchData* const matcher = data;
 	return matcher->match_val(*(size_t*)val, matcher->data);
 }
 
@@ -166,12 +166,31 @@ struct SMapIPair smapi_match(const struct SMapI* const map, fn_match_str_size_t 
 	if (!map || !match)
 		return res;
 
-	struct SMapIItMatchData match_data = {
+	struct SMapIMatchData match_data = {
 		.match = match,
 		.data = data,
 	};
 
 	struct PMapPair pres = pmap_match(map->pmap, match_key_val_wrapper, &match_data);
+
+	res.key = pres.key;
+	res.val = pres.val ? *(size_t*)pres.val : 0;
+
+	return res;
+}
+
+struct SMapIPair smapi_match_val(const struct SMapI* const map, fn_match_size_t match, const void* const data) {
+	struct SMapIPair res = { 0 };
+
+	if (!map || !match)
+		return res;
+
+	struct SMapIMatchData match_data = {
+		.match_val = match,
+		.data = data,
+	};
+
+	struct PMapPair pres = pmap_match_val(map->pmap, match_val_wrapper, &match_data);
 
 	res.key = pres.key;
 	res.val = pres.val ? *(size_t*)pres.val : 0;
@@ -187,7 +206,7 @@ const struct SMapIIt *smapi_match_it(const struct SMapI* const map, fn_match_str
 	if (!map || !match)
 		return NULL;
 
-	struct SMapIItMatchData *match_data = calloc(1, sizeof(struct SMapIItMatchData));
+	struct SMapIMatchData *match_data = calloc(1, sizeof(struct SMapIMatchData));
 	match_data->match = match;
 	match_data->data = data;
 
@@ -206,7 +225,7 @@ const struct SMapIIt *smapi_match_val_it(const struct SMapI* const map, fn_match
 	if (!map || !match)
 		return NULL;
 
-	struct SMapIItMatchData *match_data = calloc(1, sizeof(struct SMapIItMatchData));
+	struct SMapIMatchData *match_data = calloc(1, sizeof(struct SMapIMatchData));
 	match_data->match_val = match;
 	match_data->data = data;
 

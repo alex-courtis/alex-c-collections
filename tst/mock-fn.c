@@ -32,6 +32,7 @@ bool mock_match_str(const char* const val, const void* const data) {
 
 bool mock_match_size_t(const size_t val, const void* const data) {
 	check_expected_int(val);
+	check_expected_ptr(data);
 
 	return mock_type(bool);
 }

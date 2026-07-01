@@ -13,7 +13,7 @@ struct IMap {
 	const struct PMap *pmap;
 };
 
-struct IMapItMatchData {
+struct IMapMatchData {
 	fn_match_size_t_ptr match;
 	fn_match_ptr match_val;
 	const void *data;
@@ -21,7 +21,7 @@ struct IMapItMatchData {
 
 struct IMapItState {
 	const struct PMapIt *pit;
-	const struct IMapItMatchData *match_data;
+	const struct IMapMatchData *match_data;
 };
 
 static bool equal_key_size_t(const void* const a, const void* const b) {
@@ -43,12 +43,12 @@ static char *str_key_size_t(const void* const val) {
 }
 
 static bool match_key_val_wrapper(const void* const key, const void* const val, const void* const data) {
-	const struct IMapItMatchData* const matcher = data;
+	const struct IMapMatchData* const matcher = data;
 	return matcher->match(*(size_t*)key, val, matcher->data);
 }
 
 static bool match_val_wrapper(const void* const val, const void* const data) {
-	const struct IMapItMatchData* const matcher = data;
+	const struct IMapMatchData* const matcher = data;
 	return matcher->match_val(val, matcher->data);
 }
 
@@ -164,7 +164,7 @@ struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_ptr mat
 	if (!map || !match)
 		return res;
 
-	struct IMapItMatchData match_data = {
+	struct IMapMatchData match_data = {
 		.match = match,
 		.data = data,
 	};
@@ -177,15 +177,35 @@ struct IMapPair imap_match(const struct IMap* const map, fn_match_size_t_ptr mat
 	return res;
 }
 
+struct IMapPair imap_match_val(const struct IMap* const map, fn_match_ptr match, const void* const data) {
+	struct IMapPair res = { 0 };
+
+	if (!map || !match)
+		return res;
+
+	struct IMapMatchData match_data = {
+		.match_val = match,
+		.data = data,
+	};
+
+	struct PMapPair pres = pmap_match_val(map->pmap, match_val_wrapper, &match_data);
+
+	res.key = pres.key ? *(size_t*)pres.key : 0;
+	res.val = pres.val;
+
+	return res;
+}
+
 const struct IMapIt *imap_it(const struct IMap* const map) {
 	return map ? it_init(pmap_it(map->pmap)) : NULL;
 }
 
+// TODO common it init
 const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t_ptr match, const void* const data) {
 	if (!map || !match)
 		return NULL;
 
-	struct IMapItMatchData *match_data = calloc(1, sizeof(struct IMapItMatchData));
+	struct IMapMatchData *match_data = calloc(1, sizeof(struct IMapMatchData));
 	match_data->match = match;
 	match_data->data = data;
 
@@ -204,7 +224,7 @@ const struct IMapIt *imap_match_val_it(const struct IMap* const map, fn_match_pt
 	if (!map || !match)
 		return NULL;
 
-	struct IMapItMatchData *match_data = calloc(1, sizeof(struct IMapItMatchData));
+	struct IMapMatchData *match_data = calloc(1, sizeof(struct IMapMatchData));
 	match_data->match_val = match;
 	match_data->data = data;
 

@@ -101,15 +101,32 @@ static void smapi_match__none(void **state) {
 
 	assert_false(smapi_put(map, "0", 10));
 
+	//
+	// key/val
+	//
+
 	// skip
 	expect_string(mock_match_str_size_t, key, "0");
 	expect_int_value(mock_match_str_size_t, val, 10);
 	expect_string(mock_match_str_size_t, data, "x");
 	will_return(mock_match_str_size_t, false);
 
-	const struct SMapIPair pair = smapi_match(map, mock_match_str_size_t, "x");
-	assert_nul(pair.key);
-	assert_int_equal(pair.val, 0);
+	const struct SMapIPair kv_pair = smapi_match(map, mock_match_str_size_t, "x");
+	assert_nul(kv_pair.key);
+	assert_int_equal(kv_pair.val, 0);
+
+	//
+	// val
+	//
+
+	// skip
+	expect_int_value(mock_match_size_t, val, 10);
+	expect_string(mock_match_size_t, data, "x");
+	will_return(mock_match_size_t, false);
+
+	const struct SMapIPair v_pair = smapi_match_val(map, mock_match_size_t, "x");
+	assert_nul(v_pair.key);
+	assert_int_equal(v_pair.val, 0);
 
 	smapi_free(map);
 }
@@ -120,6 +137,10 @@ static void smapi_match__matches(void **state) {
 	assert_false(smapi_put(map, "0", 10));
 	assert_false(smapi_put(map, "1", 11));
 	assert_false(smapi_put(map, "2", 12));
+
+	//
+	// key/val
+	//
 
 	// skip 0
 	expect_string(mock_match_str_size_t, key, "0");
@@ -133,9 +154,26 @@ static void smapi_match__matches(void **state) {
 	expect_string(mock_match_str_size_t, data, "x");
 	will_return(mock_match_str_size_t, true);
 
-	const struct SMapIPair pair = smapi_match(map, mock_match_str_size_t, "x");
-	assert_str_equal(pair.key, "1");
-	assert_int_equal(pair.val, 11);
+	const struct SMapIPair kv_pair = smapi_match(map, mock_match_str_size_t, "x");
+	assert_str_equal(kv_pair.key, "1");
+	assert_int_equal(kv_pair.val, 11);
+
+	//
+	// val
+	//
+	// skip 0
+	expect_int_value(mock_match_size_t, val, 10);
+	expect_string(mock_match_size_t, data, "x");
+	will_return(mock_match_size_t, false);
+
+	// get 1
+	expect_int_value(mock_match_size_t, val, 11);
+	expect_string(mock_match_size_t, data, "x");
+	will_return(mock_match_size_t, true);
+
+	const struct SMapIPair v_pair = smapi_match_val(map, mock_match_size_t, "x");
+	assert_str_equal(v_pair.key, "1");
+	assert_int_equal(v_pair.val, 11);
 
 	smapi_free(map);
 }
@@ -442,6 +480,8 @@ static void smapi__null_inputs(void **state) {
 	assert_false(smapi_contains_val(map, 0));
 	smapi_match(NULL, NULL, NULL);
 	smapi_match(map, NULL, NULL);
+	smapi_match_val(NULL, NULL, NULL);
+	smapi_match_val(map, NULL, NULL);
 	assert_nul(smapi_it(NULL));
 	assert_nul(smapi_match_it(NULL, NULL, NULL));
 	assert_nul(smapi_match_it(map, NULL, NULL));
