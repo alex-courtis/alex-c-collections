@@ -424,16 +424,16 @@ static void pset_match__matches(void **state) {
 	assert_true(pset_add(set, V2));
 
 	// skip V0
-	expect_ptr(mock_match_val, val, V0);
-	expect_ptr(mock_match_val, data, D0);
-	will_return(mock_match_val, false);
+	expect_ptr(mock_match_ptr, val, V0);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, false);
 
 	// get V1
-	expect_ptr(mock_match_val, val, V1);
-	expect_ptr(mock_match_val, data, D0);
-	will_return(mock_match_val, true);
+	expect_ptr(mock_match_ptr, val, V1);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, true);
 
-	assert_ptr_equal(pset_match(set, mock_match_val, D0), V1);
+	assert_ptr_equal(pset_match(set, mock_match_ptr, D0), V1);
 
 	pset_free(set);
 }
@@ -445,16 +445,16 @@ static void pset_match__no_match(void **state) {
 	assert_true(pset_add(set, V1));
 
 	// skip V0
-	expect_ptr(mock_match_val, val, V0);
-	expect_ptr(mock_match_val, data, D0);
-	will_return(mock_match_val, false);
+	expect_ptr(mock_match_ptr, val, V0);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, false);
 
 	// skip V1
-	expect_ptr(mock_match_val, val, V1);
-	expect_ptr(mock_match_val, data, D0);
-	will_return(mock_match_val, false);
+	expect_ptr(mock_match_ptr, val, V1);
+	expect_ptr(mock_match_ptr, data, D0);
+	will_return(mock_match_ptr, false);
 
-	assert_nul(pset_match(set, mock_match_val, D0));
+	assert_nul(pset_match(set, mock_match_ptr, D0));
 
 	pset_free(set);
 }
@@ -462,7 +462,7 @@ static void pset_match__no_match(void **state) {
 static void pset_match__null_match(void **state) {
 	const struct PSet *set = pset_init();
 
-	assert_nul(pset_match(set, mock_match_val, D0));
+	assert_nul(pset_match(set, mock_match_ptr, D0));
 
 	pset_free(set);
 }

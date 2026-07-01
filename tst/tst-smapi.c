@@ -102,12 +102,12 @@ static void smapi_match__none(void **state) {
 	assert_false(smapi_put(map, "0", 10));
 
 	// skip
-	expect_string(mock_match_smapi, key, "0");
-	expect_int_value(mock_match_smapi, val, 10);
-	expect_string(mock_match_smapi, data, "x");
-	will_return(mock_match_smapi, false);
+	expect_string(mock_match_str_size_t, key, "0");
+	expect_int_value(mock_match_str_size_t, val, 10);
+	expect_string(mock_match_str_size_t, data, "x");
+	will_return(mock_match_str_size_t, false);
 
-	const struct SMapIPair pair = smapi_match(map, mock_match_smapi, "x");
+	const struct SMapIPair pair = smapi_match(map, mock_match_str_size_t, "x");
 	assert_nul(pair.key);
 	assert_int_equal(pair.val, 0);
 
@@ -122,18 +122,18 @@ static void smapi_match__matches(void **state) {
 	assert_false(smapi_put(map, "2", 12));
 
 	// skip 0
-	expect_string(mock_match_smapi, key, "0");
-	expect_int_value(mock_match_smapi, val, 10);
-	expect_string(mock_match_smapi, data, "x");
-	will_return(mock_match_smapi, false);
+	expect_string(mock_match_str_size_t, key, "0");
+	expect_int_value(mock_match_str_size_t, val, 10);
+	expect_string(mock_match_str_size_t, data, "x");
+	will_return(mock_match_str_size_t, false);
 
 	// get 1
-	expect_string(mock_match_smapi, key, "1");
-	expect_int_value(mock_match_smapi, val, 11);
-	expect_string(mock_match_smapi, data, "x");
-	will_return(mock_match_smapi, true);
+	expect_string(mock_match_str_size_t, key, "1");
+	expect_int_value(mock_match_str_size_t, val, 11);
+	expect_string(mock_match_str_size_t, data, "x");
+	will_return(mock_match_str_size_t, true);
 
-	const struct SMapIPair pair = smapi_match(map, mock_match_smapi, "x");
+	const struct SMapIPair pair = smapi_match(map, mock_match_str_size_t, "x");
 	assert_str_equal(pair.key, "1");
 	assert_int_equal(pair.val, 11);
 
@@ -190,6 +190,10 @@ static bool match_key_a_val_lt_100(const char* const key, const size_t val, cons
 	return *key == 'a' && val < 100;
 }
 
+static bool match_val_lt_13(const size_t val, const void* const data) {
+	return val < 13;
+}
+
 static void smapi_match_it__many(void **state) {
 	const struct SMapI *map = smapi_init();
 
@@ -198,6 +202,10 @@ static void smapi_match_it__many(void **state) {
 	assert_false(smapi_put(map, "bk2", 12));
 	assert_false(smapi_put(map, "ak3", 13));
 	assert_false(smapi_put(map, "ak4", 101));
+
+	//
+	// key/val
+	//
 
 	const struct SMapIIt *it = smapi_match_it(map, match_key_a_val_lt_100, NULL);
 	assert_non_nul(it);
@@ -210,6 +218,48 @@ static void smapi_match_it__many(void **state) {
 	assert_int_equal(it->val, 13);
 
 	assert_nul(smapi_it_next(it));
+
+	//
+	// val
+	//
+
+	it = smapi_match_val_it(map, match_val_lt_13, NULL);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "ak1");
+	assert_int_equal(it->val, 11);
+
+	it = smapi_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "bk2");
+	assert_int_equal(it->val, 12);
+
+	assert_nul(smapi_it_next(it));
+
+	smapi_free(map);
+}
+
+static void smapi_match_it__none(void **state) {
+	const struct SMapI *map = smapi_init();
+
+	assert_false(smapi_put(map, "ak0", 100));
+	assert_false(smapi_put(map, "ak1", 101));
+	assert_false(smapi_put(map, "bk2", 102));
+	assert_false(smapi_put(map, "ak3", 103));
+	assert_false(smapi_put(map, "ak4", 104));
+
+	assert_nul(smapi_match_it(map, match_key_a_val_lt_100, NULL));
+
+	assert_nul(smapi_match_val_it(map, match_val_lt_13, NULL));
+
+	smapi_free(map);
+}
+
+static void smapi_match_it__empty(void **state) {
+	const struct SMapI *map = smapi_init();
+
+	assert_nul(smapi_match_it(map, mock_match_str_size_t, NULL));
+
+	assert_nul(smapi_match_val_it(map, mock_match_size_t, NULL));
 
 	smapi_free(map);
 }
@@ -389,13 +439,14 @@ static void smapi__null_inputs(void **state) {
 	assert_false(smapi_contains_key(NULL, NULL));
 	assert_false(smapi_contains_key(map, NULL));
 	assert_false(smapi_contains_val(NULL, 0));
+	assert_false(smapi_contains_val(map, 0));
 	smapi_match(NULL, NULL, NULL);
 	smapi_match(map, NULL, NULL);
-	smapi_match(NULL, mock_match_smapi, NULL);
 	assert_nul(smapi_it(NULL));
 	assert_nul(smapi_match_it(NULL, NULL, NULL));
 	assert_nul(smapi_match_it(map, NULL, NULL));
-	assert_nul(smapi_match_it(map, mock_match_smapi, NULL));
+	assert_nul(smapi_match_val_it(NULL, NULL, NULL));
+	assert_nul(smapi_match_val_it(map, NULL, NULL));
 	assert_nul(smapi_it_next(NULL));
 	assert_false(smapi_put(NULL, NULL, 0));
 	assert_false(smapi_put(map, NULL, 0));
@@ -430,6 +481,8 @@ int main(void) {
 		TEST(smapi_it_next__partial),
 
 		TEST(smapi_match_it__many),
+		TEST(smapi_match_it__none),
+		TEST(smapi_match_it__empty),
 
 		TEST(smapi_equal__case_sensitive),
 		TEST(smapi_equal__case_insensitive_key),

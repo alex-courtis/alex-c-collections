@@ -46,11 +46,6 @@ struct SMapPair {
 };
 
 /*
- * match against supplied data
- */
-typedef bool (*fn_match_smap)(const char* const key, const void* const val, const void* const data);
-
-/*
  * Lifecycle
  */
 
@@ -89,13 +84,16 @@ bool smap_contains_key(const struct SMap* const map, const char* const key);
 bool smap_contains_val(const struct SMap* const map, const void* const val);
 
 // find the first match, {NULL,NULL} when no matches or NULL match
-struct SMapPair smap_match(const struct SMap* const map, fn_match_smap match, const void* const data);
+struct SMapPair smap_match(const struct SMap* const map, fn_match_str_ptr match, const void* const data);
 
 // create an iterator, caller must smap_it_free or invoke smap_next until NULL
 const struct SMapIt *smap_it(const struct SMap* const map);
 
 // create an iterator filtering by match, return NULL when no matches or NULL match
-const struct SMapIt *smap_match_it(const struct SMap* const map, fn_match_smap match, const void* const data);
+const struct SMapIt *smap_match_it(const struct SMap* const map, fn_match_str_ptr match, const void* const data);
+
+// create an iterator filtering vals by match, return NULL when no matches or NULL match
+const struct SMapIt *smap_match_val_it(const struct SMap* const map, fn_match_ptr match, const void* const data);
 
 // next iterator entry, NULL at end of map
 const struct SMapIt *smap_it_next(const struct SMapIt* const it);

@@ -22,7 +22,8 @@ struct PMap {
 struct PMapItState {
 	const struct PMap *map;
 	size_t position;
-	fn_match_key_val match;
+	fn_match_ptr_ptr match;
+	fn_match_ptr match_val;
 	const void *data;
 };
 
@@ -46,6 +47,17 @@ static void grow(struct PMap *map) {
 	map->keys = new_keys;
 	map->vals = new_vals;
 	map->capacity = new_capacity;
+}
+
+static const struct PMapIt *it_init(const struct PMap *map) {
+	if (!map || map->size == 0)
+		return NULL;
+
+	struct PMapIt *it = calloc(1, sizeof(struct PMapIt));
+	it->st = calloc(1, sizeof(struct PMapItState));
+	it->st->map = map;
+
+	return it;
 }
 
 static const void *put(const struct PMap* const map, const void* const key, const void* const val, fn_alloc alloc_val) {
@@ -266,7 +278,7 @@ bool pmap_contains_val(const struct PMap* const map, const void* const val) {
 	return false;
 }
 
-struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match, const void* const data) {
+struct PMapPair pmap_match(const struct PMap* const map, fn_match_ptr_ptr match, const void* const data) {
 	struct PMapPair res = { 0 };
 
 	if (!map || !match)
@@ -286,24 +298,37 @@ struct PMapPair pmap_match(const struct PMap* const map, fn_match_key_val match,
 }
 
 const struct PMapIt *pmap_it(const struct PMap* const map) {
-	if (!map || map->size == 0)
-		return NULL;
+	const struct PMapIt *it = it_init(map);
 
-	struct PMapIt *it = calloc(1, sizeof(struct PMapIt));
-	it->st = calloc(1, sizeof(struct PMapItState));
-	it->st->map = map;
+	if (!it)
+		return NULL;
 
 	return pmap_it_next(it);
 }
 
-const struct PMapIt *pmap_match_it(const struct PMap* const map, fn_match_key_val match, const void* const data) {
-	if (!map || !match || map->size == 0)
+const struct PMapIt *pmap_match_it(const struct PMap* const map, fn_match_ptr_ptr match, const void* const data) {
+	if (!match)
 		return NULL;
 
-	struct PMapIt *it = calloc(1, sizeof(struct PMapIt));
-	it->st = calloc(1, sizeof(struct PMapItState));
-	it->st->map = map;
+	const struct PMapIt *it = it_init(map);
+	if (!it)
+		return NULL;
+
 	it->st->match = match;
+	it->st->data = data;
+
+	return pmap_it_next(it);
+}
+
+const struct PMapIt *pmap_match_val_it(const struct PMap* const map, fn_match_ptr match, const void* const data) {
+	if (!match)
+		return NULL;
+
+	const struct PMapIt *it = it_init(map);
+	if (!it)
+		return NULL;
+
+	it->st->match_val = match;
 	it->st->data = data;
 
 	return pmap_it_next(it);
@@ -333,6 +358,9 @@ const struct PMapIt *pmap_it_next(const struct PMapIt* const it) {
 		it_m->val = *(st->map->vals + st->position);
 
 		if (st->match && !st->match(it->key, it->val, st->data)) {
+			continue;
+		}
+		if (st->match_val && !st->match_val(it->val, st->data)) {
 			continue;
 		}
 

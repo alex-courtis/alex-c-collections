@@ -1,7 +1,6 @@
 #include "tst.h"
 #include "asserts.h"
 #include "assert-sset.h"
-#include "mock-fn.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -379,11 +378,10 @@ static void sset__null_inputs(void **state) {
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
 	sset_match(NULL, NULL, NULL);
-	sset_match(NULL, mock_match_sset, NULL);
+	sset_match(set, NULL, NULL);
 	assert_nul(sset_it(NULL));
 	assert_nul(sset_match_it(NULL, NULL, NULL));
 	assert_nul(sset_match_it(set, NULL, NULL));
-	assert_nul(sset_match_it(set, match_starts_with_a, NULL));
 	assert_nul(sset_it_next(NULL));
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_add(set, NULL));

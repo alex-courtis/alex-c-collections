@@ -14,7 +14,8 @@ struct SMapI {
 };
 
 struct SMapIItMatchData {
-	fn_match_smapi match;
+	fn_match_str_size_t match;
+	fn_match_size_t match_val;
 	const void *data;
 };
 
@@ -41,6 +42,11 @@ static char *str_val_size_t(const void* const val) {
 static bool match_key_val_wrapper(const void* const key, const void* const val, const void* const data) {
 	const struct SMapIItMatchData* const matcher = data;
 	return matcher->match(key, *(size_t*)val, matcher->data);
+}
+
+static bool match_val_wrapper(const void* const val, const void* const data) {
+	const struct SMapIItMatchData* const matcher = data;
+	return matcher->match_val(*(size_t*)val, matcher->data);
 }
 
 static struct SMapIIt *it_init(const struct PMapIt *pit) {
@@ -154,7 +160,7 @@ bool smapi_contains_val(const struct SMapI* const map, const size_t val) {
 	return map ? pmap_contains_val(map->pmap, &val) : false;
 }
 
-struct SMapIPair smapi_match(const struct SMapI* const map, fn_match_smapi match, const void* const data) {
+struct SMapIPair smapi_match(const struct SMapI* const map, fn_match_str_size_t match, const void* const data) {
 	struct SMapIPair res = { 0 };
 
 	if (!map || !match)
@@ -177,7 +183,7 @@ const struct SMapIIt *smapi_it(const struct SMapI* const map) {
 	return map ? it_init(pmap_it(map->pmap)) : NULL;
 }
 
-const struct SMapIIt *smapi_match_it(const struct SMapI* const map, fn_match_smapi match, const void* const data) {
+const struct SMapIIt *smapi_match_it(const struct SMapI* const map, fn_match_str_size_t match, const void* const data) {
 	if (!map || !match)
 		return NULL;
 
@@ -186,6 +192,25 @@ const struct SMapIIt *smapi_match_it(const struct SMapI* const map, fn_match_sma
 	match_data->data = data;
 
 	struct SMapIIt *it = it_init(pmap_match_it(map->pmap, match_key_val_wrapper, match_data));
+
+	if (it) {
+		it->st->match_data = match_data;
+		return it;
+	} else {
+		free(match_data);
+		return NULL;
+	}
+}
+
+const struct SMapIIt *smapi_match_val_it(const struct SMapI* const map, fn_match_size_t match, const void* const data) {
+	if (!map || !match)
+		return NULL;
+
+	struct SMapIItMatchData *match_data = calloc(1, sizeof(struct SMapIItMatchData));
+	match_data->match_val = match;
+	match_data->data = data;
+
+	struct SMapIIt *it = it_init(pmap_match_val_it(map->pmap, match_val_wrapper, match_data));
 
 	if (it) {
 		it->st->match_data = match_data;
