@@ -119,6 +119,24 @@ static void smap_match__matches(void **state) {
 	assert_ptr_equal(kv_pair.val, V1);
 
 	//
+	// key
+	//
+
+	// skip 0
+	expect_string(mock_match_ptr, val, "0");
+	expect_ptr(mock_match_ptr, data, V2);
+	will_return(mock_match_ptr, false);
+
+	// get 1
+	expect_string(mock_match_ptr, val, "1");
+	expect_ptr(mock_match_ptr, data, V2);
+	will_return(mock_match_ptr, true);
+
+	const struct SMapPair k_pair = smap_match_key(map, mock_match_ptr, V2);
+	assert_str_equal(k_pair.key, "1");
+	assert_ptr_equal(k_pair.val, V1);
+
+	//
 	// val
 	//
 
@@ -624,6 +642,8 @@ static void smap__null_inputs(void **state) {
 	assert_false(smap_contains_val(map, NULL));
 	smap_match(NULL, NULL, NULL);
 	smap_match(map, NULL, NULL);
+	smap_match_key(NULL, NULL, NULL);
+	smap_match_key(map, NULL, NULL);
 	smap_match_val(NULL, NULL, NULL);
 	smap_match_val(map, NULL, NULL);
 	assert_nul(smap_it(NULL));
