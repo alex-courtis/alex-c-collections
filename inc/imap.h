@@ -96,7 +96,7 @@ const struct IMapIt *imap_it(const struct IMap* const map);
 // create an iterator filtering by key/val match, return NULL when no matches or NULL match
 const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t_ptr match, const void* const data);
 
-// create an iterator filtering by val match, return NULL when no matches or NULL match
+// create an iterator filtering by key match, return NULL when no matches or NULL match
 const struct IMapIt *imap_match_key_it(const struct IMap* const map, fn_match_size_t match, const void* const data);
 
 // create an iterator filtering by val match, return NULL when no matches or NULL match

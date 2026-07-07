@@ -98,6 +98,9 @@ const struct SMapIt *smap_it(const struct SMap* const map);
 // create an iterator filtering by key/val match, return NULL when no matches or NULL match
 const struct SMapIt *smap_match_it(const struct SMap* const map, fn_match_str_ptr match, const void* const data);
 
+// create an iterator filtering by key match, return NULL when no matches or NULL match
+const struct SMapIt *smap_match_key_it(const struct SMap* const map, fn_match_str match, const void* const data);
+
 // create an iterator filtering by val match, return NULL when no matches or NULL match
 const struct SMapIt *smap_match_val_it(const struct SMap* const map, fn_match_ptr match, const void* const data);
 

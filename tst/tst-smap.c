@@ -98,10 +98,6 @@ static void smap_match__matches(void **state) {
 	assert_nul(smap_put(map, "1", V1));
 	assert_nul(smap_put(map, "2", V2));
 
-	//
-	// key/val
-	//
-
 	// skip 0
 	expect_string(mock_match_str_ptr, key, "0");
 	expect_ptr(mock_match_str_ptr, val, V0);
@@ -118,9 +114,15 @@ static void smap_match__matches(void **state) {
 	assert_str_equal(kv_pair.key, "1");
 	assert_ptr_equal(kv_pair.val, V1);
 
-	//
-	// key
-	//
+	smap_free(map);
+}
+
+static void smap_match_key__matches(void **state) {
+	const struct SMap *map = smap_init();
+
+	assert_nul(smap_put(map, "0", V0));
+	assert_nul(smap_put(map, "1", V1));
+	assert_nul(smap_put(map, "2", V2));
 
 	// skip 0
 	expect_string(mock_match_str, val, "0");
@@ -136,9 +138,15 @@ static void smap_match__matches(void **state) {
 	assert_str_equal(k_pair.key, "1");
 	assert_ptr_equal(k_pair.val, V1);
 
-	//
-	// val
-	//
+	smap_free(map);
+}
+
+static void smap_match_val__matches(void **state) {
+	const struct SMap *map = smap_init();
+
+	assert_nul(smap_put(map, "0", V0));
+	assert_nul(smap_put(map, "1", V1));
+	assert_nul(smap_put(map, "2", V2));
 
 	// skip 0
 	expect_ptr(mock_match_ptr, val, V0);
@@ -211,10 +219,6 @@ static void smap_match_it__many(void **state) {
 	assert_nul(smap_put(map, "1", V1));
 	assert_nul(smap_put(map, "2", V2));
 
-	//
-	// key/val
-	//
-
 	// skip "0"
 	expect_string(mock_match_str_ptr, key, "0");
 	expect_ptr(mock_match_str_ptr, val, V0);
@@ -242,9 +246,49 @@ static void smap_match_it__many(void **state) {
 	it = smap_it_next(it);
 	assert_nul(it);
 
-	//
-	// val
-	//
+	smap_free(map);
+}
+
+static void smap_match_key_it__many(void **state) {
+	const struct SMap *map = smap_init();
+
+	assert_nul(smap_put(map, "0", V0));
+	assert_nul(smap_put(map, "1", V1));
+	assert_nul(smap_put(map, "2", V2));
+
+	// skip V0
+	expect_string(mock_match_str, val, "0");
+	expect_ptr(mock_match_str, data, D0);
+	will_return(mock_match_str, false);
+
+	// get V1
+	expect_string(mock_match_str, val, "1");
+	expect_ptr(mock_match_str, data, D0);
+	will_return(mock_match_str, true);
+
+	const struct SMapIt *it = smap_match_key_it(map, mock_match_str, D0);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "1");
+	assert_ptr_equal(it->val, V1);
+
+	// skip V2
+	expect_string(mock_match_str, val, "2");
+	expect_ptr(mock_match_str, data, D0);
+	will_return(mock_match_str, false);
+
+	// done
+	it = smap_it_next(it);
+	assert_nul(it);
+
+	smap_free(map);
+}
+
+static void smap_match_val_it__many(void **state) {
+	const struct SMap *map = smap_init();
+
+	assert_nul(smap_put(map, "0", V0));
+	assert_nul(smap_put(map, "1", V1));
+	assert_nul(smap_put(map, "2", V2));
 
 	// skip V0
 	expect_ptr(mock_match_ptr, val, V0);
@@ -256,7 +300,7 @@ static void smap_match_it__many(void **state) {
 	expect_ptr(mock_match_ptr, data, D0);
 	will_return(mock_match_ptr, true);
 
-	it = smap_match_val_it(map, mock_match_ptr, D0);
+	const struct SMapIt *it = smap_match_val_it(map, mock_match_ptr, D0);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "1");
 	assert_ptr_equal(it->val, V1);
@@ -649,6 +693,8 @@ static void smap__null_inputs(void **state) {
 	assert_nul(smap_it(NULL));
 	assert_nul(smap_match_it(NULL, NULL, NULL));
 	assert_nul(smap_match_it(map, NULL, NULL));
+	assert_nul(smap_match_key_it(NULL, NULL, NULL));
+	assert_nul(smap_match_key_it(map, NULL, NULL));
 	assert_nul(smap_match_val_it(NULL, NULL, NULL));
 	assert_nul(smap_match_val_it(map, NULL, NULL));
 	assert_nul(smap_it_next(NULL));
@@ -683,6 +729,8 @@ int main(void) {
 		TEST(smap_free_vals__),
 
 		TEST(smap_match__matches),
+		TEST(smap_match_key__matches),
+		TEST(smap_match_val__matches),
 
 		TEST(smap_it__many),
 		TEST(smap_it__empty),
@@ -692,6 +740,8 @@ int main(void) {
 		TEST(smap_it_next__partial),
 
 		TEST(smap_match_it__many),
+		TEST(smap_match_key_it__many),
+		TEST(smap_match_val_it__many),
 
 		TEST(smap_equal__case_sensitive),
 		TEST(smap_equal__case_insensitive),
