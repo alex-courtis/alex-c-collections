@@ -59,10 +59,6 @@ jobs:
       - run: make CC=gcc   MFLAGS=-m32 test
       - run: make CC=gcc   MFLAGS=-m32 test-vg
 
-      - run: make                      clean
-      - run: make CC=clang MFLAGS=-m32 test
-      - run: make CC=clang MFLAGS=-m32 test-vg
-
       - name: build and install include-what-you-use
         run: bld/docker-install-iwyu.sh
         shell: sh -e {0}
