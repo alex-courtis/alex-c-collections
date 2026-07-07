@@ -108,6 +108,9 @@ bool smapi_put(const struct SMapI* const map, const char* const key, const size_
 // set key/val if not present, return true if overwritten
 bool smapi_put_if_absent(const struct SMapI* const map, const char* const key, const size_t val);
 
+// set all from key/val, returning number of overwritten
+size_t smapi_put_all(const struct SMapI* const map, const struct SMapI* const from);
+
 // remove val, return true if removed
 bool smapi_remove(const struct SMapI* const map, const char* const key);
 

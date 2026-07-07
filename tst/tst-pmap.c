@@ -1219,6 +1219,8 @@ static void pmap_put_all_free__many(void **state) {
 
 	assert_int_equal(pmap_put_all_free(to, from), 1);
 
+	assert_pmap_equal(to, expected);
+
 	pmap_free(to);
 	pmap_free(from);
 	pmap_free(expected);

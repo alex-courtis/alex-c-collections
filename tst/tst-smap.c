@@ -424,6 +424,8 @@ static void smap_put_all_free__many(void **state) {
 
 	assert_int_equal(smap_put_all_free(to, from), 1);
 
+	assert_smap_equal(to, expected);
+
 	smap_free(to);
 	smap_free(from);
 	smap_free(expected);
