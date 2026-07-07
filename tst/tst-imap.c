@@ -121,10 +121,6 @@ static void imap_match_it__many(void **state) {
 	assert_nul(imap_put(map, 1, V1));
 	assert_nul(imap_put(map, 2, V2));
 
-	//
-	// key/val
-	//
-
 	// skip 0
 	expect_int_value(mock_match_size_t_ptr, key, 0);
 	expect_ptr(mock_match_size_t_ptr, val, V0);
@@ -152,9 +148,49 @@ static void imap_match_it__many(void **state) {
 	it = imap_it_next(it);
 	assert_nul(it);
 
-	//
-	// val
-	//
+	imap_free(map);
+}
+
+static void imap_match_key_it__many(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+	assert_nul(imap_put(map, 2, V2));
+
+	// skip 0
+	expect_int_value(mock_match_size_t, val, 0);
+	expect_ptr(mock_match_size_t, data, D0);
+	will_return(mock_match_size_t, false);
+
+	// pass 1
+	expect_int_value(mock_match_size_t, val, 1);
+	expect_ptr(mock_match_size_t, data, D0);
+	will_return(mock_match_size_t, true);
+
+	const struct IMapIt *it = imap_match_key_it(map, mock_match_size_t, D0);
+	assert_non_nul(it);
+	assert_int_equal(it->key, 1);
+	assert_ptr_equal(it->val, V1);
+
+	// skip 2
+	expect_int_value(mock_match_size_t, val, 2);
+	expect_ptr(mock_match_size_t, data, D0);
+	will_return(mock_match_size_t, false);
+
+	// done
+	it = imap_it_next(it);
+	assert_nul(it);
+
+	imap_free(map);
+}
+
+static void imap_match_val_it__many(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+	assert_nul(imap_put(map, 2, V2));
 
 	// skip V0
 	expect_ptr(mock_match_ptr, val, V0);
@@ -166,7 +202,7 @@ static void imap_match_it__many(void **state) {
 	expect_ptr(mock_match_ptr, data, D0);
 	will_return(mock_match_ptr, true);
 
-	it = imap_match_val_it(map, mock_match_ptr, D0);
+	const struct IMapIt *it = imap_match_val_it(map, mock_match_ptr, D0);
 	assert_non_nul(it);
 	assert_int_equal(it->key, 1);
 	assert_ptr_equal(it->val, V1);
@@ -189,17 +225,13 @@ static void imap_match_it__none(void **state) {
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, V1));
 
-	//
-	// key/val
-	//
-
 	// skip 0
 	expect_int_value(mock_match_size_t_ptr, key, 0);
 	expect_ptr(mock_match_size_t_ptr, val, V0);
 	expect_ptr(mock_match_size_t_ptr, data, D0);
 	will_return(mock_match_size_t_ptr, false);
 
-	// pass 0
+	// skip 1
 	expect_int_value(mock_match_size_t_ptr, key, 1);
 	expect_ptr(mock_match_size_t_ptr, val, V1);
 	expect_ptr(mock_match_size_t_ptr, data, D0);
@@ -207,16 +239,42 @@ static void imap_match_it__none(void **state) {
 
 	assert_nul(imap_match_it(map, mock_match_size_t_ptr, D0));
 
-	//
-	// val
-	//
+	imap_free(map);
+}
+
+static void imap_match_it_key__none(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+
+	// skip 0
+	expect_int_value(mock_match_size_t, val, 0);
+	expect_ptr(mock_match_size_t, data, D0);
+	will_return(mock_match_size_t, false);
+
+	// skip 1
+	expect_int_value(mock_match_size_t, val, 1);
+	expect_ptr(mock_match_size_t, data, D0);
+	will_return(mock_match_size_t, false);
+
+	assert_nul(imap_match_key_it(map, mock_match_size_t, D0));
+
+	imap_free(map);
+}
+
+static void imap_match_it_val__none(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
 
 	// skip 0
 	expect_ptr(mock_match_ptr, val, V0);
 	expect_ptr(mock_match_ptr, data, D0);
 	will_return(mock_match_ptr, false);
 
-	// pass 0
+	// skip 1
 	expect_ptr(mock_match_ptr, val, V1);
 	expect_ptr(mock_match_ptr, data, D0);
 	will_return(mock_match_ptr, false);
@@ -231,6 +289,20 @@ static void imap_match_it__empty(void **state) {
 
 	assert_nul(imap_match_it(map, mock_match_size_t_ptr, D0));
 
+	imap_free(map);
+}
+
+static void imap_match_it_key__empty(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_match_key_it(map, mock_match_size_t, D0));
+
+	imap_free(map);
+}
+
+static void imap_match_it_val__empty(void **state) {
+	const struct IMap *map = imap_init();
+
 	assert_nul(imap_match_val_it(map, mock_match_ptr, D0));
 
 	imap_free(map);
@@ -242,10 +314,6 @@ static void imap_match__matches(void **state) {
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, V1));
 	assert_nul(imap_put(map, 2, V2));
-
-	//
-	// key/val
-	//
 
 	// skip 0
 	expect_int_value(mock_match_size_t_ptr, key, 0);
@@ -263,9 +331,15 @@ static void imap_match__matches(void **state) {
 	assert_ptr_equal(v_pair.key, 1);
 	assert_ptr_equal(v_pair.val, V1);
 
-	//
-	// key
-	//
+	imap_free(map);
+}
+
+static void imap_match_key__matches(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+	assert_nul(imap_put(map, 2, V2));
 
 	// skip 0
 	expect_int_value(mock_match_size_t, val, 0);
@@ -281,9 +355,15 @@ static void imap_match__matches(void **state) {
 	assert_ptr_equal(k_pair.key, 1);
 	assert_ptr_equal(k_pair.val, V1);
 
-	//
-	// val
-	//
+	imap_free(map);
+}
+
+static void imap_match_val__matches(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+	assert_nul(imap_put(map, 2, V2));
 
 	// skip 0
 	expect_ptr(mock_match_ptr, val, V0);
@@ -308,10 +388,6 @@ static void imap_match__no_match(void **state) {
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, V1));
 
-	//
-	// key/val
-	//
-
 	// skip 0
 	expect_int_value(mock_match_size_t_ptr, key, 0);
 	expect_ptr(mock_match_size_t_ptr, val, V0);
@@ -328,9 +404,14 @@ static void imap_match__no_match(void **state) {
 	assert_int_equal(kv_pair.key, 0);
 	assert_nul(kv_pair.val);
 
-	//
-	// key
-	//
+	imap_free(map);
+}
+
+static void imap_match_key__no_match(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
 
 	// skip 0
 	expect_int_value(mock_match_size_t, val, 0);
@@ -346,9 +427,14 @@ static void imap_match__no_match(void **state) {
 	assert_int_equal(k_pair.key, 0);
 	assert_nul(k_pair.val);
 
-	//
-	// val
-	//
+	imap_free(map);
+}
+
+static void imap_match_val__no_match(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
 
 	// skip 0
 	expect_ptr(mock_match_ptr, val, V0);
@@ -373,25 +459,31 @@ static void imap_match__null_match(void **state) {
 	assert_nul(imap_put(map, 0, V0));
 	assert_nul(imap_put(map, 1, V1));
 
-	//
-	// key/val
-	//
-
 	const struct IMapPair kv_pair = imap_match(map, NULL, D0);
 	assert_int_equal(kv_pair.key, 0);
 	assert_nul(kv_pair.val);
 
-	//
-	// key
-	//
+	imap_free(map);
+}
+
+static void imap_match_key__null_match(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
 
 	const struct IMapPair k_pair = imap_match_key(map, NULL, D0);
 	assert_int_equal(k_pair.key, 0);
 	assert_nul(k_pair.val);
 
-	//
-	// val
-	//
+	imap_free(map);
+}
+
+static void imap_match_val__null_match(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
 
 	const struct IMapPair v_pair = imap_match_val(map, NULL, D0);
 	assert_int_equal(v_pair.key, 0);
@@ -720,6 +812,8 @@ static void imap__null_inputs(void **state) {
 	assert_nul(imap_it(NULL));
 	assert_nul(imap_match_it(NULL, NULL, NULL));
 	assert_nul(imap_match_it(map, NULL, NULL));
+	assert_nul(imap_match_key_it(NULL, NULL, NULL));
+	assert_nul(imap_match_key_it(map, NULL, NULL));
 	assert_nul(imap_match_val_it(NULL, NULL, NULL));
 	assert_nul(imap_match_val_it(map, NULL, NULL));
 	assert_nul(imap_it_next(NULL));
@@ -763,12 +857,28 @@ int main(void) {
 		TEST(imap_it_next__partial),
 
 		TEST(imap_match_it__many),
+		TEST(imap_match_key_it__many),
+		TEST(imap_match_val_it__many),
+
 		TEST(imap_match_it__none),
+		TEST(imap_match_it_val__none),
+		TEST(imap_match_it_key__none),
+
 		TEST(imap_match_it__empty),
+		TEST(imap_match_it_val__empty),
+		TEST(imap_match_it_key__empty),
 
 		TEST(imap_match__matches),
+		TEST(imap_match_key__matches),
+		TEST(imap_match_val__matches),
+
 		TEST(imap_match__no_match),
+		TEST(imap_match_key__no_match),
+		TEST(imap_match_val__no_match),
+
 		TEST(imap_match__null_match),
+		TEST(imap_match_key__null_match),
+		TEST(imap_match_val__null_match),
 
 		TEST(imap_equal__),
 		TEST(imap_equal__key_removed),

@@ -244,6 +244,25 @@ const struct IMapIt *imap_match_it(const struct IMap* const map, fn_match_size_t
 	}
 }
 
+const struct IMapIt *imap_match_key_it(const struct IMap* const map, fn_match_size_t match, const void* const data) {
+	if (!map || !match)
+		return NULL;
+
+	struct IMapMatchData *match_data = calloc(1, sizeof(struct IMapMatchData));
+	match_data->match_key = match;
+	match_data->data = data;
+
+	struct IMapIt *it = it_init(pmap_match_key_it(map->pmap, match_key_wrapper, match_data));
+
+	if (it) {
+		it->st->match_data = match_data;
+		return it;
+	} else {
+		free(match_data);
+		return NULL;
+	}
+}
+
 const struct IMapIt *imap_match_val_it(const struct IMap* const map, fn_match_ptr match, const void* const data) {
 	if (!map || !match)
 		return NULL;

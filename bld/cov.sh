@@ -82,7 +82,8 @@ genhtml \
 	--output-directory "${REP_PATH}" \
 	${INFO_PATH}
 
-ONLY_HTML=$(find "${REP_PATH}" -name "${1}.c.gcov.html")
+TESTED_NAME="$(echo "${1}" | sed -E 's/test-(.*)/\1/g')"
+ONLY_HTML=$(find "${REP_PATH}" -name "${TESTED_NAME}.c.gcov.html")
 
 if [ $# -eq 1 ] && [ -f "${ONLY_HTML}" ]; then
 	xdg-open "${ONLY_HTML}"
