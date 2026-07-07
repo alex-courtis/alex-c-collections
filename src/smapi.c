@@ -248,6 +248,25 @@ const struct SMapIIt *smapi_match_it(const struct SMapI* const map, fn_match_str
 	}
 }
 
+const struct SMapIIt *smapi_match_key_it(const struct SMapI* const map, fn_match_str match, const void* const data) {
+	if (!map || !match)
+		return NULL;
+
+	struct SMapIMatchData *match_data = calloc(1, sizeof(struct SMapIMatchData));
+	match_data->match_key = match;
+	match_data->data = data;
+
+	struct SMapIIt *it = it_init(pmap_match_key_it(map->pmap, match_key_wrapper, match_data));
+
+	if (it) {
+		it->st->match_data = match_data;
+		return it;
+	} else {
+		free(match_data);
+		return NULL;
+	}
+}
+
 const struct SMapIIt *smapi_match_val_it(const struct SMapI* const map, fn_match_size_t match, const void* const data) {
 	if (!map || !match)
 		return NULL;
