@@ -276,6 +276,20 @@ bool pset_add(const struct PSet* const set, const void* const val) {
 	return set ? add(set, val, set->params.alloc_val) : false;
 }
 
+size_t pset_add_all(const struct PSet* const set, const struct PSet* const from) {
+	if (!set || !from)
+		return 0;
+
+	size_t added = 0;
+
+	for (const void **v = from->vals; v < from->vals + from->size; v++) {
+		if (add(set, *v, set->params.alloc_val))
+			added++;
+	}
+
+	return added;
+}
+
 bool pset_remove(const struct PSet* const set, const void* const val) {
 	return set ? remove(set, val, NULL) : false;
 }

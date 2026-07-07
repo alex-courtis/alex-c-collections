@@ -87,6 +87,9 @@ const struct PSetIt *pset_it_next(const struct PSetIt* const it);
 // add if the set does not contain val, return true if added [equal_val, alloc_val]
 bool pset_add(const struct PSet* const set, const void* const val);
 
+// add from vals not contained in the set, return number added [equal_val, alloc_val]
+size_t pset_add_all(const struct PSet* const set, const struct PSet* const from);
+
 // if the set contains val, remove it and return true [equal_val, alloc_val]
 bool pset_remove(const struct PSet* const set, const void* const val);
 

@@ -315,6 +315,27 @@ static void pset_add__grow(void **state) {
 	pset_free(set);
 }
 
+static void pset_add_all__new(void **state) {
+	const struct PSet *to = pset_init();
+	assert_true(pset_add(to, V0));
+	assert_true(pset_add(to, V1));
+
+	const struct PSet *from = pset_init();
+	assert_true(pset_add(from, V1));
+	assert_true(pset_add(from, V2));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, V0));
+	assert_true(pset_add(expected, V1));
+	assert_true(pset_add(expected, V2));
+
+	assert_int_equal(pset_add_all(to, from), 1);
+
+	assert_pset_equal(to, expected);
+
+	pset_free(to);
+}
+
 static void pset_remove__existing(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -940,6 +961,8 @@ static void pset_str__str_val(void **state) {
 static void pset__null_inputs(void **state) {
 	const struct PSet *set = pset_init();
 
+	assert_int_equal(pset_add_all(NULL, NULL), 0);
+	assert_int_equal(pset_add_all(set, NULL), 0);
 	assert_nul(pset_clone_deep(NULL));
 	assert_nul(pset_clone_shallow(NULL));
 	pset_free(NULL);
@@ -991,6 +1014,8 @@ int main(void) {
 		TEST(pset_add__alloc_val_returned_null),
 		TEST(pset_add__null),
 		TEST(pset_add__grow),
+
+		TEST(pset_add_all__new),
 
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),
