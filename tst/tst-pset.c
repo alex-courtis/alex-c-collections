@@ -334,6 +334,8 @@ static void pset_add_all__many(void **state) {
 	assert_pset_equal(to, expected);
 
 	pset_free(to);
+	pset_free(from);
+	pset_free(expected);
 }
 
 static void pset_remove__existing(void **state) {
