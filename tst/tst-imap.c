@@ -31,10 +31,11 @@ struct IMap {
 	const struct PMap *pmap;
 };
 
-static int vals[3] = { 20, 21, 22, };
+static int vals[4] = { 20, 21, 22, 23, };
 static void *V0 = &vals[0];
 static void *V1 = &vals[1];
 static void *V2 = &vals[2];
+static void *V3 = &vals[3];
 
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
@@ -605,6 +606,27 @@ static void imap_put_if_absent__(void **state) {
 	imap_free(map);
 }
 
+static void imap_put_all_free__many(void **state) {
+	const struct IMap *to = imap_init();
+	assert_nul(imap_put(to, 0, V0));
+	assert_nul(imap_put(to, 1, strdup("V1")));
+
+	const struct IMap *from = imap_init();
+	assert_nul(imap_put(from, 1, V2));
+	assert_nul(imap_put(from, 2, V3));
+
+	const struct IMap *expected = imap_init();
+	assert_nul(imap_put(expected, 0, V0));
+	assert_nul(imap_put(expected, 1, V2));
+	assert_nul(imap_put(expected, 2, V3));
+
+	assert_int_equal(imap_put_all_free(to, from), 1);
+
+	imap_free(to);
+	imap_free(from);
+	imap_free(expected);
+}
+
 static void imap_remove_free__(void **state) {
 	const struct IMap *map = imap_init();
 
@@ -827,7 +849,8 @@ static void imap__null_inputs(void **state) {
 	assert_nul(imap_put_if_absent(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(map, 0, NULL));
 	assert_false(imap_put_free(NULL, 0, NULL));
-	assert_false(imap_put_free(map, 0, NULL));
+	assert_int_equal(imap_put_all_free(NULL, NULL), 0);
+	assert_int_equal(imap_put_all_free(map, NULL), 0);
 	assert_nul(imap_remove(NULL, 0));
 	assert_nul(imap_remove(map, 0));
 	assert_false(imap_remove_free(NULL, 0));
@@ -892,6 +915,8 @@ int main(void) {
 		TEST(imap_put_free__),
 
 		TEST(imap_put_if_absent__),
+
+		TEST(imap_put_all_free__many),
 
 		TEST(imap_remove_free__),
 
