@@ -338,6 +338,46 @@ static void pset_add_all__many(void **state) {
 	pset_free(expected);
 }
 
+static void pset_add_many__many(void **state) {
+	const struct PSet *to = pset_init();
+	assert_true(pset_add(to, V0));
+	assert_true(pset_add(to, V1));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, V0));
+	assert_true(pset_add(expected, V1));
+	assert_true(pset_add(expected, V2));
+
+	assert_int_equal(pset_add_many(to, V0, V1, V2, to), 1);
+
+	assert_pset_equal(to, expected);
+
+	pset_free(to);
+	pset_free(expected);
+}
+
+static void pset_add_many__null_set(void **state) {
+	assert_int_equal(pset_add_many(NULL), 0);
+
+	// we can't test (set, NULL) ... undefined behaviour
+}
+
+static void pset_add_many__null_vals(void **state) {
+	const struct PSet *to = pset_init();
+
+	assert_int_equal(pset_add_many(to, NULL, NULL, to), 0);
+
+	pset_free(to);
+}
+
+static void pset_add_many__no_vals(void **state) {
+	const struct PSet *to = pset_init();
+
+	assert_int_equal(pset_add_many(to, to), 0);
+
+	pset_free(to);
+}
+
 static void pset_remove__existing(void **state) {
 	const struct PSet *set = pset_init();
 
@@ -1018,6 +1058,11 @@ int main(void) {
 		TEST(pset_add__grow),
 
 		TEST(pset_add_all__many),
+
+		TEST(pset_add_many__many),
+		TEST(pset_add_many__null_set),
+		TEST(pset_add_many__null_vals),
+		TEST(pset_add_many__no_vals),
 
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),
