@@ -1203,6 +1203,27 @@ static void pmap_put__again(void **state) {
 	pmap_free(map);
 }
 
+static void pmap_put_all_free__many(void **state) {
+	const struct PMap *to = pmap_init();
+	assert_nul(pmap_put(to, K0, V0));
+	assert_nul(pmap_put(to, K1, strdup("V1")));
+
+	const struct PMap *from = pmap_init();
+	assert_nul(pmap_put(from, K1, V3));
+	assert_nul(pmap_put(from, K2, V4));
+
+	const struct PMap *expected = pmap_init();
+	assert_nul(pmap_put(expected, K0, V0));
+	assert_nul(pmap_put(expected, K1, V3));
+	assert_nul(pmap_put(expected, K2, V4));
+
+	assert_int_equal(pmap_put_all_free(to, from), 1);
+
+	pmap_free(to);
+	pmap_free(from);
+	pmap_free(expected);
+}
+
 static void pmap_remove__existing(void **state) {
 	const struct PMap *map = pmap_init();
 
@@ -1873,6 +1894,8 @@ static void pmap__null_inputs(void **state) {
 	assert_nul(pmap_put_if_absent(map, NULL, NULL));
 	assert_false(pmap_put_free(NULL, NULL, NULL));
 	assert_false(pmap_put_free(map, NULL, NULL));
+	assert_int_equal(pmap_put_all_free(NULL, NULL), 0);
+	assert_int_equal(pmap_put_all_free(map, NULL), 0);
 	assert_nul(pmap_remove(NULL, NULL));
 	assert_nul(pmap_remove(map, NULL));
 	assert_false(pmap_equal(NULL, NULL));
@@ -1957,6 +1980,8 @@ int main(void) {
 		TEST(pmap_match_val_it__empty),
 
 		TEST(pmap_put__again),
+
+		TEST(pmap_put_all_free__many),
 
 		TEST(pmap_remove__existing),
 		TEST(pmap_remove__inexistent),

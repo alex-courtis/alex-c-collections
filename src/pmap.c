@@ -464,6 +464,23 @@ bool pmap_put_free(const struct PMap* const map, const void* const key, const vo
 	}
 }
 
+size_t pmap_put_all_free(const struct PMap* const map, const struct PMap* const from) {
+	if (!map || !from)
+		return 0;
+
+	size_t overwritten = 0;
+
+	const void **k;
+	const void **v;
+	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
+		if (pmap_put_free(map, *k, *v)) {
+			overwritten++;
+		}
+	}
+
+	return overwritten;
+}
+
 const void *pmap_remove(const struct PMap* const map, const void* const key) {
 	if (!map || !key)
 		return NULL;
