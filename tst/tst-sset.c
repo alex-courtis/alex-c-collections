@@ -91,6 +91,8 @@ static void sset_add_all__many(void **state) {
 	assert_sset_equal(to, expected);
 
 	sset_free(to);
+	sset_free(from);
+	sset_free(expected);
 }
 
 static void sset_add_contains_remove_free__case_insensitive(void **state) {
