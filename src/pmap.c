@@ -25,6 +25,7 @@ struct PMapItState {
 	const struct PMap *map;
 	size_t position;
 	fn_match_ptr_ptr match_key_val;
+	fn_match_ptr match_key;
 	fn_match_ptr match_val;
 	const void *data;
 };
@@ -360,6 +361,20 @@ const struct PMapIt *pmap_match_it(const struct PMap* const map, fn_match_ptr_pt
 	return pmap_it_next(it);
 }
 
+const struct PMapIt *pmap_match_key_it(const struct PMap* const map, fn_match_ptr match, const void* const data) {
+	if (!match)
+		return NULL;
+
+	const struct PMapIt *it = it_init(map);
+	if (!it)
+		return NULL;
+
+	it->st->match_key = match;
+	it->st->data = data;
+
+	return pmap_it_next(it);
+}
+
 const struct PMapIt *pmap_match_val_it(const struct PMap* const map, fn_match_ptr match, const void* const data) {
 	if (!match)
 		return NULL;
@@ -398,6 +413,9 @@ const struct PMapIt *pmap_it_next(const struct PMapIt* const it) {
 		it_m->val = *(st->map->vals + st->position);
 
 		if (st->match_key_val && !st->match_key_val(it->key, it->val, st->data)) {
+			continue;
+		}
+		if (st->match_key && !st->match_key(it->key, st->data)) {
 			continue;
 		}
 		if (st->match_val && !st->match_val(it->val, st->data)) {

@@ -103,6 +103,9 @@ const struct PMapIt *pmap_it(const struct PMap* const map);
 // create an iterator filtering by key/val match, return NULL when no matches or NULL match
 const struct PMapIt *pmap_match_it(const struct PMap* const map, fn_match_ptr_ptr match, const void* const data);
 
+// create an iterator filtering by key match, return NULL when no matches or NULL match
+const struct PMapIt *pmap_match_key_it(const struct PMap* const map, fn_match_ptr match, const void* const data);
+
 // create an iterator filtering by val match, return NULL when no matches or NULL match
 const struct PMapIt *pmap_match_val_it(const struct PMap* const map, fn_match_ptr match, const void* const data);
 
