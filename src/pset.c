@@ -283,8 +283,9 @@ size_t pset_add_all(const struct PSet* const set, const struct PSet* const from)
 	size_t added = 0;
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		if (add(set, *v, set->params.alloc_val))
+		if (add(set, *v, set->params.alloc_val)) {
 			added++;
+		}
 	}
 
 	return added;

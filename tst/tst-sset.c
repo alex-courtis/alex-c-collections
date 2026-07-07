@@ -72,6 +72,27 @@ static void sset_add_contains_remove_free__case_sensitive(void **state) {
 	sset_free(set);
 }
 
+static void sset_add_all__many(void **state) {
+	const struct SSet *to = sset_init();
+	assert_true(sset_add(to, "A"));
+	assert_true(sset_add(to, "B"));
+
+	const struct SSet *from = sset_init();
+	assert_true(sset_add(from, "A"));
+	assert_true(sset_add(from, "C"));
+
+	const struct SSet *expected = sset_init();
+	assert_true(sset_add(expected, "A"));
+	assert_true(sset_add(expected, "B"));
+	assert_true(sset_add(expected, "C"));
+
+	assert_int_equal(sset_add_all(to, from), 1);
+
+	assert_sset_equal(to, expected);
+
+	sset_free(to);
+}
+
 static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *set = sset_init_with(params);
@@ -372,6 +393,8 @@ static void sset_clone__(void **state) {
 static void sset__null_inputs(void **state) {
 	const struct SSet *set = sset_init();
 
+	assert_int_equal(sset_add_all(NULL, NULL), 0);
+	assert_int_equal(sset_add_all(set, NULL), 0);
 	assert_nul(sset_clone(NULL));
 	sset_free(NULL);
 	sset_it_free(NULL);
@@ -403,6 +426,8 @@ int main(void) {
 
 		TEST(sset_add_contains_remove_free__case_insensitive),
 		TEST(sset_add_contains_remove_free__case_sensitive),
+
+		TEST(sset_add_all__many),
 
 		TEST(sset_match__matches),
 

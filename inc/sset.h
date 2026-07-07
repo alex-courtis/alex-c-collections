@@ -75,6 +75,9 @@ const struct SSetIt *sset_it_next(const struct SSetIt* const it);
 // add if the set does not contain val, return true if added
 bool sset_add(const struct SSet* const set, const char* const val);
 
+// add from vals not contained in the set, return number added
+size_t sset_add_all(const struct SSet* const set, const struct SSet* const from);
+
 // if the set contains val, remove it, free it and return true
 bool sset_remove(const struct SSet* const set, const char* const val);
 

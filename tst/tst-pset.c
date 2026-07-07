@@ -315,7 +315,7 @@ static void pset_add__grow(void **state) {
 	pset_free(set);
 }
 
-static void pset_add_all__new(void **state) {
+static void pset_add_all__many(void **state) {
 	const struct PSet *to = pset_init();
 	assert_true(pset_add(to, V0));
 	assert_true(pset_add(to, V1));
@@ -1015,7 +1015,7 @@ int main(void) {
 		TEST(pset_add__null),
 		TEST(pset_add__grow),
 
-		TEST(pset_add_all__new),
+		TEST(pset_add_all__many),
 
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),

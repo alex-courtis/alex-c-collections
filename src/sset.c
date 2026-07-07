@@ -125,6 +125,10 @@ bool sset_add(const struct SSet* const set, const char* const val) {
 	return set ? pset_add(set->pset, val) : false;
 }
 
+size_t sset_add_all(const struct SSet* const set, const struct SSet* const from) {
+	return set && from ? pset_add_all(set->pset, from->pset) : 0;
+}
+
 bool sset_remove(const struct SSet* const set, const char* const val) {
 	return set ? pset_remove_free(set->pset, val) : false;
 }
