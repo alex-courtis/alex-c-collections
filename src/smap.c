@@ -216,6 +216,10 @@ bool smap_put_free(const struct SMap* const map, const  char* const key, const v
 	return map ? pmap_put_free(map->pmap, key, val) : false;
 }
 
+size_t smap_put_all_free(const struct SMap* const map, const struct SMap* const from) {
+	return map && from ? pmap_put_all_free(map->pmap, from->pmap) : 0;
+}
+
 const void *smap_remove(const struct SMap* const map, const char* const key) {
 	return map ? pmap_remove(map->pmap, key) : NULL;
 }

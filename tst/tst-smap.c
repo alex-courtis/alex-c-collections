@@ -38,10 +38,11 @@ struct SMap {
 	const struct PMap *pmap;
 };
 
-static int vals[3] = { 20, 21, 22, };
+static int vals[4] = { 20, 21, 22, 23, };
 static void *V0 = &vals[0];
 static void *V1 = &vals[1];
 static void *V2 = &vals[2];
+static void *V3 = &vals[3];
 
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
@@ -407,6 +408,27 @@ static void smap_put_free__(void **state) {
 	smap_free(map);
 }
 
+static void smap_put_all_free__many(void **state) {
+	const struct SMap *to = smap_init();
+	assert_nul(smap_put(to, "a", V0));
+	assert_nul(smap_put(to, "b", strdup("V1")));
+
+	const struct SMap *from = smap_init();
+	assert_nul(smap_put(from, "b", V2));
+	assert_nul(smap_put(from, "c", V3));
+
+	const struct SMap *expected = smap_init();
+	assert_nul(smap_put(expected, "a", V0));
+	assert_nul(smap_put(expected, "b", V2));
+	assert_nul(smap_put(expected, "c", V3));
+
+	assert_int_equal(smap_put_all_free(to, from), 1);
+
+	smap_free(to);
+	smap_free(from);
+	smap_free(expected);
+}
+
 static void smap_put_if_absent__(void **state) {
 	const struct SMap *map = smap_init();
 
@@ -704,6 +726,8 @@ static void smap__null_inputs(void **state) {
 	assert_nul(smap_put_if_absent(map, NULL, NULL));
 	assert_false(smap_put_free(NULL, NULL, NULL));
 	assert_false(smap_put_free(map, NULL, NULL));
+	assert_int_equal(smap_put_all_free(NULL, NULL), 0);
+	assert_int_equal(smap_put_all_free(map, NULL), 0);
 	assert_nul(smap_remove(NULL, NULL));
 	assert_nul(smap_remove(map, NULL));
 	assert_false(smap_remove_free(NULL, NULL));
@@ -751,6 +775,8 @@ int main(void) {
 		TEST(smap_contains_val__),
 
 		TEST(smap_put_free__),
+
+		TEST(smap_put_all_free__many),
 
 		TEST(smap_put_if_absent__),
 

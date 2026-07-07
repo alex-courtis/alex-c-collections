@@ -120,6 +120,9 @@ const void *smap_put_if_absent(const struct SMap* const map, const char* const k
 // set key/val, free old val, return true if overwritten [alloc_val, free_val]
 bool smap_put_free(const struct SMap* const map, const  char* const key, const void* const val);
 
+// set all from key/val, freeing overwritten vals, returning number of overwritten [alloc_val, free_val]
+size_t smap_put_all_free(const struct SMap* const map, const struct SMap* const from);
+
 // remove val, return old val if present
 const void *smap_remove(const struct SMap* const map, const char* const key);
 
