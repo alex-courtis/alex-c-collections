@@ -193,6 +193,10 @@ bool smaps_put_if_absent(const struct SMapS* const map, const char* const key, c
 	return map ? pmap_put_if_absent(map->pmap, key, val) : false;
 }
 
+size_t smaps_put_all(const struct SMapS* const map, const struct SMapS* const from) {
+	return map && from ? pmap_put_all_free(map->pmap, from->pmap) : 0;
+}
+
 bool smaps_remove(const struct SMapS* const map, const char* const key) {
 	return map ? pmap_remove_free(map->pmap, key) : false;
 }
