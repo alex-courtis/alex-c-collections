@@ -89,10 +89,6 @@ static void smaps_match__matches(void **state) {
 	assert_false(smaps_put(map, "1", "bbb"));
 	assert_false(smaps_put(map, "2", "ccc"));
 
-	//
-	// key/val
-	//
-
 	// skip 0
 	expect_string(mock_match_str_str, key, "0");
 	expect_string(mock_match_str_str, val, "aaa");
@@ -109,9 +105,16 @@ static void smaps_match__matches(void **state) {
 	assert_str_equal(kv_pair.key, "1");
 	assert_str_equal(kv_pair.val, "bbb");
 
-	//
-	// key
-	//
+
+	smaps_free(map);
+}
+
+static void smaps_match_key__matches(void **state) {
+	const struct SMapS *map = smaps_init();
+
+	assert_false(smaps_put(map, "0", "aaa"));
+	assert_false(smaps_put(map, "1", "bbb"));
+	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
 	expect_string(mock_match_str, val, "0");
@@ -127,9 +130,15 @@ static void smaps_match__matches(void **state) {
 	assert_str_equal(k_pair.key, "1");
 	assert_str_equal(k_pair.val, "bbb");
 
-	//
-	// val
-	//
+	smaps_free(map);
+}
+
+static void smaps_match_val__matches(void **state) {
+	const struct SMapS *map = smaps_init();
+
+	assert_false(smaps_put(map, "0", "aaa"));
+	assert_false(smaps_put(map, "1", "bbb"));
+	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
 	expect_string(mock_match_str, val, "aaa");
@@ -212,10 +221,6 @@ static void smaps_match_it__many(void **state) {
 	assert_false(smaps_put(map, "ak3", "av3"));
 	assert_false(smaps_put(map, "ak4", "bv4"));
 
-	//
-	// key/val
-	//
-
 	const struct SMapSIt *it = smaps_match_it(map, match_both_start_with_a, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak1");
@@ -228,11 +233,38 @@ static void smaps_match_it__many(void **state) {
 
 	assert_nul(smaps_it_next(it));
 
-	//
-	// val
-	//
+	smaps_free(map);
+}
 
-	it = smaps_match_val_it(map, match_val_start_with_b, NULL);
+static void smaps_match_key_it__many(void **state) {
+	const struct SMapS *map = smaps_init();
+
+	assert_false(smaps_put(map, "ak0", "bv0"));
+	assert_false(smaps_put(map, "ak1", "av1"));
+	assert_false(smaps_put(map, "bk2", "av2"));
+	assert_false(smaps_put(map, "ak3", "av3"));
+	assert_false(smaps_put(map, "ak4", "bv4"));
+
+	const struct SMapSIt *it = smaps_match_key_it(map, match_val_start_with_b, NULL);
+	assert_non_nul(it);
+	assert_str_equal(it->key, "bk2");
+	assert_str_equal(it->val, "av2");
+
+	assert_nul(smaps_it_next(it));
+
+	smaps_free(map);
+}
+
+static void smaps_match_val_it__many(void **state) {
+	const struct SMapS *map = smaps_init();
+
+	assert_false(smaps_put(map, "ak0", "bv0"));
+	assert_false(smaps_put(map, "ak1", "av1"));
+	assert_false(smaps_put(map, "bk2", "av2"));
+	assert_false(smaps_put(map, "ak3", "av3"));
+	assert_false(smaps_put(map, "ak4", "bv4"));
+
+	const struct SMapSIt *it = smaps_match_val_it(map, match_val_start_with_b, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak0");
 	assert_str_equal(it->val, "bv0");
@@ -548,6 +580,8 @@ static void smaps__null_inputs(void **state) {
 	assert_nul(smaps_it(NULL));
 	assert_nul(smaps_match_it(NULL, NULL, NULL));
 	assert_nul(smaps_match_it(map, NULL, NULL));
+	assert_nul(smaps_match_key_it(NULL, NULL, NULL));
+	assert_nul(smaps_match_key_it(map, NULL, NULL));
 	assert_nul(smaps_match_val_it(NULL, NULL, NULL));
 	assert_nul(smaps_match_val_it(map, NULL, NULL));
 	assert_nul(smaps_it_next(NULL));
@@ -575,6 +609,8 @@ int main(void) {
 		TEST(smaps_put_get_remove_free__case_insensitive),
 
 		TEST(smaps_match__matches),
+		TEST(smaps_match_key__matches),
+		TEST(smaps_match_val__matches),
 
 		TEST(smaps_it__many),
 		TEST(smaps_it__empty),
@@ -584,6 +620,8 @@ int main(void) {
 		TEST(smaps_it_next__partial),
 
 		TEST(smaps_match_it__many),
+		TEST(smaps_match_key_it__many),
+		TEST(smaps_match_val_it__many),
 
 		TEST(smaps_equal__case_sensitive),
 		TEST(smaps_equal__case_insensitive_key),

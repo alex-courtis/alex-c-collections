@@ -154,6 +154,10 @@ const struct SMapSIt *smaps_match_it(const struct SMapS* const map, fn_match_str
 	return map ? it_init(pmap_match_it(map->pmap, (fn_match_ptr_ptr)match, data)) : NULL;
 }
 
+const struct SMapSIt *smaps_match_key_it(const struct SMapS* const map, fn_match_str match, const void* const data) {
+	return map ? it_init(pmap_match_key_it(map->pmap, (fn_match_ptr)match, data)) : NULL;
+}
+
 const struct SMapSIt *smaps_match_val_it(const struct SMapS* const map, fn_match_str match, const void* const data) {
 	return map ? it_init(pmap_match_val_it(map->pmap, (fn_match_ptr)match, data)) : NULL;
 }
