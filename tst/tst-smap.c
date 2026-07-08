@@ -5,6 +5,7 @@
 #include "expects.h"
 #include "mock-fn.h"
 #include "tst.h"
+#include "util-col.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -431,7 +432,7 @@ static void smap_put_all_free__many(void **state) {
 	smap_free(expected);
 }
 
-static void smap_put_many_free__many(void **state) {
+static void smap_put_many__many(void **state) {
 	const struct SMap *to = smap_init();
 	assert_nul(smap_put(to, "a", V0));
 	assert_nul(smap_put(to, "b", strdup("replaced")));
@@ -441,7 +442,7 @@ static void smap_put_many_free__many(void **state) {
 	assert_nul(smap_put(expected, "b", V1));
 	assert_nul(smap_put(expected, "c", V2));
 
-	assert_int_equal(smap_put_many_free(to,
+	assert_int_equal(smap_put_many(to,
 				"b", V1,
 				"c", V2,
 				NULL),
@@ -752,7 +753,7 @@ static void smap__null_inputs(void **state) {
 	assert_false(smap_put_free(map, NULL, NULL));
 	assert_int_equal(smap_put_all_free(NULL, NULL), 0);
 	assert_int_equal(smap_put_all_free(map, NULL), 0);
-	assert_int_equal(smap_put_many_free(NULL, NULL), 0);
+	assert_int_equal(smap_put_many(NULL, NULL), 0);
 	assert_nul(smap_remove(NULL, NULL));
 	assert_nul(smap_remove(map, NULL));
 	assert_false(smap_remove_free(NULL, NULL));
@@ -803,7 +804,7 @@ int main(void) {
 
 		TEST(smap_put_all_free__many),
 
-		TEST(smap_put_many_free__many),
+		TEST(smap_put_many__many),
 
 		TEST(smap_put_if_absent__),
 

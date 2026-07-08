@@ -4,6 +4,7 @@
 #include "expects.h"
 #include "mock-fn.h"
 #include "tst.h"
+#include "util-col.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -1226,7 +1227,7 @@ static void pmap_put_all_free__many(void **state) {
 	pmap_free(expected);
 }
 
-static void pmap_put_many_free__many(void **state) {
+static void pmap_put_many__many(void **state) {
 	const struct PMap *to = pmap_init();
 	assert_nul(pmap_put(to, K0, V0));
 	assert_nul(pmap_put(to, K1, strdup("replaced")));
@@ -1237,7 +1238,7 @@ static void pmap_put_many_free__many(void **state) {
 	assert_nul(pmap_put(expected, K1, V1));
 	assert_nul(pmap_put(expected, K2, V2));
 
-	assert_int_equal(pmap_put_many_free(to,
+	assert_int_equal(pmap_put_many(to,
 				K1, V1,
 				K2, V2,
 				NULL),
@@ -1249,15 +1250,15 @@ static void pmap_put_many_free__many(void **state) {
 	pmap_free(expected);
 }
 
-static void pmap_put_many_free__no_keyvals(void **state) {
+static void pmap_put_many__no_keyvals(void **state) {
 	const struct PMap *to = pmap_init();
 
-	assert_int_equal(pmap_put_many_free(to, NULL), 0);
+	assert_int_equal(pmap_put_many(to, NULL), 0);
 
 	pmap_free(to);
 }
 
-static void pmap_put_many_free__null_val_allowed(void **state) {
+static void pmap_put_many__null_val_allowed(void **state) {
 	const struct PMapParams params = { .allow_null_val = true, };
 	const struct PMap *to = pmap_init_with(params);
 
@@ -1270,7 +1271,7 @@ static void pmap_put_many_free__null_val_allowed(void **state) {
 	assert_nul(pmap_put(expected, K1, NULL));
 	assert_nul(pmap_put(expected, K2, V5));
 
-	assert_int_equal(pmap_put_many_free(to,
+	assert_int_equal(pmap_put_many(to,
 				K1, NULL,
 				K2, V5,
 				NULL),
@@ -1282,7 +1283,7 @@ static void pmap_put_many_free__null_val_allowed(void **state) {
 	pmap_free(expected);
 }
 
-static void pmap_put_many_free__null_val_not_allowed(void **state) {
+static void pmap_put_many__null_val_not_allowed(void **state) {
 	const struct PMap *to = pmap_init();
 
 	assert_nul(pmap_put(to, K0, V0));
@@ -1292,7 +1293,7 @@ static void pmap_put_many_free__null_val_not_allowed(void **state) {
 	assert_nul(pmap_put(expected, K0, V0));
 	assert_nul(pmap_put(expected, K1, V1));
 
-	assert_int_equal(pmap_put_many_free(to,
+	assert_int_equal(pmap_put_many(to,
 				K0, NULL,
 				K1, V1,
 				NULL),
@@ -1974,8 +1975,8 @@ static void pmap__null_inputs(void **state) {
 	assert_nul(pmap_put_if_absent(map, NULL, NULL));
 	assert_false(pmap_put_free(NULL, NULL, NULL));
 	assert_false(pmap_put_free(map, NULL, NULL));
-	assert_int_equal(pmap_put_many_free(NULL, NULL), 0);
-	assert_int_equal(pmap_put_many_free_v(NULL, NULL), 0);
+	assert_int_equal(pmap_put_many(NULL, NULL), 0);
+	assert_int_equal(pmap_put_many_v(NULL, NULL), 0);
 	assert_int_equal(pmap_put_all_free(NULL, NULL), 0);
 	assert_int_equal(pmap_put_all_free(map, NULL), 0);
 	assert_nul(pmap_remove(NULL, NULL));
@@ -2065,10 +2066,10 @@ int main(void) {
 
 		TEST(pmap_put_all_free__many),
 
-		TEST(pmap_put_many_free__many),
-		TEST(pmap_put_many_free__no_keyvals),
-		TEST(pmap_put_many_free__null_val_allowed),
-		TEST(pmap_put_many_free__null_val_not_allowed),
+		TEST(pmap_put_many__many),
+		TEST(pmap_put_many__no_keyvals),
+		TEST(pmap_put_many__null_val_allowed),
+		TEST(pmap_put_many__null_val_not_allowed),
 
 		TEST(pmap_remove__existing),
 		TEST(pmap_remove__inexistent),

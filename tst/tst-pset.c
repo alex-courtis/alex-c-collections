@@ -1,8 +1,9 @@
-#include "tst.h"
-#include "asserts.h"
 #include "assert-pset.h"
+#include "asserts.h"
 #include "expects.h"
 #include "mock-fn.h"
+#include "tst.h"
+#include "util-col.h"
 
 #include <cmocka.h>
 #include <stdbool.h>

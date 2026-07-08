@@ -3,6 +3,7 @@
 #include "asserts.h"
 #include "mock-fn.h"
 #include "tst.h"
+#include "util-col.h"
 
 #include <cmocka.h>
 #include <stdbool.h>

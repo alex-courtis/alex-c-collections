@@ -1,6 +1,7 @@
-#include "tst.h"
-#include "asserts.h"
 #include "assert-sset.h"
+#include "asserts.h"
+#include "tst.h"
+#include "util-col.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
