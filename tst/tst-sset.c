@@ -95,6 +95,46 @@ static void sset_add_all__many(void **state) {
 	sset_free(expected);
 }
 
+static void sset_add_many__many(void **state) {
+	const struct SSet *to = sset_init();
+	assert_true(sset_add(to, "a"));
+	assert_true(sset_add(to, "b"));
+
+	const struct SSet *expected = sset_init();
+	assert_true(sset_add(expected, "a"));
+	assert_true(sset_add(expected, "b"));
+	assert_true(sset_add(expected, "c"));
+
+	assert_int_equal(sset_add_many(to, "a", "b", "c", to), 1);
+
+	assert_sset_equal(to, expected);
+
+	sset_free(to);
+	sset_free(expected);
+}
+
+static void sset_add_many__null_set(void **state) {
+	assert_int_equal(sset_add_many(NULL), 0);
+
+	// we can't test (set, NULL) ... undefined behaviour
+}
+
+static void sset_add_many__null_vals(void **state) {
+	const struct SSet *to = sset_init();
+
+	assert_int_equal(sset_add_many(to, NULL, NULL, to), 0);
+
+	sset_free(to);
+}
+
+static void sset_add_many__no_vals(void **state) {
+	const struct SSet *to = sset_init();
+
+	assert_int_equal(sset_add_many(to, to), 0);
+
+	sset_free(to);
+}
+
 static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *set = sset_init_with(params);
@@ -430,6 +470,11 @@ int main(void) {
 		TEST(sset_add_contains_remove_free__case_sensitive),
 
 		TEST(sset_add_all__many),
+
+		TEST(sset_add_many__many),
+		TEST(sset_add_many__null_set),
+		TEST(sset_add_many__null_vals),
+		TEST(sset_add_many__no_vals),
 
 		TEST(sset_match__matches),
 
