@@ -113,14 +113,6 @@ static void sset_add_many__many(void **state) {
 	sset_free(expected);
 }
 
-static void sset_add_many__no_vals(void **state) {
-	const struct SSet *to = sset_init();
-
-	assert_int_equal(sset_add_many(to, NULL), 0);
-
-	sset_free(to);
-}
-
 static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *set = sset_init_with(params);
@@ -436,7 +428,7 @@ static void sset__null_inputs(void **state) {
 	assert_nul(sset_it_next(NULL));
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_add(set, NULL));
-	assert_false(sset_add_many(NULL, NULL));
+	assert_int_equal(sset_add_many(NULL, NULL), 0);
 	assert_false(sset_remove(NULL, NULL));
 	assert_false(sset_remove(set, NULL));
 	assert_false(sset_equal(NULL, NULL));
@@ -459,7 +451,6 @@ int main(void) {
 		TEST(sset_add_all__many),
 
 		TEST(sset_add_many__many),
-		TEST(sset_add_many__no_vals),
 
 		TEST(sset_match__matches),
 

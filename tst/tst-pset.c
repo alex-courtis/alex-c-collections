@@ -1006,7 +1006,8 @@ static void pset__null_inputs(void **state) {
 	assert_nul(pset_it_next(NULL));
 	assert_false(pset_add(NULL, NULL));
 	assert_false(pset_add(set, NULL));
-	assert_false(pset_add_many(NULL));
+	assert_int_equal(pset_add_many(NULL), 0);
+	assert_int_equal(pset_add_many_v(NULL, NULL), 0);
 	assert_false(pset_remove(NULL, NULL));
 	assert_false(pset_remove(set, NULL));
 	assert_false(pset_remove_free(NULL, NULL));
