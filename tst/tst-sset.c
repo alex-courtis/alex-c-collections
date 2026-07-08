@@ -105,7 +105,7 @@ static void sset_add_many__many(void **state) {
 	assert_true(sset_add(expected, "b"));
 	assert_true(sset_add(expected, "c"));
 
-	assert_int_equal(sset_add_many(to, "a", "b", "c", to), 1);
+	assert_int_equal(sset_add_many(to, "a", "b", "c", NULL), 1);
 
 	assert_sset_equal(to, expected);
 
@@ -113,24 +113,10 @@ static void sset_add_many__many(void **state) {
 	sset_free(expected);
 }
 
-static void sset_add_many__null_set(void **state) {
-	assert_int_equal(sset_add_many(NULL), 0);
-
-	// we can't test (set, NULL) ... undefined behaviour
-}
-
-static void sset_add_many__null_vals(void **state) {
-	const struct SSet *to = sset_init();
-
-	assert_int_equal(sset_add_many(to, NULL, NULL, to), 0);
-
-	sset_free(to);
-}
-
 static void sset_add_many__no_vals(void **state) {
 	const struct SSet *to = sset_init();
 
-	assert_int_equal(sset_add_many(to, to), 0);
+	assert_int_equal(sset_add_many(to, NULL), 0);
 
 	sset_free(to);
 }
@@ -450,6 +436,7 @@ static void sset__null_inputs(void **state) {
 	assert_nul(sset_it_next(NULL));
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_add(set, NULL));
+	assert_false(sset_add_many(NULL, NULL));
 	assert_false(sset_remove(NULL, NULL));
 	assert_false(sset_remove(set, NULL));
 	assert_false(sset_equal(NULL, NULL));
@@ -472,8 +459,6 @@ int main(void) {
 		TEST(sset_add_all__many),
 
 		TEST(sset_add_many__many),
-		TEST(sset_add_many__null_set),
-		TEST(sset_add_many__null_vals),
 		TEST(sset_add_many__no_vals),
 
 		TEST(sset_match__matches),
