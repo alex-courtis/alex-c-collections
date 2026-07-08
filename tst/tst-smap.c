@@ -435,7 +435,6 @@ static void smap_put_many_free__many(void **state) {
 	const struct SMap *to = smap_init();
 	assert_nul(smap_put(to, "a", V0));
 	assert_nul(smap_put(to, "b", strdup("replaced")));
-	assert_nul(smap_put(to, "c", strdup("replaced")));
 
 	const struct SMap *expected = smap_init();
 	assert_nul(smap_put(expected, "a", V0));
@@ -446,7 +445,7 @@ static void smap_put_many_free__many(void **state) {
 				"b", V1,
 				"c", V2,
 				NULL),
-			2);
+			1);
 
 	assert_smap_equal(to, expected);
 

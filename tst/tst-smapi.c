@@ -531,6 +531,36 @@ static void smapi_put_all__many(void **state) {
 	smapi_free(expected);
 }
 
+static void smapi_put_many__many(void **state) {
+	const struct SMapI *to = smapi_init();
+	assert_false(smapi_put(to, "a", 0));
+	assert_false(smapi_put(to, "b", 1));
+
+	const struct SMapI *expected = smapi_init();
+	assert_false(smapi_put(expected, "a", 0));
+	assert_false(smapi_put(expected, "b", 1));
+	assert_false(smapi_put(expected, "c", 2));
+
+	assert_int_equal(smapi_put_many(to,
+				"b", 1,
+				"c", 2,
+				NULL),
+			1);
+
+	assert_smapi_equal(to, expected);
+
+	smapi_free(to);
+	smapi_free(expected);
+}
+
+static void smapi_put_many__no_keyvals(void **state) {
+	const struct SMapI *to = smapi_init();
+
+	assert_int_equal(smapi_put_many(to, NULL), 0);
+
+	smapi_free(to);
+}
+
 static void smapi_str__(void **state) {
 
 	const struct SMapI *map = smapi_init();
@@ -676,6 +706,7 @@ static void smapi__null_inputs(void **state) {
 	assert_false(smapi_put_if_absent(map, NULL, 0));
 	assert_int_equal(smapi_put_all(NULL, NULL), 0);
 	assert_int_equal(smapi_put_all(map, NULL), 0);
+	assert_int_equal(smapi_put_many(NULL, NULL), 0);
 	assert_false(smapi_remove(NULL, NULL));
 	assert_false(smapi_remove(map, NULL));
 	assert_false(smapi_equal(NULL, NULL));
@@ -732,6 +763,9 @@ int main(void) {
 		TEST(smapi_put_if_absent__),
 
 		TEST(smapi_put_all__many),
+
+		TEST(smapi_put_many__many),
+		TEST(smapi_put_many__no_keyvals),
 
 		TEST(smapi_str__),
 
