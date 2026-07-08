@@ -4,6 +4,7 @@
 #include "expects.h"
 #include "mock-fn.h"
 #include "tst.h"
+#include "util-col.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
@@ -627,6 +628,36 @@ static void imap_put_all_free__many(void **state) {
 	imap_free(expected);
 }
 
+static void imap_put_many__many(void **state) {
+	const struct IMap *to = imap_init();
+	assert_false(imap_put(to, 0, V0));
+	assert_false(imap_put(to, 1, strdup("replaced")));
+
+	const struct IMap *expected = imap_init();
+	assert_false(imap_put(expected, 0, V0));
+	assert_false(imap_put(expected, 1, V1));
+	assert_false(imap_put(expected, 2, V2));
+
+	assert_int_equal(imap_put_many(to,
+				1, V1,
+				2, V2,
+				0),
+			1);
+
+	assert_imap_equal(to, expected);
+
+	imap_free(to);
+	imap_free(expected);
+}
+
+static void imap_put_many__no_keyvals(void **state) {
+	const struct IMap *to = imap_init();
+
+	assert_int_equal(imap_put_many(to, 0), 0);
+
+	imap_free(to);
+}
+
 static void imap_remove_free__(void **state) {
 	const struct IMap *map = imap_init();
 
@@ -851,6 +882,7 @@ static void imap__null_inputs(void **state) {
 	assert_false(imap_put_free(NULL, 0, NULL));
 	assert_int_equal(imap_put_all_free(NULL, NULL), 0);
 	assert_int_equal(imap_put_all_free(map, NULL), 0);
+	assert_int_equal(imap_put_many(NULL, NULL), 0);
 	assert_nul(imap_remove(NULL, 0));
 	assert_nul(imap_remove(map, 0));
 	assert_false(imap_remove_free(NULL, 0));
@@ -917,6 +949,9 @@ int main(void) {
 		TEST(imap_put_if_absent__),
 
 		TEST(imap_put_all_free__many),
+
+		TEST(imap_put_many__many),
+		TEST(imap_put_many__no_keyvals),
 
 		TEST(imap_remove_free__),
 
