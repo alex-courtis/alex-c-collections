@@ -607,26 +607,70 @@ static void imap_put_if_absent__(void **state) {
 	imap_free(map);
 }
 
-static void imap_put_all_free__many(void **state) {
-	const struct IMap *to = imap_init();
-	assert_nul(imap_put(to, 0, V0));
-	assert_nul(imap_put(to, 1, strdup("V1")));
-
+static void imap_put_all__variants(void **state) {
 	const struct IMap *from = imap_init();
-	assert_nul(imap_put(from, 1, V2));
-	assert_nul(imap_put(from, 2, V3));
+	assert_nul(imap_put(from, 0, V0));
+	assert_nul(imap_put(from, 1, V1));
 
 	const struct IMap *expected = imap_init();
 	assert_nul(imap_put(expected, 0, V0));
-	assert_nul(imap_put(expected, 1, V2));
-	assert_nul(imap_put(expected, 2, V3));
+	assert_nul(imap_put(expected, 1, V1));
 
-	assert_int_equal(imap_put_all_free(to, from), 1);
+	const struct IMapParams params = {
+		.free_val = mock_free,
+		.clone_val = mock_clone,
+	};
+
+	const struct IMap *to = imap_init_with(params);
+	assert_nul(imap_put(to, 0, V3));
+
+	// put_all
+	const struct IMap *actual = imap_clone_shallow(to);
+
+	assert_int_equal(imap_put_all(actual, from), 1);
+
+	assert_imap_equal(actual, expected);
+	imap_free(actual);
+
+	// put_all_free
+	actual = imap_clone_shallow(to);
+	expect_ptr(mock_free, val, V3);
+
+	assert_int_equal(imap_put_all_free(actual, from), 1);
+
+	assert_imap_equal(actual, expected);
+	imap_free(actual);
+
+	// put_all_clone
+	actual = imap_clone_shallow(to);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
+	expect_ptr(mock_clone, val, V1);
+	will_return_ptr_type(mock_clone, V1, void*);
+
+	assert_int_equal(imap_put_all_clone(actual, from), 1);
+
+	assert_imap_equal(actual, expected);
+	imap_free(actual);
+
+	// put_all_clone_free
+	actual = imap_clone_shallow(to);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
+	expect_ptr(mock_clone, val, V1);
+	will_return_ptr_type(mock_clone, V1, void*);
+	expect_ptr(mock_free, val, V3);
+
+	assert_int_equal(imap_put_all_clone_free(actual, from), 1);
+
+	assert_imap_equal(actual, expected);
+	imap_free(actual);
 
 	imap_free(to);
 	imap_free(from);
 	imap_free(expected);
 }
+
 
 static void imap_put_many__many(void **state) {
 	const struct IMap *to = imap_init();
@@ -880,13 +924,19 @@ static void imap__null_inputs(void **state) {
 	assert_nul(imap_put_if_absent(NULL, 0, NULL));
 	assert_nul(imap_put_if_absent(map, 0, NULL));
 	assert_false(imap_put_free(NULL, 0, NULL));
-	assert_int_equal(imap_put_all_free(NULL, NULL), 0);
-	assert_int_equal(imap_put_all_free(map, NULL), 0);
 	assert_int_equal(imap_put_many(NULL, NULL), 0);
 	assert_nul(imap_remove(NULL, 0));
 	assert_nul(imap_remove(map, 0));
 	assert_false(imap_remove_free(NULL, 0));
 	assert_false(imap_remove_free(map, 0));
+	assert_int_equal(imap_put_all(NULL, NULL), 0);
+	assert_int_equal(imap_put_all(map, NULL), 0);
+	assert_int_equal(imap_put_all_free(NULL, NULL), 0);
+	assert_int_equal(imap_put_all_free(map, NULL), 0);
+	assert_int_equal(imap_put_all_clone(NULL, NULL), 0);
+	assert_int_equal(imap_put_all_clone(map, NULL), 0);
+	assert_int_equal(imap_put_all_clone_free(NULL, NULL), 0);
+	assert_int_equal(imap_put_all_clone_free(map, NULL), 0);
 	assert_false(imap_equal(NULL, NULL));
 	assert_false(imap_equal(map, NULL));
 	assert_nul(imap_vals_slist_shallow(NULL));
@@ -948,7 +998,7 @@ int main(void) {
 
 		TEST(imap_put_if_absent__),
 
-		TEST(imap_put_all_free__many),
+		TEST(imap_put_all__variants),
 
 		TEST(imap_put_many__many),
 		TEST(imap_put_many__no_keyvals),

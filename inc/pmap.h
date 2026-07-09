@@ -125,9 +125,6 @@ const void *pmap_put_if_absent(const struct PMap* const map, const void* const k
 // set key/val, free old val, return true if overwritten [equal_key, alloc_key, alloc_val, free_key, free_val]
 bool pmap_put_free(const struct PMap* const map, const void* const key, const void* const val);
 
-// set all from key/val, freeing overwritten vals, returning number of overwritten [equal_key, alloc_key, alloc_val, free_key, free_val]
-size_t pmap_put_all_free(const struct PMap* const map, const struct PMap* const from);
-
 // remove val, return old val if present [equal_key, free_key]
 const void *pmap_remove(const struct PMap* const map, const void* const key);
 

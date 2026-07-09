@@ -127,6 +127,18 @@ const void *imap_remove(const struct IMap* const map, const size_t key);
 // remove val, if removed free val and return true [free_val]
 bool imap_remove_free(const struct IMap* const map, const size_t key);
 
+// set all from key/val, returning number overwritten [alloc_val]
+size_t imap_put_all(const struct IMap* const map, const struct IMap* const from);
+
+// set all from key/val, returning number overwritten, freeing overwritten vals [alloc_val, free_val]
+size_t imap_put_all_free(const struct IMap* const map, const struct IMap* const from);
+
+// set all from key/val, returning number overwritten, NOP when NULL clone_val  [clone_val]
+size_t imap_put_all_clone(const struct IMap* const map, const struct IMap* const from);
+
+// set all from key/val, returning number overwritten, freeing overwritten vals, NOP when NULL clone_val [free_val, clone_val]
+size_t imap_put_all_clone_free(const struct IMap* const map, const struct IMap* const from);
+
 /*
  * Comparison
  */
