@@ -409,23 +409,64 @@ static void smap_put_free__(void **state) {
 	smap_free(map);
 }
 
-static void smap_put_all_free__many(void **state) {
-	const struct SMap *to = smap_init();
-	assert_nul(smap_put(to, "a", V0));
-	assert_nul(smap_put(to, "b", strdup("V1")));
-
+static void smap_put_all__variants(void **state) {
 	const struct SMap *from = smap_init();
-	assert_nul(smap_put(from, "b", V2));
-	assert_nul(smap_put(from, "c", V3));
+	assert_nul(smap_put(from, "a", V0));
+	assert_nul(smap_put(from, "b", V1));
 
 	const struct SMap *expected = smap_init();
 	assert_nul(smap_put(expected, "a", V0));
-	assert_nul(smap_put(expected, "b", V2));
-	assert_nul(smap_put(expected, "c", V3));
+	assert_nul(smap_put(expected, "b", V1));
 
-	assert_int_equal(smap_put_all_free(to, from), 1);
+	const struct SMapParams params = {
+		.free_val = mock_free,
+		.clone_val = mock_clone,
+	};
 
-	assert_smap_equal(to, expected);
+	const struct SMap *to = smap_init_with(params);
+	assert_nul(smap_put(to, "a", V3));
+
+	// put_all
+	const struct SMap *actual = smap_clone_shallow(to);
+
+	assert_int_equal(smap_put_all(actual, from), 1);
+
+	assert_smap_equal(actual, expected);
+	smap_free(actual);
+
+	// put_all_free
+	actual = smap_clone_shallow(to);
+	expect_ptr(mock_free, val, V3);
+
+	assert_int_equal(smap_put_all_free(actual, from), 1);
+
+	assert_smap_equal(actual, expected);
+	smap_free(actual);
+
+	// put_all_clone
+	actual = smap_clone_shallow(to);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
+	expect_ptr(mock_clone, val, V1);
+	will_return_ptr_type(mock_clone, V1, void*);
+
+	assert_int_equal(smap_put_all_clone(actual, from), 1);
+
+	assert_smap_equal(actual, expected);
+	smap_free(actual);
+
+	// put_all_clone_free
+	actual = smap_clone_shallow(to);
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
+	expect_ptr(mock_clone, val, V1);
+	will_return_ptr_type(mock_clone, V1, void*);
+	expect_ptr(mock_free, val, V3);
+
+	assert_int_equal(smap_put_all_clone_free(actual, from), 1);
+
+	assert_smap_equal(actual, expected);
+	smap_free(actual);
 
 	smap_free(to);
 	smap_free(from);
@@ -751,8 +792,14 @@ static void smap__null_inputs(void **state) {
 	assert_nul(smap_put_if_absent(map, NULL, NULL));
 	assert_false(smap_put_free(NULL, NULL, NULL));
 	assert_false(smap_put_free(map, NULL, NULL));
+	assert_int_equal(smap_put_all(NULL, NULL), 0);
+	assert_int_equal(smap_put_all(map, NULL), 0);
 	assert_int_equal(smap_put_all_free(NULL, NULL), 0);
 	assert_int_equal(smap_put_all_free(map, NULL), 0);
+	assert_int_equal(smap_put_all_clone(NULL, NULL), 0);
+	assert_int_equal(smap_put_all_clone(map, NULL), 0);
+	assert_int_equal(smap_put_all_clone_free(NULL, NULL), 0);
+	assert_int_equal(smap_put_all_clone_free(map, NULL), 0);
 	assert_int_equal(smap_put_many(NULL, NULL), 0);
 	assert_nul(smap_remove(NULL, NULL));
 	assert_nul(smap_remove(map, NULL));
@@ -802,7 +849,7 @@ int main(void) {
 
 		TEST(smap_put_free__),
 
-		TEST(smap_put_all_free__many),
+		TEST(smap_put_all__variants),
 
 		TEST(smap_put_many__many),
 
