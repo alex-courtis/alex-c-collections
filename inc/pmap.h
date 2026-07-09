@@ -134,6 +134,18 @@ const void *pmap_remove(const struct PMap* const map, const void* const key);
 // remove val, if removed free val and return true [equal_key, free_key, free_val]
 bool pmap_remove_free(const struct PMap* const map, const void* const key);
 
+// set all from key/val, returning number overwritten [equal_key, alloc_key, alloc_val]
+size_t pmap_put_all(const struct PMap* const map, const struct PMap* const from);
+
+// set all from key/val, returning number overwritten, freeing overwritten vals [equal_key, alloc_key, alloc_val, free_val]
+size_t pmap_put_all_free(const struct PMap* const map, const struct PMap* const from);
+
+// set all from key/val, returning number overwritten, NOP when NULL clone_val  [equal_key, alloc_key, clone_val]
+size_t pmap_put_all_clone(const struct PMap* const map, const struct PMap* const from);
+
+// set all from key/val, returning number overwritten, freeing overwritten vals, NOP when NULL clone_val [equal_key, alloc_key, free_val, clone_val]
+size_t pmap_put_all_clone_free(const struct PMap* const map, const struct PMap* const from);
+
 /*
  * Comparison
  */
@@ -145,6 +157,8 @@ bool pmap_equal(const struct PMap* const a, const struct PMap* const b);
  * Conversion
  */
 
+// TODO just a key clone with maybe alloc_val
+
 // map ordered keys, caller frees list only
 struct SList *pmap_keys_slist_shallow(const struct PMap* const map);
 
@@ -154,12 +168,15 @@ struct SList *pmap_keys_slist_deep(const struct PMap* const map);
 // map ordered keys, same parameters, shallow when alloc_key is NULL
 const struct PSet *pmap_keys_pset(const struct PMap* const map);
 
+// TODO use put_all semantics instead of shallow/deep
+
 // map ordered vals, caller frees list only
 struct SList *pmap_vals_slist_shallow(const struct PMap* const map);
 
 // map ordered vals, caller frees list and vals, empty when NULL clone_val [clone_val]
 struct SList *pmap_vals_slist_deep(const struct PMap* const map);
 
+// TODO shallow vs deep using put_all semantics
 // map ordered vals, same parameters, shallow when alloc_val is NULL
 const struct PSet *pmap_vals_pset(const struct PMap* const map);
 
