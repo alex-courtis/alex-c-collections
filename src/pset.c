@@ -160,13 +160,7 @@ const struct PSet *pset_clone(const struct PSet* const from) {
 }
 
 const struct PSet *pset_clone_deep(const struct PSet* const from) {
-	if (!from)
-		return NULL;
-
-	if (from->params.clone_val)
-		return clone(from, from->params.clone_val);
-	else
-		return pset_init_with(from->params);
+	return from && from->params.clone_val ? clone(from, from->params.clone_val) : NULL;
 }
 
 void pset_free(const struct PSet * const set) {

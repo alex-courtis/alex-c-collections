@@ -58,7 +58,7 @@ const struct SMap *smap_init_with(const struct SMapParams params);
 // same params, caller frees vals when alloc_val present [alloc_val]
 const struct SMap *smap_clone(const struct SMap* const from);
 
-// same params, caller frees vals, empty when NULL clone_val [clone_val]
+// same params, caller frees vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_key, alloc_val, clone_val]
 const struct SMap *smap_clone_deep(const struct SMap* const from);
 
 // free map

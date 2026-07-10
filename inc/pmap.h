@@ -63,7 +63,7 @@ const struct PMap *pmap_init_with(const struct PMapParams params);
 // same params, caller frees keys when alloc_key present and vals when alloc_val present [alloc_key, alloc_val]
 const struct PMap *pmap_clone(const struct PMap* const from);
 
-// same params, caller frees keys when alloc_key present, caller frees vals, empty when NULL clone_val [alloc_key, clone_val]
+// same params, caller frees keys when alloc_key present, caller frees vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_key, alloc_val, clone_val]
 const struct PMap *pmap_clone_deep(const struct PMap* const from);
 
 // free map
@@ -169,7 +169,7 @@ struct SList *pmap_vals_slist_clone(const struct PMap* const map);
 // map ordered vals, same params, caller frees set, caller frees vals when alloc_val present [alloc_val]
 const struct PSet *pmap_vals_pset(const struct PMap* const map);
 
-// map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val or both alloc_val and clone_val [clone_val]
+// map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_val, clone_val]
 const struct PSet *pmap_vals_pset_clone(const struct PMap* const map);
 
 /*

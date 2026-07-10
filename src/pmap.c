@@ -171,7 +171,7 @@ static const struct PSet *vals_pset(const struct PMap* const map, fn_clone clone
 
 	const void **v;
 	for (v = map->vals; v < map->vals + map->size; v++) {
-		pset_add(set, clone_val ? clone_val(*v) : *v);
+		pset_add(set, clone_val && !map->params.alloc_val ? clone_val(*v) : *v);
 	}
 
 	return set;
@@ -215,13 +215,7 @@ const struct PMap *pmap_clone(const struct PMap* const from) {
 }
 
 const struct PMap *pmap_clone_deep(const struct PMap* const from) {
-	if (!from)
-		return NULL;
-
-	if (from->params.clone_val)
-		return clone(from, from->params.clone_val);
-	else
-		return pmap_init_with(from->params);
+	return from && from->params.clone_val ? clone(from, from->params.alloc_val ? from->params.alloc_val : from->params.clone_val) : NULL;
 }
 
 void pmap_free(const struct PMap* const map) {
@@ -621,7 +615,7 @@ const struct PSet *pmap_vals_pset(const struct PMap* const map) {
 }
 
 const struct PSet *pmap_vals_pset_clone(const struct PMap* const map) {
-	return map && map->params.clone_val && !map->params.alloc_val ? vals_pset(map, map->params.clone_val) : NULL;
+	return map && map->params.clone_val ? vals_pset(map, map->params.clone_val) : NULL;
 }
 
 char *pmap_str(const struct PMap* const map) {

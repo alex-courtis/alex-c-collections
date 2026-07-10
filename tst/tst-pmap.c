@@ -293,9 +293,29 @@ static void pmap_clone_deep__no_clone_val(void **state) {
 	assert_nul(pmap_put(from, K0, V0));
 	assert_nul(pmap_put(from, K1, NULL));
 
+	assert_nul(pmap_clone_deep(from));
+
+	pmap_free(from);
+}
+
+static void pmap_clone_deep__alloc_val_and_clone_val(void **state) {
+	const struct PMapParams params = {
+		.alloc_val = mock_alloc,
+		.clone_val = mock_clone,
+	};
+	const struct PMap *from = pmap_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(pmap_put(from, K0, V0));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
 	const struct PMap *to = pmap_clone_deep(from);
 	assert_non_nul(to);
-	assert_int_equal(pmap_size(to), 0);
+	assert_int_equal(pmap_size(to), 1);
 
 	pmap_free(from);
 	pmap_free(to);
@@ -1810,6 +1830,27 @@ static void pmap_keys_slist__many(void **state) {
 	pmap_free(map);
 }
 
+static void pmap_keys_slist__alloc_key(void **state) {
+	const struct PMapParams params = { .alloc_key = mock_alloc, };
+	const struct PMap *map = pmap_init_with(params);
+
+	expect_ptr(mock_alloc, val, K0);
+	will_return_ptr_type(mock_alloc, K0, void*);
+
+	pmap_put(map, K0, V0);
+
+	expect_ptr(mock_alloc, val, K0);
+	will_return_ptr_type(mock_alloc, K0, void*);
+
+	struct SList *list = pmap_keys_slist(map);
+
+	assert_int_equal(slist_length(list), 1);
+	assert_ptr_equal(slist_at(list, 0), K0);
+
+	slist_free(&list);
+	pmap_free(map);
+}
+
 static void pmap_keys_pset__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
@@ -2034,14 +2075,24 @@ static void pmap_vals_pset_clone__alloc_val_and_clone_val(void **state) {
 	};
 	const struct PMap *map = pmap_init_with(params);
 
+	const struct PSet *expected = pset_init();
+	pset_add(expected, V0);
+
 	expect_ptr(mock_alloc, val, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	pmap_put(map, K0, V0);
 
-	assert_nul(pmap_vals_pset_clone(map));
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct PSet *actual = pmap_vals_pset_clone(map);
+
+	assert_pset_equal(actual, expected);
 
 	pmap_free(map);
+	pset_free(expected);
+	pset_free(actual);
 }
 
 static void pmap_vals_pset__params(void **state) {
@@ -2281,6 +2332,7 @@ int main(void) {
 		TEST(pmap_clone_deep__clone_val_allow_null_val),
 		TEST(pmap_clone_deep__clone_val_no_allow_null_val),
 		TEST(pmap_clone_deep__no_clone_val),
+		TEST(pmap_clone_deep__alloc_val_and_clone_val),
 
 		TEST(pmap_free_vals__null_free_val),
 		TEST(pmap_free_vals__free_val),
@@ -2374,9 +2426,9 @@ int main(void) {
 		TEST(pmap_equal__equal_key_ok),
 		TEST(pmap_equal__equal_key_different),
 
-		// TODO missing an alloc_key test
 		TEST(pmap_keys_slist__empty),
 		TEST(pmap_keys_slist__many),
+		TEST(pmap_keys_slist__alloc_key),
 
 		TEST(pmap_keys_pset__empty),
 		TEST(pmap_keys_pset__many),

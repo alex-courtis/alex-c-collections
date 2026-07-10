@@ -171,14 +171,9 @@ static void pset_clone_deep__no_clone_val(void **state) {
 
 	assert_true(pset_add(from, V0));
 
-	const struct PSet *to = pset_clone_deep(from);
-	assert_non_nul(to);
-	assert_int_equal(pset_size(to), 0);
-
-	assert_pset_not_equal(from, to);
+	assert_nul(pset_clone_deep(from));
 
 	pset_free(from);
-	pset_free(to);
 }
 
 static void pset_free_vals__null_free_val(void **state) {
