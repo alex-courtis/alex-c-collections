@@ -510,7 +510,7 @@ static void smaps_keys_sset__params(void **state) {
 	sset_free(set);
 }
 
-static void smaps_vals_slist_deep__many(void **state) {
+static void smaps_vals_slist__many(void **state) {
 	const struct SMapSParams params = { .allow_null_val = true, };
 	const struct SMapS *map = smaps_init_with(params);
 
@@ -518,7 +518,7 @@ static void smaps_vals_slist_deep__many(void **state) {
 	smaps_put(map, "b", NULL);
 	smaps_put(map, "c", "cc");
 
-	struct SList *list = smaps_vals_slist_deep(map);
+	struct SList *list = smaps_vals_slist(map);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_str_equal(slist_at(list, 0), "aa");
@@ -644,7 +644,7 @@ static void smaps__null_inputs(void **state) {
 	assert_false(smaps_equal(map, NULL));
 	assert_nul(smaps_keys_slist(NULL));
 	assert_nul(smaps_keys_sset(NULL));
-	assert_nul(smaps_vals_slist_deep(NULL));
+	assert_nul(smaps_vals_slist(NULL));
 	assert_nul(smaps_vals_sset(NULL));
 	assert_nul(smaps_str(NULL));
 	assert_int_equal(smaps_size(NULL), 0);
@@ -693,7 +693,7 @@ int main(void) {
 		TEST(smaps_keys_sset__many),
 		TEST(smaps_keys_sset__params),
 
-		TEST(smaps_vals_slist_deep__many),
+		TEST(smaps_vals_slist__many),
 
 		TEST(smaps_vals_sset__many),
 		TEST(smaps_vals_sset__params),

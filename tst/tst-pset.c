@@ -959,7 +959,7 @@ static void pset_equal__equal_val_different(void **state) {
 	pset_free(b);
 }
 
-static void pset_vals_slist_shallow__empty(void **state) {
+static void pset_vals_slist__empty(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_nul(pset_slist_shallow(set));
@@ -967,7 +967,7 @@ static void pset_vals_slist_shallow__empty(void **state) {
 	pset_free(set);
 }
 
-static void pset_vals_slist_shallow__many(void **state) {
+static void pset_vals_slist__many(void **state) {
 	const struct PSet *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -1169,8 +1169,8 @@ int main(void) {
 		TEST(pset_equal__equal_val_ok),
 		TEST(pset_equal__equal_val_different),
 
-		TEST(pset_vals_slist_shallow__empty),
-		TEST(pset_vals_slist_shallow__many),
+		TEST(pset_vals_slist__empty),
+		TEST(pset_vals_slist__many),
 		TEST(pset_vals_slist_deep__clone_val),
 		TEST(pset_vals_slist_deep__no_clone_val),
 

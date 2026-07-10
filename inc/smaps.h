@@ -130,8 +130,8 @@ struct SList *smaps_keys_slist(const struct SMapS* const map);
 // map ordered keys, same parameters
 const struct SSet *smaps_keys_sset(const struct SMapS* const map);
 
-// map ordered vals, caller frees list and vals
-struct SList *smaps_vals_slist_deep(const struct SMapS* const map);
+// map ordered vals, caller frees list and contents
+struct SList *smaps_vals_slist(const struct SMapS* const map);
 
 // map ordered vals, same parameters
 const struct SSet *smaps_vals_sset(const struct SMapS* const map);

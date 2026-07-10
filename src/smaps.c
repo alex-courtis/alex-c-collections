@@ -227,8 +227,8 @@ const struct SSet *smaps_keys_sset(const struct SMapS* const map) {
 	return set;
 }
 
-struct SList *smaps_vals_slist_deep(const struct SMapS* const map) {
-	return map ? pmap_vals_slist_deep(map->pmap) : NULL;
+struct SList *smaps_vals_slist(const struct SMapS* const map) {
+	return map ? pmap_vals_slist(map->pmap) : NULL;
 }
 
 const struct SSet *smaps_vals_sset(const struct SMapS* const map) {

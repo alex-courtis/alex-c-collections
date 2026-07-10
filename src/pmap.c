@@ -585,11 +585,11 @@ const struct PSet *pmap_keys_pset(const struct PMap* const map) {
 	return set;
 }
 
-struct SList *pmap_vals_slist_shallow(const struct PMap* const map) {
-	return map ? vals_slist(map, NULL) : NULL;
+struct SList *pmap_vals_slist(const struct PMap* const map) {
+	return map ? vals_slist(map, map->params.alloc_val) : NULL;
 }
 
-struct SList *pmap_vals_slist_deep(const struct PMap* const map) {
+struct SList *pmap_vals_slist_clone(const struct PMap* const map) {
 	if (!map || !map->params.clone_val)
 		return NULL;
 

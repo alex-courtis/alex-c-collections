@@ -266,12 +266,12 @@ const struct SSet *smap_keys_sset(const struct SMap* const map) {
 	return set;
 }
 
-struct SList *smap_vals_slist_shallow(const struct SMap* const map) {
-	return map ? pmap_vals_slist_shallow(map->pmap) : NULL;
+struct SList *smap_vals_slist(const struct SMap* const map) {
+	return map ? pmap_vals_slist(map->pmap) : NULL;
 }
 
-struct SList *smap_vals_slist_deep(const struct SMap* const map) {
-	return map ? pmap_vals_slist_deep(map->pmap) : NULL;
+struct SList *smap_vals_slist_clone(const struct SMap* const map) {
+	return map ? pmap_vals_slist_clone(map->pmap) : NULL;
 }
 
 const struct PSet *smap_vals_pset(const struct SMap* const map) {

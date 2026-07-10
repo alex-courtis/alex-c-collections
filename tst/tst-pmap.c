@@ -1849,15 +1849,15 @@ static void pmap_keys_pset__params(void **state) {
 	pset_free(set);
 }
 
-static void pmap_vals_slist_shallow__empty(void **state) {
+static void pmap_vals_slist__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
-	assert_nul(pmap_vals_slist_shallow(map));
+	assert_nul(pmap_vals_slist(map));
 
 	pmap_free(map);
 }
 
-static void pmap_vals_slist_shallow__many(void **state) {
+static void pmap_vals_slist__many(void **state) {
 	const struct PMapParams params = { .allow_null_val = true, };
 	const struct PMap *map = pmap_init_with(params);
 
@@ -1865,12 +1865,33 @@ static void pmap_vals_slist_shallow__many(void **state) {
 	pmap_put(map, K1, NULL);
 	pmap_put(map, K2, V3);
 
-	struct SList *list = pmap_vals_slist_shallow(map);
+	struct SList *list = pmap_vals_slist(map);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_ptr_equal(slist_at(list, 0), V1);
 	assert_nul(slist_at(list, 1));
 	assert_ptr_equal(slist_at(list, 2), V3);
+
+	slist_free(&list);
+	pmap_free(map);
+}
+
+static void pmap_vals_slist__alloc_val(void **state) {
+	const struct PMapParams params = { .alloc_val = mock_alloc, };
+	const struct PMap *map = pmap_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	pmap_put(map, K0, V0);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	struct SList *list = pmap_vals_slist(map);
+
+	assert_int_equal(slist_length(list), 1);
+	assert_ptr_equal(slist_at(list, 0), V0);
 
 	slist_free(&list);
 	pmap_free(map);
@@ -1945,7 +1966,7 @@ static void pmap_vals_pset__params(void **state) {
 	pset_free(set);
 }
 
-static void pmap_vals_slist_deep__clone_val(void **state) {
+static void pmap_vals_slist_clone__clone_val(void **state) {
 	const struct PMapParams params = { .clone_val = mock_clone, };
 	const struct PMap *map = pmap_init_with(params);
 
@@ -1956,7 +1977,7 @@ static void pmap_vals_slist_deep__clone_val(void **state) {
 	expect_ptr(mock_clone, val, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 
-	struct SList *list = pmap_vals_slist_deep(map);
+	struct SList *list = pmap_vals_slist_clone(map);
 
 	assert_ptr_equal(slist_at(list, 0), V0);
 	assert_ptr_equal(slist_at(list, 1), NULL);
@@ -1965,13 +1986,13 @@ static void pmap_vals_slist_deep__clone_val(void **state) {
 	pmap_free(map);
 }
 
-static void pmap_vals_slist_deep__no_clone_val(void **state) {
+static void pmap_vals_slist_clone__no_clone_val(void **state) {
 	const struct PMap *map = pmap_init();
 
 	assert_nul(pmap_put(map, K0, V0));
 	assert_nul(pmap_put(map, K1, NULL));
 
-	assert_nul(pmap_vals_slist_deep(map));
+	assert_nul(pmap_vals_slist_clone(map));
 
 	pmap_free(map);
 }
@@ -2131,8 +2152,8 @@ static void pmap__null_inputs(void **state) {
 	assert_false(pmap_equal(map, NULL));
 	assert_nul(pmap_keys_slist(NULL));
 	assert_nul(pmap_keys_pset(NULL));
-	assert_nul(pmap_vals_slist_deep(NULL));
-	assert_nul(pmap_vals_slist_shallow(NULL));
+	assert_nul(pmap_vals_slist_clone(NULL));
+	assert_nul(pmap_vals_slist(NULL));
 	assert_nul(pmap_vals_pset(NULL));
 	assert_nul(pmap_str(NULL));
 	assert_int_equal(pmap_size(NULL), 0);
@@ -2252,11 +2273,12 @@ int main(void) {
 		TEST(pmap_keys_pset__many),
 		TEST(pmap_keys_pset__params),
 
-		TEST(pmap_vals_slist_shallow__empty),
-		TEST(pmap_vals_slist_shallow__many),
+		TEST(pmap_vals_slist__empty),
+		TEST(pmap_vals_slist__many),
+		TEST(pmap_vals_slist__alloc_val),
 
-		TEST(pmap_vals_slist_deep__clone_val),
-		TEST(pmap_vals_slist_deep__no_clone_val),
+		TEST(pmap_vals_slist_clone__clone_val),
+		TEST(pmap_vals_slist_clone__no_clone_val),
 
 		TEST(pmap_vals_pset__empty),
 		TEST(pmap_vals_pset__many),

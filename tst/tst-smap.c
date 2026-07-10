@@ -600,7 +600,7 @@ static void smap_keys_sset__params(void **state) {
 	sset_free(set);
 }
 
-static void smap_vals_slist_shallow__many(void **state) {
+static void smap_vals_slist__many(void **state) {
 	const struct SMapParams params = { .allow_null_val = true, };
 	const struct SMap *map = smap_init_with(params);
 
@@ -608,7 +608,7 @@ static void smap_vals_slist_shallow__many(void **state) {
 	smap_put(map, "b", NULL);
 	smap_put(map, "c", V2);
 
-	struct SList *list = smap_vals_slist_shallow(map);
+	struct SList *list = smap_vals_slist(map);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_ptr_equal(slist_at(list, 0), V0);
@@ -640,7 +640,7 @@ static void smap_vals_pset__many(void **state) {
 	pset_free(actual);
 }
 
-static void smap_vals_slist_deep__many(void **state) {
+static void smap_vals_slist_clone__many(void **state) {
 	const struct SMapParams params = {
 		.allow_null_val = true,
 		.clone_val = (fn_clone)clone_strdup,
@@ -651,7 +651,7 @@ static void smap_vals_slist_deep__many(void **state) {
 	smap_put(map, "b", NULL);
 	smap_put(map, "c", "bb");
 
-	struct SList *list = smap_vals_slist_deep(map);
+	struct SList *list = smap_vals_slist_clone(map);
 
 	assert_int_equal(slist_length(list), 3);
 	assert_str_equal(slist_at(list, 0), "aa");
@@ -809,8 +809,8 @@ static void smap__null_inputs(void **state) {
 	assert_false(smap_equal(map, NULL));
 	assert_nul(smap_keys_slist(NULL));
 	assert_nul(smap_keys_sset(NULL));
-	assert_nul(smap_vals_slist_shallow(NULL));
-	assert_nul(smap_vals_slist_deep(NULL));
+	assert_nul(smap_vals_slist(NULL));
+	assert_nul(smap_vals_slist_clone(NULL));
 	assert_nul(smap_vals_pset(NULL));
 	assert_nul(smap_str(NULL));
 	assert_int_equal(smap_size(NULL), 0);
@@ -864,8 +864,8 @@ int main(void) {
 		TEST(smap_keys_sset__many),
 		TEST(smap_keys_sset__params),
 
-		TEST(smap_vals_slist_deep__many),
-		TEST(smap_vals_slist_shallow__many),
+		TEST(smap_vals_slist_clone__many),
+		TEST(smap_vals_slist__many),
 
 		TEST(smap_vals_pset__many),
 
