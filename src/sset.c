@@ -39,6 +39,7 @@ const struct SSet *sset_init_with(const struct SSetParams params) {
 		.equal_val = params.case_insensitive ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
 		.alloc_val = (fn_clone)clone_strdup,
 		.free_val = (fn_free)free,
+		// TODO this has no meaning, should be alloc_val
 		.clone_val = (fn_clone)clone_strdup,
 		.str_val = (fn_str)str_or_null,
 		.initial = params.initial,
@@ -142,8 +143,8 @@ bool sset_equal(const struct SSet* const a, const struct SSet* const b) {
 	return a && b ? pset_equal(a->pset, b->pset) : false;
 }
 
-struct SList *sset_slist_deep(const struct SSet* const set) {
-	return set ? pset_slist_deep(set->pset) : NULL;
+struct SList *sset_slist(const struct SSet* const set) {
+	return set ? pset_slist(set->pset) : NULL;
 }
 
 char *sset_str(const struct SSet* const set) {

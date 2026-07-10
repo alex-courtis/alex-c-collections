@@ -339,11 +339,11 @@ bool pset_equal(const struct PSet* const a, const struct PSet* const b) {
 	return true;
 }
 
-struct SList *pset_slist_shallow(const struct PSet* const set) {
-	return set ? slist(set, NULL) : NULL;
+struct SList *pset_slist(const struct PSet* const set) {
+	return set ? slist(set, set->params.alloc_val) : NULL;
 }
 
-struct SList *pset_slist_deep(const struct PSet* const set) {
+struct SList *pset_slist_clone(const struct PSet* const set) {
 	if (!set || !set->params.clone_val)
 		return NULL;
 
