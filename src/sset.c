@@ -39,8 +39,6 @@ const struct SSet *sset_init_with(const struct SSetParams params) {
 		.equal_val = params.case_insensitive ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
 		.alloc_val = (fn_clone)clone_strdup,
 		.free_val = (fn_free)free,
-		// TODO this has no meaning, should be alloc_val
-		.clone_val = (fn_clone)clone_strdup,
 		.str_val = (fn_str)str_or_null,
 		.initial = params.initial,
 		.grow = params.grow,
@@ -58,7 +56,7 @@ const struct SSet *sset_clone(const struct SSet* const from) {
 		return NULL;
 
 	struct SSet *to = calloc(1, sizeof(struct SSet));
-	to->pset = pset_clone_deep(from->pset);
+	to->pset = pset_clone(from->pset);
 	memcpy((void*)&to->params, &from->params, sizeof(struct SSetParams));
 
 	return to;

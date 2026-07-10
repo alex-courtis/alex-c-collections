@@ -155,8 +155,8 @@ const struct PSet *pset_init_with(const struct PSetParams params) {
 	return set;
 }
 
-const struct PSet *pset_clone_shallow(const struct PSet* const from) {
-	return from ? clone(from, NULL) : NULL;
+const struct PSet *pset_clone(const struct PSet* const from) {
+	return from ? clone(from, from->params.alloc_val) : NULL;
 }
 
 const struct PSet *pset_clone_deep(const struct PSet* const from) {

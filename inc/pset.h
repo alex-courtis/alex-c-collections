@@ -46,10 +46,10 @@ const struct PSet *pset_init(void);
 // construct with params
 const struct PSet *pset_init_with(const struct PSetParams params);
 
-// clone, setting val pointers
-const struct PSet *pset_clone_shallow(const struct PSet* const from);
+// same parameters, caller frees vals when alloc_val present [alloc_val]
+const struct PSet *pset_clone(const struct PSet* const from);
 
-// clone, empty when NULL clone_val [clone_val]
+// set ordered vals, caller frees vals, NULL when NULL clone_val [clone_val]
 const struct PSet *pset_clone_deep(const struct PSet* const from);
 
 // free set
