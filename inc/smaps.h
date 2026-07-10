@@ -113,6 +113,9 @@ size_t smaps_put_all(const struct SMapS* const map, const struct SMapS* const fr
 // remove entry, if removed return true
 bool smaps_remove(const struct SMapS* const map, const char* const key);
 
+// remove entries matching from keys, return number removed
+size_t smaps_remove_all(const struct SMapS* const map, const struct SMapS* const from);
+
 /*
  * Comparison
  */

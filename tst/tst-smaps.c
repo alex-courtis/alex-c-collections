@@ -433,6 +433,32 @@ static void smaps_put_many__many(void **state) {
 	smaps_free(expected);
 }
 
+static void smaps_remove_all__(void **state) {
+	const struct SMapS *map = smaps_init();
+
+	smaps_put(map, "a", "0");
+	smaps_put(map, "b", "1");
+	smaps_put(map, "c", "2");
+
+	const struct SMapS *from = smaps_init();
+
+	smaps_put(from, "b", "1");
+	smaps_put(from, "d", "3");
+
+	const struct SMapS *expected = smaps_init();
+
+	smaps_put(expected, "a", "0");
+	smaps_put(expected, "c", "2");
+
+	assert_int_equal(smaps_remove_all(map, from), 1);
+
+	assert_smaps_equal(map, expected);
+
+	smaps_free(map);
+	smaps_free(from);
+	smaps_free(expected);
+}
+
 static void smaps_str__(void **state) {
 	const struct SMapSParams params = { .allow_null_val = true, };
 	const struct SMapS *map = smaps_init_with(params);
@@ -639,6 +665,9 @@ static void smaps__null_inputs(void **state) {
 	assert_int_equal(smaps_put_many(NULL, NULL), 0);
 	assert_false(smaps_remove(NULL, NULL));
 	assert_false(smaps_remove(map, NULL));
+	assert_int_equal(smaps_remove_all(NULL, NULL), 0);
+	assert_int_equal(smaps_remove_all(map, NULL), 0);
+	assert_int_equal(smaps_remove_all(NULL, map), 0);
 	assert_false(smaps_equal(NULL, NULL));
 	assert_false(smaps_equal(map, NULL));
 	assert_nul(smaps_keys_slist(NULL));
@@ -684,6 +713,8 @@ int main(void) {
 		TEST(smaps_put_all__many),
 
 		TEST(smaps_put_many__many),
+
+		TEST(smaps_remove_all__),
 
 		TEST(smaps_str__),
 
