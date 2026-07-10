@@ -643,7 +643,7 @@ static void smap_vals_pset__many(void **state) {
 static void smap_vals_slist_deep__many(void **state) {
 	const struct SMapParams params = {
 		.allow_null_val = true,
-		.clone_val = clone_strdup,
+		.clone_val = (fn_clone)clone_strdup,
 	};
 	const struct SMap *map = smap_init_with(params);
 

@@ -40,6 +40,16 @@ static void equal_strstr__(void **state) {
 	assert_false(equal_strstr("aabb", "xx"));
 }
 
+static void equal_size_t__(void **state) {
+	size_t a = { 1 };
+	size_t b = { 2 };
+	assert_true(equal_size_t(&a, &a));
+	assert_false(equal_size_t(&a, &b));
+	assert_false(equal_size_t(&a, NULL));
+	assert_false(equal_size_t(NULL, &b));
+	assert_false(equal_size_t(NULL, NULL));
+}
+
 static void less_than_strcmp__(void **state) {
 	assert_true(less_than_strcmp(P0, P0));
 	assert_false(less_than_strcmp(P0, NULL));
@@ -62,6 +72,17 @@ static void clone_strdup__(void **state) {
 	free(str);
 }
 
+static void clone_size_t__(void **state) {
+	size_t val = { 1 };
+
+	assert_nul(clone_size_t(NULL));
+
+	size_t *new = clone_size_t(&val);
+	assert_non_nul(new);
+	assert_int_equal(*new, 1);
+	free(new);
+}
+
 static void str_or_null__(void **state) {
 	char *str = str_or_null(NULL);
 	assert_str_equal(str, "(null)");
@@ -72,6 +93,18 @@ static void str_or_null__(void **state) {
 	free(str);
 }
 
+static void str_size_t__(void **state) {
+	size_t val = { 1 };
+
+	char *str = str_size_t(NULL);
+	assert_str_equal(str, "(null)");
+	free(str);
+
+	str = str_size_t(&val);
+	assert_str_equal(str, "1");
+	free(str);
+}
+
 int main(void) {
 
 	const struct CMUnitTest tests[] = {
@@ -79,10 +112,13 @@ int main(void) {
 		TEST(equal_strcmp__),
 		TEST(equal_strcasecmp__),
 		TEST(equal_strstr__),
+		TEST(equal_size_t__),
 		TEST(less_than_strcmp__),
 		TEST(less_than_strcasecmp__),
 		TEST(clone_strdup__),
+		TEST(clone_size_t__),
 		TEST(str_or_null__),
+		TEST(str_size_t__),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

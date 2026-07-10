@@ -103,11 +103,11 @@ static bool remove(const struct PSet* const cset, const void* const val, fn_free
 	return false;
 }
 
-static size_t add_all(const struct PSet* const set, const struct PSet* const from, fn_alloc init_val) {
+static size_t add_all(const struct PSet* const set, const struct PSet* const from, fn_clone clone_val) {
 	size_t added = 0;
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
-		if (add(set, *v, init_val)) {
+		if (add(set, *v, clone_val)) {
 			added++;
 		}
 	}

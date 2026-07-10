@@ -28,7 +28,7 @@ struct SMapIt {
 struct SMapParams {
 	const bool case_insensitive; // false
 	const fn_equal equal_val;    // compare key pointers
-	const fn_alloc alloc_val;    // assign val pointer
+	const fn_clone alloc_val;    // assign val pointer
 	const fn_free free_val;      // free
 	const fn_clone clone_val;    // NOP
 	const fn_str str_val;        // %p

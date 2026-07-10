@@ -32,16 +32,14 @@ struct PMapPair {
 	const void *val;
 };
 
-// TODO fn_alloc and fn_clone are the same, use fn_clone everywhere
-
 /*
  * Optional constructor params (default)
  */
 struct PMapParams {
 	const fn_equal equal_key;  // compare key pointers
 	const fn_equal equal_val;  // compare val pointers
-	const fn_alloc alloc_key;  // assign key pointer
-	const fn_alloc alloc_val;  // assign val pointer
+	const fn_clone alloc_key;  // assign key pointer
+	const fn_clone alloc_val;  // assign val pointer
 	const fn_free free_key;    // NOP
 	const fn_free free_val;    // free
 	const fn_clone clone_val;  // NOP

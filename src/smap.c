@@ -54,7 +54,7 @@ const struct SMap *smap_init_with(const struct SMapParams params) {
 	const struct PMapParams pmap_params = {
 		.equal_key = params.case_insensitive ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
 		.equal_val = params.equal_val,
-		.alloc_key = clone_strdup,
+		.alloc_key = (fn_clone)clone_strdup,
 		.alloc_val = params.alloc_val,
 		.free_key = (fn_free)free,
 		.free_val = params.free_val,

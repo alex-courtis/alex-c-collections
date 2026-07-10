@@ -34,7 +34,7 @@ struct IMapPair {
  */
 struct IMapParams {
 	const fn_equal equal_val;  // compare key pointers
-	const fn_alloc alloc_val;  // assign key pointer
+	const fn_clone alloc_val;  // assign key pointer
 	const fn_free free_val;    // free
 	const fn_clone clone_val;  // NOP
 	const fn_str str_val;      // %p

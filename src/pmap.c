@@ -63,7 +63,7 @@ static const struct PMapIt *it_init(const struct PMap *map) {
 	return it;
 }
 
-static const void *put(const struct PMap* const map, const void* const key, const void* const val, fn_alloc init_val) {
+static const void *put(const struct PMap* const map, const void* const key, const void* const val, fn_clone clone_val) {
 	if (!val && !map->params.allow_null_val)
 		return NULL;
 
@@ -75,7 +75,7 @@ static const void *put(const struct PMap* const map, const void* const key, cons
 		if (map->params.equal_key ? map->params.equal_key(*k, key) : *k == key) {
 			const void *val_old = *v;
 
-			const void *val_new = val && init_val ? init_val(val) : val;
+			const void *val_new = val && clone_val ? clone_val(val) : val;
 			if (!val_new && !map->params.allow_null_val) {
 				return NULL;
 			}
@@ -91,7 +91,7 @@ static const void *put(const struct PMap* const map, const void* const key, cons
 		return NULL;
 
 	// alloc new val, maybe null
-	const void *val_new = val && init_val ? init_val(val) : val;
+	const void *val_new = val && clone_val ? clone_val(val) : val;
 	if (!val_new && !map->params.allow_null_val) {
 		return NULL;
 	}
@@ -114,8 +114,8 @@ static const void *put(const struct PMap* const map, const void* const key, cons
 	return NULL;
 }
 
-static bool put_free(const struct PMap* const map, const void* const key, const void* const val, fn_alloc init_val) {
-	const void *val_old = put(map, key, val, init_val);
+static bool put_free(const struct PMap* const map, const void* const key, const void* const val, fn_clone clone_val) {
+	const void *val_old = put(map, key, val, clone_val);
 
 	if (val_old) {
 		map->params.free_val ? map->params.free_val(val_old) : free((void*)val_old);
@@ -125,18 +125,18 @@ static bool put_free(const struct PMap* const map, const void* const key, const 
 	}
 }
 
-static size_t put_all(const struct PMap* const map, const struct PMap* const from, fn_alloc init_val, bool do_free) {
+static size_t put_all(const struct PMap* const map, const struct PMap* const from, fn_clone clone_val, bool do_free) {
 	size_t overwritten = 0;
 
 	const void **k;
 	const void **v;
 	for (k = from->keys, v = from->vals; k < from->keys + from->size; k++, v++) {
 		if (do_free) {
-			if (put_free(map, *k, *v, init_val)) {
+			if (put_free(map, *k, *v, clone_val)) {
 				overwritten++;
 			}
 		} else {
-			if (put(map, *k, *v, init_val) != NULL) {
+			if (put(map, *k, *v, clone_val) != NULL) {
 				overwritten++;
 			}
 		}

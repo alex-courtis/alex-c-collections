@@ -27,21 +27,6 @@ struct SMapIItState {
 	const struct SMapIMatchData *match_data;
 };
 
-static bool equal_val_size_t(const void* const a, const void* const b) {
-	return *(size_t*)a == *(size_t*)b;
-}
-
-static void *clone_val_size_t(const void* const val) {
-	size_t *out = calloc(1, sizeof(size_t));
-	*out = *(size_t*)val;
-
-	return out;
-}
-
-static char *str_val_size_t(const void* const val) {
-	return sprintf_alloc("%zu", *(size_t*)val);
-}
-
 static bool match_key_val_wrapper(const void* const key, const void* const val, const void* const data) {
 	const struct SMapIMatchData* const matcher = data;
 	return matcher->match_key_val(key, *(size_t*)val, matcher->data);
@@ -79,14 +64,14 @@ const struct SMapI *smapi_init(void) {
 const struct SMapI *smapi_init_with(const struct SMapIParams params) {
 	const struct PMapParams pmap_params = {
 		.equal_key = params.case_insensitive_key ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
-		.equal_val = equal_val_size_t,
-		.alloc_key = clone_strdup,
-		.alloc_val = clone_val_size_t,
+		.equal_val = (fn_equal)equal_size_t,
+		.alloc_key = (fn_clone)clone_strdup,
+		.alloc_val = (fn_clone)clone_size_t,
 		.free_key = (fn_free)free,
 		.free_val = (fn_free)free,
-		.clone_val = clone_val_size_t,
+		.clone_val = (fn_clone)clone_size_t,
 		.str_key = (fn_str)str_or_null,
-		.str_val = str_val_size_t,
+		.str_val = (fn_str)str_size_t,
 		.allow_null_val = false,
 		.initial = params.initial,
 		.grow = params.grow,

@@ -661,7 +661,7 @@ static void slist_at__inexistent(void **state) {
 }
 
 static void slist_clone__deep_empty(void **state) {
-	assert_nul(slist_clone(NULL, clone_strdup));
+	assert_nul(slist_clone(NULL, (fn_clone)clone_strdup));
 }
 
 static void slist_clone__deep_vals(void **state) {
@@ -671,7 +671,7 @@ static void slist_clone__deep_vals(void **state) {
 	slist_append(&list, vals[0]);
 	slist_append(&list, vals[1]);
 
-	struct SList *cloned = slist_clone(list, clone_strdup);
+	struct SList *cloned = slist_clone(list, (fn_clone)clone_strdup);
 
 	assert_non_nul(cloned);
 
@@ -761,7 +761,7 @@ static void slist_xor_free__empty_lists(void **state) {
 	struct SList *list1 = NULL;
 	struct SList *list2 = NULL;
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, clone_strdup);
+	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
 	assert_int_equal(slist_length(list1), 0);
 }
@@ -777,7 +777,7 @@ static void slist_xor_free__first_list_empty(void **state) {
 	slist_append(&expected, strdup("item1"));
 	slist_append(&expected, strdup("item2"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, clone_strdup);
+	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
 	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
 
@@ -797,7 +797,7 @@ static void slist_xor_free__second_list_empty(void **state) {
 	slist_append(&expected, strdup("item1"));
 	slist_append(&expected, strdup("item2"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, clone_strdup);
+	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
 	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
 
@@ -822,7 +822,7 @@ static void slist_xor_free__toggle_items(void **state) {
 	slist_append(&expected, strdup("item3"));
 	slist_append(&expected, strdup("item4"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, clone_strdup);
+	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
 	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
 
@@ -844,7 +844,7 @@ static void slist_xor_free__duplicate_items(void **state) {
 
 	slist_append(&expected, strdup("item2"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, clone_strdup);
+	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
 	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
 
