@@ -114,6 +114,9 @@ size_t smapi_put_all(const struct SMapI* const map, const struct SMapI* const fr
 // remove entry, if removed return true
 bool smapi_remove(const struct SMapI* const map, const char* const key);
 
+// remove entries matching from keys, return number removed
+size_t smapi_remove_all(const struct SMapI* const map, const struct SMapI* const from);
+
 /*
  * Comparison
  */
