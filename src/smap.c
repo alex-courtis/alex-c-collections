@@ -24,7 +24,7 @@ static const struct SMap *clone(const struct SMap* const from, bool deep) {
 
 	struct SMap *to = calloc(1, sizeof(struct SMap));
 
-	to->pmap = deep ? pmap_clone_deep(from->pmap) : pmap_clone_shallow(from->pmap) ;
+	to->pmap = deep ? pmap_clone_deep(from->pmap) : pmap_clone(from->pmap) ;
 
 	memcpy((void*)&to->params, &from->params, sizeof(struct SMapParams));
 
@@ -73,7 +73,7 @@ const struct SMap *smap_init_with(const struct SMapParams params) {
 	return map;
 }
 
-const struct SMap *smap_clone_shallow(const struct SMap* const from) {
+const struct SMap *smap_clone(const struct SMap* const from) {
 	return clone(from, false);
 }
 

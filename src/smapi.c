@@ -88,7 +88,7 @@ const struct SMapI *smapi_clone(const struct SMapI* const from) {
 		return NULL;
 
 	struct SMapI *to = calloc(1, sizeof(struct SMapI));
-	to->pmap = pmap_clone_deep(from->pmap);
+	to->pmap = pmap_clone(from->pmap);
 	memcpy((void*)&to->params, &from->params, sizeof(struct SMapIParams));
 
 	return to;

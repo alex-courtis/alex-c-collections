@@ -65,7 +65,7 @@ const struct SMapS *smaps_clone(const struct SMapS* const from) {
 		return NULL;
 
 	struct SMapS *to = calloc(1, sizeof(struct SMapS));
-	to->pmap = pmap_clone_deep(from->pmap);
+	to->pmap = pmap_clone(from->pmap);
 	memcpy((void*)&to->params, &from->params, sizeof(struct SMapSParams));
 
 	return to;

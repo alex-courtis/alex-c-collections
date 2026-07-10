@@ -49,7 +49,7 @@ const struct SMapI *smapi_init(void);
 // construct with params
 const struct SMapI *smapi_init_with(const struct SMapIParams params);
 
-// clone
+// same params
 const struct SMapI *smapi_clone(const struct SMapI* const from);
 
 // free map
@@ -128,7 +128,7 @@ bool smapi_equal(const struct SMapI* const a, const struct SMapI* const b);
 // map ordered keys, caller frees list and contents
 struct SList *smapi_keys_slist(const struct SMapI* const map);
 
-// map ordered keys, same parameters
+// map ordered keys, same params
 const struct SSet *smapi_keys_sset(const struct SMapI* const map);
 
 /*

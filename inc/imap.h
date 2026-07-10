@@ -53,10 +53,10 @@ const struct IMap *imap_init(void);
 // construct with params
 const struct IMap *imap_init_with(const struct IMapParams params);
 
-// clone, setting val pointers
-const struct IMap *imap_clone_shallow(const struct IMap* const from);
+// same params, caller frees vals when alloc_val present [alloc_val]
+const struct IMap *imap_clone(const struct IMap* const from);
 
-// clone, empty when NULL clone_val [clone_val]
+// same params, caller frees vals, empty when NULL clone_val [clone_val]
 const struct IMap *imap_clone_deep(const struct IMap* const from);
 
 // free map
@@ -153,7 +153,7 @@ struct SList *imap_vals_slist(const struct IMap* const map);
 // map ordered vals, caller frees list and vals, NULL when NULL clone_val [clone_val]
 struct SList *imap_vals_slist_clone(const struct IMap* const map);
 
-// map ordered vals, same parameters, shallow when alloc_val is NULL
+// map ordered vals, same params, shallow when alloc_val is NULL
 const struct PSet *imap_vals_pset(const struct IMap* const map);
 
 /*

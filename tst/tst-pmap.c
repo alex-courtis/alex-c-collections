@@ -75,10 +75,10 @@ static void pmap_init__defaults(void **state) {
 	pmap_free(map);
 }
 
-static void pmap_clone_shallow__empty(void **state) {
+static void pmap_clone__empty(void **state) {
 	const struct PMap *from = pmap_init();
 
-	const struct PMap *to = pmap_clone_shallow(from);
+	const struct PMap *to = pmap_clone(from);
 
 	assert_non_nul(to);
 
@@ -89,7 +89,7 @@ static void pmap_clone_shallow__empty(void **state) {
 }
 
 // also tests constructor
-static void pmap_clone_shallow__params(void **state) {
+static void pmap_clone__params(void **state) {
 	const struct PMapParams params = {
 		.allow_null_val = true,
 		.equal_key = mock_equal,
@@ -104,7 +104,7 @@ static void pmap_clone_shallow__params(void **state) {
 	};
 	const struct PMap *from = pmap_init_with(params);
 
-	const struct PMap *to = pmap_clone_shallow(from);
+	const struct PMap *to = pmap_clone(from);
 
 	assert_non_nul(to);
 
@@ -124,7 +124,7 @@ static void pmap_clone_shallow__params(void **state) {
 	pmap_free(to);
 }
 
-static void pmap_clone_shallow__many(void **state) {
+static void pmap_clone__many(void **state) {
 	const struct PMapParams params = { .allow_null_val = true, };
 	const struct PMap *from = pmap_init_with(params);
 
@@ -134,7 +134,7 @@ static void pmap_clone_shallow__many(void **state) {
 	assert_nul(pmap_put(from, K3, V3));
 	assert_nul(pmap_put(from, K4, NULL));
 
-	const struct PMap *to = pmap_clone_shallow(from);
+	const struct PMap *to = pmap_clone(from);
 
 	assert_non_nul(to);
 
@@ -152,7 +152,7 @@ static void pmap_clone_shallow__many(void **state) {
 	pmap_free(to);
 }
 
-static void pmap_clone_shallow__alloc_key(void **state) {
+static void pmap_clone__alloc_key(void **state) {
 	const struct PMapParams params = {
 		.alloc_key = mock_alloc,
 		.allow_null_val = true,
@@ -178,7 +178,7 @@ static void pmap_clone_shallow__alloc_key(void **state) {
 	expect_ptr(mock_alloc, val, K2);
 	will_return_ptr_type(mock_alloc, K5, void*);
 
-	const struct PMap *to = pmap_clone_shallow(from);
+	const struct PMap *to = pmap_clone(from);
 
 	assert_non_nul(to);
 
@@ -189,6 +189,34 @@ static void pmap_clone_shallow__alloc_key(void **state) {
 	assert_ptr_equal(pmap_get(to, K3), V0);
 	assert_ptr_equal(pmap_get(to, K4), V1);
 	assert_ptr_equal(pmap_get(to, K5), NULL);
+
+	pmap_free(from);
+	pmap_free(to);
+}
+
+static void pmap_clone__alloc_val(void **state) {
+	const struct PMapParams params = {
+		.alloc_val = mock_alloc,
+	};
+	const struct PMap *from = pmap_init_with(params);
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_nul(pmap_put(from, K0, V0));
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct PMap *to = pmap_clone(from);
+
+	assert_non_nul(to);
+
+	assert_int_equal(pmap_size(to), 1);
+
+	assert_pmap_equal(from, to);
+
+	assert_ptr_equal(pmap_get(to, K0), V0);
 
 	pmap_free(from);
 	pmap_free(to);
@@ -2102,7 +2130,7 @@ static void pmap_str__str_key(void **state) {
 static void pmap__null_inputs(void **state) {
 	const struct PMap *map = pmap_init();
 
-	assert_nul(pmap_clone_shallow(NULL));
+	assert_nul(pmap_clone(NULL));
 	assert_nul(pmap_clone_deep(NULL));
 	pmap_free(NULL);
 	pmap_free_vals(NULL);
@@ -2165,10 +2193,11 @@ int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(pmap_init__defaults),
 
-		TEST(pmap_clone_shallow__empty),
-		TEST(pmap_clone_shallow__params),
-		TEST(pmap_clone_shallow__many),
-		TEST(pmap_clone_shallow__alloc_key),
+		TEST(pmap_clone__empty),
+		TEST(pmap_clone__params),
+		TEST(pmap_clone__many),
+		TEST(pmap_clone__alloc_key),
+		TEST(pmap_clone__alloc_val),
 
 		TEST(pmap_clone_deep__clone_val_allow_null_val),
 		TEST(pmap_clone_deep__clone_val_no_allow_null_val),

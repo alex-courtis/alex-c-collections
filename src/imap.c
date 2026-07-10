@@ -45,7 +45,7 @@ static const struct IMap *clone(const struct IMap* const from, bool deep) {
 
 	struct IMap *to = calloc(1, sizeof(struct IMap));
 
-	to->pmap = deep ? pmap_clone_deep(from->pmap) : pmap_clone_shallow(from->pmap);
+	to->pmap = deep ? pmap_clone_deep(from->pmap) : pmap_clone(from->pmap);
 
 	memcpy((void*)&to->params, &from->params, sizeof(struct IMapParams));
 
@@ -94,7 +94,7 @@ const struct IMap *imap_init_with(const struct IMapParams params) {
 	return map;
 }
 
-const struct IMap *imap_clone_shallow(const struct IMap* const from) {
+const struct IMap *imap_clone(const struct IMap* const from) {
 	return clone(from, false);
 }
 

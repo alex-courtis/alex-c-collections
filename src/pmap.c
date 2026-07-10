@@ -190,8 +190,8 @@ const struct PMap *pmap_init_with(const struct PMapParams params) {
 	return map;
 }
 
-const struct PMap *pmap_clone_shallow(const struct PMap* const from) {
-	return from ? clone(from, NULL) : NULL;
+const struct PMap *pmap_clone(const struct PMap* const from) {
+	return from ? clone(from, from->params.alloc_val) : NULL;
 }
 
 const struct PMap *pmap_clone_deep(const struct PMap* const from) {

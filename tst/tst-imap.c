@@ -625,7 +625,7 @@ static void imap_put_all__variants(void **state) {
 	assert_nul(imap_put(to, 0, V3));
 
 	// put_all
-	const struct IMap *actual = imap_clone_shallow(to);
+	const struct IMap *actual = imap_clone(to);
 
 	assert_int_equal(imap_put_all(actual, from), 1);
 
@@ -633,7 +633,7 @@ static void imap_put_all__variants(void **state) {
 	imap_free(actual);
 
 	// put_all_free
-	actual = imap_clone_shallow(to);
+	actual = imap_clone(to);
 	expect_ptr(mock_free, val, V3);
 
 	assert_int_equal(imap_put_all_free(actual, from), 1);
@@ -642,7 +642,7 @@ static void imap_put_all__variants(void **state) {
 	imap_free(actual);
 
 	// put_all_clone
-	actual = imap_clone_shallow(to);
+	actual = imap_clone(to);
 	expect_ptr(mock_clone, val, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 	expect_ptr(mock_clone, val, V1);
@@ -654,7 +654,7 @@ static void imap_put_all__variants(void **state) {
 	imap_free(actual);
 
 	// put_all_clone_free
-	actual = imap_clone_shallow(to);
+	actual = imap_clone(to);
 	expect_ptr(mock_clone, val, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 	expect_ptr(mock_clone, val, V1);
@@ -803,7 +803,7 @@ static void imap_vals_pset__many(void **state) {
 	pset_free(actual);
 }
 
-static void imap_clone_shallow__many(void **state) {
+static void imap_clone__many(void **state) {
 	const struct IMapParams params = { .allow_null_val = true, };
 	const struct IMap *from = imap_init_with(params);
 
@@ -811,7 +811,7 @@ static void imap_clone_shallow__many(void **state) {
 	assert_nul(imap_put(from, 1, NULL));
 	assert_nul(imap_put(from, 2, V2));
 
-	const struct IMap *to = imap_clone_shallow(from);
+	const struct IMap *to = imap_clone(from);
 
 	assert_non_nul(to);
 
@@ -824,7 +824,7 @@ static void imap_clone_shallow__many(void **state) {
 }
 
 // also tests constructor
-static void imap_clone_shallow__params(void **state) {
+static void imap_clone__params(void **state) {
 	const struct IMapParams params = {
 		.equal_val = mock_equal,
 		.alloc_val = mock_alloc,
@@ -836,7 +836,7 @@ static void imap_clone_shallow__params(void **state) {
 	};
 	const struct IMap *from = imap_init_with(params);
 
-	const struct IMap *to = imap_clone_shallow(from);
+	const struct IMap *to = imap_clone(from);
 
 	assert_non_nul(to);
 
@@ -898,7 +898,7 @@ static void imap_clone_deep__no_clone_val(void **state) {
 static void imap__null_inputs(void **state) {
 	const struct IMap *map = imap_init();
 
-	assert_nul(imap_clone_shallow(NULL));
+	assert_nul(imap_clone(NULL));
 	assert_nul(imap_clone_deep(NULL));
 	imap_free(NULL);
 	imap_free_vals(NULL);
@@ -1012,8 +1012,8 @@ int main(void) {
 
 		TEST(imap_vals_pset__many),
 
-		TEST(imap_clone_shallow__many),
-		TEST(imap_clone_shallow__params),
+		TEST(imap_clone__many),
+		TEST(imap_clone__params),
 
 		TEST(imap_clone_deep__clone_val),
 		TEST(imap_clone_deep__no_clone_val),

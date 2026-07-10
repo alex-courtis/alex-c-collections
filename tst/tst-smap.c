@@ -427,7 +427,7 @@ static void smap_put_all__variants(void **state) {
 	assert_nul(smap_put(to, "a", V3));
 
 	// put_all
-	const struct SMap *actual = smap_clone_shallow(to);
+	const struct SMap *actual = smap_clone(to);
 
 	assert_int_equal(smap_put_all(actual, from), 1);
 
@@ -435,7 +435,7 @@ static void smap_put_all__variants(void **state) {
 	smap_free(actual);
 
 	// put_all_free
-	actual = smap_clone_shallow(to);
+	actual = smap_clone(to);
 	expect_ptr(mock_free, val, V3);
 
 	assert_int_equal(smap_put_all_free(actual, from), 1);
@@ -444,7 +444,7 @@ static void smap_put_all__variants(void **state) {
 	smap_free(actual);
 
 	// put_all_clone
-	actual = smap_clone_shallow(to);
+	actual = smap_clone(to);
 	expect_ptr(mock_clone, val, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 	expect_ptr(mock_clone, val, V1);
@@ -456,7 +456,7 @@ static void smap_put_all__variants(void **state) {
 	smap_free(actual);
 
 	// put_all_clone_free
-	actual = smap_clone_shallow(to);
+	actual = smap_clone(to);
 	expect_ptr(mock_clone, val, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 	expect_ptr(mock_clone, val, V1);
@@ -662,7 +662,7 @@ static void smap_vals_slist_clone__many(void **state) {
 	smap_free(map);
 }
 
-static void smap_clone_shallow__many(void **state) {
+static void smap_clone__many(void **state) {
 	const struct SMapParams params = { .allow_null_val = true, };
 	const struct SMap *from = smap_init_with(params);
 
@@ -670,7 +670,7 @@ static void smap_clone_shallow__many(void **state) {
 	assert_nul(smap_put(from, "b", NULL));
 	assert_nul(smap_put(from, "c", V2));
 
-	const struct SMap *to = smap_clone_shallow(from);
+	const struct SMap *to = smap_clone(from);
 
 	assert_non_nul(to);
 
@@ -683,7 +683,7 @@ static void smap_clone_shallow__many(void **state) {
 }
 
 // also tests constructor
-static void smap_clone_shallow__params(void **state) {
+static void smap_clone__params(void **state) {
 	const struct SMapParams params = {
 		.case_insensitive = true,
 		.equal_val = mock_equal,
@@ -696,7 +696,7 @@ static void smap_clone_shallow__params(void **state) {
 	};
 	const struct SMap *from = smap_init_with(params);
 
-	const struct SMap *to = smap_clone_shallow(from);
+	const struct SMap *to = smap_clone(from);
 
 	assert_non_nul(to);
 
@@ -761,7 +761,7 @@ static void smap_clone_deep__no_clone_val(void **state) {
 static void smap__null_inputs(void **state) {
 	const struct SMap *map = smap_init();
 
-	assert_nul(smap_clone_shallow(NULL));
+	assert_nul(smap_clone(NULL));
 	assert_nul(smap_clone_deep(NULL));
 	smap_free(NULL);
 	smap_free_vals(NULL);
@@ -869,8 +869,8 @@ int main(void) {
 
 		TEST(smap_vals_pset__many),
 
-		TEST(smap_clone_shallow__many),
-		TEST(smap_clone_shallow__params),
+		TEST(smap_clone__many),
+		TEST(smap_clone__params),
 
 		TEST(smap_clone_deep__clone_val),
 		TEST(smap_clone_deep__no_clone_val),

@@ -46,7 +46,7 @@ const struct PSet *pset_init(void);
 // construct with params
 const struct PSet *pset_init_with(const struct PSetParams params);
 
-// same parameters, caller frees vals when alloc_val present [alloc_val]
+// same params, caller frees vals when alloc_val present [alloc_val]
 const struct PSet *pset_clone(const struct PSet* const from);
 
 // set ordered vals, caller frees vals, NULL when NULL clone_val [clone_val]
