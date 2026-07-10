@@ -338,6 +338,10 @@ const struct PSet *imap_vals_pset(const struct IMap* const map) {
 	return map ? pmap_vals_pset(map->pmap) : NULL;
 }
 
+const struct PSet *imap_vals_pset_clone(const struct IMap* const map) {
+	return map ? pmap_vals_pset_clone(map->pmap) : NULL;
+}
+
 char *imap_str(const struct IMap* const map) {
 	return map ? pmap_str(map->pmap) : NULL;
 }

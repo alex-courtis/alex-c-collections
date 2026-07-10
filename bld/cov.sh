@@ -2,7 +2,7 @@
 
 set -e
 
-HI_LIMIT=85
+HI_LIMIT=100
 MED_LIMIT=60
 
 INFO_PATH="/tmp/coverage.info" 
@@ -73,8 +73,6 @@ for EXEC in ${EXECS}; do
 	find . -name '*gcda' -delete -print
 
 done
-
-# TODO fn is reporting bad branch coverage
 
 # combined report for all coverage info
 genhtml \

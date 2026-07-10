@@ -161,8 +161,12 @@ struct SList *smap_vals_slist(const struct SMap* const map);
 // map ordered vals, caller frees list and vals, NULL when NULL clone_val [clone_val]
 struct SList *smap_vals_slist_clone(const struct SMap* const map);
 
-// map ordered vals, same params, shallow when alloc_val is NULL
+// map ordered vals, same params, caller frees set, caller frees vals when alloc_val present [alloc_val]
 const struct PSet *smap_vals_pset(const struct SMap* const map);
+
+// map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val or both alloc_val and clone_val [clone_val]
+const struct PSet *smap_vals_pset_clone(const struct SMap* const map);
+
 
 /*
  * Info

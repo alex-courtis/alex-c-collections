@@ -640,6 +640,27 @@ static void smap_vals_pset__many(void **state) {
 	pset_free(actual);
 }
 
+static void smap_vals_pset_clone__many(void **state) {
+	const struct SMapParams params = { .clone_val = mock_clone, };
+	const struct SMap *map = smap_init_with(params);
+
+	smap_put(map, "a", V0);
+
+	const struct PSet *expected = pset_init();
+	pset_add(expected, V0);
+
+	expect_ptr(mock_clone, val, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
+
+	const struct PSet *actual = smap_vals_pset_clone(map);
+
+	assert_pset_equal(actual, expected);
+
+	smap_free(map);
+	pset_free(expected);
+	pset_free(actual);
+}
+
 static void smap_vals_slist_clone__many(void **state) {
 	const struct SMapParams params = {
 		.allow_null_val = true,
@@ -812,6 +833,7 @@ static void smap__null_inputs(void **state) {
 	assert_nul(smap_vals_slist(NULL));
 	assert_nul(smap_vals_slist_clone(NULL));
 	assert_nul(smap_vals_pset(NULL));
+	assert_nul(smap_vals_pset_clone(NULL));
 	assert_nul(smap_str(NULL));
 	assert_int_equal(smap_size(NULL), 0);
 
@@ -868,6 +890,7 @@ int main(void) {
 		TEST(smap_vals_slist__many),
 
 		TEST(smap_vals_pset__many),
+		TEST(smap_vals_pset_clone__many),
 
 		TEST(smap_clone__many),
 		TEST(smap_clone__params),

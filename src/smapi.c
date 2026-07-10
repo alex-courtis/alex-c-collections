@@ -68,7 +68,6 @@ const struct SMapI *smapi_init_with(const struct SMapIParams params) {
 		.alloc_val = (fn_clone)clone_size_t,
 		.free_key = (fn_free)free,
 		.free_val = (fn_free)free,
-		.clone_val = (fn_clone)clone_size_t,
 		.str_key = (fn_str)str_or_null,
 		.str_val = (fn_str)str_size_t,
 		.allow_null_val = false,

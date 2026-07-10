@@ -45,7 +45,6 @@ const struct SMapS *smaps_init_with(const struct SMapSParams params) {
 		.alloc_val = (fn_clone)clone_strdup,
 		.free_key = (fn_free)free,
 		.free_val = (fn_free)free,
-		.clone_val = (fn_clone)clone_strdup,
 		.str_key = (fn_str)str_or_null,
 		.str_val = (fn_str)str_or_null,
 		.initial = params.initial,

@@ -592,7 +592,6 @@ static void smaps_clone__(void **state) {
 	assert_ptr_equal(to->pmap->params.alloc_val, clone_strdup);
 	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
 	assert_ptr_equal(to->pmap->params.free_val, (fn_free)free);
-	assert_ptr_equal(to->pmap->params.clone_val, clone_strdup);
 
 	assert_true(to->params.case_insensitive_key);
 	assert_true(to->params.case_insensitive_val);
