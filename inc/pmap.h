@@ -32,6 +32,8 @@ struct PMapPair {
 	const void *val;
 };
 
+// TODO fn_alloc and fn_clone are the same, use fn_clone everywhere
+
 /*
  * Optional constructor params (default)
  */
@@ -125,23 +127,23 @@ const void *pmap_put_if_absent(const struct PMap* const map, const void* const k
 // set key/val, free old val, return true if overwritten [equal_key, alloc_key, alloc_val, free_key, free_val]
 bool pmap_put_free(const struct PMap* const map, const void* const key, const void* const val);
 
-// remove val, return old val if present [equal_key, free_key]
-const void *pmap_remove(const struct PMap* const map, const void* const key);
-
-// remove val, if removed free val and return true [equal_key, free_key, free_val]
-bool pmap_remove_free(const struct PMap* const map, const void* const key);
-
 // set all from key/val, returning number overwritten [equal_key, alloc_key, alloc_val]
 size_t pmap_put_all(const struct PMap* const map, const struct PMap* const from);
 
 // set all from key/val, returning number overwritten, freeing overwritten vals [equal_key, alloc_key, alloc_val, free_val]
 size_t pmap_put_all_free(const struct PMap* const map, const struct PMap* const from);
 
-// set all from key/val, returning number overwritten, NOP when NULL clone_val  [equal_key, alloc_key, clone_val]
+// set all from key/val, returning number overwritten, NOP when NULL clone_val [equal_key, alloc_key, clone_val]
 size_t pmap_put_all_clone(const struct PMap* const map, const struct PMap* const from);
 
 // set all from key/val, returning number overwritten, freeing overwritten vals, NOP when NULL clone_val [equal_key, alloc_key, free_val, clone_val]
 size_t pmap_put_all_clone_free(const struct PMap* const map, const struct PMap* const from);
+
+// remove val, return old val if present [equal_key, free_key]
+const void *pmap_remove(const struct PMap* const map, const void* const key);
+
+// remove val, if removed free val and return true [equal_key, free_key, free_val]
+bool pmap_remove_free(const struct PMap* const map, const void* const key);
 
 /*
  * Comparison

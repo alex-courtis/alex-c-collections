@@ -339,6 +339,81 @@ static void pset_add_all__many(void **state) {
 	pset_free(expected);
 }
 
+static void pset_add_all__alloc_val(void **state) {
+	const struct PSetParams params = { .alloc_val = mock_alloc, };
+
+	expect_ptr(mock_alloc, val, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct PSet *to = pset_init_with(params);
+	assert_true(pset_add(to, V0));
+
+	const struct PSet *from = pset_init();
+	assert_true(pset_add(from, V1));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, V0));
+	assert_true(pset_add(expected, V1));
+
+	expect_ptr(mock_alloc, val, V1);
+	will_return_ptr_type(mock_alloc, V1, void*);
+
+	assert_int_equal(pset_add_all(to, from), 1);
+
+	assert_pset_equal(to, expected);
+
+	pset_free(to);
+	pset_free(from);
+	pset_free(expected);
+}
+
+static void pset_add_all_clone__many(void **state) {
+	const struct PSetParams params = { .clone_val = mock_clone, };
+	const struct PSet *to = pset_init_with(params);
+
+	assert_true(pset_add(to, V0));
+	assert_true(pset_add(to, V1));
+
+	const struct PSet *from = pset_init();
+	assert_true(pset_add(from, V1));
+	assert_true(pset_add(from, V2));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, V0));
+	assert_true(pset_add(expected, V1));
+	assert_true(pset_add(expected, V2));
+
+	expect_ptr(mock_clone, val, V2);
+	will_return_ptr_type(mock_clone, V2, void*);
+
+	assert_int_equal(pset_add_all_clone(to, from), 1);
+
+	assert_pset_equal(to, expected);
+
+	pset_free(to);
+	pset_free(from);
+	pset_free(expected);
+}
+
+static void pset_add_all_clone__no_clone_val(void **state) {
+	const struct PSet *to = pset_init();
+	assert_true(pset_add(to, V0));
+
+	const struct PSet *from = pset_init();
+	assert_true(pset_add(from, V1));
+
+	const struct PSet *expected = pset_init();
+	assert_true(pset_add(expected, V0));
+
+	assert_int_equal(pset_add_all_clone(to, from), 0);
+
+	assert_pset_equal(to, expected);
+
+	pset_free(to);
+	pset_free(from);
+	pset_free(expected);
+}
+
 static void pset_add_many__many(void **state) {
 	const struct PSet *to = pset_init();
 	assert_true(pset_add(to, V0));
@@ -992,6 +1067,8 @@ static void pset__null_inputs(void **state) {
 
 	assert_int_equal(pset_add_all(NULL, NULL), 0);
 	assert_int_equal(pset_add_all(set, NULL), 0);
+	assert_int_equal(pset_add_all_clone(NULL, NULL), 0);
+	assert_int_equal(pset_add_all_clone(set, NULL), 0);
 	assert_nul(pset_clone_deep(NULL));
 	assert_nul(pset_clone_shallow(NULL));
 	pset_free(NULL);
@@ -1047,6 +1124,10 @@ int main(void) {
 		TEST(pset_add__grow),
 
 		TEST(pset_add_all__many),
+		TEST(pset_add_all__alloc_val),
+
+		TEST(pset_add_all_clone__many),
+		TEST(pset_add_all_clone__no_clone_val),
 
 		TEST(pset_add_many__many),
 		TEST(pset_add_many__no_vals),

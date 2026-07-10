@@ -1232,12 +1232,8 @@ static void pmap_put_all__many(void **state) {
 	pmap_free(expected);
 }
 
-static void pmap_put_all_free__many(void **state) {
-	const struct PMapParams params = {
-		.alloc_val = mock_alloc,
-		.free_val = mock_free,
-		.clone_val = mock_clone,
-	};
+static void pmap_put_all__alloc_val(void **state) {
+	const struct PMapParams params = { .alloc_val = mock_alloc, };
 
 	expect_ptr(mock_alloc, val, V1);
 	will_return_ptr_type(mock_alloc, V1, void*);
@@ -1254,13 +1250,40 @@ static void pmap_put_all_free__many(void **state) {
 	assert_nul(pmap_put(expected, K1, V3));
 	assert_nul(pmap_put(expected, K2, V4));
 
-	expect_ptr(mock_free, val, V1);
-
 	expect_ptr(mock_alloc, val, V3);
 	will_return_ptr_type(mock_alloc, V3, void*);
 
 	expect_ptr(mock_alloc, val, V4);
 	will_return_ptr_type(mock_alloc, V4, void*);
+
+	assert_int_equal(pmap_put_all(to, from), 1);
+
+	assert_pmap_equal(to, expected);
+
+	pmap_free(to);
+	pmap_free(from);
+	pmap_free(expected);
+}
+
+static void pmap_put_all_free__many(void **state) {
+	const struct PMapParams params = {
+		.free_val = mock_free,
+		.clone_val = mock_clone,
+	};
+
+	const struct PMap *to = pmap_init_with(params);
+	assert_nul(pmap_put(to, K1, V1));
+
+	const struct PMap *from = pmap_init();
+	assert_nul(pmap_put(from, K1, V3));
+	assert_nul(pmap_put(from, K2, V4));
+
+
+	const struct PMap *expected = pmap_init();
+	assert_nul(pmap_put(expected, K1, V3));
+	assert_nul(pmap_put(expected, K2, V4));
+
+	expect_ptr(mock_free, val, V1);
 
 	assert_int_equal(pmap_put_all_free(to, from), 1);
 
@@ -1303,7 +1326,7 @@ static void pmap_put_all_clone__one(void **state) {
 	pmap_free(expected);
 }
 
-static void pmap_put_all_clone__free__no_clone_val(void **state) {
+static void pmap_put_all_clone__no_clone_val(void **state) {
 	const struct PMap *to = pmap_init();
 	assert_nul(pmap_put(to, K1, V1));
 
@@ -1314,10 +1337,6 @@ static void pmap_put_all_clone__free__no_clone_val(void **state) {
 	assert_nul(pmap_put(expected, K1, V1));
 
 	assert_int_equal(pmap_put_all_clone(to, from), 0);
-
-	assert_pmap_equal(to, expected);
-
-	assert_int_equal(pmap_put_all_clone_free(to, from), 0);
 
 	assert_pmap_equal(to, expected);
 
@@ -1346,6 +1365,25 @@ static void pmap_put_all_clone_free__one(void **state) {
 	expect_ptr(mock_free, val, V1);
 
 	assert_int_equal(pmap_put_all_clone_free(to, from), 1);
+
+	assert_pmap_equal(to, expected);
+
+	pmap_free(to);
+	pmap_free(from);
+	pmap_free(expected);
+}
+
+static void pmap_put_all_clone_free__no_clone_val(void **state) {
+	const struct PMap *to = pmap_init();
+	assert_nul(pmap_put(to, K1, V1));
+
+	const struct PMap *from = pmap_init();
+	assert_nul(pmap_put(from, K1, V2));
+
+	const struct PMap *expected = pmap_init();
+	assert_nul(pmap_put(expected, K1, V1));
+
+	assert_int_equal(pmap_put_all_clone_free(to, from), 0);
 
 	assert_pmap_equal(to, expected);
 
@@ -2203,14 +2241,15 @@ int main(void) {
 		TEST(pmap_put__again),
 
 		TEST(pmap_put_all__many),
+		TEST(pmap_put_all__alloc_val),
 
 		TEST(pmap_put_all_free__many),
 
 		TEST(pmap_put_all_clone__one),
+		TEST(pmap_put_all_clone__no_clone_val),
 
 		TEST(pmap_put_all_clone_free__one),
-
-		TEST(pmap_put_all_clone__free__no_clone_val),
+		TEST(pmap_put_all_clone_free__no_clone_val),
 
 		TEST(pmap_put_many__many),
 		TEST(pmap_put_many__no_keyvals),
