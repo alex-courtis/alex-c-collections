@@ -716,6 +716,49 @@ static void imap_remove_free__(void **state) {
 	imap_free(map);
 }
 
+static void imap_remove_all__(void **state) {
+	const struct IMap *map = imap_init();
+
+	assert_nul(imap_put(map, 0, V0));
+	assert_nul(imap_put(map, 1, V1));
+	assert_nul(imap_put(map, 2, V2));
+
+	const struct IMap *from = imap_init();
+
+	assert_nul(imap_put(from, 1, V1));
+	assert_nul(imap_put(from, 3, V3));
+
+	const struct IMap *expected = imap_init();
+
+	assert_nul(imap_put(expected, 0, V0));
+	assert_nul(imap_put(expected, 2, V2));
+
+	assert_int_equal(imap_remove_all(map, from), 1);
+
+	assert_imap_equal(map, expected);
+
+	imap_free(map);
+	imap_free(from);
+	imap_free(expected);
+}
+
+static void imap_remove_all_free__(void **state) {
+	const struct IMapParams params = { .free_val = mock_free, };
+	const struct IMap *map = imap_init_with(params);
+
+	assert_nul(imap_put(map, 0, V0));
+
+	const struct IMap *from = imap_init();
+
+	assert_nul(imap_put(from, 0, V0));
+
+	expect_ptr(mock_free, val, V0);
+
+	assert_int_equal(imap_remove_all_free(map, from), 1);
+
+	imap_free(map);
+	imap_free(from);
+}
 static void imap_str__(void **state) {
 	const struct IMapParams params = { .allow_null_val = true, };
 	const struct IMap *map = imap_init_with(params);
@@ -950,6 +993,12 @@ static void imap__null_inputs(void **state) {
 	assert_nul(imap_remove(map, 0));
 	assert_false(imap_remove_free(NULL, 0));
 	assert_false(imap_remove_free(map, 0));
+	assert_int_equal(imap_remove_all(NULL, NULL), 0);
+	assert_int_equal(imap_remove_all(map, NULL), 0);
+	assert_int_equal(imap_remove_all(NULL, map), 0);
+	assert_int_equal(imap_remove_all_free(NULL, NULL), 0);
+	assert_int_equal(imap_remove_all_free(map, NULL), 0);
+	assert_int_equal(imap_remove_all_free(NULL, map), 0);
 	assert_int_equal(imap_put_all(NULL, NULL), 0);
 	assert_int_equal(imap_put_all(map, NULL), 0);
 	assert_int_equal(imap_put_all_free(NULL, NULL), 0);
@@ -1026,6 +1075,10 @@ int main(void) {
 		TEST(imap_put_many__no_keyvals),
 
 		TEST(imap_remove_free__),
+
+		TEST(imap_remove_all__),
+
+		TEST(imap_remove_all_free__),
 
 		TEST(imap_str__),
 

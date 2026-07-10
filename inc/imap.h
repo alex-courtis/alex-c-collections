@@ -136,6 +136,12 @@ const void *imap_remove(const struct IMap* const map, const size_t key);
 // remove and free entry, if removed free it and return true [free_val]
 bool imap_remove_free(const struct IMap* const map, const size_t key);
 
+// remove entries matching from keys, return number removed
+size_t imap_remove_all(const struct IMap* const map, const struct IMap* const from);
+
+// remove and free entries matching from keys, return number removed [free_val]
+size_t imap_remove_all_free(const struct IMap* const map, const struct IMap* const from);
+
 /*
  * Comparison
  */
