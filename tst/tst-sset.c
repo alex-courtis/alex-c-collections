@@ -114,6 +114,29 @@ static void sset_add_many__many(void **state) {
 	sset_free(expected);
 }
 
+static void sset_remove_all__many(void **state) {
+	const struct SSet *set = sset_init();
+	assert_true(sset_add(set, "a"));
+	assert_true(sset_add(set, "b"));
+	assert_true(sset_add(set, "c"));
+
+	const struct SSet *from = sset_init();
+	assert_true(sset_add(from, "a"));
+	assert_true(sset_add(from, "c"));
+	assert_true(sset_add(from, "d"));
+
+	const struct SSet *expected = sset_init();
+	assert_true(sset_add(expected, "b"));
+
+	assert_int_equal(sset_remove_all(set, from), 2);
+
+	assert_sset_equal(set, expected);
+
+	sset_free(set);
+	sset_free(from);
+	sset_free(expected);
+}
+
 static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	const struct SSetParams params = { .case_insensitive = true, };
 	const struct SSet *set = sset_init_with(params);
@@ -432,6 +455,9 @@ static void sset__null_inputs(void **state) {
 	assert_int_equal(sset_add_many(NULL, NULL), 0);
 	assert_false(sset_remove(NULL, NULL));
 	assert_false(sset_remove(set, NULL));
+	assert_int_equal(sset_remove_all(NULL, NULL), 0);
+	assert_int_equal(sset_remove_all(set, NULL), 0);
+	assert_int_equal(sset_remove_all(NULL, set), 0);
 	assert_false(sset_equal(NULL, NULL));
 	assert_false(sset_equal(set, NULL));
 	assert_nul(sset_slist(NULL));
@@ -452,6 +478,8 @@ int main(void) {
 		TEST(sset_add_all__many),
 
 		TEST(sset_add_many__many),
+
+		TEST(sset_remove_all__many),
 
 		TEST(sset_match__matches),
 
