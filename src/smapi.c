@@ -309,7 +309,7 @@ bool smapi_remove(const struct SMapI* const map, const char* const key) {
 }
 
 size_t smapi_remove_all(const struct SMapI* const map, const struct SMapI* const from) {
-	return map && from ? pmap_remove_all(map->pmap, from->pmap) : false;
+	return map && from ? pmap_remove_all_free(map->pmap, from->pmap) : false;
 }
 
 bool smapi_equal(const struct SMapI* const a, const struct SMapI* const b) {
