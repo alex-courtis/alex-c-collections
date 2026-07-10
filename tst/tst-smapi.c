@@ -586,13 +586,13 @@ static void smapi_str__(void **state) {
 	smapi_free(map);
 }
 
-static void smapi_keys_slist_deep__many(void **state) {
+static void smapi_keys_slist__many(void **state) {
 	const struct SMapI *map = smapi_init();
 
 	smapi_put(map, "a", 10);
 	smapi_put(map, "b", 11);
 
-	struct SList *list = smapi_keys_slist_deep(map);
+	struct SList *list = smapi_keys_slist(map);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "a");
@@ -712,7 +712,7 @@ static void smapi__null_inputs(void **state) {
 	assert_false(smapi_remove(map, NULL));
 	assert_false(smapi_equal(NULL, NULL));
 	assert_false(smapi_equal(map, NULL));
-	assert_nul(smapi_keys_slist_deep(NULL));
+	assert_nul(smapi_keys_slist(NULL));
 	assert_nul(smapi_keys_sset(NULL));
 	assert_nul(smapi_str(NULL));
 	assert_int_equal(smapi_size(NULL), 0);
@@ -770,7 +770,7 @@ int main(void) {
 
 		TEST(smapi_str__),
 
-		TEST(smapi_keys_slist_deep__many),
+		TEST(smapi_keys_slist__many),
 
 		TEST(smapi_keys_sset__many),
 		TEST(smapi_keys_sset__params),

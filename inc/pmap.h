@@ -156,11 +156,8 @@ bool pmap_equal(const struct PMap* const a, const struct PMap* const b);
 
 // TODO just a key clone with maybe alloc_val
 
-// map ordered keys, caller frees list only
-struct SList *pmap_keys_slist_shallow(const struct PMap* const map);
-
-// map ordered keys, caller frees list list and vals, empty when NULL alloc_key [alloc_key]
-struct SList *pmap_keys_slist_deep(const struct PMap* const map);
+// map ordered keys, caller frees list, caller frees contents when alloc_key present [alloc_key]
+struct SList *pmap_keys_slist(const struct PMap* const map);
 
 // map ordered keys, same parameters, shallow when alloc_key is NULL
 const struct PSet *pmap_keys_pset(const struct PMap* const map);

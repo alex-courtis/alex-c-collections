@@ -6,7 +6,6 @@
 #include "fn.h"
 #include "pmap.h"
 #include "sset.h"
-#include "str.h"
 
 #include "smapi.h"
 
@@ -314,8 +313,8 @@ bool smapi_equal(const struct SMapI* const a, const struct SMapI* const b) {
 	return a && b ? pmap_equal(a->pmap, b->pmap) : false;
 }
 
-struct SList *smapi_keys_slist_deep(const struct SMapI* const map) {
-	return map ? pmap_keys_slist_deep(map->pmap) : NULL;
+struct SList *smapi_keys_slist(const struct SMapI* const map) {
+	return map ? pmap_keys_slist(map->pmap) : NULL;
 }
 
 const struct SSet *smapi_keys_sset(const struct SMapI* const map) {

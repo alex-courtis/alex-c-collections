@@ -157,21 +157,6 @@ static const struct PMap *clone(const struct PMap* const from, fn_clone clone_va
 	return to;
 }
 
-static struct SList *keys_slist(const struct PMap* const map, fn_clone clone_key) {
-	struct SList *list = NULL;
-
-	const void **k;
-	for (k = map->keys; k < map->keys + map->size; k++) {
-		if (clone_key) {
-			slist_append(&list, (void*)clone_key(*k));
-		} else {
-			slist_append(&list, (void*)*k);
-		}
-	}
-
-	return list;
-}
-
 static struct SList *vals_slist(const struct PMap* const map, fn_clone clone_val) {
 	struct SList *list = NULL;
 
@@ -562,15 +547,19 @@ bool pmap_equal(const struct PMap* const a, const struct PMap* const b) {
 	return true;
 }
 
-struct SList *pmap_keys_slist_shallow(const struct PMap* const map) {
-	return map ? keys_slist(map, NULL) : NULL;
-}
-
-struct SList *pmap_keys_slist_deep(const struct PMap* const map) {
-	if (!map || !map->params.alloc_key)
+struct SList *pmap_keys_slist(const struct PMap* const map) {
+	if (!map)
 		return NULL;
 
-	return keys_slist(map, map->params.alloc_key);
+	struct SList *list = NULL;
+
+	const void **k;
+	for (k = map->keys; k < map->keys + map->size; k++) {
+		const void *key = map->params.alloc_key ? map->params.alloc_key(*k) : *k;
+		slist_append(&list, (void*)key);
+	}
+
+	return list;
 }
 
 const struct PSet *pmap_keys_pset(const struct PMap* const map) {

@@ -546,13 +546,13 @@ static void smap_str__(void **state) {
 	smap_free(map);
 }
 
-static void smap_keys_slist_deep__many(void **state) {
+static void smap_keys_slist__many(void **state) {
 	const struct SMap *map = smap_init();
 
 	smap_put(map, "a", V0);
 	smap_put(map, "b", V1);
 
-	struct SList *list = smap_keys_slist_deep(map);
+	struct SList *list = smap_keys_slist(map);
 
 	assert_int_equal(slist_length(list), 2);
 	assert_str_equal(slist_at(list, 0), "a");
@@ -807,7 +807,7 @@ static void smap__null_inputs(void **state) {
 	assert_false(smap_remove_free(map, NULL));
 	assert_false(smap_equal(NULL, NULL));
 	assert_false(smap_equal(map, NULL));
-	assert_nul(smap_keys_slist_deep(NULL));
+	assert_nul(smap_keys_slist(NULL));
 	assert_nul(smap_keys_sset(NULL));
 	assert_nul(smap_vals_slist_shallow(NULL));
 	assert_nul(smap_vals_slist_deep(NULL));
@@ -859,7 +859,7 @@ int main(void) {
 
 		TEST(smap_str__),
 
-		TEST(smap_keys_slist_deep__many),
+		TEST(smap_keys_slist__many),
 
 		TEST(smap_keys_sset__many),
 		TEST(smap_keys_sset__params),

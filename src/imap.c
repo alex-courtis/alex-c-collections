@@ -4,7 +4,6 @@
 
 #include "fn.h"
 #include "pmap.h"
-#include "str.h"
 
 #include "imap.h"
 

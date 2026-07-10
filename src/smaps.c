@@ -205,8 +205,8 @@ bool smaps_equal(const struct SMapS* const a, const struct SMapS* const b) {
 	return a && b ? pmap_equal(a->pmap, b->pmap) : false;
 }
 
-struct SList *smaps_keys_slist_deep(const struct SMapS* const map) {
-	return map ? pmap_keys_slist_deep(map->pmap) : NULL;
+struct SList *smaps_keys_slist(const struct SMapS* const map) {
+	return map ? pmap_keys_slist(map->pmap) : NULL;
 }
 
 const struct SSet *smaps_keys_sset(const struct SMapS* const map) {

@@ -124,8 +124,8 @@ bool smaps_equal(const struct SMapS* const a, const struct SMapS* const b);
  * Conversion
  */
 
-// map ordered vals, caller frees list and vals
-struct SList *smaps_keys_slist_deep(const struct SMapS* const map);
+// map ordered keys, caller frees list and contents
+struct SList *smaps_keys_slist(const struct SMapS* const map);
 
 // map ordered keys, same parameters
 const struct SSet *smaps_keys_sset(const struct SMapS* const map);

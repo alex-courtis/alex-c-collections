@@ -125,8 +125,8 @@ bool smapi_equal(const struct SMapI* const a, const struct SMapI* const b);
  * Conversion
  */
 
-// map ordered vals, caller frees list and vals
-struct SList *smapi_keys_slist_deep(const struct SMapI* const map);
+// map ordered keys, caller frees list and contents
+struct SList *smapi_keys_slist(const struct SMapI* const map);
 
 // map ordered keys, same parameters
 const struct SSet *smapi_keys_sset(const struct SMapI* const map);
