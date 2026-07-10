@@ -521,6 +521,50 @@ static void smap_remove_free__(void **state) {
 	smap_free(map);
 }
 
+static void smap_remove_all__(void **state) {
+	const struct SMap *map = smap_init();
+
+	assert_nul(smap_put(map, "a", V0));
+	assert_nul(smap_put(map, "b", V1));
+	assert_nul(smap_put(map, "c", V2));
+
+	const struct SMap *from = smap_init();
+
+	assert_nul(smap_put(from, "b", V1));
+	assert_nul(smap_put(from, "d", V3));
+
+	const struct SMap *expected = smap_init();
+
+	assert_nul(smap_put(expected, "a", V0));
+	assert_nul(smap_put(expected, "c", V2));
+
+	assert_int_equal(smap_remove_all(map, from), 1);
+
+	assert_smap_equal(map, expected);
+
+	smap_free(map);
+	smap_free(from);
+	smap_free(expected);
+}
+
+static void smap_remove_all_free__(void **state) {
+	const struct SMapParams params = { .free_val = mock_free, };
+	const struct SMap *map = smap_init_with(params);
+
+	assert_nul(smap_put(map, "a", V0));
+
+	const struct SMap *from = smap_init();
+
+	assert_nul(smap_put(from, "a", V0));
+
+	expect_ptr(mock_free, val, V0);
+
+	assert_int_equal(smap_remove_all_free(map, from), 1);
+
+	smap_free(map);
+	smap_free(from);
+}
+
 static void smap_str__(void **state) {
 	const struct SMapParams params = { .allow_null_val = true, };
 	const struct SMap *map = smap_init_with(params);
@@ -826,6 +870,12 @@ static void smap__null_inputs(void **state) {
 	assert_nul(smap_remove(map, NULL));
 	assert_false(smap_remove_free(NULL, NULL));
 	assert_false(smap_remove_free(map, NULL));
+	assert_int_equal(smap_remove_all(NULL, NULL), 0);
+	assert_int_equal(smap_remove_all(map, NULL), 0);
+	assert_int_equal(smap_remove_all(NULL, map), 0);
+	assert_int_equal(smap_remove_all_free(NULL, NULL), 0);
+	assert_int_equal(smap_remove_all_free(map, NULL), 0);
+	assert_int_equal(smap_remove_all_free(NULL, map), 0);
 	assert_false(smap_equal(NULL, NULL));
 	assert_false(smap_equal(map, NULL));
 	assert_nul(smap_keys_slist(NULL));
@@ -878,6 +928,10 @@ int main(void) {
 		TEST(smap_put_if_absent__),
 
 		TEST(smap_remove_free__),
+
+		TEST(smap_remove_all__),
+
+		TEST(smap_remove_all_free__),
 
 		TEST(smap_str__),
 

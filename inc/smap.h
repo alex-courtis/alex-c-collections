@@ -138,6 +138,12 @@ const void *smap_remove(const struct SMap* const map, const char* const key);
 // remove and free entry, if removed free it and return true [free_val]
 bool smap_remove_free(const struct SMap* const map, const char* const key);
 
+// remove entries matching from keys, return number removed [equal_key]
+size_t smap_remove_all(const struct SMap* const map, const struct SMap* const from);
+
+// remove and free entries matching from keys, return number removed [equal_key, free_val]
+size_t smap_remove_all_free(const struct SMap* const map, const struct SMap* const from);
+
 /*
  * Comparison
  */
