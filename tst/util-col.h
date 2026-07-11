@@ -7,7 +7,7 @@
 #include "ipmap.h"
 #include "ppmap.h"
 #include "pset.h"
-#include "smap.h"
+#include "spmap.h"
 #include "simap.h"
 #include "ssmap.h"
 #include "sset.h"
@@ -31,7 +31,7 @@ size_t ppmap_put_many_v(const struct PPmap* const map, va_list __args);
 size_t ipmap_put_many(const struct IPmap* const map, ... /* key, val, NULL */ );
 
 // set key/vals, free old vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key [alloc_val, free_val]
-size_t smap_put_many(const struct SMap* const map, ... /* key, val, NULL */ );
+size_t spmap_put_many(const struct SPMap* const map, ... /* key, val, NULL */ );
 
 // set key/vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key
 size_t simap_put_many(const struct SImap* const map, ... /* key, val, NULL */ );

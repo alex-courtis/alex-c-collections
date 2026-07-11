@@ -4,7 +4,7 @@
 #include "ppmap.h"
 #include "pset.h"
 #include "sset.h"
-#include "smap.h"
+#include "spmap.h"
 #include "simap.h"
 #include "ssmap.h"
 
@@ -122,12 +122,12 @@ size_t ipmap_put_many(const struct IPmap* const map, ... /* key, val, NULL */ ) 
 	return added;
 }
 
-struct SMap {
-	const struct SMapParams params;
+struct SPMap {
+	const struct SPMapParams params;
 	const struct PPmap *ppmap;
 };
 
-size_t smap_put_many(const struct SMap* const map, ...) {
+size_t spmap_put_many(const struct SPMap* const map, ...) {
 	if (!map)
 		return 0;
 
