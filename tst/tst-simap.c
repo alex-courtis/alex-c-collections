@@ -111,7 +111,7 @@ static void simap_match__none(void **state) {
 
 	// skip
 	expect_string(mock_3pred_str_szt, str, "0");
-	expect_int_value(mock_3pred_str_szt, n, 10);
+	expect_int_value(mock_3pred_str_szt, i, 10);
 	expect_string(mock_3pred_str_szt, data, "x");
 	will_return(mock_3pred_str_szt, false);
 
@@ -145,7 +145,7 @@ static void simap_match_val__none(void **state) {
 	assert_false(simap_put(map, "0", 10));
 
 	// skip
-	expect_int_value(mock_2pred_szt, n, 10);
+	expect_int_value(mock_2pred_szt, i, 10);
 	expect_string(mock_2pred_szt, data, "x");
 	will_return(mock_2pred_szt, false);
 
@@ -165,13 +165,13 @@ static void simap_match__matches(void **state) {
 
 	// skip 0
 	expect_string(mock_3pred_str_szt, str, "0");
-	expect_int_value(mock_3pred_str_szt, n, 10);
+	expect_int_value(mock_3pred_str_szt, i, 10);
 	expect_string(mock_3pred_str_szt, data, "x");
 	will_return(mock_3pred_str_szt, false);
 
 	// get 1
 	expect_string(mock_3pred_str_szt, str, "1");
-	expect_int_value(mock_3pred_str_szt, n, 11);
+	expect_int_value(mock_3pred_str_szt, i, 11);
 	expect_string(mock_3pred_str_szt, data, "x");
 	will_return(mock_3pred_str_szt, true);
 
@@ -214,12 +214,12 @@ static void simap_match_val__matches(void **state) {
 	assert_false(simap_put(map, "2", 12));
 
 	// skip 0
-	expect_int_value(mock_2pred_szt, n, 10);
+	expect_int_value(mock_2pred_szt, i, 10);
 	expect_string(mock_2pred_szt, data, "x");
 	will_return(mock_2pred_szt, false);
 
 	// get 1
-	expect_int_value(mock_2pred_szt, n, 11);
+	expect_int_value(mock_2pred_szt, i, 11);
 	expect_string(mock_2pred_szt, data, "x");
 	will_return(mock_2pred_szt, true);
 

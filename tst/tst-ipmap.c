@@ -124,13 +124,13 @@ static void ipmap_match_it__many(void **state) {
 	assert_nul(ipmap_put(map, 2, V2));
 
 	// skip 0
-	expect_int_value(mock_3pred_szt_ptr, n, 0);
+	expect_int_value(mock_3pred_szt_ptr, i, 0);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, false);
 
 	// pass 1
-	expect_int_value(mock_3pred_szt_ptr, n, 1);
+	expect_int_value(mock_3pred_szt_ptr, i, 1);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, true);
@@ -141,7 +141,7 @@ static void ipmap_match_it__many(void **state) {
 	assert_ptr_equal(it->val, V1);
 
 	// skip 2
-	expect_int_value(mock_3pred_szt_ptr, n, 2);
+	expect_int_value(mock_3pred_szt_ptr, i, 2);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V2);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, false);
@@ -161,12 +161,12 @@ static void ipmap_match_key_it__many(void **state) {
 	assert_nul(ipmap_put(map, 2, V2));
 
 	// skip 0
-	expect_int_value(mock_2pred_szt, n, 0);
+	expect_int_value(mock_2pred_szt, i, 0);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, false);
 
 	// pass 1
-	expect_int_value(mock_2pred_szt, n, 1);
+	expect_int_value(mock_2pred_szt, i, 1);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, true);
 
@@ -176,7 +176,7 @@ static void ipmap_match_key_it__many(void **state) {
 	assert_ptr_equal(it->val, V1);
 
 	// skip 2
-	expect_int_value(mock_2pred_szt, n, 2);
+	expect_int_value(mock_2pred_szt, i, 2);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, false);
 
@@ -228,13 +228,13 @@ static void ipmap_match_it__none(void **state) {
 	assert_nul(ipmap_put(map, 1, V1));
 
 	// skip 0
-	expect_int_value(mock_3pred_szt_ptr, n, 0);
+	expect_int_value(mock_3pred_szt_ptr, i, 0);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, false);
 
 	// skip 1
-	expect_int_value(mock_3pred_szt_ptr, n, 1);
+	expect_int_value(mock_3pred_szt_ptr, i, 1);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, false);
@@ -251,12 +251,12 @@ static void ipmap_match_it_key__none(void **state) {
 	assert_nul(ipmap_put(map, 1, V1));
 
 	// skip 0
-	expect_int_value(mock_2pred_szt, n, 0);
+	expect_int_value(mock_2pred_szt, i, 0);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, false);
 
 	// skip 1
-	expect_int_value(mock_2pred_szt, n, 1);
+	expect_int_value(mock_2pred_szt, i, 1);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, false);
 
@@ -318,13 +318,13 @@ static void ipmap_match__matches(void **state) {
 	assert_nul(ipmap_put(map, 2, V2));
 
 	// skip 0
-	expect_int_value(mock_3pred_szt_ptr, n, 0);
+	expect_int_value(mock_3pred_szt_ptr, i, 0);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, false);
 
 	// get 1
-	expect_int_value(mock_3pred_szt_ptr, n, 1);
+	expect_int_value(mock_3pred_szt_ptr, i, 1);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, true);
@@ -344,12 +344,12 @@ static void ipmap_match_key__matches(void **state) {
 	assert_nul(ipmap_put(map, 2, V2));
 
 	// skip 0
-	expect_int_value(mock_2pred_szt, n, 0);
+	expect_int_value(mock_2pred_szt, i, 0);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, false);
 
 	// get 1
-	expect_int_value(mock_2pred_szt, n, 1);
+	expect_int_value(mock_2pred_szt, i, 1);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, true);
 
@@ -391,13 +391,13 @@ static void ipmap_match__no_match(void **state) {
 	assert_nul(ipmap_put(map, 1, V1));
 
 	// skip 0
-	expect_int_value(mock_3pred_szt_ptr, n, 0);
+	expect_int_value(mock_3pred_szt_ptr, i, 0);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, false);
 
 	// skip 1
-	expect_int_value(mock_3pred_szt_ptr, n, 1);
+	expect_int_value(mock_3pred_szt_ptr, i, 1);
 	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, false);
@@ -416,12 +416,12 @@ static void ipmap_match_key__no_match(void **state) {
 	assert_nul(ipmap_put(map, 1, V1));
 
 	// skip 0
-	expect_int_value(mock_2pred_szt, n, 0);
+	expect_int_value(mock_2pred_szt, i, 0);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, false);
 
 	// skip 1
-	expect_int_value(mock_2pred_szt, n, 1);
+	expect_int_value(mock_2pred_szt, i, 1);
 	expect_ptr(mock_2pred_szt, data, D0);
 	will_return(mock_2pred_szt, false);
 
