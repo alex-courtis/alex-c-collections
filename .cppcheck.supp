@@ -1,6 +1,6 @@
 unusedFunction:tst/asserts.h
 unusedFunction:tst/expect-smapi.h
-unusedFunction:tst/expect-smaps.h
+unusedFunction:tst/expect-ssmap.h
 
 unusedFunction:tst/util-file.c
 

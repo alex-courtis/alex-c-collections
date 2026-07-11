@@ -6,7 +6,7 @@
 #include "sset.h"
 #include "smap.h"
 #include "smapi.h"
-#include "smaps.h"
+#include "ssmap.h"
 
 #include "util-col.h"
 
@@ -168,12 +168,12 @@ size_t smapi_put_many(const struct SMapI* const map, ...) {
 	return added;
 }
 
-struct SMapS {
-	const struct SMapSParams params;
+struct SSmap {
+	const struct SSmapParams params;
 	const struct PPmap *ppmap;
 };
 
-size_t smaps_put_many(const struct SMapS* const map, ...) {
+size_t ssmap_put_many(const struct SSmap* const map, ...) {
 	if (!map)
 		return 0;
 

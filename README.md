@@ -37,7 +37,7 @@ Not thread safe.
 * `PPmap` with string keys.
 * Keys are memory managed.
 
-### SMapS
+### SSmap
 
 * `PPmap` with string keys and vals.
 * Keys and values are memory managed.

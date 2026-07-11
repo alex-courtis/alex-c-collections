@@ -9,7 +9,7 @@
 #include "pset.h"
 #include "smap.h"
 #include "smapi.h"
-#include "smaps.h"
+#include "ssmap.h"
 #include "sset.h"
 
 /*
@@ -37,6 +37,6 @@ size_t smap_put_many(const struct SMap* const map, ... /* key, val, NULL */ );
 size_t smapi_put_many(const struct SMapI* const map, ... /* key, val, NULL */ );
 
 // set key/vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key
-size_t smaps_put_many(const struct SMapS* const map, ... /* key, val, NULL */ );
+size_t ssmap_put_many(const struct SSmap* const map, ... /* key, val, NULL */ );
 
 #endif // UTIL_COL_H
