@@ -95,7 +95,7 @@ size_t ppmap_put_many(const struct PPmap* const map, ...) {
 	return added;
 }
 
-size_t imap_put_many(const struct IMap* const map, ... /* key, val, NULL */ ) {
+size_t ipmap_put_many(const struct IPmap* const map, ... /* key, val, NULL */ ) {
 	if (!map)
 		return 0;
 
@@ -112,7 +112,7 @@ size_t imap_put_many(const struct IMap* const map, ... /* key, val, NULL */ ) {
 		// trust that a value has been passed, NULL is valid
 		const void *val = va_arg(ap, void*);
 
-		if (imap_put_free(map, key, val)) {
+		if (ipmap_put_free(map, key, val)) {
 			added++;
 		}
 	}

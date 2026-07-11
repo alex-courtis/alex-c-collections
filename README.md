@@ -28,7 +28,7 @@ Not thread safe.
 * Operations linearly traverse keys.
 * NULL values permitted.
 
-### IMap
+### IPmap
 
 * `PPmap` with `size_t` keys
 
