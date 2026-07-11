@@ -119,12 +119,12 @@ static void pset_clone__alloc_val(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 	const struct PSet *set = pset_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
+	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	assert_true(pset_add(set, V0));
 
-	expect_ptr(mock_alloc, val, V0);
+	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	const struct PSet *clone = pset_clone(set);
@@ -148,9 +148,9 @@ static void pset_clone_deep__clone_val(void **state) {
 
 	assert_true(pset_add(set, V1));
 
-	expect_ptr(mock_clone, val, V0);
+	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V2, void*);
-	expect_ptr(mock_clone, val, V1);
+	expect_ptr(mock_clone, ptr, V1);
 	will_return_ptr_type(mock_clone, V3, void*);
 
 	const struct PSet *clone = pset_clone_deep(set);
@@ -214,8 +214,8 @@ static void pset_free_vals__free_val(void **state) {
 	assert_true(pset_contains(set, V0));
 	assert_true(pset_contains(set, V1));
 
-	expect_ptr(mock_free, val, V0);
-	expect_ptr(mock_free, val, V1);
+	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V1);
 
 	pset_free_vals(set);
 }
@@ -261,7 +261,7 @@ static void pset_add__alloc_val(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 	const struct PSet *set = pset_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
+	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	assert_true(pset_add(set, V0));
@@ -273,7 +273,7 @@ static void pset_add__alloc_val_returned_null(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 	const struct PSet *set = pset_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
+	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, NULL, void*);
 
 	assert_false(pset_add(set, V0));
@@ -362,7 +362,7 @@ static void pset_add_all__many(void **state) {
 static void pset_add_all__alloc_val(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 
-	expect_ptr(mock_alloc, val, V0);
+	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	const struct PSet *to = pset_init_with(params);
@@ -375,7 +375,7 @@ static void pset_add_all__alloc_val(void **state) {
 	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
 
-	expect_ptr(mock_alloc, val, V1);
+	expect_ptr(mock_alloc, ptr, V1);
 	will_return_ptr_type(mock_alloc, V1, void*);
 
 	assert_int_equal(pset_add_all(to, from), 1);
@@ -403,7 +403,7 @@ static void pset_add_all_clone__many(void **state) {
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V2));
 
-	expect_ptr(mock_clone, val, V2);
+	expect_ptr(mock_clone, ptr, V2);
 	will_return_ptr_type(mock_clone, V2, void*);
 
 	assert_int_equal(pset_add_all_clone(to, from), 1);
@@ -538,7 +538,7 @@ static void pset_remove_free__free_val(void **state) {
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	expect_ptr(mock_free, val, V0);
+	expect_ptr(mock_free, ptr, V0);
 
 	assert_true(pset_remove_free(set, V0));
 
@@ -607,7 +607,7 @@ static void pset_remove_all_free__free_val(void **state) {
 	assert_true(pset_add(from, V1));
 	assert_true(pset_add(from, V2));
 
-	expect_ptr(mock_free, val, V1);
+	expect_ptr(mock_free, ptr, V1);
 
 	assert_int_equal(pset_remove_all_free(set, from), 1);
 
@@ -1061,12 +1061,12 @@ static void pset_slist__alloc_val(void **state) {
 	const struct PSetParams params = { .alloc_val = mock_alloc, };
 	const struct PSet *set = pset_init_with(params);
 
-	expect_ptr(mock_alloc, val, V0);
+	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	assert_true(pset_add(set, V0));
 
-	expect_ptr(mock_alloc, val, V0);
+	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
 	struct SList *list = pset_slist(set);
@@ -1084,7 +1084,7 @@ static void pset_slist_clone__clone_val(void **state) {
 
 	assert_true(pset_add(set, V0));
 
-	expect_ptr(mock_clone, val, V0);
+	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 
 	struct SList *list = pset_slist_clone(set);

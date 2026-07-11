@@ -77,30 +77,30 @@ bool mock_match_size_t_ptr(const size_t key, const void* const val, const void* 
 	return mock_type(bool);
 }
 
-bool mock_test(const void* const val) {
-	check_expected_ptr(val);
+bool mock_pred(const void* const ptr) {
+	check_expected_ptr(ptr);
 
 	return mock_type(bool);
 }
 
-void *mock_clone(const void* const val) {
-	check_expected_ptr(val);
+void *mock_clone(const void* const ptr) {
+	check_expected_ptr(ptr);
 
 	return mock_ptr_type_checked(void*);
 }
 
-void *mock_alloc(const void* const val) {
-	check_expected_ptr(val);
+void *mock_alloc(const void* const ptr) {
+	check_expected_ptr(ptr);
 
 	return mock_ptr_type_checked(void*);
 }
 
-void mock_free(const void* const val) {
-	check_expected_ptr(val);
+void mock_free(const void* const ptr) {
+	check_expected_ptr(ptr);
 }
 
-char* mock_str(const void* const val) {
-	check_expected_ptr(val);
+char* mock_str(const void* const ptr) {
+	check_expected_ptr(ptr);
 
 	return mock_ptr_type_checked(char*);
 }

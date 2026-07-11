@@ -75,9 +75,9 @@ static void clone_strdup__(void **state) {
 static void clone_size_t__(void **state) {
 	size_t val = { 1 };
 
-	assert_nul(clone_size_t(NULL));
+	assert_nul(clone_size_t_ptr(NULL));
 
-	size_t *new = clone_size_t(&val);
+	size_t *new = clone_size_t_ptr(&val);
 	assert_non_nul(new);
 	assert_int_equal(*new, 1);
 	free(new);
@@ -96,11 +96,11 @@ static void str_or_null__(void **state) {
 static void str_size_t__(void **state) {
 	size_t val = { 1 };
 
-	char *str = str_size_t(NULL);
+	char *str = str_size_t_ptr(NULL);
 	assert_str_equal(str, "(null)");
 	free(str);
 
-	str = str_size_t(&val);
+	str = str_size_t_ptr(&val);
 	assert_str_equal(str, "1");
 	free(str);
 }

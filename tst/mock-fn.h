@@ -24,14 +24,14 @@ bool mock_match_str_size_t(const char *key, const size_t val, const void* const 
 
 bool mock_match_size_t_ptr(const size_t key, const void* const val, const void* const data);
 
-bool mock_test(const void* const val);
+bool mock_pred(const void* const ptr);
 
-void *mock_clone(const void* const val);
+void *mock_clone(const void* const ptr);
 
-void *mock_alloc(const void* const val);
+void *mock_alloc(const void* const ptr);
 
-void mock_free(const void* const val);
+void mock_free(const void* const ptr);
 
-char* mock_str(const void* const val);
+char* mock_str(const void* const ptr);
 
 #endif // MOCK_FN

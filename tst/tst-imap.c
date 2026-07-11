@@ -634,7 +634,7 @@ static void imap_put_all__variants(void **state) {
 
 	// put_all_free
 	actual = imap_clone(to);
-	expect_ptr(mock_free, val, V3);
+	expect_ptr(mock_free, ptr, V3);
 
 	assert_int_equal(imap_put_all_free(actual, from), 1);
 
@@ -643,9 +643,9 @@ static void imap_put_all__variants(void **state) {
 
 	// put_all_clone
 	actual = imap_clone(to);
-	expect_ptr(mock_clone, val, V0);
+	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
-	expect_ptr(mock_clone, val, V1);
+	expect_ptr(mock_clone, ptr, V1);
 	will_return_ptr_type(mock_clone, V1, void*);
 
 	assert_int_equal(imap_put_all_clone(actual, from), 1);
@@ -655,11 +655,11 @@ static void imap_put_all__variants(void **state) {
 
 	// put_all_clone_free
 	actual = imap_clone(to);
-	expect_ptr(mock_clone, val, V0);
+	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
-	expect_ptr(mock_clone, val, V1);
+	expect_ptr(mock_clone, ptr, V1);
 	will_return_ptr_type(mock_clone, V1, void*);
-	expect_ptr(mock_free, val, V3);
+	expect_ptr(mock_free, ptr, V3);
 
 	assert_int_equal(imap_put_all_clone_free(actual, from), 1);
 
@@ -752,7 +752,7 @@ static void imap_remove_all_free__(void **state) {
 
 	assert_nul(imap_put(from, 0, V0));
 
-	expect_ptr(mock_free, val, V0);
+	expect_ptr(mock_free, ptr, V0);
 
 	assert_int_equal(imap_remove_all_free(map, from), 1);
 
@@ -855,7 +855,7 @@ static void imap_vals_pset_clone__many(void **state) {
 	const struct PSet *expected = pset_init();
 	pset_add(expected, V0);
 
-	expect_ptr(mock_clone, val, V0);
+	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 
 	const struct PSet *actual = imap_vals_pset_clone(map);
@@ -931,7 +931,7 @@ static void imap_clone_deep__clone_val(void **state) {
 
 	assert_nul(imap_put(from, 0, V0));
 
-	expect_ptr(mock_clone, val, V0);
+	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 
 	const struct IMap *to = imap_clone_deep(from);

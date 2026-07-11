@@ -67,30 +67,30 @@ bool less_than_strcasecmp(const char* const a, const char* const b) {
 	return strcasecmp(a, b) < 0;
 }
 
-void *clone_strdup(const char* const val) {
-	if (!val)
+void *clone_strdup(const char* const str) {
+	if (!str)
 		return NULL;
 
-	return strdup(val);
+	return strdup(str);
 }
 
-void *clone_size_t(const size_t* const val) {
-	if (!val)
+void *clone_size_t_ptr(const size_t* const n_ptr) {
+	if (!n_ptr)
 		return NULL;
 
 	size_t *new = calloc(1, sizeof(size_t));
-	*new = *val;
+	*new = *n_ptr;
 
 	return new;
 }
 
-char *str_or_null(const char* const val) {
-	return sprintf_alloc("%s", val ? val : "(null)");
+char *str_or_null(const char* const str) {
+	return sprintf_alloc("%s", str ? str : "(null)");
 }
 
-char *str_size_t(const size_t* const val) {
-	if (val)
-		return sprintf_alloc("%zu", *val);
+char *str_size_t_ptr(const size_t* const n_ptr) {
+	if (n_ptr)
+		return sprintf_alloc("%zu", *n_ptr);
 	else
 		return strdup("(null)");
 }

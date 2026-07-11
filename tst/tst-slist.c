@@ -52,9 +52,9 @@ static void slist_free_vals__many(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	expect_str(mock_free, val, "0");
-	expect_str(mock_free, val, "1");
-	expect_str(mock_free, val, "2");
+	expect_str(mock_free, ptr, "0");
+	expect_str(mock_free, ptr, "1");
+	expect_str(mock_free, ptr, "2");
 
 	slist_free_vals(&list, mock_free);
 
@@ -133,7 +133,7 @@ static void slist_remove_all__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 4);
 
-	slist_remove_all(&list, (fn_equal)equal_strcmp, "x");
+	slist_remove_all(&list, (fn_match_ptr)equal_strcmp, "x");
 
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 2);
@@ -165,10 +165,10 @@ static void slist_remove_all_free__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 4);
 
-	expect_str(mock_free, val, "x");
-	expect_str(mock_free, val, "x");
+	expect_str(mock_free, ptr, "x");
+	expect_str(mock_free, ptr, "x");
 
-	slist_remove_all_free(&list, (fn_equal)equal_strcmp, "x", mock_free);
+	slist_remove_all_free(&list, (fn_match_ptr)equal_strcmp, "x", mock_free);
 
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 2);
@@ -243,10 +243,10 @@ static void slist_find_equal_val__no(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	const void *val = slist_find_equal_val(list, (fn_equal)equal_strcmp, "x");
+	const void *val = slist_find_equal_val(list, (fn_match_ptr)equal_strcmp, "x");
 	assert_nul(val);
 
-	const struct SList *i = slist_find_equal(list, (fn_equal)equal_strcmp, "x");
+	const struct SList *i = slist_find_equal(list, (fn_match_ptr)equal_strcmp, "x");
 	assert_nul(i);
 
 	slist_free(&list);
@@ -263,11 +263,11 @@ static void slist_find_equal_val__yes(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(slist_length(list), 3);
 
-	const void *val = slist_find_equal_val(list, (fn_equal)equal_strcmp, "1");
+	const void *val = slist_find_equal_val(list, (fn_match_ptr)equal_strcmp, "1");
 	assert_non_nul(val);
 	assert_str_equal(val, "1");
 
-	const struct SList *i = slist_find_equal(list, (fn_equal)equal_strcmp, "1");
+	const struct SList *i = slist_find_equal(list, (fn_match_ptr)equal_strcmp, "1");
 	assert_non_nul(i);
 	assert_str_equal(i->val, "1");
 
@@ -286,7 +286,7 @@ static void slist_equal__empty_lhs(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_slist_not_equal(NULL, rhs, (fn_equal)equal_strcmp, NULL);
+	assert_slist_not_equal(NULL, rhs, (fn_match_ptr)equal_strcmp, NULL);
 
 	assert_slist_not_equal(NULL, rhs, NULL, NULL);
 
@@ -301,7 +301,7 @@ static void slist_equal__empty_rhs(void **state) {
 	slist_append(&lhs, lvals[1]);
 	slist_append(&lhs, lvals[2]);
 
-	assert_slist_not_equal(lhs, NULL, (fn_equal)equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, NULL, (fn_match_ptr)equal_strcmp, NULL);
 
 	assert_slist_not_equal(lhs, NULL, NULL, NULL);
 
@@ -322,7 +322,7 @@ static void slist_equal__equal(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_slist_equal(lhs, rhs, (fn_equal)equal_strcmp, NULL);
+	assert_slist_equal(lhs, rhs, (fn_match_ptr)equal_strcmp, NULL);
 
 	slist_free(&lhs);
 	slist_free(&rhs);
@@ -342,7 +342,7 @@ static void slist_equal__not_equal_start(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_slist_not_equal(lhs, rhs, (fn_equal)equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, (fn_match_ptr)equal_strcmp, NULL);
 	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
@@ -363,7 +363,7 @@ static void slist_equal__not_equal_mid(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_slist_not_equal(lhs, rhs, (fn_equal)equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, (fn_match_ptr)equal_strcmp, NULL);
 	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
@@ -384,7 +384,7 @@ static void slist_equal__not_equal_end(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_slist_not_equal(lhs, rhs, (fn_equal)equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, (fn_match_ptr)equal_strcmp, NULL);
 	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
@@ -404,7 +404,7 @@ static void slist_equal__not_equal_lhs_size(void **state) {
 	slist_append(&rhs, rvals[1]);
 	slist_append(&rhs, rvals[2]);
 
-	assert_slist_not_equal(lhs, rhs, (fn_equal)equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, (fn_match_ptr)equal_strcmp, NULL);
 	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
@@ -424,7 +424,7 @@ static void slist_equal__not_equal_rhs_size(void **state) {
 	slist_append(&rhs, rvals[0]);
 	slist_append(&rhs, rvals[1]);
 
-	assert_slist_not_equal(lhs, rhs, (fn_equal)equal_strcmp, NULL);
+	assert_slist_not_equal(lhs, rhs, (fn_match_ptr)equal_strcmp, NULL);
 	assert_slist_not_equal(lhs, rhs, NULL, NULL);
 
 	slist_free(&lhs);
@@ -494,7 +494,7 @@ static void slist_sort__words(void **state) {
 		slist_append(&from, (void*)words_unsorted[i]);
 	}
 
-	struct SList *actual = slist_sort(from, (fn_equal)less_than_strcmp);
+	struct SList *actual = slist_sort(from, (fn_match_ptr)less_than_strcmp);
 	assert_non_nul(actual);
 
 	assert_int_equal(slist_length(actual), slist_length(from));
@@ -504,7 +504,7 @@ static void slist_sort__words(void **state) {
 		slist_append(&expected, (void*)words_sorted[i]);
 	}
 
-	assert_slist_equal(actual, expected, (fn_equal)equal_strcmp, NULL);
+	assert_slist_equal(actual, expected, (fn_match_ptr)equal_strcmp, NULL);
 
 	slist_free(&from);
 	slist_free(&actual);
@@ -515,10 +515,10 @@ static void slist_move__empty(void **state) {
 	struct SList *to = NULL;
 	struct SList *from = NULL;
 
-	slist_move(&to, &from, (fn_equal)equal_strcmp, "x");
+	slist_move(&to, &from, (fn_match_ptr)equal_strcmp, "x");
 	assert_nul(to);
 
-	slist_move(&to, NULL, (fn_equal)equal_strcmp, "x");
+	slist_move(&to, NULL, (fn_match_ptr)equal_strcmp, "x");
 	assert_nul(to);
 
 	slist_move(&to, &from, NULL, "x");
@@ -538,7 +538,7 @@ static void slist_move__empty_to(void **state) {
 	slist_append(&from, vals[1]);
 	slist_append(&from, vals[2]);
 
-	slist_move(&to, &from, (fn_equal)equal_strcmp, "x");
+	slist_move(&to, &from, (fn_match_ptr)equal_strcmp, "x");
 
 	assert_int_equal(slist_length(to), 0);
 	assert_int_equal(slist_length(from), 3);
@@ -555,7 +555,7 @@ static void slist_move__empty_from(void **state) {
 	slist_append(&to, vals[1]);
 	slist_append(&to, vals[2]);
 
-	slist_move(&to, &from, (fn_equal)equal_strcmp, "x");
+	slist_move(&to, &from, (fn_match_ptr)equal_strcmp, "x");
 
 	assert_int_equal(slist_length(to), 3);
 	assert_int_equal(slist_length(from), 0);
@@ -577,7 +577,7 @@ static void slist_move__no_match(void **state) {
 	slist_append(&from, from_vals[1]);
 	slist_append(&from, from_vals[2]);
 
-	slist_move(&to, &from, (fn_equal)equal_strcmp, "x");
+	slist_move(&to, &from, (fn_match_ptr)equal_strcmp, "x");
 
 	assert_int_equal(slist_length(to), 3);
 	assert_int_equal(slist_length(from), 3);
@@ -602,7 +602,7 @@ static void slist_move__many(void **state) {
 	slist_append(&from, from_vals[3]);
 	slist_append(&from, from_vals[4]);
 
-	slist_move(&to, &from, (fn_equal)equal_strstr, "x");
+	slist_move(&to, &from, (fn_match_ptr)equal_strstr, "x");
 
 	// values moved
 	assert_int_equal(slist_length(to), 6);
@@ -634,7 +634,7 @@ static void slist_move__all(void **state) {
 	slist_append(&from, from_vals[0]);
 	slist_append(&from, from_vals[1]);
 
-	slist_move(&to, &from, (fn_equal)equal_strstr, "x");
+	slist_move(&to, &from, (fn_match_ptr)equal_strstr, "x");
 
 	// values moved
 	assert_int_equal(slist_length(to), 4);
@@ -761,7 +761,7 @@ static void slist_xor_free__empty_lists(void **state) {
 	struct SList *list1 = NULL;
 	struct SList *list2 = NULL;
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	slist_xor_free(&list1, list2, (fn_match_ptr)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
 	assert_int_equal(slist_length(list1), 0);
 }
@@ -777,9 +777,9 @@ static void slist_xor_free__first_list_empty(void **state) {
 	slist_append(&expected, strdup("item1"));
 	slist_append(&expected, strdup("item2"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	slist_xor_free(&list1, list2, (fn_match_ptr)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
+	assert_slist_equal(list1, expected, (fn_match_ptr)equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -797,9 +797,9 @@ static void slist_xor_free__second_list_empty(void **state) {
 	slist_append(&expected, strdup("item1"));
 	slist_append(&expected, strdup("item2"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	slist_xor_free(&list1, list2, (fn_match_ptr)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
+	assert_slist_equal(list1, expected, (fn_match_ptr)equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -822,9 +822,9 @@ static void slist_xor_free__toggle_items(void **state) {
 	slist_append(&expected, strdup("item3"));
 	slist_append(&expected, strdup("item4"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	slist_xor_free(&list1, list2, (fn_match_ptr)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
+	assert_slist_equal(list1, expected, (fn_match_ptr)equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -844,9 +844,9 @@ static void slist_xor_free__duplicate_items(void **state) {
 
 	slist_append(&expected, strdup("item2"));
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	slist_xor_free(&list1, list2, (fn_match_ptr)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
+	assert_slist_equal(list1, expected, (fn_match_ptr)equal_strcmp, NULL);
 
 	slist_free_vals(&list1, NULL);
 	slist_free_vals(&list2, NULL);
@@ -864,9 +864,9 @@ static void slist_xor_free__vals(void **state) {
 
 	slist_append(&expected, val);
 
-	slist_xor_free(&list1, list2, (fn_equal)equal_strcmp, NULL, NULL);
+	slist_xor_free(&list1, list2, (fn_match_ptr)equal_strcmp, NULL, NULL);
 
-	assert_slist_equal(list1, expected, (fn_equal)equal_strcmp, NULL);
+	assert_slist_equal(list1, expected, (fn_match_ptr)equal_strcmp, NULL);
 
 	slist_free(&list1);
 	slist_free(&list2);

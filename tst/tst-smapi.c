@@ -85,20 +85,20 @@ static void smapi_getp__zero(void **state) {
 	assert_int_equal(smapi_get(map, "a"), 11);
 
 	size_t a = 99;
-	assert_true(smapi_getp(&a, map, "a"));
+	assert_true(smapi_get_ptr(&a, map, "a"));
 	assert_int_equal(a, 11);
 
 	assert_int_equal(smapi_get(map, "x"), 0);
 
 	size_t x = 99;
-	assert_false(smapi_getp(&x, map, "x"));
+	assert_false(smapi_get_ptr(&x, map, "x"));
 	assert_int_equal(x, 0);
 
 	assert_false(smapi_put(map, "b", 0));
 
 	size_t b = 99;
 	assert_int_equal(smapi_get(map, "b"), 0);
-	assert_true(smapi_getp(&b, map, "b"));
+	assert_true(smapi_get_ptr(&b, map, "b"));
 	assert_int_equal(b, 0);
 
 	smapi_free(map);
@@ -707,8 +707,8 @@ static void smapi__null_inputs(void **state) {
 	smapi_it_free(NULL);
 	assert_false(smapi_get(NULL, NULL));
 	assert_false(smapi_get(map, NULL));
-	assert_false(smapi_getp(NULL, NULL, NULL));
-	assert_false(smapi_getp(NULL, map, NULL));
+	assert_false(smapi_get_ptr(NULL, NULL, NULL));
+	assert_false(smapi_get_ptr(NULL, map, NULL));
 	assert_false(smapi_contains_key(NULL, NULL));
 	assert_false(smapi_contains_key(map, NULL));
 	assert_false(smapi_contains_val(NULL, 0));

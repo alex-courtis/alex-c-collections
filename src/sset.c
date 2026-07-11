@@ -138,7 +138,7 @@ size_t sset_remove_all(const struct SSet* const set, const struct SSet* const fr
 
 void sset_sort(const struct SSet* const set) {
 	if (set)
-		pset_sort(set->pset, set->params.case_insensitive ? (fn_equal)less_than_strcasecmp : (fn_equal)less_than_strcmp);
+		pset_sort(set->pset, set->params.case_insensitive ? (fn_match_ptr)less_than_strcasecmp : (fn_match_ptr)less_than_strcmp);
 }
 
 bool sset_equal(const struct SSet* const a, const struct SSet* const b) {
