@@ -80,6 +80,8 @@ const struct PsetIt *pset_filter_it(const struct Pset* const set, fn_2pred pred_
 // next iterator value, NULL at end of set
 const struct PsetIt *pset_it_next(const struct PsetIt* const it);
 
+// TODO pset_it_remove
+
 /*
  * Mutate
  */
