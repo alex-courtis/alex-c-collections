@@ -1,5 +1,5 @@
-#include "assert-ssmap.h"
 #include "assert-sset.h"
+#include "assert-ssmap.h"
 #include "asserts.h"
 #include "mock-fn.h"
 #include "tst.h"
@@ -8,6 +8,7 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fn.h"
 #include "ppmap.h"

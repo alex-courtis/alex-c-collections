@@ -588,6 +588,43 @@ static void simap_remove_all__(void **state) {
 	simap_free(expected);
 }
 
+static void simap_it_remove__many(void **state) {
+	const struct SImap *map = simap_init();
+
+	assert_false(simap_put(map, "a", 0));
+	assert_false(simap_put(map, "b", 1));
+	assert_false(simap_put(map, "c", 2));
+	assert_false(simap_put(map, "d", 3));
+	assert_false(simap_put(map, "e", 4));
+
+	const struct SImap *expected = simap_init();
+
+	assert_false(simap_put(expected, "b", 1));
+	assert_false(simap_put(expected, "d", 3));
+
+	size_t iterations = 0;
+	for (const struct SImapIt *it = simap_it(map); it; it = simap_it_next(it)) {
+		iterations++;
+		if (it->val == 0 || it->val == 2 || it->val == 4) {
+			simap_it_remove(it);
+		}
+	}
+
+	assert_int_equal(simap_size(map), 2);
+	assert_int_equal(iterations, 5);
+
+	assert_simap_equal(map, expected);
+
+	simap_free(map);
+	simap_free(expected);
+}
+
+static void simap_it_remove__partial(void **state) {
+	const struct SImapIt *it = calloc(1, sizeof(struct SImapIt));
+
+	simap_it_remove(it);
+}
+
 static void simap_str__(void **state) {
 
 	const struct SImap *map = simap_init();
@@ -736,6 +773,7 @@ static void simap__null_inputs(void **state) {
 	assert_int_equal(simap_put_many(NULL, NULL), 0);
 	assert_false(simap_remove(NULL, NULL));
 	assert_false(simap_remove(map, NULL));
+	simap_it_remove(NULL);
 	assert_int_equal(simap_remove_all(NULL, NULL), 0);
 	assert_int_equal(simap_remove_all(map, NULL), 0);
 	assert_int_equal(simap_remove_all(NULL, map), 0);
@@ -798,6 +836,9 @@ int main(void) {
 		TEST(simap_put_many__no_keyvals),
 
 		TEST(simap_remove_all__),
+
+		TEST(simap_it_remove__many),
+		TEST(simap_it_remove__partial),
 
 		TEST(simap_str__),
 
