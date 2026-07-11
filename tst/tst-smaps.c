@@ -11,7 +11,7 @@
 
 #include "fn.h"
 #include "pmap.h"
-#include "slist.h"
+#include "pslist.h"
 #include "sset.h"
 #include "str.h"
 
@@ -482,20 +482,20 @@ static void smaps_str__(void **state) {
 	smaps_free(map);
 }
 
-static void smaps_keys_slist__many(void **state) {
+static void smaps_keys_pslist__many(void **state) {
 	const struct SMapS *map = smaps_init();
 
 	smaps_put(map, "a", "aa");
 	smaps_put(map, "b", "bb");
 
-	struct SList *list = smaps_keys_slist(map);
+	struct Pslist *list = smaps_keys_pslist(map);
 
-	assert_int_equal(slist_length(list), 2);
-	assert_str_equal(slist_at(list, 0), "a");
-	assert_str_equal(slist_at(list, 1), "b");
+	assert_int_equal(pslist_length(list), 2);
+	assert_str_equal(pslist_at(list, 0), "a");
+	assert_str_equal(pslist_at(list, 1), "b");
 
 	smaps_free(map);
-	slist_free_vals(&list, NULL);
+	pslist_free_vals(&list, NULL);
 }
 
 static void smaps_keys_sset__many(void **state) {
@@ -536,7 +536,7 @@ static void smaps_keys_sset__params(void **state) {
 	sset_free(set);
 }
 
-static void smaps_vals_slist__many(void **state) {
+static void smaps_vals_pslist__many(void **state) {
 	const struct SMapSParams params = { .allow_null_val = true, };
 	const struct SMapS *map = smaps_init_with(params);
 
@@ -544,14 +544,14 @@ static void smaps_vals_slist__many(void **state) {
 	smaps_put(map, "b", NULL);
 	smaps_put(map, "c", "cc");
 
-	struct SList *list = smaps_vals_slist(map);
+	struct Pslist *list = smaps_vals_pslist(map);
 
-	assert_int_equal(slist_length(list), 3);
-	assert_str_equal(slist_at(list, 0), "aa");
-	assert_nul(slist_at(list, 1));
-	assert_str_equal(slist_at(list, 2), "cc");
+	assert_int_equal(pslist_length(list), 3);
+	assert_str_equal(pslist_at(list, 0), "aa");
+	assert_nul(pslist_at(list, 1));
+	assert_str_equal(pslist_at(list, 2), "cc");
 
-	slist_free_vals(&list, NULL);
+	pslist_free_vals(&list, NULL);
 	smaps_free(map);
 }
 
@@ -670,9 +670,9 @@ static void smaps__null_inputs(void **state) {
 	assert_int_equal(smaps_remove_all(NULL, map), 0);
 	assert_false(smaps_equal(NULL, NULL));
 	assert_false(smaps_equal(map, NULL));
-	assert_nul(smaps_keys_slist(NULL));
+	assert_nul(smaps_keys_pslist(NULL));
 	assert_nul(smaps_keys_sset(NULL));
-	assert_nul(smaps_vals_slist(NULL));
+	assert_nul(smaps_vals_pslist(NULL));
 	assert_nul(smaps_vals_sset(NULL));
 	assert_nul(smaps_str(NULL));
 	assert_int_equal(smaps_size(NULL), 0);
@@ -718,12 +718,12 @@ int main(void) {
 
 		TEST(smaps_str__),
 
-		TEST(smaps_keys_slist__many),
+		TEST(smaps_keys_pslist__many),
 
 		TEST(smaps_keys_sset__many),
 		TEST(smaps_keys_sset__params),
 
-		TEST(smaps_vals_slist__many),
+		TEST(smaps_vals_pslist__many),
 
 		TEST(smaps_vals_sset__many),
 		TEST(smaps_vals_sset__params),

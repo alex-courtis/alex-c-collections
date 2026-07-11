@@ -13,7 +13,7 @@
 
 #include "fn.h"
 #include "pmap.h"
-#include "slist.h"
+#include "pslist.h"
 #include "pset.h"
 #include "str.h"
 
@@ -784,7 +784,7 @@ static void imap_str__(void **state) {
 	imap_free(map);
 }
 
-static void imap_vals_slist__many(void **state) {
+static void imap_vals_pslist__many(void **state) {
 	const struct IMapParams params = { .allow_null_val = true, };
 	const struct IMap *map = imap_init_with(params);
 
@@ -792,18 +792,18 @@ static void imap_vals_slist__many(void **state) {
 	imap_put(map, 1, NULL);
 	imap_put(map, 2, V2);
 
-	struct SList *list = imap_vals_slist(map);
+	struct Pslist *list = imap_vals_pslist(map);
 
-	assert_int_equal(slist_length(list), 3);
-	assert_ptr_equal(slist_at(list, 0), V0);
-	assert_nul(slist_at(list, 1));
-	assert_ptr_equal(slist_at(list, 2), V2);
+	assert_int_equal(pslist_length(list), 3);
+	assert_ptr_equal(pslist_at(list, 0), V0);
+	assert_nul(pslist_at(list, 1));
+	assert_ptr_equal(pslist_at(list, 2), V2);
 
-	slist_free(&list);
+	pslist_free(&list);
 	imap_free(map);
 }
 
-static void imap_vals_slist_clone__many(void **state) {
+static void imap_vals_pslist_clone__many(void **state) {
 	const struct IMapParams params = {
 		.allow_null_val = true,
 		.clone_val = (fn_clone)clone_strdup,
@@ -814,14 +814,14 @@ static void imap_vals_slist_clone__many(void **state) {
 	imap_put(map, 1, NULL);
 	imap_put(map, 2, "2");
 
-	struct SList *list = imap_vals_slist_clone(map);
+	struct Pslist *list = imap_vals_pslist_clone(map);
 
-	assert_int_equal(slist_length(list), 3);
-	assert_str_equal(slist_at(list, 0), "0");
-	assert_nul(slist_at(list, 1));
-	assert_str_equal(slist_at(list, 2), "2");
+	assert_int_equal(pslist_length(list), 3);
+	assert_str_equal(pslist_at(list, 0), "0");
+	assert_nul(pslist_at(list, 1));
+	assert_str_equal(pslist_at(list, 2), "2");
 
-	slist_free_vals(&list, NULL);
+	pslist_free_vals(&list, NULL);
 	imap_free(map);
 }
 
@@ -1009,8 +1009,8 @@ static void imap__null_inputs(void **state) {
 	assert_int_equal(imap_put_all_clone_free(map, NULL), 0);
 	assert_false(imap_equal(NULL, NULL));
 	assert_false(imap_equal(map, NULL));
-	assert_nul(imap_vals_slist(NULL));
-	assert_nul(imap_vals_slist_clone(NULL));
+	assert_nul(imap_vals_pslist(NULL));
+	assert_nul(imap_vals_pslist_clone(NULL));
 	assert_nul(imap_vals_pset(NULL));
 	assert_nul(imap_vals_pset_clone(NULL));
 	assert_nul(imap_str(NULL));
@@ -1082,8 +1082,8 @@ int main(void) {
 
 		TEST(imap_str__),
 
-		TEST(imap_vals_slist__many),
-		TEST(imap_vals_slist_clone__many),
+		TEST(imap_vals_pslist__many),
+		TEST(imap_vals_pslist_clone__many),
 
 		TEST(imap_vals_pset__many),
 		TEST(imap_vals_pset_clone__many),
