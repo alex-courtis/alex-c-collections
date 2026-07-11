@@ -256,16 +256,16 @@ struct Pslist *spmap_keys_pslist(const struct SPmap* const map) {
 	return map ? ppmap_keys_pslist(map->ppmap) : NULL;
 }
 
-const struct SSet *spmap_keys_sset(const struct SPmap* const map) {
+const struct Sset *spmap_keys_sset(const struct SPmap* const map) {
 	if (!map)
 		return NULL;
 
-	const struct SSetParams params = {
+	const struct SsetParams params = {
 		.case_insensitive = map->params.case_insensitive,
 		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
 		.grow = map->params.grow,
 	};
-	const struct SSet *set = sset_init_with(params);
+	const struct Sset *set = sset_init_with(params);
 
 	for (const struct SImapt *it = spmap_it(map); it; it = spmap_it_next(it)) {
 		sset_add(set, it->key);
@@ -282,11 +282,11 @@ struct Pslist *spmap_vals_pslist_clone(const struct SPmap* const map) {
 	return map ? ppmap_vals_pslist_clone(map->ppmap) : NULL;
 }
 
-const struct PSet *spmap_vals_pset(const struct SPmap* const map) {
+const struct Pset *spmap_vals_pset(const struct SPmap* const map) {
 	return map ? ppmap_vals_pset(map->ppmap) : NULL;
 }
 
-const struct PSet *spmap_vals_pset_clone(const struct SPmap* const map) {
+const struct Pset *spmap_vals_pset_clone(const struct SPmap* const map) {
 	return map ? ppmap_vals_pset_clone(map->ppmap) : NULL;
 }
 

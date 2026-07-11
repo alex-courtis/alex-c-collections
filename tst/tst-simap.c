@@ -25,9 +25,9 @@ struct PPmap {
 	size_t size;
 };
 
-struct SSet {
-	const struct SSetParams params;
-	const struct PSet *pset;
+struct Sset {
+	const struct SsetParams params;
+	const struct Pset *pset;
 };
 
 struct SImap {
@@ -634,11 +634,11 @@ static void simap_keys_sset__many(void **state) {
 	simap_put(map, "a", 0);
 	simap_put(map, "b", 1);
 
-	const struct SSet *expected = sset_init();
+	const struct Sset *expected = sset_init();
 	sset_add(expected, "a");
 	sset_add(expected, "b");
 
-	const struct SSet *actual = simap_keys_sset(map);
+	const struct Sset *actual = simap_keys_sset(map);
 
 	assert_sset_equal(actual, expected);
 
@@ -655,7 +655,7 @@ static void simap_keys_sset__params(void **state) {
 	};
 	const struct SImap *map = simap_init_with(params);
 
-	const struct SSet *set = simap_keys_sset(map);
+	const struct Sset *set = simap_keys_sset(map);
 
 	assert_true(set->params.case_insensitive);
 	assert_int_equal(set->params.initial, 99);

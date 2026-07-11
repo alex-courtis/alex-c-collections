@@ -25,9 +25,9 @@ struct PPmap {
 	size_t size;
 };
 
-struct SSet {
-	const struct SSetParams params;
-	const struct PSet *pset;
+struct Sset {
+	const struct SsetParams params;
+	const struct Pset *pset;
 };
 
 struct SSmap {
@@ -504,11 +504,11 @@ static void ssmap_keys_sset__many(void **state) {
 	ssmap_put(map, "a", "aa");
 	ssmap_put(map, "b", "bb");
 
-	const struct SSet *expected = sset_init();
+	const struct Sset *expected = sset_init();
 	sset_add(expected, "a");
 	sset_add(expected, "b");
 
-	const struct SSet *actual = ssmap_keys_sset(map);
+	const struct Sset *actual = ssmap_keys_sset(map);
 
 	assert_sset_equal(actual, expected);
 
@@ -525,7 +525,7 @@ static void ssmap_keys_sset__params(void **state) {
 	};
 	const struct SSmap *map = ssmap_init_with(params);
 
-	const struct SSet *set = ssmap_keys_sset(map);
+	const struct Sset *set = ssmap_keys_sset(map);
 
 	assert_true(set->params.case_insensitive);
 	assert_int_equal(set->params.initial, 99);
@@ -561,11 +561,11 @@ static void ssmap_vals_sset__many(void **state) {
 	ssmap_put(map, "a", "aa");
 	ssmap_put(map, "b", "bb");
 
-	const struct SSet *expected = sset_init();
+	const struct Sset *expected = sset_init();
 	sset_add(expected, "aa");
 	sset_add(expected, "bb");
 
-	const struct SSet *actual = ssmap_vals_sset(map);
+	const struct Sset *actual = ssmap_vals_sset(map);
 
 	assert_sset_equal(actual, expected);
 
@@ -582,7 +582,7 @@ static void ssmap_vals_sset__params(void **state) {
 	};
 	const struct SSmap *map = ssmap_init_with(params);
 
-	const struct SSet *set = ssmap_vals_sset(map);
+	const struct Sset *set = ssmap_vals_sset(map);
 
 	assert_true(set->params.case_insensitive);
 	assert_int_equal(set->params.initial, 99);

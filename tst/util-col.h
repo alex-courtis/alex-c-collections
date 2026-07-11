@@ -17,11 +17,11 @@
  */
 
 // add if the set does not contain each val, return number added, variadic args must be NULL terminated [equal_val, alloc_val]
-size_t pset_add_many(const struct PSet* const set, ... /* , NULL */ );
-size_t pset_add_many_v(const struct PSet* const set, va_list __args);
+size_t pset_add_many(const struct Pset* const set, ... /* , NULL */ );
+size_t pset_add_many_v(const struct Pset* const set, va_list __args);
 
 // add if the set does not contain each val, return number added, variadic args must be NULL terminated
-size_t sset_add_many(const struct SSet* const set, ... /* , NULL */ );
+size_t sset_add_many(const struct Sset* const set, ... /* , NULL */ );
 
 // set key/vals, free old vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key [equal_key, alloc_key, alloc_val, free_key, free_val]
 size_t ppmap_put_many(const struct PPmap* const map, ... /* key, val, NULL */ );

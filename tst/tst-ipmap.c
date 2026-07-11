@@ -833,11 +833,11 @@ static void ipmap_vals_pset__many(void **state) {
 	ipmap_put(map, 1, NULL);
 	ipmap_put(map, 2, V2);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 	pset_add(expected, V2);
 
-	const struct PSet *actual = ipmap_vals_pset(map);
+	const struct Pset *actual = ipmap_vals_pset(map);
 
 	assert_pset_equal(actual, expected);
 
@@ -852,13 +852,13 @@ static void ipmap_vals_pset_clone__many(void **state) {
 
 	ipmap_put(map, 0, V0);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 
 	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 
-	const struct PSet *actual = ipmap_vals_pset_clone(map);
+	const struct Pset *actual = ipmap_vals_pset_clone(map);
 
 	assert_pset_equal(actual, expected);
 

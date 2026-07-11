@@ -160,10 +160,10 @@ struct Pslist *ipmap_vals_pslist(const struct IPmap* const map);
 struct Pslist *ipmap_vals_pslist_clone(const struct IPmap* const map);
 
 // map ordered vals, same params, caller frees set, caller frees vals when alloc_val present [alloc_val]
-const struct PSet *ipmap_vals_pset(const struct IPmap* const map);
+const struct Pset *ipmap_vals_pset(const struct IPmap* const map);
 
 // map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val or both alloc_val and clone_val [clone_val]
-const struct PSet *ipmap_vals_pset_clone(const struct IPmap* const map);
+const struct Pset *ipmap_vals_pset_clone(const struct IPmap* const map);
 
 /*
  * Info

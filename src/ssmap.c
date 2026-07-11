@@ -212,16 +212,16 @@ struct Pslist *ssmap_keys_pslist(const struct SSmap* const map) {
 	return map ? ppmap_keys_pslist(map->ppmap) : NULL;
 }
 
-const struct SSet *ssmap_keys_sset(const struct SSmap* const map) {
+const struct Sset *ssmap_keys_sset(const struct SSmap* const map) {
 	if (!map)
 		return NULL;
 
-	const struct SSetParams params = {
+	const struct SsetParams params = {
 		.case_insensitive = map->params.case_insensitive_key,
 		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
 		.grow = map->params.grow,
 	};
-	const struct SSet *set = sset_init_with(params);
+	const struct Sset *set = sset_init_with(params);
 
 	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
 		sset_add(set, it->key);
@@ -234,16 +234,16 @@ struct Pslist *ssmap_vals_pslist(const struct SSmap* const map) {
 	return map ? ppmap_vals_pslist(map->ppmap) : NULL;
 }
 
-const struct SSet *ssmap_vals_sset(const struct SSmap* const map) {
+const struct Sset *ssmap_vals_sset(const struct SSmap* const map) {
 	if (!map)
 		return NULL;
 
-	const struct SSetParams params = {
+	const struct SsetParams params = {
 		.case_insensitive = map->params.case_insensitive_val,
 		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
 		.grow = map->params.grow,
 	};
-	const struct SSet *set = sset_init_with(params);
+	const struct Sset *set = sset_init_with(params);
 
 	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
 		sset_add(set, it->val);

@@ -164,7 +164,7 @@ bool ppmap_equal(const struct PPmap* const a, const struct PPmap* const b);
 struct Pslist *ppmap_keys_pslist(const struct PPmap* const map);
 
 // map ordered keys, same params, caller frees contents when alloc_key present [alloc_key]
-const struct PSet *ppmap_keys_pset(const struct PPmap* const map);
+const struct Pset *ppmap_keys_pset(const struct PPmap* const map);
 
 // map ordered vals, caller frees list, caller frees contents when alloc_val present [alloc_val]
 struct Pslist *ppmap_vals_pslist(const struct PPmap* const map);
@@ -173,10 +173,10 @@ struct Pslist *ppmap_vals_pslist(const struct PPmap* const map);
 struct Pslist *ppmap_vals_pslist_clone(const struct PPmap* const map);
 
 // map ordered vals, same params, caller frees set, caller frees vals when alloc_val present [alloc_val]
-const struct PSet *ppmap_vals_pset(const struct PPmap* const map);
+const struct Pset *ppmap_vals_pset(const struct PPmap* const map);
 
 // map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_val, clone_val]
-const struct PSet *ppmap_vals_pset_clone(const struct PPmap* const map);
+const struct Pset *ppmap_vals_pset_clone(const struct PPmap* const map);
 
 /*
  * Info

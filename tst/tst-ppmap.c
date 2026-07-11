@@ -26,8 +26,8 @@ struct PPmap {
 	size_t size;
 };
 
-struct PSet {
-	const struct PSetParams params;
+struct Pset {
+	const struct PsetParams params;
 	const void **vals;
 	size_t capacity;
 	size_t size;
@@ -1918,7 +1918,7 @@ static void ppmap_keys_pslist__alloc_key(void **state) {
 static void ppmap_keys_pset__empty(void **state) {
 	const struct PPmap *map = ppmap_init();
 
-	const struct PSet *set = ppmap_keys_pset(map);
+	const struct Pset *set = ppmap_keys_pset(map);
 
 	assert_non_nul(set);
 	assert_int_equal(pset_size(set), 0);
@@ -1938,12 +1938,12 @@ static void ppmap_keys_pset__many(void **state) {
 	ppmap_put(map, K1, V1);
 	ppmap_put(map, K2, V1);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, K0);
 	pset_add(expected, K1);
 	pset_add(expected, K2);
 
-	const struct PSet *actual = ppmap_keys_pset(map);
+	const struct Pset *actual = ppmap_keys_pset(map);
 
 	assert_pset_equal(actual, expected);
 
@@ -1966,7 +1966,7 @@ static void ppmap_keys_pset__params(void **state) {
 	};
 	const struct PPmap *map = ppmap_init_with(params);
 
-	const struct PSet *set = ppmap_keys_pset(map);
+	const struct Pset *set = ppmap_keys_pset(map);
 
 	assert_int_equal(set->size, 0);
 	assert_int_equal(set->capacity, 99);
@@ -2033,7 +2033,7 @@ static void ppmap_vals_pslist__alloc_val(void **state) {
 static void ppmap_vals_pset__empty(void **state) {
 	const struct PPmap *map = ppmap_init();
 
-	const struct PSet *set = ppmap_vals_pset(map);
+	const struct Pset *set = ppmap_vals_pset(map);
 
 	assert_non_nul(set);
 	assert_int_equal(pset_size(set), 0);
@@ -2055,11 +2055,11 @@ static void ppmap_vals_pset__many(void **state) {
 	ppmap_put(map, K2, V1);
 	ppmap_put(map, K3, NULL);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 	pset_add(expected, V1);
 
-	const struct PSet *actual = ppmap_vals_pset(map);
+	const struct Pset *actual = ppmap_vals_pset(map);
 
 	assert_pset_equal(actual, expected);
 
@@ -2080,13 +2080,13 @@ static void ppmap_vals_pset__alloc_val(void **state) {
 
 	ppmap_put(map, K0, V0);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
-	const struct PSet *actual = ppmap_vals_pset(map);
+	const struct Pset *actual = ppmap_vals_pset(map);
 
 	assert_pset_equal(actual, expected);
 
@@ -2105,13 +2105,13 @@ static void ppmap_vals_pset_clone__many(void **state) {
 
 	ppmap_put(map, K0, V0);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 
 	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 
-	const struct PSet *actual = ppmap_vals_pset_clone(map);
+	const struct Pset *actual = ppmap_vals_pset_clone(map);
 
 	assert_pset_equal(actual, expected);
 
@@ -2139,7 +2139,7 @@ static void ppmap_vals_pset_clone__alloc_val_and_clone_val(void **state) {
 	};
 	const struct PPmap *map = ppmap_init_with(params);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 
 	expect_ptr(mock_alloc, ptr, V0);
@@ -2150,7 +2150,7 @@ static void ppmap_vals_pset_clone__alloc_val_and_clone_val(void **state) {
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
-	const struct PSet *actual = ppmap_vals_pset_clone(map);
+	const struct Pset *actual = ppmap_vals_pset_clone(map);
 
 	assert_pset_equal(actual, expected);
 
@@ -2171,7 +2171,7 @@ static void ppmap_vals_pset__params(void **state) {
 	};
 	const struct PPmap *map = ppmap_init_with(params);
 
-	const struct PSet *set = ppmap_vals_pset(map);
+	const struct Pset *set = ppmap_vals_pset(map);
 
 	assert_int_equal(set->size, 0);
 	assert_int_equal(set->capacity, 99);

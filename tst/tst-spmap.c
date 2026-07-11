@@ -29,9 +29,9 @@ struct PPmap {
 	size_t size;
 };
 
-struct SSet {
-	const struct SSetParams params;
-	const struct PSet *pset;
+struct Sset {
+	const struct SsetParams params;
+	const struct Pset *pset;
 };
 
 struct SPmap {
@@ -612,11 +612,11 @@ static void spmap_keys_sset__many(void **state) {
 	spmap_put(map, "a", V0);
 	spmap_put(map, "b", V1);
 
-	const struct SSet *expected = sset_init();
+	const struct Sset *expected = sset_init();
 	sset_add(expected, "a");
 	sset_add(expected, "b");
 
-	const struct SSet *actual = spmap_keys_sset(map);
+	const struct Sset *actual = spmap_keys_sset(map);
 
 	assert_sset_equal(actual, expected);
 
@@ -633,7 +633,7 @@ static void spmap_keys_sset__params(void **state) {
 	};
 	const struct SPmap *map = spmap_init_with(params);
 
-	const struct SSet *set = spmap_keys_sset(map);
+	const struct Sset *set = spmap_keys_sset(map);
 
 	assert_true(set->params.case_insensitive);
 	assert_int_equal(set->params.initial, 99);
@@ -671,11 +671,11 @@ static void spmap_vals_pset__many(void **state) {
 	spmap_put(map, "b", NULL);
 	spmap_put(map, "c", V2);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 	pset_add(expected, V2);
 
-	const struct PSet *actual = spmap_vals_pset(map);
+	const struct Pset *actual = spmap_vals_pset(map);
 
 	assert_pset_equal(actual, expected);
 
@@ -690,13 +690,13 @@ static void spmap_vals_pset_clone__many(void **state) {
 
 	spmap_put(map, "a", V0);
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	pset_add(expected, V0);
 
 	expect_ptr(mock_clone, ptr, V0);
 	will_return_ptr_type(mock_clone, V0, void*);
 
-	const struct PSet *actual = spmap_vals_pset_clone(map);
+	const struct Pset *actual = spmap_vals_pset_clone(map);
 
 	assert_pset_equal(actual, expected);
 

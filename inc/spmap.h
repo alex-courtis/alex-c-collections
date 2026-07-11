@@ -159,7 +159,7 @@ bool spmap_equal(const struct SPmap* const a, const struct SPmap* const b);
 struct Pslist *spmap_keys_pslist(const struct SPmap* const map);
 
 // map ordered keys, same params
-const struct SSet *spmap_keys_sset(const struct SPmap* const map);
+const struct Sset *spmap_keys_sset(const struct SPmap* const map);
 
 // map ordered vals, caller frees list, caller frees contents when alloc_val present [alloc_val]
 struct Pslist *spmap_vals_pslist(const struct SPmap* const map);
@@ -168,10 +168,10 @@ struct Pslist *spmap_vals_pslist(const struct SPmap* const map);
 struct Pslist *spmap_vals_pslist_clone(const struct SPmap* const map);
 
 // map ordered vals, same params, caller frees set, caller frees vals when alloc_val present [alloc_val]
-const struct PSet *spmap_vals_pset(const struct SPmap* const map);
+const struct Pset *spmap_vals_pset(const struct SPmap* const map);
 
 // map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val or both alloc_val and clone_val [clone_val]
-const struct PSet *spmap_vals_pset_clone(const struct SPmap* const map);
+const struct Pset *spmap_vals_pset_clone(const struct SPmap* const map);
 
 
 /*

@@ -27,8 +27,8 @@ static void *V5 = &vals[5];
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
 
-struct PSet {
-	const struct PSetParams params;
+struct Pset {
+	const struct PsetParams params;
 	const void **vals;
 	size_t capacity;
 	size_t size;
@@ -39,7 +39,7 @@ static char* str_first(const void *val) {
 }
 
 static void pset_init__defaults(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_non_nul(set);
 
@@ -57,9 +57,9 @@ static void pset_init__defaults(void **state) {
 }
 
 static void pset_clone__empty(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
-	const struct PSet *clone = pset_clone(set);
+	const struct Pset *clone = pset_clone(set);
 
 	assert_non_nul(clone);
 
@@ -71,16 +71,16 @@ static void pset_clone__empty(void **state) {
 
 // also tests constructor
 static void pset_clone__params(void **state) {
-	const struct PSetParams params = {
+	const struct PsetParams params = {
 		.equal_val = mock_equal,
 		.alloc_val = mock_alloc,
 		.clone_val = mock_clone,
 		.initial = 3,
 		.grow  = 4,
 	};
-	const struct PSet *set = pset_init_with(params);
+	const struct Pset *set = pset_init_with(params);
 
-	const struct PSet *clone = pset_clone(set);
+	const struct Pset *clone = pset_clone(set);
 
 	assert_non_nul(clone);
 
@@ -96,12 +96,12 @@ static void pset_clone__params(void **state) {
 }
 
 static void pset_clone__many(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	const struct PSet *clone = pset_clone(set);
+	const struct Pset *clone = pset_clone(set);
 
 	assert_int_equal(pset_size(clone), 2);
 
@@ -116,8 +116,8 @@ static void pset_clone__many(void **state) {
 }
 
 static void pset_clone__alloc_val(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .alloc_val = mock_alloc, };
+	const struct Pset *set = pset_init_with(params);
 
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
@@ -127,7 +127,7 @@ static void pset_clone__alloc_val(void **state) {
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
-	const struct PSet *clone = pset_clone(set);
+	const struct Pset *clone = pset_clone(set);
 
 	assert_int_equal(pset_size(clone), 1);
 
@@ -141,8 +141,8 @@ static void pset_clone__alloc_val(void **state) {
 }
 
 static void pset_clone_deep__clone_val(void **state) {
-	const struct PSetParams params = { .clone_val = mock_clone, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .clone_val = mock_clone, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 
@@ -153,7 +153,7 @@ static void pset_clone_deep__clone_val(void **state) {
 	expect_ptr(mock_clone, ptr, V1);
 	will_return_ptr_type(mock_clone, V3, void*);
 
-	const struct PSet *clone = pset_clone_deep(set);
+	const struct Pset *clone = pset_clone_deep(set);
 
 	assert_int_equal(pset_size(clone), 2);
 
@@ -167,7 +167,7 @@ static void pset_clone_deep__clone_val(void **state) {
 }
 
 static void pset_clone_deep__no_clone_val(void **state) {
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 
 	assert_true(pset_add(from, V0));
 
@@ -177,7 +177,7 @@ static void pset_clone_deep__no_clone_val(void **state) {
 }
 
 static void pset_free_vals__null_free_val(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	const char *val = strdup("0");
 
@@ -189,7 +189,7 @@ static void pset_free_vals__null_free_val(void **state) {
 }
 
 static void pset_free_vals__missing_val(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	char *val = strdup("0");
 
@@ -204,8 +204,8 @@ static void pset_free_vals__missing_val(void **state) {
 }
 
 static void pset_free_vals__free_val(void **state) {
-	const struct PSetParams params = { .free_val = mock_free, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .free_val = mock_free, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -221,7 +221,7 @@ static void pset_free_vals__free_val(void **state) {
 }
 
 static void pset_add__new(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -237,8 +237,8 @@ static void pset_add__new(void **state) {
 }
 
 static void pset_add__equal_val(void **state) {
-	const struct PSetParams params = { .equal_val = mock_equal, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .equal_val = mock_equal, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 
@@ -258,8 +258,8 @@ static void pset_add__equal_val(void **state) {
 }
 
 static void pset_add__alloc_val(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .alloc_val = mock_alloc, };
+	const struct Pset *set = pset_init_with(params);
 
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
@@ -270,8 +270,8 @@ static void pset_add__alloc_val(void **state) {
 }
 
 static void pset_add__alloc_val_returned_null(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .alloc_val = mock_alloc, };
+	const struct Pset *set = pset_init_with(params);
 
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, NULL, void*);
@@ -286,7 +286,7 @@ static void pset_add__alloc_val_returned_null(void **state) {
 }
 
 static void pset_add__null(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 
@@ -302,8 +302,8 @@ static void pset_add__null(void **state) {
 }
 
 static void pset_add__grow(void **state) {
-	const struct PSetParams params = { .initial = 2, .grow = 5 };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .initial = 2, .grow = 5 };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -337,15 +337,15 @@ static void pset_add__grow(void **state) {
 }
 
 static void pset_add_all__many(void **state) {
-	const struct PSet *to = pset_init();
+	const struct Pset *to = pset_init();
 	assert_true(pset_add(to, V0));
 	assert_true(pset_add(to, V1));
 
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 	assert_true(pset_add(from, V1));
 	assert_true(pset_add(from, V2));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V2));
@@ -360,18 +360,18 @@ static void pset_add_all__many(void **state) {
 }
 
 static void pset_add_all__alloc_val(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
+	const struct PsetParams params = { .alloc_val = mock_alloc, };
 
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
 
-	const struct PSet *to = pset_init_with(params);
+	const struct Pset *to = pset_init_with(params);
 	assert_true(pset_add(to, V0));
 
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 	assert_true(pset_add(from, V1));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
 
@@ -388,17 +388,17 @@ static void pset_add_all__alloc_val(void **state) {
 }
 
 static void pset_add_all_clone__many(void **state) {
-	const struct PSetParams params = { .clone_val = mock_clone, };
-	const struct PSet *to = pset_init_with(params);
+	const struct PsetParams params = { .clone_val = mock_clone, };
+	const struct Pset *to = pset_init_with(params);
 
 	assert_true(pset_add(to, V0));
 	assert_true(pset_add(to, V1));
 
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 	assert_true(pset_add(from, V1));
 	assert_true(pset_add(from, V2));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V2));
@@ -416,13 +416,13 @@ static void pset_add_all_clone__many(void **state) {
 }
 
 static void pset_add_all_clone__no_clone_val(void **state) {
-	const struct PSet *to = pset_init();
+	const struct Pset *to = pset_init();
 	assert_true(pset_add(to, V0));
 
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 	assert_true(pset_add(from, V1));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 
 	assert_int_equal(pset_add_all_clone(to, from), 0);
@@ -435,11 +435,11 @@ static void pset_add_all_clone__no_clone_val(void **state) {
 }
 
 static void pset_add_many__many(void **state) {
-	const struct PSet *to = pset_init();
+	const struct Pset *to = pset_init();
 	assert_true(pset_add(to, V0));
 	assert_true(pset_add(to, V1));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V2));
@@ -453,7 +453,7 @@ static void pset_add_many__many(void **state) {
 }
 
 static void pset_add_many__no_vals(void **state) {
-	const struct PSet *to = pset_init();
+	const struct Pset *to = pset_init();
 
 	assert_int_equal(pset_add_many(to, NULL), 0);
 
@@ -461,7 +461,7 @@ static void pset_add_many__no_vals(void **state) {
 }
 
 static void pset_remove__existing(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -488,7 +488,7 @@ static void pset_remove__existing(void **state) {
 }
 
 static void pset_remove__inexistent(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -509,8 +509,8 @@ static void pset_remove__inexistent(void **state) {
 }
 
 static void pset_remove__equal_val(void **state) {
-	const struct PSetParams params = { .equal_val = mock_equal, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .equal_val = mock_equal, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 
@@ -532,8 +532,8 @@ static void pset_remove__equal_val(void **state) {
 }
 
 static void pset_remove_free__free_val(void **state) {
-	const struct PSetParams params = { .free_val = mock_free, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .free_val = mock_free, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -550,7 +550,7 @@ static void pset_remove_free__free_val(void **state) {
 }
 
 static void pset_remove_free__free(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	const char *val = strdup("0");
 
@@ -562,13 +562,13 @@ static void pset_remove_free__free(void **state) {
 }
 
 static void pset_remove_all__many(void **state) {
-	const struct PSetParams params = { .free_val = mock_free, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .free_val = mock_free, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 	assert_true(pset_add(from, V1));
 	assert_true(pset_add(from, V2));
 
@@ -579,14 +579,14 @@ static void pset_remove_all__many(void **state) {
 }
 
 static void pset_remove_all_free__no_free_val(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	const char *val = strdup("should be freed");
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, val));
 
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 	assert_true(pset_add(from, val));
 	assert_true(pset_add(from, V2));
 
@@ -597,13 +597,13 @@ static void pset_remove_all_free__no_free_val(void **state) {
 }
 
 static void pset_remove_all_free__free_val(void **state) {
-	const struct PSetParams params = { .free_val = mock_free, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .free_val = mock_free, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	const struct PSet *from = pset_init();
+	const struct Pset *from = pset_init();
 	assert_true(pset_add(from, V1));
 	assert_true(pset_add(from, V2));
 
@@ -616,7 +616,7 @@ static void pset_remove_all_free__free_val(void **state) {
 }
 
 static void pset_match__matches(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -638,7 +638,7 @@ static void pset_match__matches(void **state) {
 }
 
 static void pset_match__no_match(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -659,7 +659,7 @@ static void pset_match__no_match(void **state) {
 }
 
 static void pset_match__null_match(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_nul(pset_match(set, mock_2pred, D0));
 
@@ -667,7 +667,7 @@ static void pset_match__null_match(void **state) {
 }
 
 static void pset_it__empty(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_int_equal(pset_size(set), 0);
 
@@ -677,12 +677,12 @@ static void pset_it__empty(void **state) {
 }
 
 static void pset_it__free(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
-	const struct PSetIt *it = pset_it(set);
+	const struct PsetIt *it = pset_it(set);
 	assert_non_nul(it);
 	assert_str_equal(it->val, V0);
 
@@ -692,14 +692,14 @@ static void pset_it__free(void **state) {
 }
 
 static void pset_it__many(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
 
 	assert_int_equal(pset_size(set), 2);
 
-	const struct PSetIt *it = pset_it(set);
+	const struct PsetIt *it = pset_it(set);
 	assert_non_nul(it);
 	assert_str_equal(it->val, V0);
 
@@ -714,7 +714,7 @@ static void pset_it__many(void **state) {
 }
 
 static void pset_it__cleared(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -732,19 +732,19 @@ static void pset_it__cleared(void **state) {
 }
 
 static void pset_it_free__partial(void **state) {
-	const struct PSetIt *it = calloc(1, sizeof(struct PSetIt));
+	const struct PsetIt *it = calloc(1, sizeof(struct PsetIt));
 
 	pset_it_free(it);
 }
 
 static void pset_it_next__partial(void **state) {
-	const struct PSetIt *it = calloc(1, sizeof(struct PSetIt));
+	const struct PsetIt *it = calloc(1, sizeof(struct PsetIt));
 
 	assert_nul(pset_it_next(it));
 }
 
 static void pset_match_it__many(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -764,7 +764,7 @@ static void pset_match_it__many(void **state) {
 	expect_ptr(mock_equal, b, D0);
 	will_return(mock_equal, true);
 
-	const struct PSetIt *it = pset_match_it(set, mock_equal, D0);
+	const struct PsetIt *it = pset_match_it(set, mock_equal, D0);
 	assert_non_nul(it);
 	assert_ptr_equal(it->val, V1);
 
@@ -795,7 +795,7 @@ static void pset_match_it__many(void **state) {
 }
 
 static void pset_match_it__none(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -816,7 +816,7 @@ static void pset_match_it__none(void **state) {
 }
 
 static void pset_match_it__empty(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_nul(pset_match_it(set, mock_equal, D0));
 
@@ -824,7 +824,7 @@ static void pset_match_it__empty(void **state) {
 }
 
 static void pset_add__again(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -842,7 +842,7 @@ static void pset_add__again(void **state) {
 	assert_int_equal(pset_size(set), 4);
 
 	// 0
-	const struct PSetIt *it = pset_it(set);
+	const struct PsetIt *it = pset_it(set);
 	assert_non_nul(it);
 	assert_str_equal(it->val, V0);
 
@@ -869,8 +869,8 @@ static void pset_add__again(void **state) {
 }
 
 static void pset_sort__empty(void **state) {
-	const struct PSet *actual = pset_init();
-	const struct PSet *expected = pset_init();
+	const struct Pset *actual = pset_init();
+	const struct Pset *expected = pset_init();
 
 	pset_sort(actual, mock_less_than);
 
@@ -883,11 +883,11 @@ static void pset_sort__empty(void **state) {
 }
 
 static void pset_sort__one(void **state) {
-	const struct PSet *actual = pset_init();
+	const struct Pset *actual = pset_init();
 
 	assert_true(pset_add(actual, V0));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 
 	pset_sort(actual, mock_less_than);
@@ -903,7 +903,7 @@ static bool test_less_than_int(const void* const a, const void* const b) {
 }
 
 static void pset_sort__many(void **state) {
-	const struct PSet *actual = pset_init();
+	const struct Pset *actual = pset_init();
 
 	assert_true(pset_add(actual, V2));
 	assert_true(pset_add(actual, V0));
@@ -912,7 +912,7 @@ static void pset_sort__many(void **state) {
 	assert_true(pset_add(actual, V1));
 	assert_true(pset_add(actual, V4));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V0));
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V2));
@@ -929,12 +929,12 @@ static void pset_sort__many(void **state) {
 }
 
 static void pset_sort__no_less_than(void **state) {
-	const struct PSet *actual = pset_init();
+	const struct Pset *actual = pset_init();
 
 	assert_true(pset_add(actual, V1));
 	assert_true(pset_add(actual, V0));
 
-	const struct PSet *expected = pset_init();
+	const struct Pset *expected = pset_init();
 	assert_true(pset_add(expected, V1));
 	assert_true(pset_add(expected, V0));
 
@@ -947,8 +947,8 @@ static void pset_sort__no_less_than(void **state) {
 }
 
 static void pset_equal__length_different(void **state) {
-	const struct PSet *a = pset_init();
-	const struct PSet *b = pset_init();
+	const struct Pset *a = pset_init();
+	const struct Pset *b = pset_init();
 
 	assert_true(pset_add(a, V0));
 
@@ -962,8 +962,8 @@ static void pset_equal__length_different(void **state) {
 }
 
 static void pset_equal__val_pointers_ok(void **state) {
-	const struct PSet *a = pset_init();
-	const struct PSet *b = pset_init();
+	const struct Pset *a = pset_init();
+	const struct Pset *b = pset_init();
 
 	assert_true(pset_add(a, V0));
 	assert_true(pset_add(a, V1));
@@ -980,8 +980,8 @@ static void pset_equal__val_pointers_ok(void **state) {
 }
 
 static void pset_equal__val_pointers_different(void **state) {
-	const struct PSet *a = pset_init();
-	const struct PSet *b = pset_init();
+	const struct Pset *a = pset_init();
+	const struct Pset *b = pset_init();
 
 	assert_true(pset_add(a, V0));
 	assert_true(pset_add(a, V1));
@@ -996,9 +996,9 @@ static void pset_equal__val_pointers_different(void **state) {
 }
 
 static void pset_equal__equal_val_ok(void **state) {
-	const struct PSetParams params = { .equal_val = (fn_equal)equal_strcmp, };
-	const struct PSet *a = pset_init_with(params);
-	const struct PSet *b = pset_init_with(params);
+	const struct PsetParams params = { .equal_val = (fn_equal)equal_strcmp, };
+	const struct Pset *a = pset_init_with(params);
+	const struct Pset *b = pset_init_with(params);
 
 	assert_true(pset_add(a, V0));
 	assert_true(pset_add(a, V1));
@@ -1017,9 +1017,9 @@ static void pset_equal__equal_val_ok(void **state) {
 }
 
 static void pset_equal__equal_val_different(void **state) {
-	const struct PSetParams params = { .equal_val = (fn_equal)equal_strcmp, };
-	const struct PSet *a = pset_init_with(params);
-	const struct PSet *b = pset_init_with(params);
+	const struct PsetParams params = { .equal_val = (fn_equal)equal_strcmp, };
+	const struct Pset *a = pset_init_with(params);
+	const struct Pset *b = pset_init_with(params);
 
 	assert_true(pset_add(a, "0"));
 	assert_true(pset_add(a, "1"));
@@ -1034,7 +1034,7 @@ static void pset_equal__equal_val_different(void **state) {
 }
 
 static void pset_pslist__empty(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_nul(pset_pslist(set));
 
@@ -1042,7 +1042,7 @@ static void pset_pslist__empty(void **state) {
 }
 
 static void pset_pslist__many(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -1058,8 +1058,8 @@ static void pset_pslist__many(void **state) {
 }
 
 static void pset_pslist__alloc_val(void **state) {
-	const struct PSetParams params = { .alloc_val = mock_alloc, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .alloc_val = mock_alloc, };
+	const struct Pset *set = pset_init_with(params);
 
 	expect_ptr(mock_alloc, ptr, V0);
 	will_return_ptr_type(mock_alloc, V0, void*);
@@ -1079,8 +1079,8 @@ static void pset_pslist__alloc_val(void **state) {
 }
 
 static void pset_pslist_clone__clone_val(void **state) {
-	const struct PSetParams params = { .clone_val = mock_clone, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .clone_val = mock_clone, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, V0));
 
@@ -1094,7 +1094,7 @@ static void pset_pslist_clone__clone_val(void **state) {
 }
 
 static void pset_pslist_clone__no_clone_val(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 
@@ -1104,8 +1104,8 @@ static void pset_pslist_clone__no_clone_val(void **state) {
 }
 
 static void pset_str__empty(void **state) {
-	const struct PSetParams params = { .str_val = mock_str, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .str_val = mock_str, };
+	const struct Pset *set = pset_init_with(params);
 
 	char *str = pset_str(set);
 	assert_str_equal(str, "");
@@ -1115,7 +1115,7 @@ static void pset_str__empty(void **state) {
 }
 
 static void pset_str__pointers(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
 	assert_true(pset_add(set, V1));
@@ -1139,8 +1139,8 @@ static void pset_str__pointers(void **state) {
 }
 
 static void pset_str__str_val(void **state) {
-	const struct PSetParams params = { .str_val = str_first, };
-	const struct PSet *set = pset_init_with(params);
+	const struct PsetParams params = { .str_val = str_first, };
+	const struct Pset *set = pset_init_with(params);
 
 	assert_true(pset_add(set, "ONE"));
 	assert_true(pset_add(set, "TWO"));
@@ -1158,7 +1158,7 @@ static void pset_str__str_val(void **state) {
 }
 
 static void pset__null_inputs(void **state) {
-	const struct PSet *set = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_int_equal(pset_add_all(NULL, NULL), 0);
 	assert_int_equal(pset_add_all(set, NULL), 0);

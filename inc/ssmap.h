@@ -131,13 +131,13 @@ bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b);
 struct Pslist *ssmap_keys_pslist(const struct SSmap* const map);
 
 // map ordered keys, same params
-const struct SSet *ssmap_keys_sset(const struct SSmap* const map);
+const struct Sset *ssmap_keys_sset(const struct SSmap* const map);
 
 // map ordered vals, caller frees list and contents
 struct Pslist *ssmap_vals_pslist(const struct SSmap* const map);
 
 // map ordered vals, same params
-const struct SSet *ssmap_vals_sset(const struct SSmap* const map);
+const struct Sset *ssmap_vals_sset(const struct SSmap* const map);
 
 /*
  * Info

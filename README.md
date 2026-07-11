@@ -9,16 +9,16 @@ Not thread safe.
 * Containerless singly linked list.
 * NULL values permitted.
 
-### PSet
+### Pset
 
 * Array backed pointer set.
 * Entries preserve insertion order.
 * Operations linearly traverse values.
 * NULL not permitted.
 
-### SSet
+### Sset
 
-* `PSet` with string values
+* `Pset` with string values
 * Values are memory managed.
 
 ### PPmap

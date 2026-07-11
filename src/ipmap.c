@@ -342,11 +342,11 @@ struct Pslist *ipmap_vals_pslist_clone(const struct IPmap* const map) {
 	return map ? ppmap_vals_pslist_clone(map->ppmap) : NULL;
 }
 
-const struct PSet *ipmap_vals_pset(const struct IPmap* const map) {
+const struct Pset *ipmap_vals_pset(const struct IPmap* const map) {
 	return map ? ppmap_vals_pset(map->ppmap) : NULL;
 }
 
-const struct PSet *ipmap_vals_pset_clone(const struct IPmap* const map) {
+const struct Pset *ipmap_vals_pset_clone(const struct IPmap* const map) {
 	return map ? ppmap_vals_pset_clone(map->ppmap) : NULL;
 }
 

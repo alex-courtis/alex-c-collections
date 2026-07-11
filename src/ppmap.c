@@ -157,8 +157,8 @@ static const struct PPmap *clone(const struct PPmap* const from, fn_clone clone_
 	return to;
 }
 
-static const struct PSet *vals_pset(const struct PPmap* const map, fn_clone clone_val) {
-	const struct PSetParams params = {
+static const struct Pset *vals_pset(const struct PPmap* const map, fn_clone clone_val) {
+	const struct PsetParams params = {
 		.equal_val = map->params.equal_val,
 		.alloc_val = map->params.alloc_val,
 		.free_val = map->params.free_val,
@@ -167,7 +167,7 @@ static const struct PSet *vals_pset(const struct PPmap* const map, fn_clone clon
 		.initial = MAX(map->size, map->params.initial),
 		.grow  = map->params.grow,
 	};
-	const struct PSet *set = pset_init_with(params);
+	const struct Pset *set = pset_init_with(params);
 
 	const void **v;
 	for (v = map->vals; v < map->vals + map->size; v++) {
@@ -608,11 +608,11 @@ struct Pslist *ppmap_keys_pslist(const struct PPmap* const map) {
 	return list;
 }
 
-const struct PSet *ppmap_keys_pset(const struct PPmap* const map) {
+const struct Pset *ppmap_keys_pset(const struct PPmap* const map) {
 	if (!map)
 		return NULL;
 
-	const struct PSetParams params = {
+	const struct PsetParams params = {
 		.equal_val = map->params.equal_key,
 		.alloc_val = map->params.alloc_key,
 		.free_val = map->params.free_key,
@@ -621,7 +621,7 @@ const struct PSet *ppmap_keys_pset(const struct PPmap* const map) {
 		.initial = MAX(map->size, map->params.initial),
 		.grow  = map->params.grow,
 	};
-	const struct PSet *set = pset_init_with(params);
+	const struct Pset *set = pset_init_with(params);
 
 	const void **k;
 	for (k = map->keys; k < map->keys + map->size; k++) {
@@ -642,11 +642,11 @@ struct Pslist *ppmap_vals_pslist_clone(const struct PPmap* const map) {
 	return vals_pslist(map, map->params.clone_val);
 }
 
-const struct PSet *ppmap_vals_pset(const struct PPmap* const map) {
+const struct Pset *ppmap_vals_pset(const struct PPmap* const map) {
 	return map ? vals_pset(map, NULL) : NULL;
 }
 
-const struct PSet *ppmap_vals_pset_clone(const struct PPmap* const map) {
+const struct Pset *ppmap_vals_pset_clone(const struct PPmap* const map) {
 	return map && map->params.clone_val ? vals_pset(map, map->params.clone_val) : NULL;
 }
 

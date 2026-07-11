@@ -10,7 +10,7 @@
 
 #include "util-col.h"
 
-size_t pset_add_many_v(const struct PSet* const set, va_list __args) {
+size_t pset_add_many_v(const struct Pset* const set, va_list __args) {
 	if (!set)
 		return 0;
 
@@ -26,7 +26,7 @@ size_t pset_add_many_v(const struct PSet* const set, va_list __args) {
 	return added;
 }
 
-size_t pset_add_many(const struct PSet* const set, ...) {
+size_t pset_add_many(const struct Pset* const set, ...) {
 	if (!set)
 		return 0;
 
@@ -40,12 +40,12 @@ size_t pset_add_many(const struct PSet* const set, ...) {
 	return added;
 }
 
-struct SSet {
-	const struct SSetParams params;
-	const struct PSet *pset;
+struct Sset {
+	const struct SsetParams params;
+	const struct Pset *pset;
 };
 
-size_t sset_add_many(const struct SSet* const set, ...) {
+size_t sset_add_many(const struct Sset* const set, ...) {
 	if (!set)
 		return 0;
 

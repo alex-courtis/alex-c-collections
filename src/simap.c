@@ -320,16 +320,16 @@ struct Pslist *simap_keys_pslist(const struct SImap* const map) {
 	return map ? ppmap_keys_pslist(map->ppmap) : NULL;
 }
 
-const struct SSet *simap_keys_sset(const struct SImap* const map) {
+const struct Sset *simap_keys_sset(const struct SImap* const map) {
 	if (!map)
 		return NULL;
 
-	const struct SSetParams params = {
+	const struct SsetParams params = {
 		.case_insensitive = map->params.case_insensitive_key,
 		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
 		.grow = map->params.grow,
 	};
-	const struct SSet *set = sset_init_with(params);
+	const struct Sset *set = sset_init_with(params);
 
 	for (const struct SImapIt *it = simap_it(map); it; it = simap_it_next(it)) {
 		sset_add(set, it->key);

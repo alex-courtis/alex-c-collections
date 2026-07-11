@@ -132,7 +132,7 @@ bool simap_equal(const struct SImap* const a, const struct SImap* const b);
 struct Pslist *simap_keys_pslist(const struct SImap* const map);
 
 // map ordered keys, same params
-const struct SSet *simap_keys_sset(const struct SImap* const map);
+const struct Sset *simap_keys_sset(const struct SImap* const map);
 
 /*
  * Info
