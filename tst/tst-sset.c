@@ -154,7 +154,7 @@ static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	sset_free(set);
 }
 
-static void sset_match__matches(void **state) {
+static void sset_find__matches(void **state) {
 	const struct Sset *set = sset_init();
 
 	assert_true(sset_add(set, "x0"));
@@ -162,7 +162,7 @@ static void sset_match__matches(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "x3"));
 
-	assert_str_equal(sset_match(set, match_starts_with_a, NULL), "a2");
+	assert_str_equal(sset_find(set, match_starts_with_a, NULL), "a2");
 
 	sset_free(set);
 }
@@ -210,7 +210,7 @@ static void sset_it_next__partial(void **state) {
 	assert_nul(sset_it_next(it));
 }
 
-static void sset_match_it__(void **state) {
+static void sset_filter_it__(void **state) {
 	const struct Sset *set = sset_init();
 
 	assert_true(sset_add(set, "a1"));
@@ -218,7 +218,7 @@ static void sset_match_it__(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "b2"));
 
-	const struct SsetIt *it = sset_match_it(set, match_starts_with_a, NULL);
+	const struct SsetIt *it = sset_filter_it(set, match_starts_with_a, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->val, "a1");
 
@@ -444,11 +444,11 @@ static void sset__null_inputs(void **state) {
 	sset_it_free(NULL);
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
-	sset_match(NULL, NULL, NULL);
-	sset_match(set, NULL, NULL);
+	sset_find(NULL, NULL, NULL);
+	sset_find(set, NULL, NULL);
 	assert_nul(sset_it(NULL));
-	assert_nul(sset_match_it(NULL, NULL, NULL));
-	assert_nul(sset_match_it(set, NULL, NULL));
+	assert_nul(sset_filter_it(NULL, NULL, NULL));
+	assert_nul(sset_filter_it(set, NULL, NULL));
 	assert_nul(sset_it_next(NULL));
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_add(set, NULL));
@@ -481,7 +481,7 @@ int main(void) {
 
 		TEST(sset_remove_all__many),
 
-		TEST(sset_match__matches),
+		TEST(sset_find__matches),
 
 		TEST(sset_it__many),
 		TEST(sset_it__empty),
@@ -490,7 +490,7 @@ int main(void) {
 
 		TEST(sset_it_next__partial),
 
-		TEST(sset_match_it__),
+		TEST(sset_filter_it__),
 
 		TEST(sset_equal__case_sensitive),
 		TEST(sset_equal__case_insensitive),

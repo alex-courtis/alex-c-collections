@@ -104,7 +104,7 @@ static void simap_getp__zero(void **state) {
 	simap_free(map);
 }
 
-static void simap_match__none(void **state) {
+static void simap_find__none(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "0", 10));
@@ -115,14 +115,14 @@ static void simap_match__none(void **state) {
 	expect_string(mock_3pred_str_szt, data, "x");
 	will_return(mock_3pred_str_szt, false);
 
-	const struct SImapPair kv_pair = simap_match(map, mock_3pred_str_szt, "x");
+	const struct SImapPair kv_pair = simap_find(map, mock_3pred_str_szt, "x");
 	assert_nul(kv_pair.key);
 	assert_int_equal(kv_pair.val, 0);
 
 	simap_free(map);
 }
 
-static void simap_match_key__none(void **state) {
+static void simap_find_key__none(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "0", 10));
@@ -132,14 +132,14 @@ static void simap_match_key__none(void **state) {
 	expect_string(mock_2pred_str, data, "x");
 	will_return(mock_2pred_str, false);
 
-	const struct SImapPair k_pair = simap_match_key(map, mock_2pred_str, "x");
+	const struct SImapPair k_pair = simap_find_key(map, mock_2pred_str, "x");
 	assert_nul(k_pair.key);
 	assert_int_equal(k_pair.val, 0);
 
 	simap_free(map);
 }
 
-static void simap_match_val__none(void **state) {
+static void simap_find_val__none(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "0", 10));
@@ -149,14 +149,14 @@ static void simap_match_val__none(void **state) {
 	expect_string(mock_2pred_szt, data, "x");
 	will_return(mock_2pred_szt, false);
 
-	const struct SImapPair v_pair = simap_match_val(map, mock_2pred_szt, "x");
+	const struct SImapPair v_pair = simap_find_val(map, mock_2pred_szt, "x");
 	assert_nul(v_pair.key);
 	assert_int_equal(v_pair.val, 0);
 
 	simap_free(map);
 }
 
-static void simap_match__matches(void **state) {
+static void simap_find__matches(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "0", 10));
@@ -175,14 +175,14 @@ static void simap_match__matches(void **state) {
 	expect_string(mock_3pred_str_szt, data, "x");
 	will_return(mock_3pred_str_szt, true);
 
-	const struct SImapPair kv_pair = simap_match(map, mock_3pred_str_szt, "x");
+	const struct SImapPair kv_pair = simap_find(map, mock_3pred_str_szt, "x");
 	assert_str_equal(kv_pair.key, "1");
 	assert_int_equal(kv_pair.val, 11);
 
 	simap_free(map);
 }
 
-static void simap_match_key__matches(void **state) {
+static void simap_find_key__matches(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "0", 10));
@@ -199,14 +199,14 @@ static void simap_match_key__matches(void **state) {
 	expect_string(mock_2pred_str, data, "x");
 	will_return(mock_2pred_str, true);
 
-	const struct SImapPair k_pair = simap_match_key(map, mock_2pred_str, "x");
+	const struct SImapPair k_pair = simap_find_key(map, mock_2pred_str, "x");
 	assert_str_equal(k_pair.key, "1");
 	assert_int_equal(k_pair.val, 11);
 
 	simap_free(map);
 }
 
-static void simap_match_val__matches(void **state) {
+static void simap_find_val__matches(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "0", 10));
@@ -223,7 +223,7 @@ static void simap_match_val__matches(void **state) {
 	expect_string(mock_2pred_szt, data, "x");
 	will_return(mock_2pred_szt, true);
 
-	const struct SImapPair v_pair = simap_match_val(map, mock_2pred_szt, "x");
+	const struct SImapPair v_pair = simap_find_val(map, mock_2pred_szt, "x");
 	assert_str_equal(v_pair.key, "1");
 	assert_int_equal(v_pair.val, 11);
 
@@ -288,7 +288,7 @@ static bool match_val_lt_13(const size_t val, const void* const data) {
 	return val < 13;
 }
 
-static void simap_match_it__many(void **state) {
+static void simap_filter_it__many(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "ak0", 100));
@@ -297,7 +297,7 @@ static void simap_match_it__many(void **state) {
 	assert_false(simap_put(map, "ak3", 13));
 	assert_false(simap_put(map, "ak4", 101));
 
-	const struct SImapIt *it = simap_match_it(map, match_key_a_val_lt_100, NULL);
+	const struct SImapIt *it = simap_filter_it(map, match_key_a_val_lt_100, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak1");
 	assert_int_equal(it->val, 11);
@@ -312,7 +312,7 @@ static void simap_match_it__many(void **state) {
 	simap_free(map);
 }
 
-static void simap_match_key_it__many(void **state) {
+static void simap_key_filter_it__many(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "bk0", 100));
@@ -321,7 +321,7 @@ static void simap_match_key_it__many(void **state) {
 	assert_false(simap_put(map, "ak3", 13));
 	assert_false(simap_put(map, "bk4", 101));
 
-	const struct SImapIt *it = simap_match_key_it(map, match_key_a, NULL);
+	const struct SImapIt *it = simap_key_filter_it(map, match_key_a, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak1");
 	assert_int_equal(it->val, 11);
@@ -336,7 +336,7 @@ static void simap_match_key_it__many(void **state) {
 	simap_free(map);
 }
 
-static void simap_match_val_it__many(void **state) {
+static void simap_val_filter_it__many(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "ak0", 100));
@@ -345,7 +345,7 @@ static void simap_match_val_it__many(void **state) {
 	assert_false(simap_put(map, "ak3", 13));
 	assert_false(simap_put(map, "ak4", 101));
 
-	const struct SImapIt *it = simap_match_val_it(map, match_val_lt_13, NULL);
+	const struct SImapIt *it = simap_val_filter_it(map, match_val_lt_13, NULL);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak1");
 	assert_int_equal(it->val, 11);
@@ -360,7 +360,7 @@ static void simap_match_val_it__many(void **state) {
 	simap_free(map);
 }
 
-static void simap_match_it__none(void **state) {
+static void simap_filter_it__none(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "ak0", 100));
@@ -369,53 +369,53 @@ static void simap_match_it__none(void **state) {
 	assert_false(simap_put(map, "ak3", 103));
 	assert_false(simap_put(map, "ak4", 104));
 
-	assert_nul(simap_match_it(map, match_key_a_val_lt_100, NULL));
+	assert_nul(simap_filter_it(map, match_key_a_val_lt_100, NULL));
 
 	simap_free(map);
 }
 
-static void simap_match_key_it__none(void **state) {
+static void simap_key_filter_it__none(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "bk3", 103));
 	assert_false(simap_put(map, "bk4", 104));
 
-	assert_nul(simap_match_key_it(map, match_key_a, NULL));
+	assert_nul(simap_key_filter_it(map, match_key_a, NULL));
 
 	simap_free(map);
 }
 
-static void simap_match_val_it__none(void **state) {
+static void simap_val_filter_it__none(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "ak0", 100));
 	assert_false(simap_put(map, "ak1", 101));
 
-	assert_nul(simap_match_val_it(map, match_val_lt_13, NULL));
+	assert_nul(simap_val_filter_it(map, match_val_lt_13, NULL));
 
 	simap_free(map);
 }
 
-static void simap_match_it__empty(void **state) {
+static void simap_filter_it__empty(void **state) {
 	const struct SImap *map = simap_init();
 
-	assert_nul(simap_match_it(map, mock_3pred_str_szt, NULL));
+	assert_nul(simap_filter_it(map, mock_3pred_str_szt, NULL));
 
 	simap_free(map);
 }
 
-static void simap_match_key_it__empty(void **state) {
+static void simap_key_filter_it__empty(void **state) {
 	const struct SImap *map = simap_init();
 
-	assert_nul(simap_match_key_it(map, mock_2pred_str, NULL));
+	assert_nul(simap_key_filter_it(map, mock_2pred_str, NULL));
 
 	simap_free(map);
 }
 
-static void simap_match_val_it__empty(void **state) {
+static void simap_val_filter_it__empty(void **state) {
 	const struct SImap *map = simap_init();
 
-	assert_nul(simap_match_val_it(map, mock_2pred_szt, NULL));
+	assert_nul(simap_val_filter_it(map, mock_2pred_szt, NULL));
 
 	simap_free(map);
 }
@@ -713,19 +713,19 @@ static void simap__null_inputs(void **state) {
 	assert_false(simap_contains_key(map, NULL));
 	assert_false(simap_contains_val(NULL, 0));
 	assert_false(simap_contains_val(map, 0));
-	simap_match(NULL, NULL, NULL);
-	simap_match(map, NULL, NULL);
-	simap_match_key(NULL, NULL, NULL);
-	simap_match_key(map, NULL, NULL);
-	simap_match_val(NULL, NULL, NULL);
-	simap_match_val(map, NULL, NULL);
+	simap_find(NULL, NULL, NULL);
+	simap_find(map, NULL, NULL);
+	simap_find_key(NULL, NULL, NULL);
+	simap_find_key(map, NULL, NULL);
+	simap_find_val(NULL, NULL, NULL);
+	simap_find_val(map, NULL, NULL);
 	assert_nul(simap_it(NULL));
-	assert_nul(simap_match_it(NULL, NULL, NULL));
-	assert_nul(simap_match_it(map, NULL, NULL));
-	assert_nul(simap_match_key_it(NULL, NULL, NULL));
-	assert_nul(simap_match_key_it(map, NULL, NULL));
-	assert_nul(simap_match_val_it(NULL, NULL, NULL));
-	assert_nul(simap_match_val_it(map, NULL, NULL));
+	assert_nul(simap_filter_it(NULL, NULL, NULL));
+	assert_nul(simap_filter_it(map, NULL, NULL));
+	assert_nul(simap_key_filter_it(NULL, NULL, NULL));
+	assert_nul(simap_key_filter_it(map, NULL, NULL));
+	assert_nul(simap_val_filter_it(NULL, NULL, NULL));
+	assert_nul(simap_val_filter_it(map, NULL, NULL));
 	assert_nul(simap_it_next(NULL));
 	assert_false(simap_put(NULL, NULL, 0));
 	assert_false(simap_put(map, NULL, 0));
@@ -756,13 +756,13 @@ int main(void) {
 
 		TEST(simap_getp__zero),
 
-		TEST(simap_match__none),
-		TEST(simap_match_key__none),
-		TEST(simap_match_val__none),
+		TEST(simap_find__none),
+		TEST(simap_find_key__none),
+		TEST(simap_find_val__none),
 
-		TEST(simap_match__matches),
-		TEST(simap_match_key__matches),
-		TEST(simap_match_val__matches),
+		TEST(simap_find__matches),
+		TEST(simap_find_key__matches),
+		TEST(simap_find_val__matches),
 
 		TEST(simap_it__many),
 		TEST(simap_it__empty),
@@ -771,17 +771,17 @@ int main(void) {
 
 		TEST(simap_it_next__partial),
 
-		TEST(simap_match_it__many),
-		TEST(simap_match_key_it__many),
-		TEST(simap_match_val_it__many),
+		TEST(simap_filter_it__many),
+		TEST(simap_key_filter_it__many),
+		TEST(simap_val_filter_it__many),
 
-		TEST(simap_match_it__none),
-		TEST(simap_match_key_it__none),
-		TEST(simap_match_val_it__none),
+		TEST(simap_filter_it__none),
+		TEST(simap_key_filter_it__none),
+		TEST(simap_val_filter_it__none),
 
-		TEST(simap_match_it__empty),
-		TEST(simap_match_key_it__empty),
-		TEST(simap_match_val_it__empty),
+		TEST(simap_filter_it__empty),
+		TEST(simap_key_filter_it__empty),
+		TEST(simap_val_filter_it__empty),
 
 		TEST(simap_equal__case_sensitive),
 		TEST(simap_equal__case_insensitive_key),
