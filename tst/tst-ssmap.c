@@ -459,6 +459,43 @@ static void ssmap_remove_all__(void **state) {
 	ssmap_free(expected);
 }
 
+static void ssmap_it_remove__many(void **state) {
+	const struct SSmap *map = ssmap_init();
+
+	assert_false(ssmap_put(map, "a", "0"));
+	assert_false(ssmap_put(map, "b", "1"));
+	assert_false(ssmap_put(map, "c", "2"));
+	assert_false(ssmap_put(map, "d", "3"));
+	assert_false(ssmap_put(map, "e", "4"));
+
+	const struct SSmap *expected = ssmap_init();
+
+	assert_false(ssmap_put(expected, "b", "1"));
+	assert_false(ssmap_put(expected, "d", "3"));
+
+	size_t iterations = 0;
+	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
+		iterations++;
+		if (strcmp(it->key, "a") == 0 || strcmp(it->key, "c") == 0 || strcmp(it->key, "e") == 0) {
+			ssmap_it_remove(it);
+		}
+	}
+
+	assert_int_equal(ssmap_size(map), 2);
+	assert_int_equal(iterations, 5);
+
+	assert_ssmap_equal(map, expected);
+
+	ssmap_free(map);
+	ssmap_free(expected);
+}
+
+static void ssmap_it_remove__partial(void **state) {
+	const struct SSmapIt *it = calloc(1, sizeof(struct SSmapIt));
+
+	ssmap_it_remove(it);
+}
+
 static void ssmap_str__(void **state) {
 	const struct SSmapParams params = { .allow_null_val = true, };
 	const struct SSmap *map = ssmap_init_with(params);
@@ -668,6 +705,7 @@ static void ssmap__null_inputs(void **state) {
 	assert_int_equal(ssmap_remove_all(NULL, NULL), 0);
 	assert_int_equal(ssmap_remove_all(map, NULL), 0);
 	assert_int_equal(ssmap_remove_all(NULL, map), 0);
+	ssmap_it_remove(NULL);
 	assert_false(ssmap_equal(NULL, NULL));
 	assert_false(ssmap_equal(map, NULL));
 	assert_nul(ssmap_keys_pslist(NULL));
@@ -715,6 +753,9 @@ int main(void) {
 		TEST(ssmap_put_many__many),
 
 		TEST(ssmap_remove_all__),
+
+		TEST(ssmap_it_remove__many),
+		TEST(ssmap_it_remove__partial),
 
 		TEST(ssmap_str__),
 
