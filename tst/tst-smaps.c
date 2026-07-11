@@ -91,18 +91,18 @@ static void smaps_match__matches(void **state) {
 	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_match_str_str, key, "0");
-	expect_string(mock_match_str_str, val, "aaa");
-	expect_string(mock_match_str_str, data, "x");
-	will_return(mock_match_str_str, false);
+	expect_string(mock_3pred_str_str, key, "0");
+	expect_string(mock_3pred_str_str, val, "aaa");
+	expect_string(mock_3pred_str_str, data, "x");
+	will_return(mock_3pred_str_str, false);
 
 	// get 1
-	expect_string(mock_match_str_str, key, "1");
-	expect_string(mock_match_str_str, val, "bbb");
-	expect_string(mock_match_str_str, data, "x");
-	will_return(mock_match_str_str, true);
+	expect_string(mock_3pred_str_str, key, "1");
+	expect_string(mock_3pred_str_str, val, "bbb");
+	expect_string(mock_3pred_str_str, data, "x");
+	will_return(mock_3pred_str_str, true);
 
-	const struct SMapSPair kv_pair = smaps_match(map, mock_match_str_str, "x");
+	const struct SMapSPair kv_pair = smaps_match(map, mock_3pred_str_str, "x");
 	assert_str_equal(kv_pair.key, "1");
 	assert_str_equal(kv_pair.val, "bbb");
 
@@ -118,16 +118,16 @@ static void smaps_match_key__matches(void **state) {
 	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_match_str, val, "0");
-	expect_string(mock_match_str, data, "x");
-	will_return(mock_match_str, false);
+	expect_string(mock_2pred_str, val, "0");
+	expect_string(mock_2pred_str, data, "x");
+	will_return(mock_2pred_str, false);
 
 	// get 1
-	expect_string(mock_match_str, val, "1");
-	expect_string(mock_match_str, data, "x");
-	will_return(mock_match_str, true);
+	expect_string(mock_2pred_str, val, "1");
+	expect_string(mock_2pred_str, data, "x");
+	will_return(mock_2pred_str, true);
 
-	const struct SMapSPair k_pair = smaps_match_key(map, mock_match_str, "x");
+	const struct SMapSPair k_pair = smaps_match_key(map, mock_2pred_str, "x");
 	assert_str_equal(k_pair.key, "1");
 	assert_str_equal(k_pair.val, "bbb");
 
@@ -142,16 +142,16 @@ static void smaps_match_val__matches(void **state) {
 	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_match_str, val, "aaa");
-	expect_string(mock_match_str, data, "x");
-	will_return(mock_match_str, false);
+	expect_string(mock_2pred_str, val, "aaa");
+	expect_string(mock_2pred_str, data, "x");
+	will_return(mock_2pred_str, false);
 
 	// get 1
-	expect_string(mock_match_str, val, "bbb");
-	expect_string(mock_match_str, data, "x");
-	will_return(mock_match_str, true);
+	expect_string(mock_2pred_str, val, "bbb");
+	expect_string(mock_2pred_str, data, "x");
+	will_return(mock_2pred_str, true);
 
-	const struct SMapSPair v_pair = smaps_match_val(map, mock_match_str, "x");
+	const struct SMapSPair v_pair = smaps_match_val(map, mock_2pred_str, "x");
 	assert_str_equal(v_pair.key, "1");
 	assert_str_equal(v_pair.val, "bbb");
 

@@ -43,24 +43,24 @@ typedef bool (*fn_pred)(const void* const ptr);
 //
 // bi-predicate against user data
 //
-typedef bool (*fn_match_ptr)(const void* const val, const void* const data);
+typedef bool (*fn_2pred)(const void* const val, const void* const data);
 
-typedef bool (*fn_match_str)(const char* const val, const void* const data);
+typedef bool (*fn_2pred_str)(const char* const val, const void* const data);
 
-typedef bool (*fn_match_size_t)(const size_t val, const void* const data);
+typedef bool (*fn_2pred_szt)(const size_t val, const void* const data);
 
 //
-// tri-predicate against user data
+// tri-predicate against user data, generally map key/val
 //
-typedef bool (*fn_match_ptr_ptr)(const void* const key, const void* const val, const void* const data);
+typedef bool (*fn_3pred)(const void* const key, const void* const val, const void* const data);
 
-typedef bool (*fn_match_str_ptr)(const char* const key, const void* const val, const void* const data);
+typedef bool (*fn_3pred_str_ptr)(const char* const key, const void* const val, const void* const data);
 
-typedef bool (*fn_match_str_str)(const char * const key, const char* const val, const void* const data);
+typedef bool (*fn_3pred_str_str)(const char * const key, const char* const val, const void* const data);
 
-typedef bool (*fn_match_str_size_t_ptr)(const char * const key, const size_t val, const void* const data);
+typedef bool (*fn_3pred_str_szt)(const char * const key, const size_t val, const void* const data);
 
-typedef bool (*fn_match_size_t_ptr)(const size_t key, const void* const val, const void* const data);
+typedef bool (*fn_2pred_szt_ptr)(const size_t key, const void* const val, const void* const data);
 
 //
 // free

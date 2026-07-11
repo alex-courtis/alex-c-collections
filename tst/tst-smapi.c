@@ -110,12 +110,12 @@ static void smapi_match__none(void **state) {
 	assert_false(smapi_put(map, "0", 10));
 
 	// skip
-	expect_string(mock_match_str_size_t, key, "0");
-	expect_int_value(mock_match_str_size_t, val, 10);
-	expect_string(mock_match_str_size_t, data, "x");
-	will_return(mock_match_str_size_t, false);
+	expect_string(mock_3pred_str_szt, key, "0");
+	expect_int_value(mock_3pred_str_szt, val, 10);
+	expect_string(mock_3pred_str_szt, data, "x");
+	will_return(mock_3pred_str_szt, false);
 
-	const struct SMapIPair kv_pair = smapi_match(map, mock_match_str_size_t, "x");
+	const struct SMapIPair kv_pair = smapi_match(map, mock_3pred_str_szt, "x");
 	assert_nul(kv_pair.key);
 	assert_int_equal(kv_pair.val, 0);
 
@@ -128,11 +128,11 @@ static void smapi_match_key__none(void **state) {
 	assert_false(smapi_put(map, "0", 10));
 
 	// skip
-	expect_string(mock_match_str, val, "0");
-	expect_string(mock_match_str, data, "x");
-	will_return(mock_match_str, false);
+	expect_string(mock_2pred_str, val, "0");
+	expect_string(mock_2pred_str, data, "x");
+	will_return(mock_2pred_str, false);
 
-	const struct SMapIPair k_pair = smapi_match_key(map, mock_match_str, "x");
+	const struct SMapIPair k_pair = smapi_match_key(map, mock_2pred_str, "x");
 	assert_nul(k_pair.key);
 	assert_int_equal(k_pair.val, 0);
 
@@ -145,11 +145,11 @@ static void smapi_match_val__none(void **state) {
 	assert_false(smapi_put(map, "0", 10));
 
 	// skip
-	expect_int_value(mock_match_size_t, val, 10);
-	expect_string(mock_match_size_t, data, "x");
-	will_return(mock_match_size_t, false);
+	expect_int_value(mock_2pred_szt, val, 10);
+	expect_string(mock_2pred_szt, data, "x");
+	will_return(mock_2pred_szt, false);
 
-	const struct SMapIPair v_pair = smapi_match_val(map, mock_match_size_t, "x");
+	const struct SMapIPair v_pair = smapi_match_val(map, mock_2pred_szt, "x");
 	assert_nul(v_pair.key);
 	assert_int_equal(v_pair.val, 0);
 
@@ -164,18 +164,18 @@ static void smapi_match__matches(void **state) {
 	assert_false(smapi_put(map, "2", 12));
 
 	// skip 0
-	expect_string(mock_match_str_size_t, key, "0");
-	expect_int_value(mock_match_str_size_t, val, 10);
-	expect_string(mock_match_str_size_t, data, "x");
-	will_return(mock_match_str_size_t, false);
+	expect_string(mock_3pred_str_szt, key, "0");
+	expect_int_value(mock_3pred_str_szt, val, 10);
+	expect_string(mock_3pred_str_szt, data, "x");
+	will_return(mock_3pred_str_szt, false);
 
 	// get 1
-	expect_string(mock_match_str_size_t, key, "1");
-	expect_int_value(mock_match_str_size_t, val, 11);
-	expect_string(mock_match_str_size_t, data, "x");
-	will_return(mock_match_str_size_t, true);
+	expect_string(mock_3pred_str_szt, key, "1");
+	expect_int_value(mock_3pred_str_szt, val, 11);
+	expect_string(mock_3pred_str_szt, data, "x");
+	will_return(mock_3pred_str_szt, true);
 
-	const struct SMapIPair kv_pair = smapi_match(map, mock_match_str_size_t, "x");
+	const struct SMapIPair kv_pair = smapi_match(map, mock_3pred_str_szt, "x");
 	assert_str_equal(kv_pair.key, "1");
 	assert_int_equal(kv_pair.val, 11);
 
@@ -190,16 +190,16 @@ static void smapi_match_key__matches(void **state) {
 	assert_false(smapi_put(map, "2", 12));
 
 	// skip 0
-	expect_string(mock_match_str, val, "0");
-	expect_string(mock_match_str, data, "x");
-	will_return(mock_match_str, false);
+	expect_string(mock_2pred_str, val, "0");
+	expect_string(mock_2pred_str, data, "x");
+	will_return(mock_2pred_str, false);
 
 	// get 1
-	expect_string(mock_match_str, val, "1");
-	expect_string(mock_match_str, data, "x");
-	will_return(mock_match_str, true);
+	expect_string(mock_2pred_str, val, "1");
+	expect_string(mock_2pred_str, data, "x");
+	will_return(mock_2pred_str, true);
 
-	const struct SMapIPair k_pair = smapi_match_key(map, mock_match_str, "x");
+	const struct SMapIPair k_pair = smapi_match_key(map, mock_2pred_str, "x");
 	assert_str_equal(k_pair.key, "1");
 	assert_int_equal(k_pair.val, 11);
 
@@ -214,16 +214,16 @@ static void smapi_match_val__matches(void **state) {
 	assert_false(smapi_put(map, "2", 12));
 
 	// skip 0
-	expect_int_value(mock_match_size_t, val, 10);
-	expect_string(mock_match_size_t, data, "x");
-	will_return(mock_match_size_t, false);
+	expect_int_value(mock_2pred_szt, val, 10);
+	expect_string(mock_2pred_szt, data, "x");
+	will_return(mock_2pred_szt, false);
 
 	// get 1
-	expect_int_value(mock_match_size_t, val, 11);
-	expect_string(mock_match_size_t, data, "x");
-	will_return(mock_match_size_t, true);
+	expect_int_value(mock_2pred_szt, val, 11);
+	expect_string(mock_2pred_szt, data, "x");
+	will_return(mock_2pred_szt, true);
 
-	const struct SMapIPair v_pair = smapi_match_val(map, mock_match_size_t, "x");
+	const struct SMapIPair v_pair = smapi_match_val(map, mock_2pred_szt, "x");
 	assert_str_equal(v_pair.key, "1");
 	assert_int_equal(v_pair.val, 11);
 
@@ -399,7 +399,7 @@ static void smapi_match_val_it__none(void **state) {
 static void smapi_match_it__empty(void **state) {
 	const struct SMapI *map = smapi_init();
 
-	assert_nul(smapi_match_it(map, mock_match_str_size_t, NULL));
+	assert_nul(smapi_match_it(map, mock_3pred_str_szt, NULL));
 
 	smapi_free(map);
 }
@@ -407,7 +407,7 @@ static void smapi_match_it__empty(void **state) {
 static void smapi_match_key_it__empty(void **state) {
 	const struct SMapI *map = smapi_init();
 
-	assert_nul(smapi_match_key_it(map, mock_match_str, NULL));
+	assert_nul(smapi_match_key_it(map, mock_2pred_str, NULL));
 
 	smapi_free(map);
 }
@@ -415,7 +415,7 @@ static void smapi_match_key_it__empty(void **state) {
 static void smapi_match_val_it__empty(void **state) {
 	const struct SMapI *map = smapi_init();
 
-	assert_nul(smapi_match_val_it(map, mock_match_size_t, NULL));
+	assert_nul(smapi_match_val_it(map, mock_2pred_szt, NULL));
 
 	smapi_free(map);
 }

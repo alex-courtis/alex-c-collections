@@ -661,18 +661,18 @@ static void pmap_match__matches(void **state) {
 	assert_nul(pmap_put(map, K2, V2));
 
 	// skip K0
-	expect_ptr(mock_match_ptr_ptr, key, K0);
-	expect_ptr(mock_match_ptr_ptr, val, V0);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K0);
+	expect_ptr(mock_3pred, val, V0);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
 	// get K1
-	expect_ptr(mock_match_ptr_ptr, key, K1);
-	expect_ptr(mock_match_ptr_ptr, val, V1);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, true);
+	expect_ptr(mock_3pred, key, K1);
+	expect_ptr(mock_3pred, val, V1);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, true);
 
-	const struct PMapPair kv_pair = pmap_match(map, mock_match_ptr_ptr, D0);
+	const struct PMapPair kv_pair = pmap_match(map, mock_3pred, D0);
 	assert_ptr_equal(kv_pair.key, K1);
 	assert_ptr_equal(kv_pair.val, V1);
 
@@ -687,16 +687,16 @@ static void pmap_match_key__matches(void **state) {
 	assert_nul(pmap_put(map, K2, V2));
 
 	// skip V0
-	expect_ptr(mock_match_ptr, val, K0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// get V1
-	expect_ptr(mock_match_ptr, val, K1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, true);
+	expect_ptr(mock_2pred, val, K1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, true);
 
-	const struct PMapPair k_pair = pmap_match_key(map, mock_match_ptr, D0);
+	const struct PMapPair k_pair = pmap_match_key(map, mock_2pred, D0);
 	assert_ptr_equal(k_pair.key, K1);
 	assert_ptr_equal(k_pair.val, V1);
 
@@ -711,16 +711,16 @@ static void pmap_match_val__matches(void **state) {
 	assert_nul(pmap_put(map, K2, V2));
 
 	// skip V0
-	expect_ptr(mock_match_ptr, val, V0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// get V1
-	expect_ptr(mock_match_ptr, val, V1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, true);
+	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, true);
 
-	const struct PMapPair v_pair = pmap_match_val(map, mock_match_ptr, D0);
+	const struct PMapPair v_pair = pmap_match_val(map, mock_2pred, D0);
 	assert_ptr_equal(v_pair.key, K1);
 	assert_ptr_equal(v_pair.val, V1);
 
@@ -734,18 +734,18 @@ static void pmap_match__no_match(void **state) {
 	assert_nul(pmap_put(map, K1, V1));
 
 	// skip K0
-	expect_ptr(mock_match_ptr_ptr, key, K0);
-	expect_ptr(mock_match_ptr_ptr, val, V0);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K0);
+	expect_ptr(mock_3pred, val, V0);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
 	// skip K1
-	expect_ptr(mock_match_ptr_ptr, key, K1);
-	expect_ptr(mock_match_ptr_ptr, val, V1);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K1);
+	expect_ptr(mock_3pred, val, V1);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
-	const struct PMapPair kv_pair = pmap_match(map, mock_match_ptr_ptr, D0);
+	const struct PMapPair kv_pair = pmap_match(map, mock_3pred, D0);
 	assert_nul(kv_pair.key);
 	assert_nul(kv_pair.val);
 
@@ -759,16 +759,16 @@ static void pmap_match_key__no_match(void **state) {
 	assert_nul(pmap_put(map, K1, V1));
 
 	// skip V0
-	expect_ptr(mock_match_ptr, val, K0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// skip V1
-	expect_ptr(mock_match_ptr, val, K1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
-	const struct PMapPair k_pair = pmap_match_key(map, mock_match_ptr, D0);
+	const struct PMapPair k_pair = pmap_match_key(map, mock_2pred, D0);
 	assert_nul(k_pair.key);
 	assert_nul(k_pair.val);
 
@@ -782,16 +782,16 @@ static void pmap_match_val__no_match(void **state) {
 	assert_nul(pmap_put(map, K1, V1));
 
 	// skip V0
-	expect_ptr(mock_match_ptr, val, V0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// skip V1
-	expect_ptr(mock_match_ptr, val, V1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
-	const struct PMapPair v_pair = pmap_match_val(map, mock_match_ptr, D0);
+	const struct PMapPair v_pair = pmap_match_val(map, mock_2pred, D0);
 	assert_nul(v_pair.key);
 	assert_nul(v_pair.val);
 
@@ -970,33 +970,33 @@ static void pmap_match_it__many(void **state) {
 	assert_int_equal(pmap_size(map), 5);
 
 	// skip K0
-	expect_ptr(mock_match_ptr_ptr, key, K0);
-	expect_ptr(mock_match_ptr_ptr, val, V0);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K0);
+	expect_ptr(mock_3pred, val, V0);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
 	// get K1
-	expect_ptr(mock_match_ptr_ptr, key, K1);
-	expect_ptr(mock_match_ptr_ptr, val, V1);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, true);
+	expect_ptr(mock_3pred, key, K1);
+	expect_ptr(mock_3pred, val, V1);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, true);
 
-	const struct PMapIt *it = pmap_match_it(map, mock_match_ptr_ptr, D0);
+	const struct PMapIt *it = pmap_match_it(map, mock_3pred, D0);
 	assert_non_nul(it);
 	assert_ptr_equal(it->key, K1);
 	assert_ptr_equal(it->val, V1);
 
 	// skip K2
-	expect_ptr(mock_match_ptr_ptr, key, K2);
-	expect_ptr(mock_match_ptr_ptr, val, V2);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K2);
+	expect_ptr(mock_3pred, val, V2);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
 	// get K3
-	expect_ptr(mock_match_ptr_ptr, key, K3);
-	expect_ptr(mock_match_ptr_ptr, val, V3);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, true);
+	expect_ptr(mock_3pred, key, K3);
+	expect_ptr(mock_3pred, val, V3);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, true);
 
 	it = pmap_it_next(it);
 	assert_non_nul(it);
@@ -1004,10 +1004,10 @@ static void pmap_match_it__many(void **state) {
 	assert_ptr_equal(it->val, V3);
 
 	// skip K4
-	expect_ptr(mock_match_ptr_ptr, key, K4);
-	expect_ptr(mock_match_ptr_ptr, val, V4);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K4);
+	expect_ptr(mock_3pred, val, V4);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
 	// done
 	it = pmap_it_next(it);
@@ -1026,29 +1026,29 @@ static void pmap_match_key_it__many(void **state) {
 	assert_nul(pmap_put(map, K4, V4));
 
 	// skip K0
-	expect_ptr(mock_match_ptr, val, K0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// get K1
-	expect_ptr(mock_match_ptr, val, K1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, true);
+	expect_ptr(mock_2pred, val, K1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, true);
 
-	const struct PMapIt *it = pmap_match_key_it(map, mock_match_ptr, D0);
+	const struct PMapIt *it = pmap_match_key_it(map, mock_2pred, D0);
 	assert_non_nul(it);
 	assert_ptr_equal(it->key, K1);
 	assert_ptr_equal(it->val, V1);
 
 	// skip K2
-	expect_ptr(mock_match_ptr, val, K2);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K2);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// get K3
-	expect_ptr(mock_match_ptr, val, K3);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, true);
+	expect_ptr(mock_2pred, val, K3);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, true);
 
 	it = pmap_it_next(it);
 	assert_non_nul(it);
@@ -1056,9 +1056,9 @@ static void pmap_match_key_it__many(void **state) {
 	assert_ptr_equal(it->val, V3);
 
 	// skip K4
-	expect_ptr(mock_match_ptr, val, K4);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K4);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// done
 	it = pmap_it_next(it);
@@ -1077,29 +1077,29 @@ static void pmap_match_val_it__many(void **state) {
 	assert_nul(pmap_put(map, K4, V4));
 
 	// skip V0
-	expect_ptr(mock_match_ptr, val, V0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// get V1
-	expect_ptr(mock_match_ptr, val, V1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, true);
+	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, true);
 
-	const struct PMapIt *it = pmap_match_val_it(map, mock_match_ptr, D0);
+	const struct PMapIt *it = pmap_match_val_it(map, mock_2pred, D0);
 	assert_non_nul(it);
 	assert_ptr_equal(it->key, K1);
 	assert_ptr_equal(it->val, V1);
 
 	// skip V2
-	expect_ptr(mock_match_ptr, val, V2);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V2);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// get V3
-	expect_ptr(mock_match_ptr, val, V3);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, true);
+	expect_ptr(mock_2pred, val, V3);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, true);
 
 	it = pmap_it_next(it);
 	assert_non_nul(it);
@@ -1107,9 +1107,9 @@ static void pmap_match_val_it__many(void **state) {
 	assert_ptr_equal(it->val, V3);
 
 	// skip V4
-	expect_ptr(mock_match_ptr, val, V4);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V4);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// done
 	it = pmap_it_next(it);
@@ -1129,18 +1129,18 @@ static void pmap_match_it__none(void **state) {
 	//
 
 	// skip K0
-	expect_ptr(mock_match_ptr_ptr, key, K0);
-	expect_ptr(mock_match_ptr_ptr, val, V0);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K0);
+	expect_ptr(mock_3pred, val, V0);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
 	// skip K1
-	expect_ptr(mock_match_ptr_ptr, key, K1);
-	expect_ptr(mock_match_ptr_ptr, val, V1);
-	expect_ptr(mock_match_ptr_ptr, data, D0);
-	will_return(mock_match_ptr_ptr, false);
+	expect_ptr(mock_3pred, key, K1);
+	expect_ptr(mock_3pred, val, V1);
+	expect_ptr(mock_3pred, data, D0);
+	will_return(mock_3pred, false);
 
-	assert_nul(pmap_match_it(map, mock_match_ptr_ptr, D0));
+	assert_nul(pmap_match_it(map, mock_3pred, D0));
 
 	pmap_free(map);
 }
@@ -1153,16 +1153,16 @@ static void pmap_match_key_it__none(void **state) {
 	assert_nul(pmap_put(map, K1, V1));
 
 	// skip K0
-	expect_ptr(mock_match_ptr, val, K0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// skip K1
-	expect_ptr(mock_match_ptr, val, K1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, K1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
-	assert_nul(pmap_match_key_it(map, mock_match_ptr, D0));
+	assert_nul(pmap_match_key_it(map, mock_2pred, D0));
 
 	pmap_free(map);
 }
@@ -1175,16 +1175,16 @@ static void pmap_match_val_it__none(void **state) {
 	assert_nul(pmap_put(map, K1, V1));
 
 	// skip V0
-	expect_ptr(mock_match_ptr, val, V0);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
 	// skip V1
-	expect_ptr(mock_match_ptr, val, V1);
-	expect_ptr(mock_match_ptr, data, D0);
-	will_return(mock_match_ptr, false);
+	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, data, D0);
+	will_return(mock_2pred, false);
 
-	assert_nul(pmap_match_val_it(map, mock_match_ptr, D0));
+	assert_nul(pmap_match_val_it(map, mock_2pred, D0));
 
 	pmap_free(map);
 }
@@ -1192,7 +1192,7 @@ static void pmap_match_val_it__none(void **state) {
 static void pmap_match_it__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
-	assert_nul(pmap_match_it(map, mock_match_ptr_ptr, D0));
+	assert_nul(pmap_match_it(map, mock_3pred, D0));
 
 	pmap_free(map);
 }
@@ -1200,7 +1200,7 @@ static void pmap_match_it__empty(void **state) {
 static void pmap_match_key_it__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
-	assert_nul(pmap_match_key_it(map, mock_match_ptr, D0));
+	assert_nul(pmap_match_key_it(map, mock_2pred, D0));
 
 	pmap_free(map);
 }
@@ -1208,7 +1208,7 @@ static void pmap_match_key_it__empty(void **state) {
 static void pmap_match_val_it__empty(void **state) {
 	const struct PMap *map = pmap_init();
 
-	assert_nul(pmap_match_val_it(map, mock_match_ptr, D0));
+	assert_nul(pmap_match_val_it(map, mock_2pred, D0));
 
 	pmap_free(map);
 }
@@ -2343,13 +2343,13 @@ static void pmap__null_inputs(void **state) {
 	assert_nul(pmap_it(NULL));
 	assert_nul(pmap_match_it(NULL, NULL, NULL));
 	assert_nul(pmap_match_it(map, NULL, NULL));
-	assert_nul(pmap_match_it(NULL, mock_match_ptr_ptr, NULL));
+	assert_nul(pmap_match_it(NULL, mock_3pred, NULL));
 	assert_nul(pmap_match_key_it(NULL, NULL, NULL));
 	assert_nul(pmap_match_key_it(map, NULL, NULL));
-	assert_nul(pmap_match_key_it(NULL, mock_match_ptr, NULL));
+	assert_nul(pmap_match_key_it(NULL, mock_2pred, NULL));
 	assert_nul(pmap_match_val_it(NULL, NULL, NULL));
 	assert_nul(pmap_match_val_it(map, NULL, NULL));
-	assert_nul(pmap_match_val_it(NULL, mock_match_ptr, NULL));
+	assert_nul(pmap_match_val_it(NULL, mock_2pred, NULL));
 	assert_nul(pmap_it_next(NULL));
 	assert_false(pmap_put(NULL, NULL, NULL));
 	assert_false(pmap_put(map, NULL, NULL));

@@ -39,13 +39,13 @@ struct SList *slist_append(struct SList **head, void *val);
 void *slist_remove(struct SList **head, struct SList **item);
 
 // remove items, NULL equal_val is val pointer comparison
-size_t slist_remove_all(struct SList **head, fn_match_ptr match_val, const void *data);
+size_t slist_remove_all(struct SList **head, fn_2pred match_val, const void *data);
 
 // remove items and free vals, NULL equal_val is val pointer comparison, NULL free_val calls free()
-size_t slist_remove_all_free(struct SList **head, fn_match_ptr match_val, const void *b, fn_free free_val);
+size_t slist_remove_all_free(struct SList **head, fn_2pred match_val, const void *b, fn_free free_val);
 
 // merges list2 into list1, such that the resulting list contains only elements that appeared exclusively in list1 or list2.
-void slist_xor_free(struct SList **head1, struct SList *head2, fn_match_ptr match_val, fn_free free_val, fn_clone clone_val);
+void slist_xor_free(struct SList **head1, struct SList *head2, fn_2pred match_val, fn_free free_val, fn_clone clone_val);
 
 /*
  * Access
@@ -61,17 +61,17 @@ struct SList *slist_find(struct SList *head, fn_pred pred_val);
 void *slist_find_val(struct SList *head, fn_pred pred_val);
 
 // find, NULL equal_val is val pointer comparison
-struct SList *slist_find_equal(struct SList *head, fn_match_ptr match_val, const void *b);
+struct SList *slist_find_equal(struct SList *head, fn_2pred match_val, const void *b);
 
 // find a val, NULL equal_val is val pointer comparison
-void *slist_find_equal_val(struct SList *head, fn_match_ptr match_val, const void *b);
+void *slist_find_equal_val(struct SList *head, fn_2pred match_val, const void *b);
 
 /*
  * Comparison
  */
 
 // same length and every item equal in order, NULL equal_val compares pointers
-bool slist_equal(struct SList *a, struct SList *b, fn_match_ptr match_val);
+bool slist_equal(struct SList *a, struct SList *b, fn_2pred match_val);
 
 /*
  * Utility
@@ -81,7 +81,7 @@ bool slist_equal(struct SList *a, struct SList *b, fn_match_ptr match_val);
 struct SList *slist_sort(struct SList *head, fn_less_than less_than_val);
 
 // move items between lists where from value matches b, NULL equal_val does nothing
-void slist_move(struct SList **to, struct SList **from, fn_match_ptr match_val, const void *data);
+void slist_move(struct SList **to, struct SList **from, fn_2pred match_val, const void *data);
 
 /*
  * Info
