@@ -63,7 +63,7 @@ const struct SMapI *smapi_init(void) {
 const struct SMapI *smapi_init_with(const struct SMapIParams params) {
 	const struct PMapParams pmap_params = {
 		.equal_key = params.case_insensitive_key ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
-		.equal_val = (fn_equal)equal_size_t,
+		.equal_val = (fn_equal)equal_stp,
 		.alloc_key = (fn_clone)clone_strdup,
 		.alloc_val = (fn_clone)clone_size_t_ptr,
 		.free_key = (fn_free)free,
@@ -128,17 +128,17 @@ size_t smapi_get(const struct SMapI* const map, const char* const key) {
 	}
 }
 
-bool smapi_get_ptr(size_t* n_ptr, const struct SMapI* const map, const char* const key) {
-	if (!map || !n_ptr)
+bool smapi_get_ptr(size_t* np, const struct SMapI* const map, const char* const key) {
+	if (!map || !np)
 		return false;
 
-	const size_t *val_ptr = pmap_get(map->pmap, key);
+	const size_t *vp = pmap_get(map->pmap, key);
 
-	if (val_ptr) {
-		*n_ptr = *val_ptr;
+	if (vp) {
+		*np = *vp;
 		return true;
 	} else {
-		*n_ptr = 0;
+		*np = 0;
 		return false;
 	}
 }

@@ -13,7 +13,7 @@ struct IMap {
 };
 
 struct IMapMatchData {
-	fn_2pred_szt_ptr match_key_val;
+	fn_3pred_szt_ptr match_key_val;
 	fn_2pred_szt match_key;
 	fn_2pred match_val;
 	const void *data;
@@ -73,7 +73,7 @@ const struct IMap *imap_init(void) {
 
 const struct IMap *imap_init_with(const struct IMapParams params) {
 	const struct PMapParams pmap_params = {
-		.equal_key = (fn_equal)equal_size_t,
+		.equal_key = (fn_equal)equal_stp,
 		.equal_val = params.equal_val,
 		.alloc_key = (fn_clone)clone_size_t_ptr,
 		.alloc_val = params.alloc_val,
@@ -145,7 +145,7 @@ bool imap_contains_val(const struct IMap* const map, const void* const val) {
 	return map ? pmap_contains_val(map->pmap, val) : false;
 }
 
-struct IMapPair imap_match(const struct IMap* const map, fn_2pred_szt_ptr match, const void* const data) {
+struct IMapPair imap_match(const struct IMap* const map, fn_3pred_szt_ptr match, const void* const data) {
 	struct IMapPair res = { 0 };
 
 	if (!map || !match)
@@ -206,7 +206,7 @@ const struct IMapIt *imap_it(const struct IMap* const map) {
 	return map ? it_init(pmap_it(map->pmap)) : NULL;
 }
 
-const struct IMapIt *imap_match_it(const struct IMap* const map, fn_2pred_szt_ptr match, const void* const data) {
+const struct IMapIt *imap_match_it(const struct IMap* const map, fn_3pred_szt_ptr match, const void* const data) {
 	if (!map || !match)
 		return NULL;
 

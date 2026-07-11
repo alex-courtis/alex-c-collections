@@ -40,7 +40,7 @@ bool equal_strstr(const char* const a, const char* const b) {
 	return strstr(a, b);
 }
 
-bool equal_size_t(const size_t* const a, const size_t* const b) {
+bool equal_stp(const size_t* const a, const size_t* const b) {
 	if (!a || !b)
 		return false;
 
@@ -74,12 +74,12 @@ void *clone_strdup(const char* const str) {
 	return strdup(str);
 }
 
-void *clone_size_t_ptr(const size_t* const n_ptr) {
-	if (!n_ptr)
+void *clone_size_t_ptr(const size_t* const np) {
+	if (!np)
 		return NULL;
 
 	size_t *new = calloc(1, sizeof(size_t));
-	*new = *n_ptr;
+	*new = *np;
 
 	return new;
 }
@@ -88,9 +88,9 @@ char *str_or_null(const char* const str) {
 	return sprintf_alloc("%s", str ? str : "(null)");
 }
 
-char *str_size_t_ptr(const size_t* const n_ptr) {
-	if (n_ptr)
-		return sprintf_alloc("%zu", *n_ptr);
+char *str_size_t_ptr(const size_t* const np) {
+	if (np)
+		return sprintf_alloc("%zu", *np);
 	else
 		return strdup("(null)");
 }

@@ -101,14 +101,14 @@ static void smap_match__matches(void **state) {
 	assert_nul(smap_put(map, "2", V2));
 
 	// skip 0
-	expect_string(mock_3pred_str_ptr, key, "0");
-	expect_ptr(mock_3pred_str_ptr, val, V0);
+	expect_string(mock_3pred_str_ptr, str, "0");
+	expect_ptr(mock_3pred_str_ptr, ptr, V0);
 	expect_ptr(mock_3pred_str_ptr, data, V2);
 	will_return(mock_3pred_str_ptr, false);
 
 	// get 1
-	expect_string(mock_3pred_str_ptr, key, "1");
-	expect_ptr(mock_3pred_str_ptr, val, V1);
+	expect_string(mock_3pred_str_ptr, str, "1");
+	expect_ptr(mock_3pred_str_ptr, ptr, V1);
 	expect_ptr(mock_3pred_str_ptr, data, V2);
 	will_return(mock_3pred_str_ptr, true);
 
@@ -127,12 +127,12 @@ static void smap_match_key__matches(void **state) {
 	assert_nul(smap_put(map, "2", V2));
 
 	// skip 0
-	expect_string(mock_2pred_str, val, "0");
+	expect_string(mock_2pred_str, str, "0");
 	expect_ptr(mock_2pred_str, data, V2);
 	will_return(mock_2pred_str, false);
 
 	// get 1
-	expect_string(mock_2pred_str, val, "1");
+	expect_string(mock_2pred_str, str, "1");
 	expect_ptr(mock_2pred_str, data, V2);
 	will_return(mock_2pred_str, true);
 
@@ -151,12 +151,12 @@ static void smap_match_val__matches(void **state) {
 	assert_nul(smap_put(map, "2", V2));
 
 	// skip 0
-	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, ptr, V0);
 	expect_ptr(mock_2pred, data, V2);
 	will_return(mock_2pred, false);
 
 	// get 1
-	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, ptr, V1);
 	expect_ptr(mock_2pred, data, V2);
 	will_return(mock_2pred, true);
 
@@ -222,14 +222,14 @@ static void smap_match_it__many(void **state) {
 	assert_nul(smap_put(map, "2", V2));
 
 	// skip "0"
-	expect_string(mock_3pred_str_ptr, key, "0");
-	expect_ptr(mock_3pred_str_ptr, val, V0);
+	expect_string(mock_3pred_str_ptr, str, "0");
+	expect_ptr(mock_3pred_str_ptr, ptr, V0);
 	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, false);
 
 	// get "1"
-	expect_string(mock_3pred_str_ptr, key, "1");
-	expect_ptr(mock_3pred_str_ptr, val, V1);
+	expect_string(mock_3pred_str_ptr, str, "1");
+	expect_ptr(mock_3pred_str_ptr, ptr, V1);
 	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, true);
 
@@ -239,8 +239,8 @@ static void smap_match_it__many(void **state) {
 	assert_ptr_equal(it->val, V1);
 
 	// skip "2"
-	expect_string(mock_3pred_str_ptr, key, "2");
-	expect_ptr(mock_3pred_str_ptr, val, V2);
+	expect_string(mock_3pred_str_ptr, str, "2");
+	expect_ptr(mock_3pred_str_ptr, ptr, V2);
 	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, false);
 
@@ -259,12 +259,12 @@ static void smap_match_key_it__many(void **state) {
 	assert_nul(smap_put(map, "2", V2));
 
 	// skip V0
-	expect_string(mock_2pred_str, val, "0");
+	expect_string(mock_2pred_str, str, "0");
 	expect_ptr(mock_2pred_str, data, D0);
 	will_return(mock_2pred_str, false);
 
 	// get V1
-	expect_string(mock_2pred_str, val, "1");
+	expect_string(mock_2pred_str, str, "1");
 	expect_ptr(mock_2pred_str, data, D0);
 	will_return(mock_2pred_str, true);
 
@@ -274,7 +274,7 @@ static void smap_match_key_it__many(void **state) {
 	assert_ptr_equal(it->val, V1);
 
 	// skip V2
-	expect_string(mock_2pred_str, val, "2");
+	expect_string(mock_2pred_str, str, "2");
 	expect_ptr(mock_2pred_str, data, D0);
 	will_return(mock_2pred_str, false);
 
@@ -293,12 +293,12 @@ static void smap_match_val_it__many(void **state) {
 	assert_nul(smap_put(map, "2", V2));
 
 	// skip V0
-	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, ptr, V0);
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, false);
 
 	// get V1
-	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, ptr, V1);
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, true);
 
@@ -308,7 +308,7 @@ static void smap_match_val_it__many(void **state) {
 	assert_ptr_equal(it->val, V1);
 
 	// skip V2
-	expect_ptr(mock_2pred, val, V2);
+	expect_ptr(mock_2pred, ptr, V2);
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, false);
 

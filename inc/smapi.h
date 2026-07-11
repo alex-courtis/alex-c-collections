@@ -65,8 +65,8 @@ void smapi_it_free(const struct SMapIIt* const it);
 // return val, will return 0 if not present
 size_t smapi_get(const struct SMapI* const map, const char* const key);
 
-// populate n_ptr with val if present, 0 and return false if not present
-bool smapi_get_ptr(size_t* n_ptr, const struct SMapI* const map, const char* const key);
+// populate np with val if present, 0 and return false if not present
+bool smapi_get_ptr(size_t* np, const struct SMapI* const map, const char* const key);
 
 // true if key is present
 bool smapi_contains_key(const struct SMapI* const map, const char* const key);

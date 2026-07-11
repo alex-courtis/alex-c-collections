@@ -623,12 +623,12 @@ static void pset_match__matches(void **state) {
 	assert_true(pset_add(set, V2));
 
 	// skip V0
-	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, ptr, V0);
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, false);
 
 	// get V1
-	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, ptr, V1);
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, true);
 
@@ -644,12 +644,12 @@ static void pset_match__no_match(void **state) {
 	assert_true(pset_add(set, V1));
 
 	// skip V0
-	expect_ptr(mock_2pred, val, V0);
+	expect_ptr(mock_2pred, ptr, V0);
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, false);
 
 	// skip V1
-	expect_ptr(mock_2pred, val, V1);
+	expect_ptr(mock_2pred, ptr, V1);
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, false);
 

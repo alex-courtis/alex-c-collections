@@ -91,14 +91,14 @@ static void smaps_match__matches(void **state) {
 	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_3pred_str_str, key, "0");
-	expect_string(mock_3pred_str_str, val, "aaa");
+	expect_string(mock_3pred_str_str, str1, "0");
+	expect_string(mock_3pred_str_str, str2, "aaa");
 	expect_string(mock_3pred_str_str, data, "x");
 	will_return(mock_3pred_str_str, false);
 
 	// get 1
-	expect_string(mock_3pred_str_str, key, "1");
-	expect_string(mock_3pred_str_str, val, "bbb");
+	expect_string(mock_3pred_str_str, str1, "1");
+	expect_string(mock_3pred_str_str, str2, "bbb");
 	expect_string(mock_3pred_str_str, data, "x");
 	will_return(mock_3pred_str_str, true);
 
@@ -118,12 +118,12 @@ static void smaps_match_key__matches(void **state) {
 	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_2pred_str, val, "0");
+	expect_string(mock_2pred_str, str, "0");
 	expect_string(mock_2pred_str, data, "x");
 	will_return(mock_2pred_str, false);
 
 	// get 1
-	expect_string(mock_2pred_str, val, "1");
+	expect_string(mock_2pred_str, str, "1");
 	expect_string(mock_2pred_str, data, "x");
 	will_return(mock_2pred_str, true);
 
@@ -142,12 +142,12 @@ static void smaps_match_val__matches(void **state) {
 	assert_false(smaps_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_2pred_str, val, "aaa");
+	expect_string(mock_2pred_str, str, "aaa");
 	expect_string(mock_2pred_str, data, "x");
 	will_return(mock_2pred_str, false);
 
 	// get 1
-	expect_string(mock_2pred_str, val, "bbb");
+	expect_string(mock_2pred_str, str, "bbb");
 	expect_string(mock_2pred_str, data, "x");
 	will_return(mock_2pred_str, true);
 

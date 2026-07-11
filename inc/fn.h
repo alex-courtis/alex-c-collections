@@ -22,7 +22,7 @@ bool equal_strcasecmp(const char* const a, const char* const b);
 bool equal_strstr(const char* const a, const char* const b);
 
 // true if both present and equal value
-bool equal_size_t(const size_t* const a, const size_t* const b);
+bool equal_stp(const size_t* const a, const size_t* const b);
 
 //
 // a less than b, a is generally the value from the collection, b generally user data or the value from the other collection
@@ -43,24 +43,24 @@ typedef bool (*fn_pred)(const void* const ptr);
 //
 // bi-predicate against user data
 //
-typedef bool (*fn_2pred)(const void* const val, const void* const data);
+typedef bool (*fn_2pred)    (const void* const ptr, const void* const data);
 
-typedef bool (*fn_2pred_str)(const char* const val, const void* const data);
+typedef bool (*fn_2pred_str)(const char* const str, const void* const data);
 
-typedef bool (*fn_2pred_szt)(const size_t val, const void* const data);
+typedef bool (*fn_2pred_szt)(const size_t n,        const void* const data);
 
 //
 // tri-predicate against user data, generally map key/val
 //
-typedef bool (*fn_3pred)(const void* const key, const void* const val, const void* const data);
+typedef bool (*fn_3pred)        (const void* const ptr1, const void* const ptr2, const void* const data);
 
-typedef bool (*fn_3pred_str_ptr)(const char* const key, const void* const val, const void* const data);
+typedef bool (*fn_3pred_str_ptr)(const char* const str,  const void* const ptr,  const void* const data);
 
-typedef bool (*fn_3pred_str_str)(const char * const key, const char* const val, const void* const data);
+typedef bool (*fn_3pred_str_str)(const char* const str1, const char* const str2, const void* const data);
 
-typedef bool (*fn_3pred_str_szt)(const char * const key, const size_t val, const void* const data);
+typedef bool (*fn_3pred_str_szt)(const char* const str,  const size_t n,         const void* const data);
 
-typedef bool (*fn_2pred_szt_ptr)(const size_t key, const void* const val, const void* const data);
+typedef bool (*fn_3pred_szt_ptr)(const size_t n,         const void* const ptr,  const void* const data);
 
 //
 // free
@@ -75,8 +75,8 @@ typedef void* (*fn_clone)(const void* const ptr);
 // copies a string using strdup, return NULL on NULL str
 void *clone_strdup(const char* const str);
 
-// allocates and sets a size_t*, return NULL on NULL n_ptr
-void *clone_size_t_ptr(const size_t* const n_ptr);
+// allocates and sets a size_t*, return NULL on NULL np
+void *clone_size_t_ptr(const size_t* const np);
 
 //
 // to string, caller frees, may return NULL
@@ -87,6 +87,6 @@ typedef char* (*fn_str)(const void* const ptr);
 char *str_or_null(const char* const str);
 
 // %zu or "(null)"
-char *str_size_t_ptr(const size_t* const n_ptr);
+char *str_size_t_ptr(const size_t* const np);
 
 #endif // FN_H
