@@ -7,7 +7,7 @@
 #include "fn.h"
 
 /*
- * `PMap` with string keys and vals.
+ * `PPmap` with string keys and vals.
  * Keys and values are memory managed.
  */
 struct SMapS; // IWYU pragma: keep

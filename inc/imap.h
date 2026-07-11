@@ -7,7 +7,7 @@
 #include "fn.h"
 
 /*
- * `PMap` with `size_t` keys
+ * `PPmap` with `size_t` keys
  */
 struct IMap; // IWYU pragma: keep
 

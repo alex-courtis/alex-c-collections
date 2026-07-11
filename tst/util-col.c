@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-#include "pmap.h"
+#include "ppmap.h"
 #include "pset.h"
 #include "sset.h"
 #include "smap.h"
@@ -59,7 +59,7 @@ size_t sset_add_many(const struct SSet* const set, ...) {
 	return added;
 }
 
-size_t pmap_put_many_v(const struct PMap* const map, va_list __args) {
+size_t ppmap_put_many_v(const struct PPmap* const map, va_list __args) {
 	if (!map)
 		return 0;
 
@@ -73,7 +73,7 @@ size_t pmap_put_many_v(const struct PMap* const map, va_list __args) {
 		// trust that a value has been passed, NULL is valid
 		const void *val = va_arg(__args, void*);
 
-		if (pmap_put_free(map, key, val)) {
+		if (ppmap_put_free(map, key, val)) {
 			added++;
 		}
 	}
@@ -81,14 +81,14 @@ size_t pmap_put_many_v(const struct PMap* const map, va_list __args) {
 	return added;
 }
 
-size_t pmap_put_many(const struct PMap* const map, ...) {
+size_t ppmap_put_many(const struct PPmap* const map, ...) {
 	if (!map)
 		return 0;
 
 	va_list ap;
 	va_start(ap, map);
 
-	size_t added = pmap_put_many_v(map, ap);
+	size_t added = ppmap_put_many_v(map, ap);
 
 	va_end(ap);
 
@@ -124,7 +124,7 @@ size_t imap_put_many(const struct IMap* const map, ... /* key, val, NULL */ ) {
 
 struct SMap {
 	const struct SMapParams params;
-	const struct PMap *pmap;
+	const struct PPmap *ppmap;
 };
 
 size_t smap_put_many(const struct SMap* const map, ...) {
@@ -134,7 +134,7 @@ size_t smap_put_many(const struct SMap* const map, ...) {
 	va_list ap;
 	va_start(ap, map);
 
-	size_t added = pmap_put_many_v(map->pmap, ap);
+	size_t added = ppmap_put_many_v(map->ppmap, ap);
 
 	va_end(ap);
 
@@ -170,7 +170,7 @@ size_t smapi_put_many(const struct SMapI* const map, ...) {
 
 struct SMapS {
 	const struct SMapSParams params;
-	const struct PMap *pmap;
+	const struct PPmap *ppmap;
 };
 
 size_t smaps_put_many(const struct SMapS* const map, ...) {
@@ -180,7 +180,7 @@ size_t smaps_put_many(const struct SMapS* const map, ...) {
 	va_list ap;
 	va_start(ap, map);
 
-	size_t added = pmap_put_many_v(map->pmap, ap);
+	size_t added = ppmap_put_many_v(map->ppmap, ap);
 
 	va_end(ap);
 

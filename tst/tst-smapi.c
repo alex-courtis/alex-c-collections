@@ -10,15 +10,15 @@
 #include <stdlib.h>
 
 #include "fn.h"
-#include "pmap.h"
+#include "ppmap.h"
 #include "pslist.h"
 #include "sset.h"
 #include "str.h"
 
 #include "smapi.h"
 
-struct PMap {
-	const struct PMapParams params;
+struct PPmap {
+	const struct PPmapParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
@@ -32,7 +32,7 @@ struct SSet {
 
 struct SMapI {
 	const struct SMapIParams params;
-	const struct PMap *pmap;
+	const struct PPmap *ppmap;
 };
 
 static void smapi_put_get_remove_free__case_sensitive(void **state) {
@@ -679,15 +679,15 @@ static void smapi_clone__(void **state) {
 
 	assert_non_nul(to);
 
-	assert_int_equal(to->pmap->size, 0);
-	assert_int_equal(to->pmap->capacity, 99);
-	assert_false(to->pmap->params.allow_null_val);
-	assert_int_equal(to->pmap->params.grow, 1);
-	assert_ptr_equal(to->pmap->params.equal_key, equal_strcasecmp);
-	assert_ptr_equal(to->pmap->params.alloc_key, clone_strdup);
-	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->pmap->params.free_val, (fn_free)free);
-	assert_ptr_equal(to->pmap->params.str_key, (fn_str)str_or_null);
+	assert_int_equal(to->ppmap->size, 0);
+	assert_int_equal(to->ppmap->capacity, 99);
+	assert_false(to->ppmap->params.allow_null_val);
+	assert_int_equal(to->ppmap->params.grow, 1);
+	assert_ptr_equal(to->ppmap->params.equal_key, equal_strcasecmp);
+	assert_ptr_equal(to->ppmap->params.alloc_key, clone_strdup);
+	assert_ptr_equal(to->ppmap->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ppmap->params.free_val, (fn_free)free);
+	assert_ptr_equal(to->ppmap->params.str_key, (fn_str)str_or_null);
 
 	assert_true(to->params.case_insensitive_key);
 	assert_ptr_equal(to->params.initial, 99);

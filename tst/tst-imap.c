@@ -12,15 +12,15 @@
 #include <string.h>
 
 #include "fn.h"
-#include "pmap.h"
+#include "ppmap.h"
 #include "pslist.h"
 #include "pset.h"
 #include "str.h"
 
 #include "imap.h"
 
-struct PMap {
-	const struct PMapParams params;
+struct PPmap {
+	const struct PPmapParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
@@ -29,7 +29,7 @@ struct PMap {
 
 struct IMap {
 	const struct IMapParams params;
-	const struct PMap *pmap;
+	const struct PPmap *ppmap;
 };
 
 static int vals[4] = { 20, 21, 22, 23, };
@@ -525,8 +525,8 @@ static void imap_equal__key_removed(void **state) {
 	assert_nul(imap_put(b, 0, V0));
 	assert_nul(imap_put(b, 1, V1));
 
-	int *removed_key = (int*)b->pmap->keys[0];
-	b->pmap->keys[0] = NULL;
+	int *removed_key = (int*)b->ppmap->keys[0];
+	b->ppmap->keys[0] = NULL;
 
 	assert_imap_not_equal(a, b);
 
@@ -572,8 +572,8 @@ static void imap_get__key_removed(void **state) {
 	const struct IMap *actual = imap_init();
 	assert_nul(imap_put(actual, 0, V0));
 
-	int *removed_key = (int*)actual->pmap->keys[0];
-	actual->pmap->keys[0] = NULL;
+	int *removed_key = (int*)actual->ppmap->keys[0];
+	actual->ppmap->keys[0] = NULL;
 
 	assert_nul(imap_get(actual, 0));
 
@@ -904,16 +904,15 @@ static void imap_clone__params(void **state) {
 
 	assert_non_nul(to);
 
-	// commented out are tested elsewhere
-	assert_int_equal(to->pmap->size, 0);
-	assert_int_equal(to->pmap->capacity, 99);
-	assert_true(to->pmap->params.allow_null_val);
-	assert_int_equal(to->pmap->params.grow, 1);
-	assert_ptr_equal(to->pmap->params.equal_val, mock_equal);
-	assert_ptr_equal(to->pmap->params.alloc_val, mock_alloc);
-	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->pmap->params.free_val, mock_free);
-	assert_ptr_equal(to->pmap->params.clone_val, mock_clone);
+	assert_int_equal(to->ppmap->size, 0);
+	assert_int_equal(to->ppmap->capacity, 99);
+	assert_true(to->ppmap->params.allow_null_val);
+	assert_int_equal(to->ppmap->params.grow, 1);
+	assert_ptr_equal(to->ppmap->params.equal_val, mock_equal);
+	assert_ptr_equal(to->ppmap->params.alloc_val, mock_alloc);
+	assert_ptr_equal(to->ppmap->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ppmap->params.free_val, mock_free);
+	assert_ptr_equal(to->ppmap->params.clone_val, mock_clone);
 
 	assert_ptr_equal(to->params.equal_val, mock_equal);
 	assert_ptr_equal(to->params.free_val, mock_free);

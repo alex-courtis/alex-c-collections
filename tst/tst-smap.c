@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "fn.h"
-#include "pmap.h"
+#include "ppmap.h"
 #include "pset.h"
 #include "pslist.h"
 #include "sset.h"
@@ -21,8 +21,8 @@
 
 #include "smap.h"
 
-struct PMap {
-	const struct PMapParams params;
+struct PPmap {
+	const struct PPmapParams params;
 	const void **keys;
 	const void **vals;
 	size_t capacity;
@@ -36,7 +36,7 @@ struct SSet {
 
 struct SMap {
 	const struct SMapParams params;
-	const struct PMap *pmap;
+	const struct PPmap *ppmap;
 };
 
 static int vals[4] = { 20, 21, 22, 23, };
@@ -765,17 +765,17 @@ static void smap_clone__params(void **state) {
 
 	assert_non_nul(to);
 
-	assert_int_equal(to->pmap->size, 0);
-	assert_int_equal(to->pmap->capacity, 99);
-	assert_true(to->pmap->params.allow_null_val);
-	assert_int_equal(to->pmap->params.grow, 1);
-	assert_ptr_equal(to->pmap->params.equal_key, equal_strcasecmp);
-	assert_ptr_equal(to->pmap->params.equal_val, mock_equal);
-	assert_ptr_equal(to->pmap->params.alloc_key, clone_strdup);
-	assert_ptr_equal(to->pmap->params.alloc_val, mock_alloc);
-	assert_ptr_equal(to->pmap->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->pmap->params.free_val, mock_free);
-	assert_ptr_equal(to->pmap->params.clone_val, mock_clone);
+	assert_int_equal(to->ppmap->size, 0);
+	assert_int_equal(to->ppmap->capacity, 99);
+	assert_true(to->ppmap->params.allow_null_val);
+	assert_int_equal(to->ppmap->params.grow, 1);
+	assert_ptr_equal(to->ppmap->params.equal_key, equal_strcasecmp);
+	assert_ptr_equal(to->ppmap->params.equal_val, mock_equal);
+	assert_ptr_equal(to->ppmap->params.alloc_key, clone_strdup);
+	assert_ptr_equal(to->ppmap->params.alloc_val, mock_alloc);
+	assert_ptr_equal(to->ppmap->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ppmap->params.free_val, mock_free);
+	assert_ptr_equal(to->ppmap->params.clone_val, mock_clone);
 
 	assert_true(to->params.case_insensitive);
 	assert_ptr_equal(to->params.equal_val, mock_equal);

@@ -21,7 +21,7 @@ Not thread safe.
 * `PSet` with string values
 * Values are memory managed.
 
-### PMap
+### PPmap
 
 * Array backed pointer indexed map.
 * Entries preserve insertion order.
@@ -30,16 +30,16 @@ Not thread safe.
 
 ### IMap
 
-* `PMap` with `size_t` keys
+* `PPmap` with `size_t` keys
 
 ### SMap
 
-* `PMap` with string keys.
+* `PPmap` with string keys.
 * Keys are memory managed.
 
 ### SMapS
 
-* `PMap` with string keys and vals.
+* `PPmap` with string keys and vals.
 * Keys and values are memory managed.
 
 ## Strings
