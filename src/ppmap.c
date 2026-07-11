@@ -158,6 +158,33 @@ static const struct PPmap *clone(const struct PPmap* const from, fn_clone clone_
 	return to;
 }
 
+static void it_remove(const struct PPmapIt* const it, bool do_free) {
+	if (!it)
+		return;
+
+	struct PPmapItState *st = it->st;
+	if (!st) {
+		ppmap_it_free(it);
+		return;
+	}
+
+	if (do_free) {
+		ppmap_remove_free(st->map, it->key);
+	} else {
+		ppmap_remove(st->map, it->key);
+	}
+
+	if (st->position > 0) {
+		st->position--;
+	} else {
+		st->attached = false;
+	}
+
+	((struct PPmapIt*)it)->key = NULL;
+	((struct PPmapIt*)it)->val = NULL;
+}
+
+
 static const struct Pset *vals_pset(const struct PPmap* const map, fn_clone clone_val) {
 	const struct PsetParams params = {
 		.equal_val = map->params.equal_val,
@@ -255,32 +282,6 @@ void ppmap_it_free(const struct PPmapIt* const it) {
 	free(it->st);
 	free((void*)it);
 }
-
-static void it_remove(const struct PPmapIt* const it, bool do_free) {
-	if (!it)
-		return;
-
-	struct PPmapItState *st = it->st;
-	if (!st) {
-		ppmap_it_free(it);
-		return;
-	}
-
-	if (do_free) {
-		ppmap_remove_free(st->map, it->key);
-	} else {
-		ppmap_remove(st->map, it->key);
-	}
-
-	if (st->position > 0) {
-		st->position--;
-	} else {
-		st->attached = false;
-	}
-
-	((struct PsetIt*)it)->val = NULL;
-}
-
 
 const void *ppmap_get(const struct PPmap* const map, const void* const key) {
 	if (!map || !key)

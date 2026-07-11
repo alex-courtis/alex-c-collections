@@ -39,11 +39,12 @@ struct SPmap {
 	const struct PPmap *ppmap;
 };
 
-static int vals[4] = { 20, 21, 22, 23, };
+static int vals[5] = { 20, 21, 22, 23, 24, };
 static void *V0 = &vals[0];
 static void *V1 = &vals[1];
 static void *V2 = &vals[2];
 static void *V3 = &vals[3];
+static void *V4 = &vals[4];
 
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
@@ -565,6 +566,87 @@ static void spmap_remove_all_free__(void **state) {
 	spmap_free(from);
 }
 
+static void spmap_it_remove__many(void **state) {
+	const struct SPmapParams params = { .free_val = mock_free, };
+	const struct SPmap *map = spmap_init_with(params);
+
+	assert_false(spmap_put(map, "a", V0));
+	assert_false(spmap_put(map, "b", V1));
+	assert_false(spmap_put(map, "c", V2));
+	assert_false(spmap_put(map, "d", V3));
+	assert_false(spmap_put(map, "e", V4));
+
+	const struct SPmap *expected = spmap_init();
+
+	assert_false(spmap_put(expected, "a", V0));
+	assert_false(spmap_put(expected, "c", V2));
+	assert_false(spmap_put(expected, "e", V4));
+
+	size_t iterations = 0;
+	for (const struct SPmapIt *it = spmap_it(map); it; it = spmap_it_next(it)) {
+		iterations++;
+		if (it->val == V1 || it->val == V3) {
+			spmap_it_remove(it);
+		}
+	}
+
+	assert_int_equal(spmap_size(map), 3);
+	assert_int_equal(iterations, 5);
+
+	assert_spmap_equal(map, expected);
+
+	spmap_free(map);
+	spmap_free(expected);
+}
+
+static void spmap_it_remove__partial(void **state) {
+	const struct SPmapIt *it = calloc(1, sizeof(struct SPmapIt));
+
+	spmap_it_remove(it);
+}
+
+static void spmap_it_remove_free__many(void **state) {
+	const struct SPmapParams params = { .free_val = mock_free, };
+	const struct SPmap *map = spmap_init_with(params);
+
+	assert_false(spmap_put(map, "a", V0));
+	assert_false(spmap_put(map, "b", V1));
+	assert_false(spmap_put(map, "c", V2));
+	assert_false(spmap_put(map, "d", V3));
+	assert_false(spmap_put(map, "e", V4));
+
+	const struct SPmap *expected = spmap_init();
+
+	assert_false(spmap_put(expected, "a", V0));
+	assert_false(spmap_put(expected, "c", V2));
+	assert_false(spmap_put(expected, "e", V4));
+
+	expect_ptr(mock_free, ptr, V1);
+	expect_ptr(mock_free, ptr, V3);
+
+	size_t iterations = 0;
+	for (const struct SPmapIt *it = spmap_it(map); it; it = spmap_it_next(it)) {
+		iterations++;
+		if (it->val == V1 || it->val == V3) {
+			spmap_it_remove_free(it);
+		}
+	}
+
+	assert_int_equal(spmap_size(map), 3);
+	assert_int_equal(iterations, 5);
+
+	assert_spmap_equal(map, expected);
+
+	spmap_free(map);
+	spmap_free(expected);
+}
+
+static void spmap_it_remove_free__partial(void **state) {
+	const struct SPmapIt *it = calloc(1, sizeof(struct SPmapIt));
+
+	spmap_it_remove_free(it);
+}
+
 static void spmap_str__(void **state) {
 	const struct SPmapParams params = { .allow_null_val = true, };
 	const struct SPmap *map = spmap_init_with(params);
@@ -876,6 +958,8 @@ static void spmap__null_inputs(void **state) {
 	assert_int_equal(spmap_remove_all_free(NULL, NULL), 0);
 	assert_int_equal(spmap_remove_all_free(map, NULL), 0);
 	assert_int_equal(spmap_remove_all_free(NULL, map), 0);
+	spmap_it_remove(NULL);
+	spmap_it_remove_free(NULL);
 	assert_false(spmap_equal(NULL, NULL));
 	assert_false(spmap_equal(map, NULL));
 	assert_nul(spmap_keys_pslist(NULL));
@@ -932,6 +1016,12 @@ int main(void) {
 		TEST(spmap_remove_all__),
 
 		TEST(spmap_remove_all_free__),
+
+		TEST(spmap_it_remove__many),
+		TEST(spmap_it_remove__partial),
+
+		TEST(spmap_it_remove_free__many),
+		TEST(spmap_it_remove_free__partial),
 
 		TEST(spmap_str__),
 
