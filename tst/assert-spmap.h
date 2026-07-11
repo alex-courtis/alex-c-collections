@@ -7,7 +7,7 @@
 
 #include "spmap.h"
 
-void _assert_spmap_equal(const struct SPMap *a, const struct SPMap *b, const char * const file, const int line) {
+void _assert_spmap_equal(const struct SPmap *a, const struct SPmap *b, const char * const file, const int line) {
 	if (!spmap_equal(a, b)) {
 		write_file("actual.spmap", spmap_str(a));
 		write_file("expected.spmap", spmap_str(b));
@@ -17,7 +17,7 @@ void _assert_spmap_equal(const struct SPMap *a, const struct SPMap *b, const cha
 }
 #define assert_spmap_equal(a, b) _assert_spmap_equal(a, b, __FILE__, __LINE__)
 
-void _assert_spmap_not_equal(const struct SPMap *a, const struct SPMap *b, const char * const file, const int line) {
+void _assert_spmap_not_equal(const struct SPmap *a, const struct SPmap *b, const char * const file, const int line) {
 	if (spmap_equal(a, b)) {
 		write_file("actual.spmap", spmap_str(a));
 		write_file("expected.spmap", spmap_str(b));

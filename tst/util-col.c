@@ -122,12 +122,12 @@ size_t ipmap_put_many(const struct IPmap* const map, ... /* key, val, NULL */ ) 
 	return added;
 }
 
-struct SPMap {
-	const struct SPMapParams params;
+struct SPmap {
+	const struct SPmapParams params;
 	const struct PPmap *ppmap;
 };
 
-size_t spmap_put_many(const struct SPMap* const map, ...) {
+size_t spmap_put_many(const struct SPmap* const map, ...) {
 	if (!map)
 		return 0;
 

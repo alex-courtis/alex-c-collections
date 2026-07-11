@@ -32,7 +32,7 @@ Not thread safe.
 
 * `PPmap` with `size_t` keys
 
-### SPMap
+### SPmap
 
 * `PPmap` with string keys.
 * Keys are memory managed.
