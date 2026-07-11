@@ -5,7 +5,7 @@
 #include "pset.h"
 #include "sset.h"
 #include "smap.h"
-#include "smapi.h"
+#include "simap.h"
 #include "ssmap.h"
 
 #include "util-col.h"
@@ -141,7 +141,7 @@ size_t smap_put_many(const struct SMap* const map, ...) {
 	return added;
 }
 
-size_t smapi_put_many(const struct SMapI* const map, ...) {
+size_t simap_put_many(const struct SImap* const map, ...) {
 	if (!map)
 		return 0;
 
@@ -158,7 +158,7 @@ size_t smapi_put_many(const struct SMapI* const map, ...) {
 		// trust that a value has been passed, NULL is valid
 		const size_t val = va_arg(ap, size_t);
 
-		if (smapi_put(map, key, val)) {
+		if (simap_put(map, key, val)) {
 			added++;
 		}
 	}

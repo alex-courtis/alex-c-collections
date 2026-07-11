@@ -14,7 +14,7 @@ struct SMap {
 	const struct PPmap *ppmap;
 };
 
-struct SMapItState {
+struct SImaptState {
 	const struct PPmapIt *pit;
 };
 
@@ -31,12 +31,12 @@ static const struct SMap *clone(const struct SMap* const from, bool deep) {
 	return to;
 }
 
-static const struct SMapIt *it_init(const struct PPmapIt *pit) {
+static const struct SImapt *it_init(const struct PPmapIt *pit) {
 	if (!pit)
 		return NULL;
 
-	struct SMapIt *it = calloc(1, sizeof(struct SMapIt));
-	it->st = calloc(1, sizeof(struct SMapItState));
+	struct SImapt *it = calloc(1, sizeof(struct SImapt));
+	it->st = calloc(1, sizeof(struct SImaptState));
 
 	it->st->pit = pit;
 	it->key = pit->key;
@@ -99,7 +99,7 @@ void smap_free_vals(const struct SMap* const map) {
 	free((void*)map);
 }
 
-void smap_it_free(const struct SMapIt* const it) {
+void smap_it_free(const struct SImapt* const it) {
 	if (!it)
 		return;
 
@@ -165,23 +165,23 @@ struct SMapPair smap_match_val(const struct SMap* const map, fn_2pred match, con
 	return res;
 }
 
-const struct SMapIt *smap_it(const struct SMap* const map) {
+const struct SImapt *smap_it(const struct SMap* const map) {
 	return map ? it_init(ppmap_it(map->ppmap)) : NULL;
 }
 
-const struct SMapIt *smap_match_it(const struct SMap* const map, fn_3pred_str_ptr match, const void* const data) {
+const struct SImapt *smap_match_it(const struct SMap* const map, fn_3pred_str_ptr match, const void* const data) {
 	return map ? it_init(ppmap_match_it(map->ppmap, (fn_3pred)match, data)) : NULL;
 }
 
-const struct SMapIt *smap_match_key_it(const struct SMap* const map, fn_2pred_str match, const void* const data) {
+const struct SImapt *smap_match_key_it(const struct SMap* const map, fn_2pred_str match, const void* const data) {
 	return map ? it_init(ppmap_match_key_it(map->ppmap, (fn_2pred)match, data)) : NULL;
 }
 
-const struct SMapIt *smap_match_val_it(const struct SMap* const map, fn_2pred match, const void* const data) {
+const struct SImapt *smap_match_val_it(const struct SMap* const map, fn_2pred match, const void* const data) {
 	return map ? it_init(ppmap_match_val_it(map->ppmap, match, data)) : NULL;
 }
 
-const struct SMapIt *smap_it_next(const struct SMapIt* const it) {
+const struct SImapt *smap_it_next(const struct SImapt* const it) {
 	if (!it)
 		return NULL;
 
@@ -194,7 +194,7 @@ const struct SMapIt *smap_it_next(const struct SMapIt* const it) {
 	it->st->pit = ppmap_it_next(it->st->pit);
 
 	if (it->st->pit) {
-		struct SMapIt *it_m = (struct SMapIt*)it;
+		struct SImapt *it_m = (struct SImapt*)it;
 		it_m->key = it->st->pit->key;
 		it_m->val = it->st->pit->val;
 		return it;
@@ -267,7 +267,7 @@ const struct SSet *smap_keys_sset(const struct SMap* const map) {
 	};
 	const struct SSet *set = sset_init_with(params);
 
-	for (const struct SMapIt *it = smap_it(map); it; it = smap_it_next(it)) {
+	for (const struct SImapt *it = smap_it(map); it; it = smap_it_next(it)) {
 		sset_add(set, it->key);
 	}
 
