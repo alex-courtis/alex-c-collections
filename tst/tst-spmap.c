@@ -175,7 +175,7 @@ static void spmap_it__many(void **state) {
 	assert_nul(spmap_put(map, "b", NULL));
 	assert_nul(spmap_put(map, "c", V2));
 
-	const struct SImapt *it = spmap_it(map);
+	const struct SPmapIt *it = spmap_it(map);
 
 	assert_non_nul(it);
 	assert_str_equal(it->key, "a");
@@ -192,13 +192,13 @@ static void spmap_it__many(void **state) {
 }
 
 static void spmap_it_free__partial(void **state) {
-	const struct SImapt *it = calloc(1, sizeof(struct SImapt));
+	const struct SPmapIt *it = calloc(1, sizeof(struct SPmapIt));
 
 	spmap_it_free(it);
 }
 
 static void spmap_it_next__partial(void **state) {
-	const struct SImapt *it = calloc(1, sizeof(struct SImapt));
+	const struct SPmapIt *it = calloc(1, sizeof(struct SPmapIt));
 
 	assert_nul(spmap_it_next(it));
 }
@@ -207,7 +207,7 @@ static void spmap_it__empty(void **state) {
 
 	const struct SPmap *map = spmap_init();
 
-	const struct SImapt *it = spmap_it(map);
+	const struct SPmapIt *it = spmap_it(map);
 
 	assert_nul(it);
 
@@ -233,7 +233,7 @@ static void spmap_match_it__many(void **state) {
 	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, true);
 
-	const struct SImapt *it = spmap_match_it(map, mock_3pred_str_ptr, D0);
+	const struct SPmapIt *it = spmap_match_it(map, mock_3pred_str_ptr, D0);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "1");
 	assert_ptr_equal(it->val, V1);
@@ -268,7 +268,7 @@ static void spmap_match_key_it__many(void **state) {
 	expect_ptr(mock_2pred_str, data, D0);
 	will_return(mock_2pred_str, true);
 
-	const struct SImapt *it = spmap_match_key_it(map, mock_2pred_str, D0);
+	const struct SPmapIt *it = spmap_match_key_it(map, mock_2pred_str, D0);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "1");
 	assert_ptr_equal(it->val, V1);
@@ -302,7 +302,7 @@ static void spmap_match_val_it__many(void **state) {
 	expect_ptr(mock_2pred, data, D0);
 	will_return(mock_2pred, true);
 
-	const struct SImapt *it = spmap_match_val_it(map, mock_2pred, D0);
+	const struct SPmapIt *it = spmap_match_val_it(map, mock_2pred, D0);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "1");
 	assert_ptr_equal(it->val, V1);

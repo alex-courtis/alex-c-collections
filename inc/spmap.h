@@ -15,11 +15,11 @@ struct SPmap; // IWYU pragma: keep
 /*
  * Entry iterator.
  */
-struct SImaptState; // IWYU pragma: keep
-struct SImapt {
+struct SPmapItState; // IWYU pragma: keep
+struct SPmapIt {
 	const char *key;
 	const void *val;
-	struct SImaptState *st;
+	struct SPmapItState *st;
 };
 
 /*
@@ -68,7 +68,7 @@ void spmap_free(const struct SPmap* const map);
 void spmap_free_vals(const struct SPmap* const map);
 
 // free iterator
-void spmap_it_free(const struct SImapt* const it);
+void spmap_it_free(const struct SPmapIt* const it);
 
 /*
  * Access
@@ -93,19 +93,19 @@ struct SPmapPair spmap_match_key(const struct SPmap* const map, fn_2pred_str mat
 struct SPmapPair spmap_match_val(const struct SPmap* const map, fn_2pred match, const void* const data);
 
 // create an iterator, caller must spmap_it_free or invoke spmap_next until NULL
-const struct SImapt *spmap_it(const struct SPmap* const map);
+const struct SPmapIt *spmap_it(const struct SPmap* const map);
 
 // create an iterator filtering by key/val match, return NULL when no matches or NULL match
-const struct SImapt *spmap_match_it(const struct SPmap* const map, fn_3pred_str_ptr match, const void* const data);
+const struct SPmapIt *spmap_match_it(const struct SPmap* const map, fn_3pred_str_ptr match, const void* const data);
 
 // create an iterator filtering by key match, return NULL when no matches or NULL match
-const struct SImapt *spmap_match_key_it(const struct SPmap* const map, fn_2pred_str match, const void* const data);
+const struct SPmapIt *spmap_match_key_it(const struct SPmap* const map, fn_2pred_str match, const void* const data);
 
 // create an iterator filtering by val match, return NULL when no matches or NULL match
-const struct SImapt *spmap_match_val_it(const struct SPmap* const map, fn_2pred match, const void* const data);
+const struct SPmapIt *spmap_match_val_it(const struct SPmap* const map, fn_2pred match, const void* const data);
 
 // next iterator entry, NULL at end of map
-const struct SImapt *spmap_it_next(const struct SImapt* const it);
+const struct SPmapIt *spmap_it_next(const struct SPmapIt* const it);
 
 /*
  * Mutate
