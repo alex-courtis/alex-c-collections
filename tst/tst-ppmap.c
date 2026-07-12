@@ -352,12 +352,12 @@ static void ppmap_free_vals__free_val(void **state) {
 	ppmap_free_vals(map);
 }
 
-static void free_ppmap(void *val) {
+static void free_ppmap(const void *val) {
 	ppmap_free_vals(val);
 }
 
 static void ppmap_free_vals__free_val_hierarchical(void **state) {
-	const struct PPmapParams params_outer = { .free_val = free_ppmap, };
+	const struct PPmapParams params_outer = { .free_val = (fn_free)free_ppmap, };
 	const struct PPmap *outer = ppmap_init_with(params_outer);
 
 	const struct PPmapParams params_inner = { .free_val = mock_free, };
