@@ -66,6 +66,25 @@ static struct IPmapIt *it_init(const struct PPmapIt *pit) {
 	return it;
 }
 
+static void it_remove(const struct IPmapIt* const it, bool do_free) {
+	if (!it)
+		return;
+
+	if (!it->st) {
+		ipmap_it_free(it);
+		return;
+	}
+
+	if (do_free) {
+		ppmap_it_remove_free(it->st->pit);
+	} else {
+		ppmap_it_remove(it->st->pit);
+	}
+
+	((struct IPmapIt*)it)->key = 0;
+	((struct IPmapIt*)it)->val = NULL;
+}
+
 const struct IPmap *ipmap_init(void) {
 	const struct IPmapParams params = { 0 };
 	return ipmap_init_with(params);
@@ -312,6 +331,14 @@ size_t ipmap_remove_all(const struct IPmap* const map, const struct IPmap* const
 
 size_t ipmap_remove_all_free(const struct IPmap* const map, const struct IPmap* const from) {
 	return map && from ? ppmap_remove_all_free(map->ppmap, from->ppmap) : 0;
+}
+
+void ipmap_it_remove(const struct IPmapIt* const it) {
+	it_remove(it, false);
+}
+
+void ipmap_it_remove_free(const struct IPmapIt* const it) {
+	it_remove(it, true);
 }
 
 size_t ipmap_put_all(const struct IPmap* const map, const struct IPmap* const from) {

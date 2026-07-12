@@ -45,7 +45,7 @@ static const struct SPmapIt *it_init(const struct PPmapIt *pit) {
 	return it;
 }
 
-void it_remove(const struct SPmapIt* const it, bool do_free) {
+static void it_remove(const struct SPmapIt* const it, bool do_free) {
 	if (!it)
 		return;
 

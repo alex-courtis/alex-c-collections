@@ -32,11 +32,12 @@ struct IPmap {
 	const struct PPmap *ppmap;
 };
 
-static int vals[4] = { 20, 21, 22, 23, };
+static int vals[5] = { 20, 21, 22, 23, 24,};
 static void *V0 = &vals[0];
 static void *V1 = &vals[1];
 static void *V2 = &vals[2];
 static void *V3 = &vals[3];
+static void *V4 = &vals[4];
 
 static int datas[1] = { 30, };
 static void *D0 = &datas[0];
@@ -759,6 +760,88 @@ static void ipmap_remove_all_free__(void **state) {
 	ipmap_free(map);
 	ipmap_free(from);
 }
+
+static void ipmap_it_remove__many(void **state) {
+	const struct IPmapParams params = { .free_val = mock_free, };
+	const struct IPmap *map = ipmap_init_with(params);
+
+	assert_false(ipmap_put(map, 0, V0));
+	assert_false(ipmap_put(map, 1, V1));
+	assert_false(ipmap_put(map, 2, V2));
+	assert_false(ipmap_put(map, 3, V3));
+	assert_false(ipmap_put(map, 4, V4));
+
+	const struct IPmap *expected = ipmap_init();
+
+	assert_false(ipmap_put(expected, 0, V0));
+	assert_false(ipmap_put(expected, 2, V2));
+	assert_false(ipmap_put(expected, 4, V4));
+
+	size_t iterations = 0;
+	for (const struct IPmapIt *it = ipmap_it(map); it; it = ipmap_it_next(it)) {
+		iterations++;
+		if (it->val == V1 || it->val == V3) {
+			ipmap_it_remove(it);
+		}
+	}
+
+	assert_int_equal(ipmap_size(map), 3);
+	assert_int_equal(iterations, 5);
+
+	assert_ipmap_equal(map, expected);
+
+	ipmap_free(map);
+	ipmap_free(expected);
+}
+
+static void ipmap_it_remove__partial(void **state) {
+	const struct IPmapIt *it = calloc(1, sizeof(struct IPmapIt));
+
+	ipmap_it_remove(it);
+}
+
+static void ipmap_it_remove_free__many(void **state) {
+	const struct IPmapParams params = { .free_val = mock_free, };
+	const struct IPmap *map = ipmap_init_with(params);
+
+	assert_false(ipmap_put(map, 0, V0));
+	assert_false(ipmap_put(map, 1, V1));
+	assert_false(ipmap_put(map, 2, V2));
+	assert_false(ipmap_put(map, 3, V3));
+	assert_false(ipmap_put(map, 4, V4));
+
+	const struct IPmap *expected = ipmap_init();
+
+	assert_false(ipmap_put(expected, 0, V0));
+	assert_false(ipmap_put(expected, 2, V2));
+	assert_false(ipmap_put(expected, 4, V4));
+
+	expect_ptr(mock_free, ptr, V1);
+	expect_ptr(mock_free, ptr, V3);
+
+	size_t iterations = 0;
+	for (const struct IPmapIt *it = ipmap_it(map); it; it = ipmap_it_next(it)) {
+		iterations++;
+		if (it->val == V1 || it->val == V3) {
+			ipmap_it_remove_free(it);
+		}
+	}
+
+	assert_int_equal(ipmap_size(map), 3);
+	assert_int_equal(iterations, 5);
+
+	assert_ipmap_equal(map, expected);
+
+	ipmap_free(map);
+	ipmap_free(expected);
+}
+
+static void ipmap_it_remove_free__partial(void **state) {
+	const struct IPmapIt *it = calloc(1, sizeof(struct IPmapIt));
+
+	ipmap_it_remove_free(it);
+}
+
 static void ipmap_str__(void **state) {
 	const struct IPmapParams params = { .allow_null_val = true, };
 	const struct IPmap *map = ipmap_init_with(params);
@@ -992,6 +1075,7 @@ static void ipmap__null_inputs(void **state) {
 	assert_nul(ipmap_remove(map, 0));
 	assert_false(ipmap_remove_free(NULL, 0));
 	assert_false(ipmap_remove_free(map, 0));
+	ipmap_it_remove(NULL);
 	assert_int_equal(ipmap_remove_all(NULL, NULL), 0);
 	assert_int_equal(ipmap_remove_all(map, NULL), 0);
 	assert_int_equal(ipmap_remove_all(NULL, map), 0);
@@ -1078,6 +1162,12 @@ int main(void) {
 		TEST(ipmap_remove_all__),
 
 		TEST(ipmap_remove_all_free__),
+
+		TEST(ipmap_it_remove__many),
+		TEST(ipmap_it_remove__partial),
+
+		TEST(ipmap_it_remove_free__many),
+		TEST(ipmap_it_remove_free__partial),
 
 		TEST(ipmap_str__),
 
