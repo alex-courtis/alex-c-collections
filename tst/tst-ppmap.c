@@ -352,7 +352,7 @@ static void ppmap_free_vals__free_val(void **state) {
 	ppmap_free_vals(map);
 }
 
-static void free_ppmap(const void *val) {
+static void free_ppmap(void *val) {
 	ppmap_free_vals(val);
 }
 
@@ -506,7 +506,7 @@ static void ppmap_put__alloc_key_free_key(void **state) {
 	const struct PPmapParams params = {
 		.equal_key = (fn_equal)equal_strcmp,
 		.alloc_key = alloc_key_duplicate,
-		.free_key = (fn_free)free,
+		.free_key = free,
 	};
 	const struct PPmap *map = ppmap_init_with(params);
 

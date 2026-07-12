@@ -722,8 +722,8 @@ static void simap_clone__(void **state) {
 	assert_int_equal(to->ppmap->params.grow, 1);
 	assert_ptr_equal(to->ppmap->params.equal_key, equal_strcasecmp);
 	assert_ptr_equal(to->ppmap->params.alloc_key, clone_strdup);
-	assert_ptr_equal(to->ppmap->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->ppmap->params.free_val, (fn_free)free);
+	assert_ptr_equal(to->ppmap->params.free_key, free);
+	assert_ptr_equal(to->ppmap->params.free_val, free);
 	assert_ptr_equal(to->ppmap->params.str_key, (fn_str)str_or_null);
 
 	assert_true(to->params.case_insensitive_key);

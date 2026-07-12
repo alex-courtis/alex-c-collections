@@ -654,8 +654,8 @@ static void ssmap_clone__(void **state) {
 	assert_ptr_equal(to->ppmap->params.equal_val, equal_strcasecmp);
 	assert_ptr_equal(to->ppmap->params.alloc_key, clone_strdup);
 	assert_ptr_equal(to->ppmap->params.alloc_val, clone_strdup);
-	assert_ptr_equal(to->ppmap->params.free_key, (fn_free)free);
-	assert_ptr_equal(to->ppmap->params.free_val, (fn_free)free);
+	assert_ptr_equal(to->ppmap->params.free_key, free);
+	assert_ptr_equal(to->ppmap->params.free_val, free);
 
 	assert_true(to->params.case_insensitive_key);
 	assert_true(to->params.case_insensitive_val);

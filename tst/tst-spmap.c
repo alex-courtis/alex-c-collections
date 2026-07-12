@@ -855,7 +855,7 @@ static void spmap_clone__params(void **state) {
 	assert_ptr_equal(to->ppmap->params.equal_val, mock_equal);
 	assert_ptr_equal(to->ppmap->params.alloc_key, clone_strdup);
 	assert_ptr_equal(to->ppmap->params.alloc_val, mock_alloc);
-	assert_ptr_equal(to->ppmap->params.free_key, (fn_free)free);
+	assert_ptr_equal(to->ppmap->params.free_key, free);
 	assert_ptr_equal(to->ppmap->params.free_val, mock_free);
 	assert_ptr_equal(to->ppmap->params.clone_val, mock_clone);
 

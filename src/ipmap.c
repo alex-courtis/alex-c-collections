@@ -96,7 +96,7 @@ const struct IPmap *ipmap_init_with(const struct IPmapParams params) {
 		.equal_val = params.equal_val,
 		.alloc_key = (fn_clone)clone_size_t_ptr,
 		.alloc_val = params.alloc_val,
-		.free_key = (fn_free)free,
+		.free_key = free,
 		.free_val = params.free_val,
 		.clone_val = params.clone_val,
 		.str_key = (fn_str)str_size_t_ptr,
