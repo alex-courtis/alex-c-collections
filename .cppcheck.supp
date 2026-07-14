@@ -6,6 +6,9 @@ unusedFunction:tst/util-file.c
 
 unusedFunction:tst/mock-fn.c
 
+# wraps are dynamically invoked at runtime only
+unusedFunction:tst/wrap*.c
+
 # this is just not practical
 nullPointerOutOfMemory
 
