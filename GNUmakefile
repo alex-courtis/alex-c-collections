@@ -30,6 +30,7 @@ $(SRC_O): $(INC_H) config.mk GNUmakefile
 $(TST_O): $(TST_H) $(SRC_O) config.mk GNUmakefile
 
 # test executables exclude: other tst-x.o
+$(TST_E): LDFLAGS += -Wl,--wrap=fclose
 $(TST_E): $(SRC_O) $(filter-out tst/tst%,$(TST_O))
 
 # test-x builds tst/tst-x and executes it

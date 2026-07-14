@@ -21,6 +21,8 @@
 
 #include "spmap.h"
 
+// TODO try and generify all xxmap tests with a single macro driven template
+
 struct PPmap {
 	const struct PPmapParams params;
 	const void **keys;
