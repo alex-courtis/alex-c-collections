@@ -1,6 +1,7 @@
 #include "assert-ppmap.h"
 #include "assert-pset.h"
 #include "asserts.h"
+#include "data.h"
 #include "expects.h"
 #include "mock-fn.h"
 #include "tst.h"
@@ -32,25 +33,6 @@ struct Pset {
 	size_t capacity;
 	size_t size;
 };
-
-static int keys[6] = { 10, 11, 12, 13, 14, 15, };
-static void *K0 = &keys[0];
-static void *K1 = &keys[1];
-static void *K2 = &keys[2];
-static void *K3 = &keys[3];
-static void *K4 = &keys[4];
-static void *K5 = &keys[5];
-
-static int vals[6] = { 20, 21, 22, 23, 24, 25, };
-static void *V0 = &vals[0];
-static void *V1 = &vals[1];
-static void *V2 = &vals[2];
-static void *V3 = &vals[3];
-static void *V4 = &vals[4];
-static void *V5 = &vals[5];
-
-static int datas[1] = { 30, };
-static void *D0 = &datas[0];
 
 static void *alloc_key_duplicate(const void* const val) {
 	return sprintf_alloc("%s%s", (char*)val, (char*)val);

@@ -2,6 +2,7 @@
 #include "assert-spmap.h"
 #include "assert-sset.h"
 #include "asserts.h"
+#include "data.h"
 #include "expects.h"
 #include "mock-fn.h"
 #include "tst.h"
@@ -40,16 +41,6 @@ struct SPmap {
 	const struct SPmapParams params;
 	const struct PPmap *ppmap;
 };
-
-static int vals[5] = { 20, 21, 22, 23, 24, };
-static void *V0 = &vals[0];
-static void *V1 = &vals[1];
-static void *V2 = &vals[2];
-static void *V3 = &vals[3];
-static void *V4 = &vals[4];
-
-static int datas[1] = { 30, };
-static void *D0 = &datas[0];
 
 static void spmap_put_get_remove__case_sensitive(void **state) {
 

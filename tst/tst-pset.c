@@ -1,5 +1,6 @@
 #include "assert-pset.h"
 #include "asserts.h"
+#include "data.h"
 #include "expects.h"
 #include "mock-fn.h"
 #include "tst.h"
@@ -15,17 +16,6 @@
 #include "str.h"
 
 #include "pset.h"
-
-static int vals[6] = { 20, 21, 22, 23, 24, 25, };
-static void *V0 = &vals[0];
-static void *V1 = &vals[1];
-static void *V2 = &vals[2];
-static void *V3 = &vals[3];
-static void *V4 = &vals[4];
-static void *V5 = &vals[5];
-
-static int datas[1] = { 30, };
-static void *D0 = &datas[0];
 
 struct Pset {
 	const struct PsetParams params;
@@ -1040,20 +1030,22 @@ static bool test_less_than_int(const void* const a, const void* const b) {
 static void pset_sort__many(void **state) {
 	const struct Pset *actual = pset_init();
 
-	assert_true(pset_add(actual, V2));
-	assert_true(pset_add(actual, V0));
-	assert_true(pset_add(actual, V3));
-	assert_true(pset_add(actual, V5));
-	assert_true(pset_add(actual, V1));
-	assert_true(pset_add(actual, V4));
+	const int v[6] = { 0, 1, 2, 3, 4, 5 };
+
+	assert_true(pset_add(actual, &v[2]));
+	assert_true(pset_add(actual, &v[0]));
+	assert_true(pset_add(actual, &v[3]));
+	assert_true(pset_add(actual, &v[5]));
+	assert_true(pset_add(actual, &v[1]));
+	assert_true(pset_add(actual, &v[4]));
 
 	const struct Pset *expected = pset_init();
-	assert_true(pset_add(expected, V0));
-	assert_true(pset_add(expected, V1));
-	assert_true(pset_add(expected, V2));
-	assert_true(pset_add(expected, V3));
-	assert_true(pset_add(expected, V4));
-	assert_true(pset_add(expected, V5));
+	assert_true(pset_add(expected, &v[0]));
+	assert_true(pset_add(expected, &v[1]));
+	assert_true(pset_add(expected, &v[2]));
+	assert_true(pset_add(expected, &v[3]));
+	assert_true(pset_add(expected, &v[4]));
+	assert_true(pset_add(expected, &v[5]));
 
 	pset_sort(actual, test_less_than_int);
 

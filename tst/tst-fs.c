@@ -16,6 +16,16 @@
 
 #include "fs.h"
 
+
+int __real_fclose (FILE *__stream);
+int __wrap_fclose (FILE *__stream) { // cppcheck-suppress staticFunction
+
+	// close it anyway
+	int rc = __real_fclose(__stream);
+
+	return has_mock() ? mock_int() : rc;
+}
+
 static void clean_files_dirs(void) {
 	chmod("tst/tmp/fs_mkdir_p/notwritable", 0755);
 	rmdir("tst/tmp/fs_mkdir_p/notwritable");

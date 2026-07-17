@@ -30,7 +30,6 @@ $(SRC_O): $(INC_H) config.mk GNUmakefile
 $(TST_O): $(TST_H) $(SRC_O) config.mk GNUmakefile
 
 # test executables exclude: other tst-x.o
-$(TST_E): LDFLAGS += -Wl,--wrap=fclose
 $(TST_E): $(SRC_O) $(filter-out tst/tst%,$(TST_O))
 
 # test-x builds tst/tst-x and executes it
@@ -42,6 +41,9 @@ test-%: tst/tst-%
 test-vg: $(patsubst tst/tst%,test%-vg,$(TST_E))
 test-%-vg: tst/tst-%
 	$(VALGRIND) ./$(^)
+
+# individual test wraps
+tst/tst-fs: LDFLAGS += -Wl,--wrap=fclose
 
 ifneq (,$(or $(findstring test,$(MAKECMDGOALS)), $(findstring tst/tst,$(MAKECMDGOALS))))
 CFLAGS += -Wno-unused-function
@@ -68,6 +70,7 @@ cppcheck: $(INC_H) $(SRC_C) $(TST_H) $(TST_C)
 		--disable=information \
 		--inconclusive \
 		--check-level=exhaustive \
+		--inline-suppr \
 		--suppressions-list=.cppcheck.supp \
 		--error-exitcode=1 \
 		$(CPPFLAGS)
