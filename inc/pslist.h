@@ -39,7 +39,7 @@ struct Pslist *pslist_append(struct Pslist **head, void *val);
 void *pslist_remove(struct Pslist **head, struct Pslist **item);
 
 // remove items, NULL pred_val is val pointer comparison
-size_t pslist_remove_all(struct Pslist **head, fn_2pred pred_val, const void *data);
+size_t pslist_remove_from(struct Pslist **head, fn_2pred pred_val, const void *data);
 
 // remove items and free vals, NULL pred_val is val pointer comparison, NULL free_val calls free()
 size_t pslist_remove_all_free(struct Pslist **head, fn_2pred pred_val, const void *data, fn_free free_val);

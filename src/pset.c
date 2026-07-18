@@ -137,7 +137,7 @@ static size_t add_all(const struct Pset* const set, const struct Pset* const fro
 	return added;
 }
 
-static size_t remove_all(const struct Pset* const set, const struct Pset* const from, fn_free free_val) {
+static size_t remove_from(const struct Pset* const set, const struct Pset* const from, fn_free free_val) {
 	size_t removed = 0;
 
 	for (const void **v = from->vals; v < from->vals + from->size; v++) {
@@ -339,11 +339,11 @@ bool pset_remove_free(const struct Pset* const set, const void* const val) {
 }
 
 size_t pset_remove_from(const struct Pset* const set, const struct Pset* const from) {
-	return set && from ? remove_all(set, from, NULL) : 0;
+	return set && from ? remove_from(set, from, NULL) : 0;
 }
 
 size_t pset_remove_from_free(const struct Pset* const set, const struct Pset* const from) {
-	return set && from ? remove_all(set, from, set->params.free_val ? set->params.free_val : free) : 0;
+	return set && from ? remove_from(set, from, set->params.free_val ? set->params.free_val : free) : 0;
 }
 
 void pset_it_remove(const struct PsetIt* const it) {

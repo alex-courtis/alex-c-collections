@@ -95,7 +95,7 @@ void *pslist_remove(struct Pslist **head, struct Pslist **item) {
 	return removed;
 }
 
-size_t pslist_remove_all(struct Pslist **head, fn_2pred pred_val, const void *data) {
+size_t pslist_remove_from(struct Pslist **head, fn_2pred pred_val, const void *data) {
 	struct Pslist *i;
 	size_t removed = 0;
 

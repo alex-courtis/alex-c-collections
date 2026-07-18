@@ -133,7 +133,7 @@ static void pslist_remove_all__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(pslist_length(list), 4);
 
-	pslist_remove_all(&list, (fn_2pred)equal_strcmp, "x");
+	pslist_remove_from(&list, (fn_2pred)equal_strcmp, "x");
 
 	assert_non_nul(list);
 	assert_int_equal(pslist_length(list), 2);
