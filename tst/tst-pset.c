@@ -1461,15 +1461,15 @@ int main(void) {
 		TEST(pset_remove_free__free_val),
 		TEST(pset_remove_free__free),
 
-		TEST(pset_remove_from__many),
-
-		TEST(pset_remove_from_free__no_free_val),
-		TEST(pset_remove_from_free__free_val),
-
 		TEST(pset_remove_all__many),
 
 		TEST(pset_remove_all_free__no_free_val),
 		TEST(pset_remove_all_free__free_val),
+
+		TEST(pset_remove_from__many),
+
+		TEST(pset_remove_from_free__no_free_val),
+		TEST(pset_remove_from_free__free_val),
 
 		TEST(pset_find__matches),
 		TEST(pset_find__no_match),

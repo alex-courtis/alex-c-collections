@@ -120,9 +120,9 @@ static size_t remove_all(const struct Pset* const cset, bool do_free) {
 	}
 
 	size_t removed = set->size;
+	set->size = 0;
 
 	memset(set->vals, 0, set->size * sizeof(void*));
-	set->size = 0;
 
 	return removed;
 }
