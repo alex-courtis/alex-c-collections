@@ -503,7 +503,10 @@ static void simap_at__(void **state) {
 	assert_str_equal(simap_at(map, 1).key, "b");
 	assert_int_equal(simap_at(map, 1).val, 1);
 
+	int *removed_val = (int*)map->ppmap->vals[1];
 	map->ppmap->vals[1] = NULL;
+	free(removed_val);
+
 	assert_str_equal(simap_at(map, 1).key, "b");
 	assert_int_equal(simap_at(map, 1).val, 0);
 

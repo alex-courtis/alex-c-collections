@@ -568,7 +568,10 @@ static void ipmap_at__(void **state) {
 	assert_int_equal(ipmap_at(map, 1).key, 1);
 	assert_ptr_equal(ipmap_at(map, 1).val, V1);
 
+	int *removed_key = (int*)map->ppmap->keys[1];
 	map->ppmap->keys[1] = NULL;
+	free(removed_key);
+
 	assert_int_equal(ipmap_at(map, 1).key, 0);
 	assert_ptr_equal(ipmap_at(map, 1).val, V1);
 
