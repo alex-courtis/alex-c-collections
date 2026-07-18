@@ -125,7 +125,7 @@ static void sset_at__(void **state) {
 	sset_free(set);
 }
 
-static void sset_remove_all__many(void **state) {
+static void sset_remove_from__many(void **state) {
 	const struct Sset *set = sset_init();
 	assert_true(sset_add(set, "a"));
 	assert_true(sset_add(set, "b"));
@@ -139,7 +139,7 @@ static void sset_remove_all__many(void **state) {
 	const struct Sset *expected = sset_init();
 	assert_true(sset_add(expected, "b"));
 
-	assert_int_equal(sset_remove_all(set, from), 2);
+	assert_int_equal(sset_remove_from(set, from), 2);
 
 	assert_sset_equal(set, expected);
 
@@ -503,9 +503,9 @@ static void sset__null_inputs(void **state) {
 	assert_int_equal(sset_add_many(NULL, NULL), 0);
 	assert_false(sset_remove(NULL, NULL));
 	assert_false(sset_remove(set, NULL));
-	assert_int_equal(sset_remove_all(NULL, NULL), 0);
-	assert_int_equal(sset_remove_all(set, NULL), 0);
-	assert_int_equal(sset_remove_all(NULL, set), 0);
+	assert_int_equal(sset_remove_from(NULL, NULL), 0);
+	assert_int_equal(sset_remove_from(set, NULL), 0);
+	assert_int_equal(sset_remove_from(NULL, set), 0);
 	assert_false(sset_equal(NULL, NULL));
 	assert_false(sset_equal(set, NULL));
 	assert_nul(sset_pslist(NULL));
@@ -529,7 +529,7 @@ int main(void) {
 
 		TEST(sset_at__),
 
-		TEST(sset_remove_all__many),
+		TEST(sset_remove_from__many),
 
 		TEST(sset_it_remove__many),
 		TEST(sset_it_remove__partial),

@@ -581,7 +581,7 @@ static void simap_put_many__no_keyvals(void **state) {
 	simap_free(to);
 }
 
-static void simap_remove_all__(void **state) {
+static void simap_remove_from__(void **state) {
 	const struct SImap *map = simap_init();
 
 	simap_put(map, "a", 0);
@@ -598,7 +598,7 @@ static void simap_remove_all__(void **state) {
 	simap_put(expected, "a", 0);
 	simap_put(expected, "c", 2);
 
-	assert_int_equal(simap_remove_all(map, from), 1);
+	assert_int_equal(simap_remove_from(map, from), 1);
 
 	assert_simap_equal(map, expected);
 
@@ -794,9 +794,9 @@ static void simap__null_inputs(void **state) {
 	assert_false(simap_remove(NULL, NULL));
 	assert_false(simap_remove(map, NULL));
 	simap_it_remove(NULL);
-	assert_int_equal(simap_remove_all(NULL, NULL), 0);
-	assert_int_equal(simap_remove_all(map, NULL), 0);
-	assert_int_equal(simap_remove_all(NULL, map), 0);
+	assert_int_equal(simap_remove_from(NULL, NULL), 0);
+	assert_int_equal(simap_remove_from(map, NULL), 0);
+	assert_int_equal(simap_remove_from(NULL, map), 0);
 	assert_false(simap_equal(NULL, NULL));
 	assert_false(simap_equal(map, NULL));
 	assert_nul(simap_keys_pslist(NULL));
@@ -857,7 +857,7 @@ int main(void) {
 		TEST(simap_put_many__many),
 		TEST(simap_put_many__no_keyvals),
 
-		TEST(simap_remove_all__),
+		TEST(simap_remove_from__),
 
 		TEST(simap_it_remove__many),
 		TEST(simap_it_remove__partial),

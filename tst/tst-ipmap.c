@@ -727,7 +727,7 @@ static void ipmap_remove_free__(void **state) {
 	ipmap_free(map);
 }
 
-static void ipmap_remove_all__(void **state) {
+static void ipmap_remove_from__(void **state) {
 	const struct IPmap *map = ipmap_init();
 
 	assert_nul(ipmap_put(map, 0, V0));
@@ -744,7 +744,7 @@ static void ipmap_remove_all__(void **state) {
 	assert_nul(ipmap_put(expected, 0, V0));
 	assert_nul(ipmap_put(expected, 2, V2));
 
-	assert_int_equal(ipmap_remove_all(map, from), 1);
+	assert_int_equal(ipmap_remove_from(map, from), 1);
 
 	assert_ipmap_equal(map, expected);
 
@@ -753,7 +753,7 @@ static void ipmap_remove_all__(void **state) {
 	ipmap_free(expected);
 }
 
-static void ipmap_remove_all_free__(void **state) {
+static void ipmap_remove_from_free__(void **state) {
 	const struct IPmapParams params = { .free_val = mock_free, };
 	const struct IPmap *map = ipmap_init_with(params);
 
@@ -765,7 +765,7 @@ static void ipmap_remove_all_free__(void **state) {
 
 	expect_ptr(mock_free, ptr, V0);
 
-	assert_int_equal(ipmap_remove_all_free(map, from), 1);
+	assert_int_equal(ipmap_remove_from_free(map, from), 1);
 
 	ipmap_free(map);
 	ipmap_free(from);
@@ -1087,12 +1087,12 @@ static void ipmap__null_inputs(void **state) {
 	assert_false(ipmap_remove_free(NULL, 0));
 	assert_false(ipmap_remove_free(map, 0));
 	ipmap_it_remove(NULL);
-	assert_int_equal(ipmap_remove_all(NULL, NULL), 0);
-	assert_int_equal(ipmap_remove_all(map, NULL), 0);
-	assert_int_equal(ipmap_remove_all(NULL, map), 0);
-	assert_int_equal(ipmap_remove_all_free(NULL, NULL), 0);
-	assert_int_equal(ipmap_remove_all_free(map, NULL), 0);
-	assert_int_equal(ipmap_remove_all_free(NULL, map), 0);
+	assert_int_equal(ipmap_remove_from(NULL, NULL), 0);
+	assert_int_equal(ipmap_remove_from(map, NULL), 0);
+	assert_int_equal(ipmap_remove_from(NULL, map), 0);
+	assert_int_equal(ipmap_remove_from_free(NULL, NULL), 0);
+	assert_int_equal(ipmap_remove_from_free(map, NULL), 0);
+	assert_int_equal(ipmap_remove_from_free(NULL, map), 0);
 	assert_int_equal(ipmap_put_all(NULL, NULL), 0);
 	assert_int_equal(ipmap_put_all(map, NULL), 0);
 	assert_int_equal(ipmap_put_all_free(NULL, NULL), 0);
@@ -1172,9 +1172,9 @@ int main(void) {
 
 		TEST(ipmap_remove_free__),
 
-		TEST(ipmap_remove_all__),
+		TEST(ipmap_remove_from__),
 
-		TEST(ipmap_remove_all_free__),
+		TEST(ipmap_remove_from_free__),
 
 		TEST(ipmap_it_remove__many),
 		TEST(ipmap_it_remove__partial),
