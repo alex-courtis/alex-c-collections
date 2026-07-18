@@ -7,6 +7,7 @@
 #include "util-col.h"
 
 #include <cmocka.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -448,6 +449,51 @@ static void pset_add_many__no_vals(void **state) {
 	assert_int_equal(pset_add_many(to, NULL), 0);
 
 	pset_free(to);
+}
+
+static void pset_at__empty(void **state) {
+	const struct Pset *set = pset_init();
+
+	assert_nul(pset_at(set, 0));
+	assert_nul(pset_at(set, 123));
+
+	pset_free(set);
+}
+
+static void pset_at__start(void **state) {
+	const struct Pset *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+	assert_true(pset_add(set, V2));
+
+	assert_ptr_equal(pset_at(set, 0), V0);
+
+	pset_free(set);
+}
+
+static void pset_at__end(void **state) {
+	const struct Pset *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+	assert_true(pset_add(set, V2));
+
+	assert_ptr_equal(pset_at(set, 2), V2);
+
+	pset_free(set);
+}
+
+static void pset_at__beyond_end(void **state) {
+	const struct Pset *set = pset_init();
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+	assert_true(pset_add(set, V2));
+
+	assert_nul(pset_at(set, 3));
+
+	pset_free(set);
 }
 
 static void pset_remove__existing(void **state) {
@@ -1298,6 +1344,7 @@ static void pset__null_inputs(void **state) {
 	pset_it_free(NULL);
 	assert_false(pset_contains(NULL, NULL));
 	assert_false(pset_contains(set, NULL));
+	assert_nul(pset_at(NULL, 0));
 	assert_nul(pset_find(NULL, NULL, NULL));
 	assert_nul(pset_find(set, NULL, NULL));
 	assert_nul(pset_it(NULL));
@@ -1362,6 +1409,11 @@ int main(void) {
 
 		TEST(pset_add_many__many),
 		TEST(pset_add_many__no_vals),
+
+		TEST(pset_at__empty),
+		TEST(pset_at__start),
+		TEST(pset_at__end),
+		TEST(pset_at__beyond_end),
 
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),

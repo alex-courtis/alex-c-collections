@@ -114,6 +114,17 @@ static void sset_add_many__many(void **state) {
 	sset_free(expected);
 }
 
+static void sset_at__(void **state) {
+	const struct Sset *set = sset_init();
+	assert_true(sset_add(set, "a"));
+	assert_true(sset_add(set, "b"));
+	assert_true(sset_add(set, "c"));
+
+	assert_str_equal(sset_at(set, 1), "b");
+
+	sset_free(set);
+}
+
 static void sset_remove_all__many(void **state) {
 	const struct Sset *set = sset_init();
 	assert_true(sset_add(set, "a"));
@@ -479,6 +490,7 @@ static void sset__null_inputs(void **state) {
 	sset_it_free(NULL);
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
+	assert_nul(sset_at(NULL, 0));
 	sset_find(NULL, NULL, NULL);
 	sset_find(set, NULL, NULL);
 	assert_nul(sset_it(NULL));
@@ -514,6 +526,8 @@ int main(void) {
 		TEST(sset_add_all__many),
 
 		TEST(sset_add_many__many),
+
+		TEST(sset_at__),
 
 		TEST(sset_remove_all__many),
 
