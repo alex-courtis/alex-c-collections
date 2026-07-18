@@ -1882,6 +1882,37 @@ static void ppmap_contains_val__equal_val(void **state) {
 	ppmap_free(map);
 }
 
+static void ppmap_at__empty(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	assert_nul(ppmap_at(map, 0).val);
+	assert_nul(ppmap_at(map, 123).val);
+
+	ppmap_free(map);
+}
+
+static void ppmap_at__many(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	assert_nul(ppmap_put(map, K0, V0));
+	assert_nul(ppmap_put(map, K1, V1));
+	assert_nul(ppmap_put(map, K2, V2));
+
+	assert_ptr_equal(ppmap_at(map, 0).key, K0);
+	assert_ptr_equal(ppmap_at(map, 0).val, V0);
+
+	assert_ptr_equal(ppmap_at(map, 1).key, K1);
+	assert_ptr_equal(ppmap_at(map, 1).val, V1);
+
+	assert_ptr_equal(ppmap_at(map, 2).key, K2);
+	assert_ptr_equal(ppmap_at(map, 2).val, V2);
+
+	assert_nul(ppmap_at(map, 3).key);
+	assert_nul(ppmap_at(map, 3).val);
+
+	ppmap_free(map);
+}
+
 static void ppmap_equal__length_different(void **state) {
 	const struct PPmap *a = ppmap_init();
 	const struct PPmap *b = ppmap_init();
@@ -2465,6 +2496,7 @@ static void ppmap__null_inputs(void **state) {
 	assert_false(ppmap_contains_key(map, NULL));
 	assert_false(ppmap_contains_val(NULL, NULL));
 	assert_false(ppmap_contains_val(map, NULL));
+	assert_nul(ppmap_at(NULL, 0).val);
 	ppmap_find(NULL, NULL, NULL);
 	ppmap_find(map, NULL, NULL);
 	ppmap_find_val(NULL, NULL, NULL);
@@ -2631,6 +2663,9 @@ int main(void) {
 
 		TEST(ppmap_contains_val__pointers),
 		TEST(ppmap_contains_val__equal_val),
+
+		TEST(ppmap_at__empty),
+		TEST(ppmap_at__many),
 
 		TEST(ppmap_equal__length_different),
 		TEST(ppmap_equal__key_pointers_ok),

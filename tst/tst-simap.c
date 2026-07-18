@@ -494,6 +494,22 @@ static void simap_contains_val__(void **state) {
 	simap_free(map);
 }
 
+static void simap_at__(void **state) {
+	const struct SImap *map = simap_init();
+	assert_false(simap_put(map, "a", 0));
+	assert_false(simap_put(map, "b", 1));
+	assert_false(simap_put(map, "c", 2));
+
+	assert_str_equal(simap_at(map, 1).key, "b");
+	assert_int_equal(simap_at(map, 1).val, 1);
+
+	map->ppmap->vals[1] = NULL;
+	assert_str_equal(simap_at(map, 1).key, "b");
+	assert_int_equal(simap_at(map, 1).val, 0);
+
+	simap_free(map);
+}
+
 static void simap_put_if_absent__(void **state) {
 	const struct SImap *map = simap_init();
 
@@ -750,6 +766,7 @@ static void simap__null_inputs(void **state) {
 	assert_false(simap_contains_key(map, NULL));
 	assert_false(simap_contains_val(NULL, 0));
 	assert_false(simap_contains_val(map, 0));
+	assert_nul(simap_at(NULL, 0).key);
 	simap_find(NULL, NULL, NULL);
 	simap_find(map, NULL, NULL);
 	simap_find_key(NULL, NULL, NULL);
@@ -827,6 +844,8 @@ int main(void) {
 		TEST(simap_contains_key__),
 
 		TEST(simap_contains_val__),
+
+		TEST(simap_at__),
 
 		TEST(simap_put_if_absent__),
 

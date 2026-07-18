@@ -375,6 +375,18 @@ static void ssmap_contains_val__(void **state) {
 	ssmap_free(map);
 }
 
+static void ssmap_at__(void **state) {
+	const struct SSmap *map = ssmap_init();
+	assert_false(ssmap_put(map, "a", "aa"));
+	assert_false(ssmap_put(map, "b", "bb"));
+	assert_false(ssmap_put(map, "c", "cc"));
+
+	assert_str_equal(ssmap_at(map, 1).key, "b");
+	assert_str_equal(ssmap_at(map, 1).val, "bb");
+
+	ssmap_free(map);
+}
+
 static void ssmap_put_if_absent__(void **state) {
 	const struct SSmap *map = ssmap_init();
 
@@ -680,6 +692,7 @@ static void ssmap__null_inputs(void **state) {
 	assert_false(ssmap_contains_key(map, NULL));
 	assert_false(ssmap_contains_val(NULL, NULL));
 	assert_false(ssmap_contains_val(map, NULL));
+	assert_nul(ssmap_at(NULL, 0).val);
 	ssmap_find(NULL, NULL, NULL);
 	ssmap_find(map, NULL, NULL);
 	ssmap_find_key(NULL, NULL, NULL);
@@ -746,6 +759,8 @@ int main(void) {
 		TEST(ssmap_contains_key__),
 
 		TEST(ssmap_contains_val__),
+
+		TEST(ssmap_at__),
 
 		TEST(ssmap_put_if_absent__),
 

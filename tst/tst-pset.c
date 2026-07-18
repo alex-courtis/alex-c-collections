@@ -460,7 +460,7 @@ static void pset_at__empty(void **state) {
 	pset_free(set);
 }
 
-static void pset_at__start(void **state) {
+static void pset_at__many(void **state) {
 	const struct Pset *set = pset_init();
 
 	assert_true(pset_add(set, V0));
@@ -468,28 +468,8 @@ static void pset_at__start(void **state) {
 	assert_true(pset_add(set, V2));
 
 	assert_ptr_equal(pset_at(set, 0), V0);
-
-	pset_free(set);
-}
-
-static void pset_at__end(void **state) {
-	const struct Pset *set = pset_init();
-
-	assert_true(pset_add(set, V0));
-	assert_true(pset_add(set, V1));
-	assert_true(pset_add(set, V2));
-
+	assert_ptr_equal(pset_at(set, 1), V1);
 	assert_ptr_equal(pset_at(set, 2), V2);
-
-	pset_free(set);
-}
-
-static void pset_at__beyond_end(void **state) {
-	const struct Pset *set = pset_init();
-
-	assert_true(pset_add(set, V0));
-	assert_true(pset_add(set, V1));
-	assert_true(pset_add(set, V2));
 
 	assert_nul(pset_at(set, 3));
 
@@ -1411,9 +1391,7 @@ int main(void) {
 		TEST(pset_add_many__no_vals),
 
 		TEST(pset_at__empty),
-		TEST(pset_at__start),
-		TEST(pset_at__end),
-		TEST(pset_at__beyond_end),
+		TEST(pset_at__many),
 
 		TEST(pset_remove__existing),
 		TEST(pset_remove__inexistent),

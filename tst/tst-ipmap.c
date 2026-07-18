@@ -559,6 +559,22 @@ static void ipmap_contains_val__(void **state) {
 	ipmap_free(map);
 }
 
+static void ipmap_at__(void **state) {
+	const struct IPmap *map = ipmap_init();
+	assert_nul(ipmap_put(map, 0, V0));
+	assert_nul(ipmap_put(map, 1, V1));
+	assert_nul(ipmap_put(map, 2, V2));
+
+	assert_int_equal(ipmap_at(map, 1).key, 1);
+	assert_ptr_equal(ipmap_at(map, 1).val, V1);
+
+	map->ppmap->keys[1] = NULL;
+	assert_int_equal(ipmap_at(map, 1).key, 0);
+	assert_ptr_equal(ipmap_at(map, 1).val, V1);
+
+	ipmap_free(map);
+}
+
 static void ipmap_get__key_removed(void **state) {
 
 	const struct IPmap *actual = ipmap_init();
@@ -1043,6 +1059,7 @@ static void ipmap__null_inputs(void **state) {
 	assert_false(ipmap_get(NULL, 0));
 	assert_false(ipmap_contains_key(NULL, 0));
 	assert_false(ipmap_contains_val(NULL, 0));
+	assert_nul(ipmap_at(NULL, 0).val);
 	assert_nul(ipmap_it(NULL));
 	assert_nul(ipmap_filter_it(NULL, NULL, NULL));
 	assert_nul(ipmap_filter_it(map, NULL, NULL));
@@ -1136,6 +1153,8 @@ int main(void) {
 		TEST(ipmap_contains_key__),
 
 		TEST(ipmap_contains_val__),
+
+		TEST(ipmap_at__),
 
 		TEST(ipmap_get__key_removed),
 
