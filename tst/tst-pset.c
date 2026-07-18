@@ -576,6 +576,66 @@ static void pset_remove_free__free(void **state) {
 	pset_free(set);
 }
 
+static void pset_remove_all__many(void **state) {
+	const struct Pset *set = pset_init();
+
+	assert_int_equal(pset_remove_all(set), 0);
+
+	assert_int_equal(pset_size(set), 0);
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+
+	assert_int_equal(pset_remove_all(set), 2);
+
+	assert_int_equal(pset_size(set), 0);
+
+	assert_nul(pset_at(set, 0));
+	assert_nul(pset_at(set, 1));
+
+	pset_free(set);
+}
+
+static void pset_remove_all_free__no_free_val(void **state) {
+	const struct Pset *set = pset_init();
+
+	assert_int_equal(pset_remove_all_free(set), 0);
+
+	assert_true(pset_add(set, strdup("to free")));
+	assert_true(pset_add(set, strdup("to free")));
+
+	assert_int_equal(pset_remove_all_free(set), 2);
+
+	assert_int_equal(pset_size(set), 0);
+
+	assert_nul(pset_at(set, 0));
+	assert_nul(pset_at(set, 1));
+
+	pset_free(set);
+}
+
+static void pset_remove_all_free__free_val(void **state) {
+	const struct PsetParams params = { .free_val = mock_free, };
+	const struct Pset *set = pset_init_with(params);
+
+	assert_int_equal(pset_remove_all_free(set), 0);
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+
+	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V1);
+
+	assert_int_equal(pset_remove_all_free(set), 2);
+
+	assert_int_equal(pset_size(set), 0);
+
+	assert_nul(pset_at(set, 0));
+	assert_nul(pset_at(set, 1));
+
+	pset_free(set);
+}
+
 static void pset_remove_from__many(void **state) {
 	const struct PsetParams params = { .free_val = mock_free, };
 	const struct Pset *set = pset_init_with(params);
@@ -1340,6 +1400,8 @@ static void pset__null_inputs(void **state) {
 	assert_false(pset_remove(set, NULL));
 	assert_false(pset_remove_free(NULL, NULL));
 	assert_false(pset_remove_free(set, NULL));
+	assert_int_equal(pset_remove_all(NULL), 0);
+	assert_int_equal(pset_remove_all_free(NULL), 0);
 	assert_int_equal(pset_remove_from(NULL, NULL), 0);
 	assert_int_equal(pset_remove_from(set, NULL), 0);
 	assert_int_equal(pset_remove_from(NULL, set), 0);
@@ -1403,6 +1465,11 @@ int main(void) {
 
 		TEST(pset_remove_from_free__no_free_val),
 		TEST(pset_remove_from_free__free_val),
+
+		TEST(pset_remove_all__many),
+
+		TEST(pset_remove_all_free__no_free_val),
+		TEST(pset_remove_all_free__free_val),
 
 		TEST(pset_find__matches),
 		TEST(pset_find__no_match),

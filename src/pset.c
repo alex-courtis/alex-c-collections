@@ -104,6 +104,26 @@ static bool remove(const struct Pset* const cset, const void* const val, fn_free
 	return false;
 }
 
+static void free_all(const struct Pset* const cset) {
+	struct Pset *set = (struct Pset*)cset;
+
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
+		if (*v) {
+			if (set->params.free_val) {
+				set->params.free_val((void*)*v);
+			} else {
+				free((void*)*v);
+			}
+		}
+	}
+}
+
+static void wipe_vals(const struct Pset* const cset) {
+	struct Pset *set = (struct Pset*)cset;
+	memset(set->vals, 0, set->size * sizeof(void*));
+	set->size = 0;
+}
+
 static void it_remove(const struct PsetIt* const it, bool do_free) {
 	if (!it)
 		return;
@@ -210,15 +230,7 @@ void pset_free_vals(const struct Pset* const set) {
 	if (!set)
 		return;
 
-	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (*v) {
-			if (set->params.free_val) {
-				set->params.free_val((void*)*v);
-			} else {
-				free((void*)*v);
-			}
-		}
-	}
+	free_all(set);
 
 	pset_free(set);
 }
@@ -336,6 +348,26 @@ bool pset_remove(const struct Pset* const set, const void* const val) {
 
 bool pset_remove_free(const struct Pset* const set, const void* const val) {
 	return set ? remove(set, val, set->params.free_val ? set->params.free_val : free) : false;
+}
+
+size_t pset_remove_all(const struct Pset* const set) {
+	if (!set)
+		return 0;
+
+	size_t removed = set->size;
+
+	wipe_vals(set);
+
+	return removed;
+}
+
+size_t pset_remove_all_free(const struct Pset* const set) {
+	if (!set)
+		return 0;
+
+	free_all(set);
+
+	return pset_remove_all(set);
 }
 
 size_t pset_remove_from(const struct Pset* const set, const struct Pset* const from) {
