@@ -40,6 +40,8 @@ bool less_than_strcasecmp(const char* const a, const char* const b);
 //
 typedef bool (*fn_pred)(const void* const ptr);
 
+// TODO rename params
+
 //
 // bi-predicate against user data
 //
