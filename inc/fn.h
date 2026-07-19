@@ -32,6 +32,9 @@ bool less_than_strcmp(const char* const a, const char* const b);
 // strcasecmp(a, b) < 0
 bool less_than_strcasecmp(const char* const a, const char* const b);
 
+// true if both present and equal value
+bool equal_stp(const size_t* const a, const size_t* const b);
+
 //
 // predicate
 //

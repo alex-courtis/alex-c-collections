@@ -19,13 +19,6 @@ struct SImapItState {
 	const struct SImapFilter *filter;
 };
 
-static bool equal_stp(const size_t* const a, const size_t* const b) {
-	if (!a || !b)
-		return false;
-
-	return *a == *b;
-}
-
 static bool filter_passes(const void* const key, const void* const val, const struct SImapFilter* const filter) {
 	const size_t i = *(size_t*)val;
 

@@ -17,13 +17,6 @@ struct IPmapItState {
 	const struct IPmapFilter *filter;
 };
 
-static bool equal_stp(const size_t* const a, const size_t* const b) {
-	if (!a || !b)
-		return false;
-
-	return *a == *b;
-}
-
 static const struct IPmap *clone(const struct IPmap* const from, bool deep) {
 	if (!from)
 		return NULL;
