@@ -139,18 +139,18 @@ static void ssmap_find__(void **state) {
 	assert_false(ssmap_put(map, "2", "ccc"));
 
 	// skip 0
-	expect_string(mock_3pred_str_str, str1, "0");
-	expect_string(mock_3pred_str_str, str2, "aaa");
-	expect_string(mock_3pred_str_str, data, "x");
-	will_return(mock_3pred_str_str, false);
+	expect_string(mock_pred_s_s_p, s1, "0");
+	expect_string(mock_pred_s_s_p, s2, "aaa");
+	expect_string(mock_pred_s_s_p, p, "x");
+	will_return(mock_pred_s_s_p, false);
 
 	// get 1
-	expect_string(mock_3pred_str_str, str1, "1");
-	expect_string(mock_3pred_str_str, str2, "bbb");
-	expect_string(mock_3pred_str_str, data, "x");
-	will_return(mock_3pred_str_str, true);
+	expect_string(mock_pred_s_s_p, s1, "1");
+	expect_string(mock_pred_s_s_p, s2, "bbb");
+	expect_string(mock_pred_s_s_p, p, "x");
+	will_return(mock_pred_s_s_p, true);
 
-	const struct SSmapFilter filter = { .key_val_data = mock_3pred_str_str, .data = "x", };
+	const struct SSmapFilter filter = { .key_val_data = mock_pred_s_s_p, .data = "x", };
 	const struct SSmapPair kv_pair = ssmap_find(map, filter);
 	assert_str_equal(kv_pair.key, "1");
 	assert_str_equal(kv_pair.val, "bbb");

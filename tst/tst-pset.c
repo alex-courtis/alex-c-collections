@@ -707,9 +707,9 @@ static void pset_find__empty_set(void **state) {
 	const struct Pset *set = pset_init();
 
 	const struct PsetFilter filter = {
-		.val = mock_pred,
+		.val = mock_pred_p,
 		.data = D0,
-		.val_data = mock_2pred,
+		.val_data = mock_pred_p_p,
 	};
 
 	assert_nul(pset_find(set, filter));
@@ -725,14 +725,14 @@ static void pset_find__val(void **state) {
 	assert_true(pset_add(set, V2));
 
 	// skip V0
-	expect_ptr(mock_pred, ptr, V0);
-	will_return(mock_pred, false);
+	expect_ptr(mock_pred_p, p, V0);
+	will_return(mock_pred_p, false);
 
 	// get V1
-	expect_ptr(mock_pred, ptr, V1);
-	will_return(mock_pred, true);
+	expect_ptr(mock_pred_p, p, V1);
+	will_return(mock_pred_p, true);
 
-	const struct PsetFilter filter = { .val = mock_pred, };
+	const struct PsetFilter filter = { .val = mock_pred_p, };
 
 	assert_ptr_equal(pset_find(set, filter), V1);
 
@@ -747,16 +747,16 @@ static void pset_find__val_data(void **state) {
 	assert_true(pset_add(set, V2));
 
 	// skip V0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
+	expect_ptr(mock_pred_p_p, p1, V0);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, false);
 
 	// get V1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, true);
+	expect_ptr(mock_pred_p_p, p1, V1);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, true);
 
-	const struct PsetFilter filter = { .val_data = mock_2pred, .data = D0, };
+	const struct PsetFilter filter = { .val_data = mock_pred_p_p, .data = D0, };
 
 	assert_ptr_equal(pset_find(set, filter), V1);
 
@@ -862,8 +862,8 @@ static void pset_filter_it__empty_set(void **state) {
 	const struct Pset *set = pset_init();
 
 	const struct PsetFilter filter = {
-		.val = mock_pred,
-		.val_data = mock_2pred,
+		.val = mock_pred_p,
+		.val_data = mock_pred_p_p,
 		.data = D0,
 	};
 	assert_nul(pset_filter_it(set, filter));
@@ -883,39 +883,39 @@ static void pset_filter_it__many(void **state) {
 	assert_int_equal(pset_size(set), 5);
 
 	// skip 0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
+	expect_ptr(mock_pred_p_p, p1, V0);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, false);
 
 	// get 1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, true);
+	expect_ptr(mock_pred_p_p, p1, V1);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, true);
 
-	const struct PsetFilter filter = { .val_data = mock_2pred, .data = D0, };
+	const struct PsetFilter filter = { .val_data = mock_pred_p_p, .data = D0, };
 	const struct PsetIt *it = pset_filter_it(set, filter);
 
 	assert_non_nul(it);
 	assert_ptr_equal(it->val, V1);
 
 	// skip K2
-	expect_ptr(mock_2pred, ptr, V2);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
+	expect_ptr(mock_pred_p_p, p1, V2);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, false);
 
 	// get K3
-	expect_ptr(mock_2pred, ptr, V3);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, true);
+	expect_ptr(mock_pred_p_p, p1, V3);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, true);
 
 	it = pset_it_next(it);
 	assert_non_nul(it);
 	assert_ptr_equal(it->val, V3);
 
 	// skip K4
-	expect_ptr(mock_2pred, ptr, V4);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
+	expect_ptr(mock_pred_p_p, p1, V4);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, false);
 
 	// done
 	it = pset_it_next(it);
@@ -932,11 +932,11 @@ static void pset_filter_it__none(void **state) {
 	assert_int_equal(pset_size(set), 1);
 
 	// skip K0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
+	expect_ptr(mock_pred_p_p, p1, V0);
+	expect_ptr(mock_pred_p_p, p2, D0);
+	will_return(mock_pred_p_p, false);
 
-	const struct PsetFilter filter = { .val_data = mock_2pred, .data = D0, };
+	const struct PsetFilter filter = { .val_data = mock_pred_p_p, .data = D0, };
 	assert_nul(pset_filter_it(set, filter));
 
 	pset_free(set);

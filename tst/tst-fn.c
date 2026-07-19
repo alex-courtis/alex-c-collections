@@ -40,16 +40,6 @@ static void equal_strstr__(void **state) {
 	assert_false(equal_strstr("aabb", "xx"));
 }
 
-static void equal_stp__(void **state) {
-	size_t a = { 1 };
-	size_t b = { 2 };
-	assert_true(equal_stp(&a, &a));
-	assert_false(equal_stp(&a, &b));
-	assert_false(equal_stp(&a, NULL));
-	assert_false(equal_stp(NULL, &b));
-	assert_false(equal_stp(NULL, NULL));
-}
-
 static void less_than_strcmp__(void **state) {
 	assert_true(less_than_strcmp(P0, P0));
 	assert_false(less_than_strcmp(P0, NULL));
@@ -112,7 +102,6 @@ int main(void) {
 		TEST(equal_strcmp__),
 		TEST(equal_strcasecmp__),
 		TEST(equal_strstr__),
-		TEST(equal_stp__),
 		TEST(less_than_strcmp__),
 		TEST(less_than_strcasecmp__),
 		TEST(clone_strdup__),

@@ -165,7 +165,7 @@ static void simap_it_next__partial(void **state) {
 static void simap_filter_it__empty(void **state) {
 	const struct SImap *map = simap_init();
 
-	const struct SImapFilter filter = { .key = mock_pred_str, };
+	const struct SImapFilter filter = { .key = mock_pred_s, };
 	assert_nul(simap_filter_it(map, filter));
 
 	simap_free(map);
@@ -204,77 +204,77 @@ static void simap_find__variants(void **state) {
 	assert_false(simap_put(map, "2", 12));
 
 	// key
-	expect_string(mock_pred_str, str, "0");
-	will_return(mock_pred_str, false);
-	expect_string(mock_pred_str, str, "1");
-	will_return(mock_pred_str, true);
+	expect_string(mock_pred_s, s, "0");
+	will_return(mock_pred_s, false);
+	expect_string(mock_pred_s, s, "1");
+	will_return(mock_pred_s, true);
 
-	const struct SImapFilter filter_k = { .key = mock_pred_str, .data = "x", };
+	const struct SImapFilter filter_k = { .key = mock_pred_s, .data = "x", };
 	const struct SImapPair pair_k = simap_find(map, filter_k);
 	assert_str_equal(pair_k.key, "1");
 	assert_int_equal(pair_k.val, 11);
 
 	// key_data
-	expect_string(mock_2pred_str, str, "0");
-	expect_string(mock_2pred_str, data, "x");
-	will_return(mock_2pred_str, false);
-	expect_string(mock_2pred_str, str, "1");
-	expect_string(mock_2pred_str, data, "x");
-	will_return(mock_2pred_str, true);
+	expect_string(mock_pred_s_p, s, "0");
+	expect_string(mock_pred_s_p, p, "x");
+	will_return(mock_pred_s_p, false);
+	expect_string(mock_pred_s_p, s, "1");
+	expect_string(mock_pred_s_p, p, "x");
+	will_return(mock_pred_s_p, true);
 
-	const struct SImapFilter filter_kd = { .key_data = mock_2pred_str, .data = "x", };
+	const struct SImapFilter filter_kd = { .key_data = mock_pred_s_p, .data = "x", };
 	const struct SImapPair pair_kd = simap_find(map, filter_kd);
 	assert_str_equal(pair_kd.key, "1");
 	assert_int_equal(pair_kd.val, 11);
 
 	// val
-	expect_int_value(mock_pred_szt, i, 10);
-	will_return(mock_pred_szt, false);
-	expect_int_value(mock_pred_szt, i, 11);
-	will_return(mock_pred_szt, true);
+	expect_int_value(mock_pred_i, i, 10);
+	will_return(mock_pred_i, false);
+	expect_int_value(mock_pred_i, i, 11);
+	will_return(mock_pred_i, true);
 
-	const struct SImapFilter filter_v = { .val = mock_pred_szt, .data = "x", };
+	const struct SImapFilter filter_v = { .val = mock_pred_i, .data = "x", };
 	const struct SImapPair pair_v = simap_find(map, filter_v);
 	assert_str_equal(pair_v.key, "1");
 	assert_int_equal(pair_v.val, 11);
 
 	// val_data
-	expect_int_value(mock_2pred_szt, i, 10);
-	expect_string(mock_2pred_szt, data, "x");
-	will_return(mock_2pred_szt, false);
-	expect_int_value(mock_2pred_szt, i, 11);
-	expect_string(mock_2pred_szt, data, "x");
-	will_return(mock_2pred_szt, true);
+	expect_int_value(mock_pred_i_p, i, 10);
+	expect_string(mock_pred_i_p, p, "x");
+	will_return(mock_pred_i_p, false);
+	expect_int_value(mock_pred_i_p, i, 11);
+	expect_string(mock_pred_i_p, p, "x");
+	will_return(mock_pred_i_p, true);
 
-	const struct SImapFilter filter_vd = { .val_data = mock_2pred_szt, .data = "x", };
+	const struct SImapFilter filter_vd = { .val_data = mock_pred_i_p, .data = "x", };
 	const struct SImapPair pair_vd = simap_find(map, filter_vd);
 	assert_str_equal(pair_vd.key, "1");
 	assert_int_equal(pair_vd.val, 11);
 
 	// key_val
-	expect_string(mock_2pred_str_szt, str, "0");
-	expect_int_value(mock_2pred_str_szt, i, 10);
-	will_return(mock_2pred_str_szt, false);
-	expect_string(mock_2pred_str_szt, str, "1");
-	expect_int_value(mock_2pred_str_szt, i, 11);
-	will_return(mock_2pred_str_szt, true);
+	expect_string(mock_pred_s_i, s, "0");
+	expect_int_value(mock_pred_s_i, i, 10);
+	will_return(mock_pred_s_i, false);
+	expect_string(mock_pred_s_i, s, "1");
+	expect_int_value(mock_pred_s_i, i, 11);
+	will_return(mock_pred_s_i, true);
 
-	const struct SImapFilter filter_kv = { .key_val = mock_2pred_str_szt, .data = "x", };
+	const struct SImapFilter filter_kv = { .key_val = mock_pred_s_i, .data = "x", };
 	const struct SImapPair pair_kv = simap_find(map, filter_kv);
 	assert_str_equal(pair_kv.key, "1");
 	assert_int_equal(pair_kv.val, 11);
 
 	// key_val_data
-	expect_string(mock_3pred_str_szt, str, "0");
-	expect_int_value(mock_3pred_str_szt, i, 10);
-	expect_string(mock_3pred_str_szt, data, "x");
-	will_return(mock_3pred_str_szt, false);
-	expect_string(mock_3pred_str_szt, str, "1");
-	expect_int_value(mock_3pred_str_szt, i, 11);
-	expect_string(mock_3pred_str_szt, data, "x");
-	will_return(mock_3pred_str_szt, true);
+	expect_string(mock_pred_s_i_p, s, "0");
+	expect_int_value(mock_pred_s_i_p, i, 10);
+	expect_string(mock_pred_s_i_p, p, "x");
+	will_return(mock_pred_s_i_p, false);
+	expect_string(mock_pred_s_i_p, s, "1");
+	expect_int_value(mock_pred_s_i_p, i, 11);
+	expect_string(mock_pred_s_i_p, p, "x");
+	will_return(mock_pred_s_i_p, true);
 
-	const struct SImapFilter filter_kvd = { .key_val_data = mock_3pred_str_szt, .data = "x", };
+	const struct SImapFilter filter_kvd = { .key_val_data = mock_pred_s_i_p, .data = "x", };
 	const struct SImapPair pair_kvd = simap_find(map, filter_kvd);
 	assert_str_equal(pair_kvd.key, "1");
 	assert_int_equal(pair_kvd.val, 11);
