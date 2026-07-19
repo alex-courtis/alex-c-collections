@@ -87,7 +87,7 @@ static void spmap_free_vals__(void **state) {
 	spmap_free_vals(map);
 }
 
-static void spmap_find2__(void **state) {
+static void spmap_find__(void **state) {
 	const struct SPmap *map = spmap_init();
 
 	assert_nul(spmap_put(map, "0", V0));
@@ -107,7 +107,7 @@ static void spmap_find2__(void **state) {
 	will_return(mock_3pred_str_ptr, true);
 
 	const struct SPmapFilter filter = { .key_val_data = mock_3pred_str_ptr, .data = D0, };
-	const struct SPmapPair kv_pair = spmap_find2(map, filter);
+	const struct SPmapPair kv_pair = spmap_find(map, filter);
 
 	assert_str_equal(kv_pair.key, "1");
 	assert_ptr_equal(kv_pair.val, V1);
@@ -162,7 +162,7 @@ static void spmap_it__empty(void **state) {
 	spmap_free(map);
 }
 
-static void spmap_filter_it2__(void **state) {
+static void spmap_filter_it__(void **state) {
 	const struct SPmap *map = spmap_init();
 
 	assert_nul(spmap_put(map, "0", V0));
@@ -182,7 +182,7 @@ static void spmap_filter_it2__(void **state) {
 	will_return(mock_3pred_str_ptr, true);
 
 	const struct SPmapFilter filter = { .key_val_data = mock_3pred_str_ptr, .data = D0, };
-	const struct SPmapIt *it = spmap_filter_it2(map, filter);
+	const struct SPmapIt *it = spmap_filter_it(map, filter);
 
 	assert_non_nul(it);
 	assert_str_equal(it->key, "1");
@@ -858,9 +858,9 @@ static void spmap__null_inputs(void **state) {
 	assert_false(spmap_contains_val(NULL, NULL));
 	assert_false(spmap_contains_val(map, NULL));
 	assert_nul(spmap_at(NULL, 0).val);
-	spmap_find2(NULL, filter);
+	spmap_find(NULL, filter);
 	assert_nul(spmap_it(NULL));
-	assert_nul(spmap_filter_it2(NULL, filter));
+	assert_nul(spmap_filter_it(NULL, filter));
 	assert_nul(spmap_it_next(NULL));
 	assert_nul(spmap_put(NULL, NULL, NULL));
 	assert_nul(spmap_put(map, NULL, NULL));
@@ -912,7 +912,7 @@ int main(void) {
 
 		TEST(spmap_free_vals__),
 
-		TEST(spmap_find2__),
+		TEST(spmap_find__),
 
 		TEST(spmap_it__many),
 		TEST(spmap_it__empty),
@@ -921,7 +921,7 @@ int main(void) {
 
 		TEST(spmap_it_next__partial),
 
-		TEST(spmap_filter_it2__),
+		TEST(spmap_filter_it__),
 
 		TEST(spmap_equal__case_sensitive),
 		TEST(spmap_equal__case_insensitive),

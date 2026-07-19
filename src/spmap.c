@@ -157,7 +157,7 @@ struct SPmapPair spmap_at(const struct SPmap* const map, const size_t i) {
 }
 
 // find the first key/val pred, {NULL,NULL} when no matches, first when empty filter
-struct SPmapPair spmap_find2(const struct SPmap* const map, const struct SPmapFilter filter) {
+struct SPmapPair spmap_find(const struct SPmap* const map, const struct SPmapFilter filter) {
 	struct SPmapPair res = { 0 };
 
 	if (!map)
@@ -185,7 +185,7 @@ const struct SPmapIt *spmap_it(const struct SPmap* const map) {
 	return map ? it_init(ppmap_it(map->ppmap)) : NULL;
 }
 
-const struct SPmapIt *spmap_filter_it2(const struct SPmap* const map, const struct SPmapFilter filter) {
+const struct SPmapIt *spmap_filter_it(const struct SPmap* const map, const struct SPmapFilter filter) {
 	if (!map)
 		return NULL;
 

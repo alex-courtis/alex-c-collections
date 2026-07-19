@@ -103,13 +103,13 @@ bool spmap_contains_val(const struct SPmap* const map, const void* const val);
 struct SPmapPair spmap_at(const struct SPmap* const map, const size_t i);
 
 // find the first key/val pred, {NULL,NULL} when no matches, first when empty filter
-struct SPmapPair spmap_find2(const struct SPmap* const map, const struct SPmapFilter filter);
+struct SPmapPair spmap_find(const struct SPmap* const map, const struct SPmapFilter filter);
 
 // create an iterator, caller must spmap_it_free or invoke spmap_next until NULL
 const struct SPmapIt *spmap_it(const struct SPmap* const map);
 
 // create a filtering iterator, return NULL when no matches, caller must spmap_it_free or invoke spmap_next until NULL
-const struct SPmapIt *spmap_filter_it2(const struct SPmap* const map, const struct SPmapFilter filter);
+const struct SPmapIt *spmap_filter_it(const struct SPmap* const map, const struct SPmapFilter filter);
 
 // next iterator entry, NULL at end of map
 const struct SPmapIt *spmap_it_next(const struct SPmapIt* const it);
