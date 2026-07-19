@@ -218,7 +218,7 @@ static void sset_add_contains_remove_free__case_insensitive(void **state) {
 	sset_free(set);
 }
 
-static void sset_find__matches(void **state) {
+static void sset_find__(void **state) {
 	const struct Sset *set = sset_init();
 
 	assert_true(sset_add(set, "x0"));
@@ -226,7 +226,9 @@ static void sset_find__matches(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "x3"));
 
-	assert_str_equal(sset_find(set, match_starts_with_a, NULL), "a2");
+	const struct SsetFilter filter = { .val_data = match_starts_with_a, .data = "x", };
+
+	assert_str_equal(sset_find(set, filter), "a2");
 
 	sset_free(set);
 }
@@ -282,7 +284,9 @@ static void sset_filter_it__(void **state) {
 	assert_true(sset_add(set, "a2"));
 	assert_true(sset_add(set, "b2"));
 
-	const struct SsetIt *it = sset_filter_it(set, match_starts_with_a, NULL);
+	const struct SsetFilter filter = { .val_data = match_starts_with_a, .data = "x", };
+	const struct SsetIt *it = sset_filter_it(set, filter);
+
 	assert_non_nul(it);
 	assert_str_equal(it->val, "a1");
 
@@ -500,6 +504,7 @@ static void sset_clone__(void **state) {
 
 static void sset__null_inputs(void **state) {
 	const struct Sset *set = sset_init();
+	const struct SsetFilter filter = { 0 };
 
 	assert_int_equal(sset_add_all(NULL, NULL), 0);
 	assert_int_equal(sset_add_all(set, NULL), 0);
@@ -509,11 +514,9 @@ static void sset__null_inputs(void **state) {
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
 	assert_nul(sset_at(NULL, 0));
-	sset_find(NULL, NULL, NULL);
-	sset_find(set, NULL, NULL);
+	sset_find(NULL, filter);
 	assert_nul(sset_it(NULL));
-	assert_nul(sset_filter_it(NULL, NULL, NULL));
-	assert_nul(sset_filter_it(set, NULL, NULL));
+	assert_nul(sset_filter_it(NULL, filter));
 	assert_nul(sset_it_next(NULL));
 	sset_it_remove(NULL);
 	assert_false(sset_add(NULL, NULL));
@@ -555,7 +558,7 @@ int main(void) {
 		TEST(sset_it_remove__many),
 		TEST(sset_it_remove__partial),
 
-		TEST(sset_find__matches),
+		TEST(sset_find__),
 
 		TEST(sset_it__many),
 		TEST(sset_it__empty),
