@@ -594,6 +594,26 @@ static void ssmap_put_many__many(void **state) {
 	ssmap_free(expected);
 }
 
+static void ssmap_remove_all__(void **state) {
+	const struct SSmap *map = ssmap_init();
+
+	assert_int_equal(ssmap_remove_all(map), 0);
+
+	assert_false(ssmap_put(map, "a", "0"));
+	assert_false(ssmap_put(map, "b", "1"));
+
+	assert_int_equal(ssmap_remove_all(map), 2);
+
+	assert_int_equal(ssmap_size(map), 0);
+
+	assert_false(ssmap_contains_key(map, "a"));
+	assert_false(ssmap_contains_val(map, "0"));
+	assert_false(ssmap_contains_key(map, "b"));
+	assert_false(ssmap_contains_val(map, "1"));
+
+	ssmap_free(map);
+}
+
 static void ssmap_remove_from__(void **state) {
 	const struct SSmap *map = ssmap_init();
 
@@ -716,6 +736,7 @@ static void ssmap__null_inputs(void **state) {
 	assert_int_equal(ssmap_put_many(NULL, NULL), 0);
 	assert_false(ssmap_remove(NULL, NULL));
 	assert_false(ssmap_remove(map, NULL));
+	assert_int_equal(ssmap_remove_all(NULL), 0);
 	assert_int_equal(ssmap_remove_from(NULL, NULL), 0);
 	assert_int_equal(ssmap_remove_from(map, NULL), 0);
 	assert_int_equal(ssmap_remove_from(NULL, map), 0);
@@ -779,6 +800,8 @@ int main(void) {
 		TEST(ssmap_put_all__many),
 
 		TEST(ssmap_put_many__many),
+
+		TEST(ssmap_remove_all__),
 
 		TEST(ssmap_remove_from__),
 

@@ -527,6 +527,50 @@ static void spmap_remove_free__(void **state) {
 	spmap_free(map);
 }
 
+static void spmap_remove_all__(void **state) {
+	const struct SPmap *map = spmap_init();
+
+	assert_int_equal(spmap_remove_all(map), 0);
+
+	assert_false(spmap_put(map, "a", V0));
+	assert_false(spmap_put(map, "b", V1));
+
+	assert_int_equal(spmap_remove_all(map), 2);
+
+	assert_int_equal(spmap_size(map), 0);
+
+	assert_false(spmap_contains_key(map, "a"));
+	assert_false(spmap_contains_val(map, V0));
+	assert_false(spmap_contains_key(map, "b"));
+	assert_false(spmap_contains_val(map, V1));
+
+	spmap_free(map);
+}
+
+static void spmap_remove_all_free__(void **state) {
+	const struct SPmapParams params = { .free_val = mock_free, };
+	const struct SPmap *map = spmap_init_with(params);
+
+	assert_int_equal(spmap_remove_all_free(map), 0);
+
+	assert_false(spmap_put(map, "a", V0));
+	assert_false(spmap_put(map, "b", V1));
+
+	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V1);
+
+	assert_int_equal(spmap_remove_all_free(map), 2);
+
+	assert_int_equal(spmap_size(map), 0);
+
+	assert_false(spmap_contains_key(map, "a"));
+	assert_false(spmap_contains_val(map, V0));
+	assert_false(spmap_contains_key(map, "b"));
+	assert_false(spmap_contains_val(map, V1));
+
+	spmap_free(map);
+}
+
 static void spmap_remove_from__(void **state) {
 	const struct SPmap *map = spmap_init();
 
@@ -958,6 +1002,8 @@ static void spmap__null_inputs(void **state) {
 	assert_nul(spmap_remove(map, NULL));
 	assert_false(spmap_remove_free(NULL, NULL));
 	assert_false(spmap_remove_free(map, NULL));
+	assert_int_equal(spmap_remove_all(NULL), 0);
+	assert_int_equal(spmap_remove_all_free(NULL), 0);
 	assert_int_equal(spmap_remove_from(NULL, NULL), 0);
 	assert_int_equal(spmap_remove_from(map, NULL), 0);
 	assert_int_equal(spmap_remove_from(NULL, map), 0);
@@ -1020,6 +1066,9 @@ int main(void) {
 		TEST(spmap_put_if_absent__),
 
 		TEST(spmap_remove_free__),
+
+		TEST(spmap_remove_all__),
+		TEST(spmap_remove_all_free__),
 
 		TEST(spmap_remove_from__),
 
