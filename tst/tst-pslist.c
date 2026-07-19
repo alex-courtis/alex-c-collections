@@ -133,7 +133,7 @@ static void pslist_remove_all__some(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(pslist_length(list), 4);
 
-	pslist_remove_from(&list, (fn_pred_p_p)equal_strcmp, "x");
+	pslist_remove_from(&list, (fn_pred_pp)equal_strcmp, "x");
 
 	assert_non_nul(list);
 	assert_int_equal(pslist_length(list), 2);
@@ -168,7 +168,7 @@ static void pslist_remove_all_free__some(void **state) {
 	expect_str(mock_free, ptr, "x");
 	expect_str(mock_free, ptr, "x");
 
-	pslist_remove_all_free(&list, (fn_pred_p_p)equal_strcmp, "x", mock_free);
+	pslist_remove_all_free(&list, (fn_pred_pp)equal_strcmp, "x", mock_free);
 
 	assert_non_nul(list);
 	assert_int_equal(pslist_length(list), 2);
@@ -243,10 +243,10 @@ static void pslist_find_equal_val__no(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(pslist_length(list), 3);
 
-	const void *val = pslist_find_equal_val(list, (fn_pred_p_p)equal_strcmp, "x");
+	const void *val = pslist_find_equal_val(list, (fn_pred_pp)equal_strcmp, "x");
 	assert_nul(val);
 
-	const struct Pslist *i = pslist_find_equal(list, (fn_pred_p_p)equal_strcmp, "x");
+	const struct Pslist *i = pslist_find_equal(list, (fn_pred_pp)equal_strcmp, "x");
 	assert_nul(i);
 
 	pslist_free(&list);
@@ -263,11 +263,11 @@ static void pslist_find_equal_val__yes(void **state) {
 	assert_non_nul(list);
 	assert_int_equal(pslist_length(list), 3);
 
-	const void *val = pslist_find_equal_val(list, (fn_pred_p_p)equal_strcmp, "1");
+	const void *val = pslist_find_equal_val(list, (fn_pred_pp)equal_strcmp, "1");
 	assert_non_nul(val);
 	assert_str_equal(val, "1");
 
-	const struct Pslist *i = pslist_find_equal(list, (fn_pred_p_p)equal_strcmp, "1");
+	const struct Pslist *i = pslist_find_equal(list, (fn_pred_pp)equal_strcmp, "1");
 	assert_non_nul(i);
 	assert_str_equal(i->val, "1");
 
@@ -286,7 +286,7 @@ static void pslist_equal__empty_lhs(void **state) {
 	pslist_append(&rhs, rvals[1]);
 	pslist_append(&rhs, rvals[2]);
 
-	assert_pslist_not_equal(NULL, rhs, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_not_equal(NULL, rhs, (fn_pred_pp)equal_strcmp, NULL);
 
 	assert_pslist_not_equal(NULL, rhs, NULL, NULL);
 
@@ -301,7 +301,7 @@ static void pslist_equal__empty_rhs(void **state) {
 	pslist_append(&lhs, lvals[1]);
 	pslist_append(&lhs, lvals[2]);
 
-	assert_pslist_not_equal(lhs, NULL, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_not_equal(lhs, NULL, (fn_pred_pp)equal_strcmp, NULL);
 
 	assert_pslist_not_equal(lhs, NULL, NULL, NULL);
 
@@ -322,7 +322,7 @@ static void pslist_equal__equal(void **state) {
 	pslist_append(&rhs, rvals[1]);
 	pslist_append(&rhs, rvals[2]);
 
-	assert_pslist_equal(lhs, rhs, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_equal(lhs, rhs, (fn_pred_pp)equal_strcmp, NULL);
 
 	pslist_free(&lhs);
 	pslist_free(&rhs);
@@ -342,7 +342,7 @@ static void pslist_equal__not_equal_start(void **state) {
 	pslist_append(&rhs, rvals[1]);
 	pslist_append(&rhs, rvals[2]);
 
-	assert_pslist_not_equal(lhs, rhs, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_not_equal(lhs, rhs, (fn_pred_pp)equal_strcmp, NULL);
 	assert_pslist_not_equal(lhs, rhs, NULL, NULL);
 
 	pslist_free(&lhs);
@@ -363,7 +363,7 @@ static void pslist_equal__not_equal_mid(void **state) {
 	pslist_append(&rhs, rvals[1]);
 	pslist_append(&rhs, rvals[2]);
 
-	assert_pslist_not_equal(lhs, rhs, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_not_equal(lhs, rhs, (fn_pred_pp)equal_strcmp, NULL);
 	assert_pslist_not_equal(lhs, rhs, NULL, NULL);
 
 	pslist_free(&lhs);
@@ -384,7 +384,7 @@ static void pslist_equal__not_equal_end(void **state) {
 	pslist_append(&rhs, rvals[1]);
 	pslist_append(&rhs, rvals[2]);
 
-	assert_pslist_not_equal(lhs, rhs, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_not_equal(lhs, rhs, (fn_pred_pp)equal_strcmp, NULL);
 	assert_pslist_not_equal(lhs, rhs, NULL, NULL);
 
 	pslist_free(&lhs);
@@ -404,7 +404,7 @@ static void pslist_equal__not_equal_lhs_size(void **state) {
 	pslist_append(&rhs, rvals[1]);
 	pslist_append(&rhs, rvals[2]);
 
-	assert_pslist_not_equal(lhs, rhs, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_not_equal(lhs, rhs, (fn_pred_pp)equal_strcmp, NULL);
 	assert_pslist_not_equal(lhs, rhs, NULL, NULL);
 
 	pslist_free(&lhs);
@@ -424,7 +424,7 @@ static void pslist_equal__not_equal_rhs_size(void **state) {
 	pslist_append(&rhs, rvals[0]);
 	pslist_append(&rhs, rvals[1]);
 
-	assert_pslist_not_equal(lhs, rhs, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_not_equal(lhs, rhs, (fn_pred_pp)equal_strcmp, NULL);
 	assert_pslist_not_equal(lhs, rhs, NULL, NULL);
 
 	pslist_free(&lhs);
@@ -494,7 +494,7 @@ static void pslist_sort__words(void **state) {
 		pslist_append(&from, (void*)words_unsorted[i]);
 	}
 
-	struct Pslist *actual = pslist_sort(from, (fn_pred_p_p)less_than_strcmp);
+	struct Pslist *actual = pslist_sort(from, (fn_pred_pp)less_than_strcmp);
 	assert_non_nul(actual);
 
 	assert_int_equal(pslist_length(actual), pslist_length(from));
@@ -504,7 +504,7 @@ static void pslist_sort__words(void **state) {
 		pslist_append(&expected, (void*)words_sorted[i]);
 	}
 
-	assert_pslist_equal(actual, expected, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_equal(actual, expected, (fn_pred_pp)equal_strcmp, NULL);
 
 	pslist_free(&from);
 	pslist_free(&actual);
@@ -515,10 +515,10 @@ static void pslist_move__empty(void **state) {
 	struct Pslist *to = NULL;
 	struct Pslist *from = NULL;
 
-	pslist_move(&to, &from, (fn_pred_p_p)equal_strcmp, "x");
+	pslist_move(&to, &from, (fn_pred_pp)equal_strcmp, "x");
 	assert_nul(to);
 
-	pslist_move(&to, NULL, (fn_pred_p_p)equal_strcmp, "x");
+	pslist_move(&to, NULL, (fn_pred_pp)equal_strcmp, "x");
 	assert_nul(to);
 
 	pslist_move(&to, &from, NULL, "x");
@@ -538,7 +538,7 @@ static void pslist_move__empty_to(void **state) {
 	pslist_append(&from, vals[1]);
 	pslist_append(&from, vals[2]);
 
-	pslist_move(&to, &from, (fn_pred_p_p)equal_strcmp, "x");
+	pslist_move(&to, &from, (fn_pred_pp)equal_strcmp, "x");
 
 	assert_int_equal(pslist_length(to), 0);
 	assert_int_equal(pslist_length(from), 3);
@@ -555,7 +555,7 @@ static void pslist_move__empty_from(void **state) {
 	pslist_append(&to, vals[1]);
 	pslist_append(&to, vals[2]);
 
-	pslist_move(&to, &from, (fn_pred_p_p)equal_strcmp, "x");
+	pslist_move(&to, &from, (fn_pred_pp)equal_strcmp, "x");
 
 	assert_int_equal(pslist_length(to), 3);
 	assert_int_equal(pslist_length(from), 0);
@@ -577,7 +577,7 @@ static void pslist_move__no_match(void **state) {
 	pslist_append(&from, from_vals[1]);
 	pslist_append(&from, from_vals[2]);
 
-	pslist_move(&to, &from, (fn_pred_p_p)equal_strcmp, "x");
+	pslist_move(&to, &from, (fn_pred_pp)equal_strcmp, "x");
 
 	assert_int_equal(pslist_length(to), 3);
 	assert_int_equal(pslist_length(from), 3);
@@ -602,7 +602,7 @@ static void pslist_move__many(void **state) {
 	pslist_append(&from, from_vals[3]);
 	pslist_append(&from, from_vals[4]);
 
-	pslist_move(&to, &from, (fn_pred_p_p)equal_strstr, "x");
+	pslist_move(&to, &from, (fn_pred_pp)equal_strstr, "x");
 
 	// values moved
 	assert_int_equal(pslist_length(to), 6);
@@ -634,7 +634,7 @@ static void pslist_move__all(void **state) {
 	pslist_append(&from, from_vals[0]);
 	pslist_append(&from, from_vals[1]);
 
-	pslist_move(&to, &from, (fn_pred_p_p)equal_strstr, "x");
+	pslist_move(&to, &from, (fn_pred_pp)equal_strstr, "x");
 
 	// values moved
 	assert_int_equal(pslist_length(to), 4);
@@ -761,7 +761,7 @@ static void pslist_xor_free__empty_lists(void **state) {
 	struct Pslist *list1 = NULL;
 	struct Pslist *list2 = NULL;
 
-	pslist_xor_free(&list1, list2, (fn_pred_p_p)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	pslist_xor_free(&list1, list2, (fn_pred_pp)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
 	assert_int_equal(pslist_length(list1), 0);
 }
@@ -777,9 +777,9 @@ static void pslist_xor_free__first_list_empty(void **state) {
 	pslist_append(&expected, strdup("item1"));
 	pslist_append(&expected, strdup("item2"));
 
-	pslist_xor_free(&list1, list2, (fn_pred_p_p)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	pslist_xor_free(&list1, list2, (fn_pred_pp)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_pslist_equal(list1, expected, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_equal(list1, expected, (fn_pred_pp)equal_strcmp, NULL);
 
 	pslist_free_vals(&list1, NULL);
 	pslist_free_vals(&list2, NULL);
@@ -797,9 +797,9 @@ static void pslist_xor_free__second_list_empty(void **state) {
 	pslist_append(&expected, strdup("item1"));
 	pslist_append(&expected, strdup("item2"));
 
-	pslist_xor_free(&list1, list2, (fn_pred_p_p)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	pslist_xor_free(&list1, list2, (fn_pred_pp)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_pslist_equal(list1, expected, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_equal(list1, expected, (fn_pred_pp)equal_strcmp, NULL);
 
 	pslist_free_vals(&list1, NULL);
 	pslist_free_vals(&list2, NULL);
@@ -822,9 +822,9 @@ static void pslist_xor_free__toggle_items(void **state) {
 	pslist_append(&expected, strdup("item3"));
 	pslist_append(&expected, strdup("item4"));
 
-	pslist_xor_free(&list1, list2, (fn_pred_p_p)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	pslist_xor_free(&list1, list2, (fn_pred_pp)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_pslist_equal(list1, expected, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_equal(list1, expected, (fn_pred_pp)equal_strcmp, NULL);
 
 	pslist_free_vals(&list1, NULL);
 	pslist_free_vals(&list2, NULL);
@@ -844,9 +844,9 @@ static void pslist_xor_free__duplicate_items(void **state) {
 
 	pslist_append(&expected, strdup("item2"));
 
-	pslist_xor_free(&list1, list2, (fn_pred_p_p)equal_strcmp, NULL, (fn_clone)clone_strdup);
+	pslist_xor_free(&list1, list2, (fn_pred_pp)equal_strcmp, NULL, (fn_clone)clone_strdup);
 
-	assert_pslist_equal(list1, expected, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_equal(list1, expected, (fn_pred_pp)equal_strcmp, NULL);
 
 	pslist_free_vals(&list1, NULL);
 	pslist_free_vals(&list2, NULL);
@@ -864,9 +864,9 @@ static void pslist_xor_free__vals(void **state) {
 
 	pslist_append(&expected, val);
 
-	pslist_xor_free(&list1, list2, (fn_pred_p_p)equal_strcmp, NULL, NULL);
+	pslist_xor_free(&list1, list2, (fn_pred_pp)equal_strcmp, NULL, NULL);
 
-	assert_pslist_equal(list1, expected, (fn_pred_p_p)equal_strcmp, NULL);
+	assert_pslist_equal(list1, expected, (fn_pred_pp)equal_strcmp, NULL);
 
 	pslist_free(&list1);
 	pslist_free(&list2);

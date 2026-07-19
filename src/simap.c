@@ -163,7 +163,7 @@ struct SImapPair simap_find(const struct SImap* const map, const struct SImapFil
 		return res;
 
 	const struct PPmapFilter ppmap_filter = {
-		.key_val_data = (fn_pred_p_p_p)filter_passes,
+		.key_val_data = (fn_pred_ppp)filter_passes,
 		.data = &filter,
 	};
 	struct PPmapPair pres = ppmap_find(map->ppmap, ppmap_filter);
@@ -186,7 +186,7 @@ const struct SImapIt *simap_filter_it(const struct SImap* const map, const struc
 	memcpy((void*)filter_as_data, &filter, sizeof(struct SImapFilter));
 
 	const struct PPmapFilter ppmap_filter = {
-		.key_val_data = (fn_pred_p_p_p)filter_passes,
+		.key_val_data = (fn_pred_ppp)filter_passes,
 		.data = filter_as_data,
 	};
 
