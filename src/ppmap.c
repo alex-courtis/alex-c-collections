@@ -65,8 +65,7 @@ static const struct PPmapIt *it_init(const struct PPmap *map) {
 	return it;
 }
 
-// TODO check and
-static bool filter_excludes(const struct PPmapFilter *filter, const void* const key, const void* const val) {
+static bool filter_blocks(const struct PPmapFilter *filter, const void* const key, const void* const val) {
 	return
 		(filter->key          && !filter->key         (key                    )) ||
 		(filter->val          && !filter->val         (      val              )) ||
@@ -401,7 +400,7 @@ struct PPmapPair ppmap_find2(const struct PPmap* const map, const struct PPmapFi
 	const void **k;
 	const void **v;
 	for (k = map->keys, v = map->vals; k < map->keys + map->size; k++, v++) {
-		if (filter_excludes(&filter, *k, *v))
+		if (filter_blocks(&filter, *k, *v))
 			continue;
 
 		res.key = *k;
@@ -542,7 +541,7 @@ const struct PPmapIt *ppmap_it_next(const struct PPmapIt* const it) {
 		it_m->key = *(st->map->keys + st->position);
 		it_m->val = *(st->map->vals + st->position);
 
-		if (filter_excludes(&st->filter, it_m->key, it_m->val))
+		if (filter_blocks(&st->filter, it_m->key, it_m->val))
 			continue;
 
 		if (st->pred_key_val && !st->pred_key_val(it->key, it->val, st->data)) {

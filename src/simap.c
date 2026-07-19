@@ -19,18 +19,17 @@ struct SImapItState {
 	const struct SImapFilter *filter;
 };
 
-// TODO check and
-static bool filter_includes(const void* const key, const void* const val, const struct SImapFilter* const filter) {
+static bool filter_passes(const void* const key, const void* const val, const struct SImapFilter* const filter) {
 	const size_t i = *(size_t*)val;
 
-	return
-		(filter->key          && filter->key         (key                 )) ||
-		(filter->val          && filter->val         (     i              )) ||
-		(filter->key_val      && filter->key_val     (key, i              )) ||
-		(filter->key_data     && filter->key_data    (key,    filter->data)) ||
-		(filter->val_data     && filter->val_data    (     i, filter->data)) ||
-		(filter->key_val_data && filter->key_val_data(key, i, filter->data))
-		;
+	return !(
+			(filter->key          && !filter->key         (key                 )) ||
+			(filter->val          && !filter->val         (     i              )) ||
+			(filter->key_val      && !filter->key_val     (key, i              )) ||
+			(filter->key_data     && !filter->key_data    (key,    filter->data)) ||
+			(filter->val_data     && !filter->val_data    (     i, filter->data)) ||
+			(filter->key_val_data && !filter->key_val_data(key, i, filter->data))
+			);
 }
 
 static struct SImapIt *it_init(const struct PPmapIt *pit) {
@@ -164,7 +163,7 @@ struct SImapPair simap_find(const struct SImap* const map, const struct SImapFil
 		return res;
 
 	const struct PPmapFilter ppmap_filter = {
-		.key_val_data = (fn_3pred)filter_includes,
+		.key_val_data = (fn_3pred)filter_passes,
 		.data = &filter,
 	};
 	struct PPmapPair pres = ppmap_find2(map->ppmap, ppmap_filter);
@@ -187,7 +186,7 @@ const struct SImapIt *simap_filter_it(const struct SImap* const map, const struc
 	memcpy((void*)filter_as_data, &filter, sizeof(struct SImapFilter));
 
 	const struct PPmapFilter ppmap_filter = {
-		.key_val_data = (fn_3pred)filter_includes,
+		.key_val_data = (fn_3pred)filter_passes,
 		.data = filter_as_data,
 	};
 

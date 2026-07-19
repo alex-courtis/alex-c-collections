@@ -34,7 +34,6 @@ bool mock_pred_szt(const size_t i) {
 	return mock_type(bool);
 }
 
-// TODO rename params
 bool mock_2pred(const void* const ptr, const void* const data) {
 	check_expected_ptr(ptr);
 	check_expected_ptr(data);

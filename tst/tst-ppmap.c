@@ -825,22 +825,81 @@ static void ppmap_find2__key_val_data(void **state) {
 	ppmap_free(map);
 }
 
-static void ppmap_find2__no_match(void **state) {
+static void ppmap_find2__some_block(void **state) {
 	const struct PPmap *map = ppmap_init();
 
 	assert_nul(ppmap_put(map, K0, V0));
-	assert_nul(ppmap_put(map, K1, V0));
-	assert_nul(ppmap_put(map, K2, V0));
+	assert_nul(ppmap_put(map, K1, V1));
+	assert_nul(ppmap_put(map, K2, V2));
 
-	// skip all
-	expect_ptr_count(mock_2pred, ptr, V0, 3);
-	expect_ptr_count(mock_2pred, data, D0, 3);
-	will_return_int_count(mock_2pred, false, 3);
+	// key blocks
+	expect_ptr(mock_pred, ptr, K0);
+	will_return(mock_pred, false);
 
-	const struct PPmapFilter filter = { .val_data = mock_2pred, .data = D0, };
+	// key passes, val blocks
+	expect_ptr(mock_pred, ptr, K1);
+	will_return(mock_pred, true);
+	expect_ptr(mock_pred, ptr, V1);
+	will_return(mock_pred, false);
+
+	// both pass
+	expect_ptr(mock_pred, ptr, K2);
+	will_return(mock_pred, true);
+	expect_ptr(mock_pred, ptr, V2);
+	will_return(mock_pred, true);
+
+	const struct PPmapFilter filter = {
+		.key = mock_pred,
+		.val = mock_pred,
+	};
+	const struct PPmapPair kv_pair = ppmap_find2(map, filter);
+	assert_ptr_equal(kv_pair.key, K2);
+	assert_ptr_equal(kv_pair.val, V2);
+
+	ppmap_free(map);
+}
+
+static void ppmap_find2__all_block(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	assert_nul(ppmap_put(map, K0, V0));
+	assert_nul(ppmap_put(map, K1, V1));
+	assert_nul(ppmap_put(map, K2, V2));
+
+	// key blocks, val will not be evaluated
+	expect_any_count(mock_pred, ptr, 3);
+	will_return_int_count(mock_pred, false, 3);
+
+	const struct PPmapFilter filter = {
+		.key = mock_pred,
+		.val = mock_pred,
+	};
 	const struct PPmapPair kv_pair = ppmap_find2(map, filter);
 	assert_nul(kv_pair.key);
 	assert_nul(kv_pair.val);
+
+	ppmap_free(map);
+}
+
+static void ppmap_find2__none_block(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	assert_nul(ppmap_put(map, K0, V0));
+	assert_nul(ppmap_put(map, K1, V1));
+
+	// both pass
+	expect_ptr(mock_pred, ptr, K0);
+	will_return(mock_pred, true);
+	expect_ptr(mock_pred, ptr, V0);
+	will_return(mock_pred, true);
+
+	const struct PPmapFilter filter = {
+		.key = mock_pred,
+		.val = mock_pred,
+	};
+	const struct PPmapPair kv_pair = ppmap_find2(map, filter);
+	assert_ptr_equal(kv_pair.key, K0);
+	assert_ptr_equal(kv_pair.val, V0);
 
 	ppmap_free(map);
 }
@@ -2559,7 +2618,9 @@ int main(void) {
 		TEST(ppmap_find2__key_val),
 		TEST(ppmap_find2__key_val_data),
 
-		TEST(ppmap_find2__no_match),
+		TEST(ppmap_find2__all_block),
+		TEST(ppmap_find2__some_block),
+		TEST(ppmap_find2__none_block),
 
 		TEST(ppmap_it__empty),
 		TEST(ppmap_it__free),
