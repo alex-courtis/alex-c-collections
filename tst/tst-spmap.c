@@ -275,6 +275,19 @@ static void spmap_contains_val__(void **state) {
 	spmap_free(map);
 }
 
+static void spmap_first_key__(void **state) {
+	const struct SPmap *map = spmap_init();
+
+	assert_false(spmap_put(map, "a", V0));
+	assert_false(spmap_put(map, "b", V1));
+
+	assert_str_equal(spmap_first_key(map, V0), "a");
+	assert_str_equal(spmap_first_key(map, V1), "b");
+	assert_nul(spmap_first_key(map, V2));
+
+	spmap_free(map);
+}
+
 static void spmap_at__(void **state) {
 	const struct SPmap *map = spmap_init();
 	assert_false(spmap_put(map, K0, V0));
@@ -855,6 +868,7 @@ static void spmap__null_inputs(void **state) {
 	assert_false(spmap_contains_key(map, NULL));
 	assert_false(spmap_contains_val(NULL, NULL));
 	assert_false(spmap_contains_val(map, NULL));
+	assert_nul(spmap_first_key(NULL, NULL));
 	assert_nul(spmap_at(NULL, 0).val);
 	spmap_find(NULL, filter);
 	assert_nul(spmap_it(NULL));
@@ -927,6 +941,8 @@ int main(void) {
 		TEST(spmap_contains_key__),
 
 		TEST(spmap_contains_val__),
+
+		TEST(spmap_first_key__),
 
 		TEST(spmap_at__),
 

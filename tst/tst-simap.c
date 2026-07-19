@@ -415,7 +415,7 @@ static void simap_contains_val__(void **state) {
 	simap_free(map);
 }
 
-static void simap_first_key__equal_val(void **state) {
+static void simap_first_key__(void **state) {
 	const struct SImap *map = simap_init();
 
 	assert_false(simap_put(map, "a", 0));
@@ -427,7 +427,6 @@ static void simap_first_key__equal_val(void **state) {
 
 	simap_free(map);
 }
-
 
 static void simap_at__(void **state) {
 	const struct SImap *map = simap_init();
@@ -786,7 +785,7 @@ int main(void) {
 
 		TEST(simap_at__),
 
-		TEST(simap_first_key__equal_val),
+		TEST(simap_first_key__),
 
 		TEST(simap_put_if_absent__),
 
