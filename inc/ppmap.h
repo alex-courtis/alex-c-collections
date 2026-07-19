@@ -42,7 +42,7 @@ struct PPmapFilter {
 	fn_2pred key_val;
 
 	// test keys or vals against user data
-	const void * const data;
+	const void *data;
 	fn_2pred key_data;
 	fn_2pred val_data;
 	fn_3pred key_val_data;
