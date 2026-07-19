@@ -420,6 +420,7 @@ static void simap_first_key__(void **state) {
 
 	assert_false(simap_put(map, "a", 0));
 	assert_false(simap_put(map, "b", 1));
+	assert_false(simap_put(map, "c", 1));
 
 	assert_str_equal(simap_first_key(map, 0), "a");
 	assert_str_equal(simap_first_key(map, 1), "b");

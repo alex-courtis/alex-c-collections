@@ -183,6 +183,29 @@ static void ipmap_contains_val__(void **state) {
 	ipmap_free(map);
 }
 
+static void ipmap_first_key__(void **state) {
+	const struct IPmap *map = ipmap_init();
+
+	assert_false(ipmap_put(map, 0, V0));
+	assert_false(ipmap_put(map, 1, V1));
+	assert_false(ipmap_put(map, 2, V1));
+
+	assert_false(ipmap_first_key(NULL, map, V0));
+
+	size_t key;
+
+	assert_true(ipmap_first_key(&key, map, V0));
+	assert_int_equal(key, 0);
+
+	assert_true(ipmap_first_key(&key, map, V1));
+	assert_int_equal(key, 1);
+
+	assert_false(ipmap_first_key(&key, map, V2));
+	assert_int_equal(key, 0);
+
+	ipmap_free(map);
+}
+
 static void ipmap_at__(void **state) {
 	const struct IPmap *map = ipmap_init();
 	assert_nul(ipmap_put(map, 0, V0));
@@ -940,6 +963,7 @@ static void ipmap__null_inputs(void **state) {
 	assert_false(ipmap_get(NULL, 0));
 	assert_false(ipmap_contains_key(NULL, 0));
 	assert_false(ipmap_contains_val(NULL, 0));
+	assert_false(ipmap_first_key(NULL, NULL, NULL));
 	assert_nul(ipmap_at(NULL, 0).val);
 	ipmap_find(NULL, filter);
 	assert_nul(ipmap_it(NULL));
@@ -1001,6 +1025,8 @@ int main(void) {
 		TEST(ipmap_contains_key__),
 
 		TEST(ipmap_contains_val__),
+
+		TEST(ipmap_first_key__),
 
 		TEST(ipmap_at__),
 
