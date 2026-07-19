@@ -1898,6 +1898,7 @@ static void ppmap_first_key__pointers(void **state) {
 
 	assert_nul(ppmap_put(map, K0, V0));
 	assert_nul(ppmap_put(map, K1, V1));
+	assert_nul(ppmap_put(map, K2, V1));
 
 	assert_ptr_equal(ppmap_first_key(map, V0), K0);
 	assert_ptr_equal(ppmap_first_key(map, V1), K1);
@@ -1913,6 +1914,7 @@ static void ppmap_first_key__equal_val(void **state) {
 
 	assert_nul(ppmap_put(map, K0, V0));
 	assert_nul(ppmap_put(map, K1, V1));
+	assert_nul(ppmap_put(map, K2, V1));
 
 	assert_ptr_equal(ppmap_first_key(map, V0), K0);
 	assert_ptr_equal(ppmap_first_key(map, V1), K1);

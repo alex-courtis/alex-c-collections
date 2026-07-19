@@ -280,6 +280,7 @@ static void spmap_first_key__(void **state) {
 
 	assert_false(spmap_put(map, "a", V0));
 	assert_false(spmap_put(map, "b", V1));
+	assert_false(spmap_put(map, "c", V1));
 
 	assert_str_equal(spmap_first_key(map, V0), "a");
 	assert_str_equal(spmap_first_key(map, V1), "b");
