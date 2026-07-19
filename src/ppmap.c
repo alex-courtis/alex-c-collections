@@ -369,7 +369,7 @@ struct PPmapPair ppmap_at(const struct PPmap* const map, const size_t i) {
 	return res;
 }
 
-struct PPmapPair ppmap_find2(const struct PPmap* const map, const struct PPmapFilter filter) {
+struct PPmapPair ppmap_find(const struct PPmap* const map, const struct PPmapFilter filter) {
 	struct PPmapPair res = { 0 };
 
 	if (!map)
@@ -401,7 +401,7 @@ const struct PPmapIt *ppmap_it(const struct PPmap* const map) {
 	return ppmap_it_next(it);
 }
 
-const struct PPmapIt *ppmap_filter_it2(const struct PPmap* const map, const struct PPmapFilter filter) {
+const struct PPmapIt *ppmap_filter_it(const struct PPmap* const map, const struct PPmapFilter filter) {
 	if (!map)
 		return NULL;
 

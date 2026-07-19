@@ -169,7 +169,7 @@ struct IPmapPair ipmap_at(const struct IPmap* const map, const size_t i) {
 	return res;
 }
 
-struct IPmapPair ipmap_find2(const struct IPmap* const map, const struct IPmapFilter filter) {
+struct IPmapPair ipmap_find(const struct IPmap* const map, const struct IPmapFilter filter) {
 	struct IPmapPair res = { 0 };
 
 	if (!map)
@@ -179,7 +179,7 @@ struct IPmapPair ipmap_find2(const struct IPmap* const map, const struct IPmapFi
 		.key_val_data = (fn_3pred)filter_passes,
 		.data = &filter,
 	};
-	struct PPmapPair pres = ppmap_find2(map->ppmap, ppmap_filter);
+	struct PPmapPair pres = ppmap_find(map->ppmap, ppmap_filter);
 
 	res.key = pres.key ? *(size_t*)pres.key : 0;
 	res.val = pres.val;
@@ -191,7 +191,7 @@ const struct IPmapIt *ipmap_it(const struct IPmap* const map) {
 	return map ? it_init(ppmap_it(map->ppmap)) : NULL;
 }
 
-const struct IPmapIt *ipmap_filter_it2(const struct IPmap* const map, const struct IPmapFilter filter) {
+const struct IPmapIt *ipmap_filter_it(const struct IPmap* const map, const struct IPmapFilter filter) {
 	if (!map)
 		return NULL;
 
@@ -203,7 +203,7 @@ const struct IPmapIt *ipmap_filter_it2(const struct IPmap* const map, const stru
 		.data = filter_as_data,
 	};
 
-	struct IPmapIt *it = it_init(ppmap_filter_it2(map->ppmap, ppmap_filter));
+	struct IPmapIt *it = it_init(ppmap_filter_it(map->ppmap, ppmap_filter));
 
 	if (it) {
 		it->st->filter = filter_as_data;

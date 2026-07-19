@@ -177,7 +177,7 @@ struct SPmapPair spmap_find(const struct SPmap* const map, const struct SPmapFil
 	if (!map)
 		return res;
 
-	struct PPmapPair pres = ppmap_find2(map->ppmap, ppmap_filter_init(&filter));
+	struct PPmapPair pres = ppmap_find(map->ppmap, ppmap_filter_init(&filter));
 
 	res.key = pres.key;
 	res.val = pres.val;
@@ -190,7 +190,7 @@ const struct SPmapIt *spmap_it(const struct SPmap* const map) {
 }
 
 const struct SPmapIt *spmap_filter_it(const struct SPmap* const map, const struct SPmapFilter filter) {
-	return map ? it_init(ppmap_filter_it2(map->ppmap, ppmap_filter_init(&filter))) : NULL;
+	return map ? it_init(ppmap_filter_it(map->ppmap, ppmap_filter_init(&filter))) : NULL;
 }
 
 const struct SPmapIt *spmap_it_next(const struct SPmapIt* const it) {
