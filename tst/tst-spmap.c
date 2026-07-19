@@ -87,7 +87,7 @@ static void spmap_free_vals__(void **state) {
 	spmap_free_vals(map);
 }
 
-static void spmap_find__matches(void **state) {
+static void spmap_find2__(void **state) {
 	const struct SPmap *map = spmap_init();
 
 	assert_nul(spmap_put(map, "0", V0));
@@ -97,66 +97,20 @@ static void spmap_find__matches(void **state) {
 	// skip 0
 	expect_string(mock_3pred_str_ptr, str, "0");
 	expect_ptr(mock_3pred_str_ptr, ptr, V0);
-	expect_ptr(mock_3pred_str_ptr, data, V2);
+	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, false);
 
 	// get 1
 	expect_string(mock_3pred_str_ptr, str, "1");
 	expect_ptr(mock_3pred_str_ptr, ptr, V1);
-	expect_ptr(mock_3pred_str_ptr, data, V2);
+	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, true);
 
-	const struct SPmapPair kv_pair = spmap_find(map, mock_3pred_str_ptr, V2);
+	const struct SPmapFilter filter = { .key_val_data = mock_3pred_str_ptr, .data = D0, };
+	const struct SPmapPair kv_pair = spmap_find2(map, filter);
+
 	assert_str_equal(kv_pair.key, "1");
 	assert_ptr_equal(kv_pair.val, V1);
-
-	spmap_free(map);
-}
-
-static void spmap_find_key__matches(void **state) {
-	const struct SPmap *map = spmap_init();
-
-	assert_nul(spmap_put(map, "0", V0));
-	assert_nul(spmap_put(map, "1", V1));
-	assert_nul(spmap_put(map, "2", V2));
-
-	// skip 0
-	expect_string(mock_2pred_str, str, "0");
-	expect_ptr(mock_2pred_str, data, V2);
-	will_return(mock_2pred_str, false);
-
-	// get 1
-	expect_string(mock_2pred_str, str, "1");
-	expect_ptr(mock_2pred_str, data, V2);
-	will_return(mock_2pred_str, true);
-
-	const struct SPmapPair k_pair = spmap_find_key(map, mock_2pred_str, V2);
-	assert_str_equal(k_pair.key, "1");
-	assert_ptr_equal(k_pair.val, V1);
-
-	spmap_free(map);
-}
-
-static void spmap_find_val__matches(void **state) {
-	const struct SPmap *map = spmap_init();
-
-	assert_nul(spmap_put(map, "0", V0));
-	assert_nul(spmap_put(map, "1", V1));
-	assert_nul(spmap_put(map, "2", V2));
-
-	// skip 0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, V2);
-	will_return(mock_2pred, false);
-
-	// get 1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, V2);
-	will_return(mock_2pred, true);
-
-	const struct SPmapPair v_pair = spmap_find_val(map, mock_2pred, V2);
-	assert_str_equal(v_pair.key, "1");
-	assert_ptr_equal(v_pair.val, V1);
 
 	spmap_free(map);
 }
@@ -208,7 +162,7 @@ static void spmap_it__empty(void **state) {
 	spmap_free(map);
 }
 
-static void spmap_filter_it__many(void **state) {
+static void spmap_filter_it2__(void **state) {
 	const struct SPmap *map = spmap_init();
 
 	assert_nul(spmap_put(map, "0", V0));
@@ -227,7 +181,9 @@ static void spmap_filter_it__many(void **state) {
 	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, true);
 
-	const struct SPmapIt *it = spmap_filter_it(map, mock_3pred_str_ptr, D0);
+	const struct SPmapFilter filter = { .key_val_data = mock_3pred_str_ptr, .data = D0, };
+	const struct SPmapIt *it = spmap_filter_it2(map, filter);
+
 	assert_non_nul(it);
 	assert_str_equal(it->key, "1");
 	assert_ptr_equal(it->val, V1);
@@ -237,74 +193,6 @@ static void spmap_filter_it__many(void **state) {
 	expect_ptr(mock_3pred_str_ptr, ptr, V2);
 	expect_ptr(mock_3pred_str_ptr, data, D0);
 	will_return(mock_3pred_str_ptr, false);
-
-	// done
-	it = spmap_it_next(it);
-	assert_nul(it);
-
-	spmap_free(map);
-}
-
-static void spmap_key_filter_it__many(void **state) {
-	const struct SPmap *map = spmap_init();
-
-	assert_nul(spmap_put(map, "0", V0));
-	assert_nul(spmap_put(map, "1", V1));
-	assert_nul(spmap_put(map, "2", V2));
-
-	// skip V0
-	expect_string(mock_2pred_str, str, "0");
-	expect_ptr(mock_2pred_str, data, D0);
-	will_return(mock_2pred_str, false);
-
-	// get V1
-	expect_string(mock_2pred_str, str, "1");
-	expect_ptr(mock_2pred_str, data, D0);
-	will_return(mock_2pred_str, true);
-
-	const struct SPmapIt *it = spmap_key_filter_it(map, mock_2pred_str, D0);
-	assert_non_nul(it);
-	assert_str_equal(it->key, "1");
-	assert_ptr_equal(it->val, V1);
-
-	// skip V2
-	expect_string(mock_2pred_str, str, "2");
-	expect_ptr(mock_2pred_str, data, D0);
-	will_return(mock_2pred_str, false);
-
-	// done
-	it = spmap_it_next(it);
-	assert_nul(it);
-
-	spmap_free(map);
-}
-
-static void spmap_val_filter_it__many(void **state) {
-	const struct SPmap *map = spmap_init();
-
-	assert_nul(spmap_put(map, "0", V0));
-	assert_nul(spmap_put(map, "1", V1));
-	assert_nul(spmap_put(map, "2", V2));
-
-	// skip V0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
-
-	// get V1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, true);
-
-	const struct SPmapIt *it = spmap_val_filter_it(map, mock_2pred, D0);
-	assert_non_nul(it);
-	assert_str_equal(it->key, "1");
-	assert_ptr_equal(it->val, V1);
-
-	// skip V2
-	expect_ptr(mock_2pred, ptr, V2);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
 
 	// done
 	it = spmap_it_next(it);
@@ -956,6 +844,7 @@ static void spmap_clone_deep__no_clone_val(void **state) {
 
 static void spmap__null_inputs(void **state) {
 	const struct SPmap *map = spmap_init();
+	const struct SPmapFilter filter = { 0 };
 
 	assert_nul(spmap_clone(NULL));
 	assert_nul(spmap_clone_deep(NULL));
@@ -969,19 +858,9 @@ static void spmap__null_inputs(void **state) {
 	assert_false(spmap_contains_val(NULL, NULL));
 	assert_false(spmap_contains_val(map, NULL));
 	assert_nul(spmap_at(NULL, 0).val);
-	spmap_find(NULL, NULL, NULL);
-	spmap_find(map, NULL, NULL);
-	spmap_find_key(NULL, NULL, NULL);
-	spmap_find_key(map, NULL, NULL);
-	spmap_find_val(NULL, NULL, NULL);
-	spmap_find_val(map, NULL, NULL);
+	spmap_find2(NULL, filter);
 	assert_nul(spmap_it(NULL));
-	assert_nul(spmap_filter_it(NULL, NULL, NULL));
-	assert_nul(spmap_filter_it(map, NULL, NULL));
-	assert_nul(spmap_key_filter_it(NULL, NULL, NULL));
-	assert_nul(spmap_key_filter_it(map, NULL, NULL));
-	assert_nul(spmap_val_filter_it(NULL, NULL, NULL));
-	assert_nul(spmap_val_filter_it(map, NULL, NULL));
+	assert_nul(spmap_filter_it2(NULL, filter));
 	assert_nul(spmap_it_next(NULL));
 	assert_nul(spmap_put(NULL, NULL, NULL));
 	assert_nul(spmap_put(map, NULL, NULL));
@@ -1033,9 +912,7 @@ int main(void) {
 
 		TEST(spmap_free_vals__),
 
-		TEST(spmap_find__matches),
-		TEST(spmap_find_key__matches),
-		TEST(spmap_find_val__matches),
+		TEST(spmap_find2__),
 
 		TEST(spmap_it__many),
 		TEST(spmap_it__empty),
@@ -1044,9 +921,7 @@ int main(void) {
 
 		TEST(spmap_it_next__partial),
 
-		TEST(spmap_filter_it__many),
-		TEST(spmap_key_filter_it__many),
-		TEST(spmap_val_filter_it__many),
+		TEST(spmap_filter_it2__),
 
 		TEST(spmap_equal__case_sensitive),
 		TEST(spmap_equal__case_insensitive),
