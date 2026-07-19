@@ -2510,23 +2510,8 @@ static void ppmap__null_inputs(void **state) {
 	assert_false(ppmap_contains_val(map, NULL));
 	assert_nul(ppmap_at(NULL, 0).val);
 	ppmap_find2(NULL, filter);
-	ppmap_find(NULL, NULL, NULL);
-	ppmap_find(map, NULL, NULL);
-	ppmap_find_val(NULL, NULL, NULL);
-	ppmap_find_val(map, NULL, NULL);
-	ppmap_find_key(NULL, NULL, NULL);
-	ppmap_find_key(map, NULL, NULL);
 	assert_nul(ppmap_it(NULL));
 	assert_nul(ppmap_filter_it2(NULL, filter));
-	assert_nul(ppmap_filter_it(NULL, NULL, NULL));
-	assert_nul(ppmap_filter_it(map, NULL, NULL));
-	assert_nul(ppmap_filter_it(NULL, mock_3pred, NULL));
-	assert_nul(ppmap_key_filter_it(NULL, NULL, NULL));
-	assert_nul(ppmap_key_filter_it(map, NULL, NULL));
-	assert_nul(ppmap_key_filter_it(NULL, mock_2pred, NULL));
-	assert_nul(ppmap_val_filter_it(NULL, NULL, NULL));
-	assert_nul(ppmap_val_filter_it(map, NULL, NULL));
-	assert_nul(ppmap_val_filter_it(NULL, mock_2pred, NULL));
 	assert_nul(ppmap_it_next(NULL));
 	ppmap_it_remove(NULL),
 	ppmap_it_remove_free(NULL),

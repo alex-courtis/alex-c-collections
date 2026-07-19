@@ -202,186 +202,166 @@ static void ipmap_at__(void **state) {
 	ipmap_free(map);
 }
 
-static void ipmap_find__matches(void **state) {
+static void ipmap_find__variants(void **state) {
 	const struct IPmap *map = ipmap_init();
-
 	assert_nul(ipmap_put(map, 0, V0));
 	assert_nul(ipmap_put(map, 1, V1));
 	assert_nul(ipmap_put(map, 2, V2));
 
-	// skip 0
-	expect_int_value(mock_3pred_szt_ptr, i, 0);
-	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
-	expect_ptr(mock_3pred_szt_ptr, data, D0);
-	will_return(mock_3pred_szt_ptr, false);
+	// key
+	expect_int_value(mock_pred_szt, i, 0);
+	will_return(mock_pred_szt, false);
+	expect_int_value(mock_pred_szt, i, 1);
+	will_return(mock_pred_szt, true);
 
-	// get 1
-	expect_int_value(mock_3pred_szt_ptr, i, 1);
-	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
-	expect_ptr(mock_3pred_szt_ptr, data, D0);
-	will_return(mock_3pred_szt_ptr, true);
+	const struct IPmapFilter filter_k = { .key = mock_pred_szt, };
+	const struct IPmapPair pair_k = ipmap_find2(map, filter_k);
+	assert_int_equal(pair_k.key, 1);
+	assert_ptr_equal(pair_k.val, V1);
 
-	const struct IPmapPair v_pair = ipmap_find(map, mock_3pred_szt_ptr, D0);
-	assert_ptr_equal(v_pair.key, 1);
-	assert_ptr_equal(v_pair.val, V1);
-
-	ipmap_free(map);
-}
-
-static void ipmap_find_key__matches(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-	assert_nul(ipmap_put(map, 2, V2));
-
-	// skip 0
+	// key_data
 	expect_int_value(mock_2pred_szt, i, 0);
-	expect_ptr(mock_2pred_szt, data, D0);
+	expect_string(mock_2pred_szt, data, "x");
 	will_return(mock_2pred_szt, false);
-
-	// get 1
 	expect_int_value(mock_2pred_szt, i, 1);
-	expect_ptr(mock_2pred_szt, data, D0);
+	expect_string(mock_2pred_szt, data, "x");
 	will_return(mock_2pred_szt, true);
 
-	const struct IPmapPair k_pair = ipmap_find_key(map, mock_2pred_szt, D0);
-	assert_ptr_equal(k_pair.key, 1);
-	assert_ptr_equal(k_pair.val, V1);
+	const struct IPmapFilter filter_kd = { .key_data = mock_2pred_szt, .data = "x", };
+	const struct IPmapPair pair_kd = ipmap_find2(map, filter_kd);
+	assert_int_equal(pair_kd.key, 1);
+	assert_ptr_equal(pair_kd.val, V1);
+
+	// val
+	expect_ptr(mock_pred, ptr, V0);
+	will_return(mock_pred, false);
+	expect_ptr(mock_pred, ptr, V1);
+	will_return(mock_pred, true);
+
+	const struct IPmapFilter filter_v = { .val = mock_pred, };
+	const struct IPmapPair pair_v = ipmap_find2(map, filter_v);
+	assert_int_equal(pair_v.key, 1);
+	assert_ptr_equal(pair_v.val, V1);
+
+	// val_data
+	expect_ptr(mock_2pred, ptr, V0);
+	expect_string(mock_2pred, data, "x");
+	will_return(mock_2pred, false);
+	expect_ptr(mock_2pred, ptr, V1);
+	expect_string(mock_2pred, data, "x");
+	will_return(mock_2pred, true);
+
+	const struct IPmapFilter filter_vd = { .val_data = mock_2pred, .data = "x", };
+	const struct IPmapPair pair_vd = ipmap_find2(map, filter_vd);
+	assert_int_equal(pair_vd.key, 1);
+	assert_ptr_equal(pair_vd.val, V1);
+
+	// key_val
+	expect_int_value(mock_2pred_szt, i, 0);
+	expect_ptr(mock_2pred_szt, data, V0);
+	will_return(mock_2pred_szt, false);
+	expect_int_value(mock_2pred_szt, i, 1);
+	expect_ptr(mock_2pred_szt, data, V1);
+	will_return(mock_2pred_szt, true);
+
+	const struct IPmapFilter filter_kv = { .key_val = mock_2pred_szt, };
+	const struct IPmapPair pair_kv = ipmap_find2(map, filter_kv);
+	assert_int_equal(pair_kv.key, 1);
+	assert_ptr_equal(pair_kv.val, V1);
+
+	// key_val_data
+	expect_int_value(mock_3pred_szt_ptr, i, 0);
+	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
+	expect_ptr(mock_3pred_szt_ptr, data, "x");
+	will_return(mock_3pred_szt_ptr, false);
+	expect_int_value(mock_3pred_szt_ptr, i, 1);
+	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
+	expect_ptr(mock_3pred_szt_ptr, data, "x");
+	will_return(mock_3pred_szt_ptr, true);
+
+	const struct IPmapFilter filter_kvd = { .key_val_data = mock_3pred_szt_ptr, .data = "x", };
+	const struct IPmapPair pair_kvd = ipmap_find2(map, filter_kvd);
+	assert_int_equal(pair_kvd.key, 1);
+	assert_ptr_equal(pair_kvd.val, V1);
 
 	ipmap_free(map);
 }
 
-static void ipmap_find_val__matches(void **state) {
+static void ipmap_find__some_block(void **state) {
 	const struct IPmap *map = ipmap_init();
 
 	assert_nul(ipmap_put(map, 0, V0));
 	assert_nul(ipmap_put(map, 1, V1));
 	assert_nul(ipmap_put(map, 2, V2));
 
-	// skip 0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
+	// key blocks
+	expect_int_value(mock_pred_szt, i, 0);
+	will_return(mock_pred_szt, false);
 
-	// get 1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, true);
+	// key passes, val blocks
+	expect_int_value(mock_pred_szt, i, 1);
+	will_return(mock_pred_szt, true);
+	expect_ptr(mock_pred, ptr, V1);
+	will_return(mock_pred, false);
 
-	const struct IPmapPair kv_pair = ipmap_find_val(map, mock_2pred, D0);
-	assert_ptr_equal(kv_pair.key, 1);
-	assert_ptr_equal(kv_pair.val, V1);
+	// both pass
+	expect_int_value(mock_pred_szt, i, 2);
+	will_return(mock_pred_szt, true);
+	expect_ptr(mock_pred, ptr, V2);
+	will_return(mock_pred, true);
 
-	ipmap_free(map);
-}
-
-static void ipmap_find__no_match(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-
-	// skip 0
-	expect_int_value(mock_3pred_szt_ptr, i, 0);
-	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
-	expect_ptr(mock_3pred_szt_ptr, data, D0);
-	will_return(mock_3pred_szt_ptr, false);
-
-	// skip 1
-	expect_int_value(mock_3pred_szt_ptr, i, 1);
-	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
-	expect_ptr(mock_3pred_szt_ptr, data, D0);
-	will_return(mock_3pred_szt_ptr, false);
-
-	const struct IPmapPair kv_pair = ipmap_find(map, mock_3pred_szt_ptr, D0);
-	assert_int_equal(kv_pair.key, 0);
-	assert_nul(kv_pair.val);
+	const struct IPmapFilter filter = {
+		.key = mock_pred_szt,
+		.val = mock_pred,
+	};
+	const struct IPmapPair pair = ipmap_find2(map, filter);
+	assert_int_equal(pair.key, 2);
+	assert_int_equal(pair.val, V2);
 
 	ipmap_free(map);
 }
 
-static void ipmap_find_key__no_match(void **state) {
+static void ipmap_find__all_block(void **state) {
 	const struct IPmap *map = ipmap_init();
 
 	assert_nul(ipmap_put(map, 0, V0));
 	assert_nul(ipmap_put(map, 1, V1));
+	assert_nul(ipmap_put(map, 2, V2));
 
-	// skip 0
-	expect_int_value(mock_2pred_szt, i, 0);
-	expect_ptr(mock_2pred_szt, data, D0);
-	will_return(mock_2pred_szt, false);
+	// key blocks
+	expect_any_count(mock_pred_szt, i, 3);
+	will_return_int_count(mock_pred_szt, false, 3);
 
-	// skip 1
-	expect_int_value(mock_2pred_szt, i, 1);
-	expect_ptr(mock_2pred_szt, data, D0);
-	will_return(mock_2pred_szt, false);
-
-	const struct IPmapPair k_pair = ipmap_find_key(map, mock_2pred_szt, D0);
-	assert_int_equal(k_pair.key, 0);
-	assert_nul(k_pair.val);
+	const struct IPmapFilter filter = {
+		.key = mock_pred_szt,
+		.val = mock_pred,
+	};
+	const struct IPmapPair pair = ipmap_find2(map, filter);
+	assert_int_equal(pair.key, 0);
+	assert_nul(pair.val);
 
 	ipmap_free(map);
 }
 
-static void ipmap_find_val__no_match(void **state) {
+static void ipmap_find__none_block(void **state) {
 	const struct IPmap *map = ipmap_init();
 
 	assert_nul(ipmap_put(map, 0, V0));
 	assert_nul(ipmap_put(map, 1, V1));
+	assert_nul(ipmap_put(map, 2, V2));
 
-	// skip 0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
+	expect_any(mock_pred_szt, i);
+	will_return_int(mock_pred_szt, true);
+	expect_any(mock_pred, ptr);
+	will_return_int(mock_pred, true);
 
-	// skip 1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
-
-	const struct IPmapPair v_pair = ipmap_find_val(map, mock_2pred, D0);
-	assert_int_equal(v_pair.key, 0);
-	assert_nul(v_pair.val);
-
-	ipmap_free(map);
-}
-
-static void ipmap_find__null_match(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-
-	const struct IPmapPair kv_pair = ipmap_find(map, NULL, D0);
-	assert_int_equal(kv_pair.key, 0);
-	assert_nul(kv_pair.val);
-
-	ipmap_free(map);
-}
-
-static void ipmap_find_key__null_match(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-
-	const struct IPmapPair k_pair = ipmap_find_key(map, NULL, D0);
-	assert_int_equal(k_pair.key, 0);
-	assert_nul(k_pair.val);
-
-	ipmap_free(map);
-}
-
-static void ipmap_find_val__null_match(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-
-	const struct IPmapPair v_pair = ipmap_find_val(map, NULL, D0);
-	assert_int_equal(v_pair.key, 0);
-	assert_nul(v_pair.val);
+	const struct IPmapFilter filter = {
+		.key = mock_pred_szt,
+		.val = mock_pred,
+	};
+	const struct IPmapPair pair = ipmap_find2(map, filter);
+	assert_int_equal(pair.key, 0);
+	assert_ptr_equal(pair.val, V0);
 
 	ipmap_free(map);
 }
@@ -427,7 +407,16 @@ static void ipmap_it_next__partial(void **state) {
 	assert_nul(ipmap_it_next(it));
 }
 
-static void ipmap_filter_it__many(void **state) {
+static void ipmap_filter_it2__empty(void **state) {
+	const struct IPmap *map = ipmap_init();
+
+	const struct IPmapFilter filter = { .key = mock_pred_szt, };
+	assert_nul(ipmap_filter_it2(map, filter));
+
+	ipmap_free(map);
+}
+
+static void ipmap_filter_it2__many(void **state) {
 	const struct IPmap *map = ipmap_init();
 
 	assert_nul(ipmap_put(map, 0, V0));
@@ -446,7 +435,8 @@ static void ipmap_filter_it__many(void **state) {
 	expect_ptr(mock_3pred_szt_ptr, data, D0);
 	will_return(mock_3pred_szt_ptr, true);
 
-	const struct IPmapIt *it = ipmap_filter_it(map, mock_3pred_szt_ptr, D0);
+	const struct IPmapFilter filter = { .key_val_data = mock_3pred_szt_ptr, .data = D0, };
+	const struct IPmapIt *it = ipmap_filter_it2(map, filter);
 	assert_non_nul(it);
 	assert_int_equal(it->key, 1);
 	assert_ptr_equal(it->val, V1);
@@ -460,163 +450,6 @@ static void ipmap_filter_it__many(void **state) {
 	// done
 	it = ipmap_it_next(it);
 	assert_nul(it);
-
-	ipmap_free(map);
-}
-
-static void ipmap_key_filter_it__many(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-	assert_nul(ipmap_put(map, 2, V2));
-
-	// skip 0
-	expect_int_value(mock_2pred_szt, i, 0);
-	expect_ptr(mock_2pred_szt, data, D0);
-	will_return(mock_2pred_szt, false);
-
-	// pass 1
-	expect_int_value(mock_2pred_szt, i, 1);
-	expect_ptr(mock_2pred_szt, data, D0);
-	will_return(mock_2pred_szt, true);
-
-	const struct IPmapIt *it = ipmap_key_filter_it(map, mock_2pred_szt, D0);
-	assert_non_nul(it);
-	assert_int_equal(it->key, 1);
-	assert_ptr_equal(it->val, V1);
-
-	// skip 2
-	expect_int_value(mock_2pred_szt, i, 2);
-	expect_ptr(mock_2pred_szt, data, D0);
-	will_return(mock_2pred_szt, false);
-
-	// done
-	it = ipmap_it_next(it);
-	assert_nul(it);
-
-	ipmap_free(map);
-}
-
-static void ipmap_val_filter_it__many(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-	assert_nul(ipmap_put(map, 2, V2));
-
-	// skip V0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
-
-	// pass V1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, true);
-
-	const struct IPmapIt *it = ipmap_val_filter_it(map, mock_2pred, D0);
-	assert_non_nul(it);
-	assert_int_equal(it->key, 1);
-	assert_ptr_equal(it->val, V1);
-
-	// skip V2
-	expect_ptr(mock_2pred, ptr, V2);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
-
-	// done
-	it = ipmap_it_next(it);
-	assert_nul(it);
-
-	ipmap_free(map);
-}
-
-static void ipmap_filter_it__none(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-
-	// skip 0
-	expect_int_value(mock_3pred_szt_ptr, i, 0);
-	expect_ptr(mock_3pred_szt_ptr, ptr, V0);
-	expect_ptr(mock_3pred_szt_ptr, data, D0);
-	will_return(mock_3pred_szt_ptr, false);
-
-	// skip 1
-	expect_int_value(mock_3pred_szt_ptr, i, 1);
-	expect_ptr(mock_3pred_szt_ptr, ptr, V1);
-	expect_ptr(mock_3pred_szt_ptr, data, D0);
-	will_return(mock_3pred_szt_ptr, false);
-
-	assert_nul(ipmap_filter_it(map, mock_3pred_szt_ptr, D0));
-
-	ipmap_free(map);
-}
-
-static void ipmap_filter_it_key__none(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-
-	// skip 0
-	expect_int_value(mock_2pred_szt, i, 0);
-	expect_ptr(mock_2pred_szt, data, D0);
-	will_return(mock_2pred_szt, false);
-
-	// skip 1
-	expect_int_value(mock_2pred_szt, i, 1);
-	expect_ptr(mock_2pred_szt, data, D0);
-	will_return(mock_2pred_szt, false);
-
-	assert_nul(ipmap_key_filter_it(map, mock_2pred_szt, D0));
-
-	ipmap_free(map);
-}
-
-static void ipmap_filter_it_val__none(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_put(map, 0, V0));
-	assert_nul(ipmap_put(map, 1, V1));
-
-	// skip 0
-	expect_ptr(mock_2pred, ptr, V0);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
-
-	// skip 1
-	expect_ptr(mock_2pred, ptr, V1);
-	expect_ptr(mock_2pred, data, D0);
-	will_return(mock_2pred, false);
-
-	assert_nul(ipmap_val_filter_it(map, mock_2pred, D0));
-
-	ipmap_free(map);
-}
-
-static void ipmap_filter_it__empty(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_filter_it(map, mock_3pred_szt_ptr, D0));
-
-	ipmap_free(map);
-}
-
-static void ipmap_filter_it_key__empty(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_key_filter_it(map, mock_2pred_szt, D0));
-
-	ipmap_free(map);
-}
-
-static void ipmap_filter_it_val__empty(void **state) {
-	const struct IPmap *map = ipmap_init();
-
-	assert_nul(ipmap_val_filter_it(map, mock_2pred, D0));
 
 	ipmap_free(map);
 }
@@ -1097,6 +930,7 @@ static void ipmap_str__(void **state) {
 
 static void ipmap__null_inputs(void **state) {
 	const struct IPmap *map = ipmap_init();
+	const struct IPmapFilter filter = { 0 };
 
 	assert_nul(ipmap_clone(NULL));
 	assert_nul(ipmap_clone_deep(NULL));
@@ -1107,19 +941,9 @@ static void ipmap__null_inputs(void **state) {
 	assert_false(ipmap_contains_key(NULL, 0));
 	assert_false(ipmap_contains_val(NULL, 0));
 	assert_nul(ipmap_at(NULL, 0).val);
-	ipmap_find(NULL, NULL, NULL);
-	ipmap_find(map, NULL, NULL);
-	ipmap_find_key(NULL, NULL, NULL);
-	ipmap_find_key(map, NULL, NULL);
-	ipmap_find_val(NULL, NULL, NULL);
-	ipmap_find_val(map, NULL, NULL);
+	ipmap_find2(NULL, filter);
 	assert_nul(ipmap_it(NULL));
-	assert_nul(ipmap_filter_it(NULL, NULL, NULL));
-	assert_nul(ipmap_filter_it(map, NULL, NULL));
-	assert_nul(ipmap_key_filter_it(NULL, NULL, NULL));
-	assert_nul(ipmap_key_filter_it(map, NULL, NULL));
-	assert_nul(ipmap_val_filter_it(NULL, NULL, NULL));
-	assert_nul(ipmap_val_filter_it(map, NULL, NULL));
+	assert_nul(ipmap_filter_it2(NULL, filter));
 	assert_nul(ipmap_it_next(NULL));
 	assert_false(ipmap_put(NULL, 0, NULL));
 	assert_nul(ipmap_put_if_absent(NULL, 0, NULL));
@@ -1180,34 +1004,18 @@ int main(void) {
 
 		TEST(ipmap_at__),
 
-		TEST(ipmap_find__matches),
-		TEST(ipmap_find_key__matches),
-		TEST(ipmap_find_val__matches),
-
-		TEST(ipmap_find__no_match),
-		TEST(ipmap_find_key__no_match),
-		TEST(ipmap_find_val__no_match),
-
-		TEST(ipmap_find__null_match),
-		TEST(ipmap_find_key__null_match),
-		TEST(ipmap_find_val__null_match),
+		TEST(ipmap_find__variants),
+		TEST(ipmap_find__some_block),
+		TEST(ipmap_find__all_block),
+		TEST(ipmap_find__none_block),
 
 		TEST(ipmap_it__many),
 		TEST(ipmap_it__empty),
 
 		TEST(ipmap_it_next__partial),
 
-		TEST(ipmap_filter_it__many),
-		TEST(ipmap_key_filter_it__many),
-		TEST(ipmap_val_filter_it__many),
-
-		TEST(ipmap_filter_it__none),
-		TEST(ipmap_filter_it_val__none),
-		TEST(ipmap_filter_it_key__none),
-
-		TEST(ipmap_filter_it__empty),
-		TEST(ipmap_filter_it_val__empty),
-		TEST(ipmap_filter_it_key__empty),
+		TEST(ipmap_filter_it2__empty),
+		TEST(ipmap_filter_it2__many),
 
 		TEST(ipmap_equal__),
 		TEST(ipmap_equal__key_removed),
