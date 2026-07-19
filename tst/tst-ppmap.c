@@ -1753,7 +1753,7 @@ static void ppmap_remove_all_free__free_key_free_val(void **state) {
 	ppmap_free(map);
 }
 
-static void ppmap_remove_from__free_key(void **state) {
+static void ppmap_remove_in__free_key(void **state) {
 	const struct PPmapParams params = { .free_val = mock_free, .free_key = mock_free, };
 	const struct PPmap *map = ppmap_init_with(params);
 
@@ -1774,7 +1774,7 @@ static void ppmap_remove_from__free_key(void **state) {
 	expect_ptr(mock_free, ptr, K0);
 	expect_ptr(mock_free, ptr, K2);
 
-	assert_int_equal(ppmap_remove_from(map, from), 2);
+	assert_int_equal(ppmap_remove_in(map, from), 2);
 
 	assert_ppmap_equal(map, expected);
 
@@ -1786,7 +1786,7 @@ static void ppmap_remove_from__free_key(void **state) {
 	ppmap_free(expected);
 }
 
-static void ppmap_remove_from_free__free_val(void **state) {
+static void ppmap_remove_in_free__free_val(void **state) {
 	const struct PPmapParams params = { .free_val = mock_free, };
 	const struct PPmap *map = ppmap_init_with(params);
 
@@ -1807,7 +1807,7 @@ static void ppmap_remove_from_free__free_val(void **state) {
 	expect_ptr(mock_free, ptr, V0);
 	expect_ptr(mock_free, ptr, V2);
 
-	assert_int_equal(ppmap_remove_from_free(map, from), 2);
+	assert_int_equal(ppmap_remove_in_free(map, from), 2);
 
 	assert_ppmap_equal(map, expected);
 
@@ -2535,12 +2535,12 @@ static void ppmap__null_inputs(void **state) {
 	assert_nul(ppmap_remove(map, NULL));
 	assert_int_equal(ppmap_remove_all(NULL), 0);
 	assert_int_equal(ppmap_remove_all_free(NULL), 0);
-	assert_int_equal(ppmap_remove_from(NULL, NULL), 0);
-	assert_int_equal(ppmap_remove_from(map, NULL), 0);
-	assert_int_equal(ppmap_remove_from(NULL, map), 0);
-	assert_int_equal(ppmap_remove_from_free(NULL, NULL), 0);
-	assert_int_equal(ppmap_remove_from_free(map, NULL), 0);
-	assert_int_equal(ppmap_remove_from_free(NULL, map), 0);
+	assert_int_equal(ppmap_remove_in(NULL, NULL), 0);
+	assert_int_equal(ppmap_remove_in(map, NULL), 0);
+	assert_int_equal(ppmap_remove_in(NULL, map), 0);
+	assert_int_equal(ppmap_remove_in_free(NULL, NULL), 0);
+	assert_int_equal(ppmap_remove_in_free(map, NULL), 0);
+	assert_int_equal(ppmap_remove_in_free(NULL, map), 0);
 	assert_false(ppmap_equal(NULL, NULL));
 	assert_false(ppmap_equal(map, NULL));
 	assert_nul(ppmap_keys_pslist(NULL));
@@ -2658,8 +2658,8 @@ int main(void) {
 		TEST(ppmap_remove_all_free__no_free_val),
 		TEST(ppmap_remove_all_free__free_key_free_val),
 
-		TEST(ppmap_remove_from__free_key),
-		TEST(ppmap_remove_from_free__free_val),
+		TEST(ppmap_remove_in__free_key),
+		TEST(ppmap_remove_in_free__free_val),
 
 		TEST(ppmap_contains_key__pointers),
 		TEST(ppmap_contains_key__equal_key),

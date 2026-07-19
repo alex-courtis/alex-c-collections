@@ -636,7 +636,7 @@ static void pset_remove_all_free__free_val(void **state) {
 	pset_free(set);
 }
 
-static void pset_remove_from__many(void **state) {
+static void pset_remove_in__many(void **state) {
 	const struct PsetParams params = { .free_val = mock_free, };
 	const struct Pset *set = pset_init_with(params);
 
@@ -647,13 +647,13 @@ static void pset_remove_from__many(void **state) {
 	assert_true(pset_add(from, V1));
 	assert_true(pset_add(from, V2));
 
-	assert_int_equal(pset_remove_from(set, from), 1);
+	assert_int_equal(pset_remove_in(set, from), 1);
 
 	pset_free(set);
 	pset_free(from);
 }
 
-static void pset_remove_from_free__no_free_val(void **state) {
+static void pset_remove_in_free__no_free_val(void **state) {
 	const struct Pset *set = pset_init();
 
 	const char *val = strdup("should be freed");
@@ -665,13 +665,13 @@ static void pset_remove_from_free__no_free_val(void **state) {
 	assert_true(pset_add(from, val));
 	assert_true(pset_add(from, V2));
 
-	assert_int_equal(pset_remove_from_free(set, from), 1);
+	assert_int_equal(pset_remove_in_free(set, from), 1);
 
 	pset_free(set);
 	pset_free(from);
 }
 
-static void pset_remove_from_free__free_val(void **state) {
+static void pset_remove_in_free__free_val(void **state) {
 	const struct PsetParams params = { .free_val = mock_free, };
 	const struct Pset *set = pset_init_with(params);
 
@@ -684,7 +684,7 @@ static void pset_remove_from_free__free_val(void **state) {
 
 	expect_ptr(mock_free, ptr, V1);
 
-	assert_int_equal(pset_remove_from_free(set, from), 1);
+	assert_int_equal(pset_remove_in_free(set, from), 1);
 
 	pset_free(set);
 	pset_free(from);
@@ -1445,12 +1445,12 @@ static void pset__null_inputs(void **state) {
 	assert_false(pset_remove_free(set, NULL));
 	assert_int_equal(pset_remove_all(NULL), 0);
 	assert_int_equal(pset_remove_all_free(NULL), 0);
-	assert_int_equal(pset_remove_from(NULL, NULL), 0);
-	assert_int_equal(pset_remove_from(set, NULL), 0);
-	assert_int_equal(pset_remove_from(NULL, set), 0);
-	assert_int_equal(pset_remove_from_free(NULL, NULL), 0);
-	assert_int_equal(pset_remove_from_free(set, NULL), 0);
-	assert_int_equal(pset_remove_from_free(NULL, set), 0);
+	assert_int_equal(pset_remove_in(NULL, NULL), 0);
+	assert_int_equal(pset_remove_in(set, NULL), 0);
+	assert_int_equal(pset_remove_in(NULL, set), 0);
+	assert_int_equal(pset_remove_in_free(NULL, NULL), 0);
+	assert_int_equal(pset_remove_in_free(set, NULL), 0);
+	assert_int_equal(pset_remove_in_free(NULL, set), 0);
 	pset_sort(NULL, NULL);
 	assert_false(pset_equal(NULL, NULL));
 	assert_false(pset_equal(set, NULL));
@@ -1509,10 +1509,10 @@ int main(void) {
 		TEST(pset_remove_all_free__no_free_val),
 		TEST(pset_remove_all_free__free_val),
 
-		TEST(pset_remove_from__many),
+		TEST(pset_remove_in__many),
 
-		TEST(pset_remove_from_free__no_free_val),
-		TEST(pset_remove_from_free__free_val),
+		TEST(pset_remove_in_free__no_free_val),
+		TEST(pset_remove_in_free__free_val),
 
 		TEST(pset_find__empty_filter),
 		TEST(pset_find__empty_set),

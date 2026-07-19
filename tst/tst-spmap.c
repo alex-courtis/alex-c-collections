@@ -457,7 +457,7 @@ static void spmap_remove_all_free__(void **state) {
 	spmap_free(map);
 }
 
-static void spmap_remove_from__(void **state) {
+static void spmap_remove_in__(void **state) {
 	const struct SPmap *map = spmap_init();
 
 	assert_nul(spmap_put(map, "a", V0));
@@ -474,7 +474,7 @@ static void spmap_remove_from__(void **state) {
 	assert_nul(spmap_put(expected, "a", V0));
 	assert_nul(spmap_put(expected, "c", V2));
 
-	assert_int_equal(spmap_remove_from(map, from), 1);
+	assert_int_equal(spmap_remove_in(map, from), 1);
 
 	assert_spmap_equal(map, expected);
 
@@ -483,7 +483,7 @@ static void spmap_remove_from__(void **state) {
 	spmap_free(expected);
 }
 
-static void spmap_remove_from_free__(void **state) {
+static void spmap_remove_in_free__(void **state) {
 	const struct SPmapParams params = { .free_val = mock_free, };
 	const struct SPmap *map = spmap_init_with(params);
 
@@ -495,7 +495,7 @@ static void spmap_remove_from_free__(void **state) {
 
 	expect_ptr(mock_free, ptr, V0);
 
-	assert_int_equal(spmap_remove_from_free(map, from), 1);
+	assert_int_equal(spmap_remove_in_free(map, from), 1);
 
 	spmap_free(map);
 	spmap_free(from);
@@ -881,12 +881,12 @@ static void spmap__null_inputs(void **state) {
 	assert_false(spmap_remove_free(map, NULL));
 	assert_int_equal(spmap_remove_all(NULL), 0);
 	assert_int_equal(spmap_remove_all_free(NULL), 0);
-	assert_int_equal(spmap_remove_from(NULL, NULL), 0);
-	assert_int_equal(spmap_remove_from(map, NULL), 0);
-	assert_int_equal(spmap_remove_from(NULL, map), 0);
-	assert_int_equal(spmap_remove_from_free(NULL, NULL), 0);
-	assert_int_equal(spmap_remove_from_free(map, NULL), 0);
-	assert_int_equal(spmap_remove_from_free(NULL, map), 0);
+	assert_int_equal(spmap_remove_in(NULL, NULL), 0);
+	assert_int_equal(spmap_remove_in(map, NULL), 0);
+	assert_int_equal(spmap_remove_in(NULL, map), 0);
+	assert_int_equal(spmap_remove_in_free(NULL, NULL), 0);
+	assert_int_equal(spmap_remove_in_free(map, NULL), 0);
+	assert_int_equal(spmap_remove_in_free(NULL, map), 0);
 	spmap_it_remove(NULL);
 	spmap_it_remove_free(NULL);
 	assert_false(spmap_equal(NULL, NULL));
@@ -943,9 +943,9 @@ int main(void) {
 		TEST(spmap_remove_all__),
 		TEST(spmap_remove_all_free__),
 
-		TEST(spmap_remove_from__),
+		TEST(spmap_remove_in__),
 
-		TEST(spmap_remove_from_free__),
+		TEST(spmap_remove_in_free__),
 
 		TEST(spmap_it_remove__many),
 		TEST(spmap_it_remove__partial),

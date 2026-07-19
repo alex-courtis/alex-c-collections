@@ -522,7 +522,7 @@ static void ssmap_remove_all__(void **state) {
 	ssmap_free(map);
 }
 
-static void ssmap_remove_from__(void **state) {
+static void ssmap_remove_in__(void **state) {
 	const struct SSmap *map = ssmap_init();
 
 	ssmap_put(map, "a", "0");
@@ -539,7 +539,7 @@ static void ssmap_remove_from__(void **state) {
 	ssmap_put(expected, "a", "0");
 	ssmap_put(expected, "c", "2");
 
-	assert_int_equal(ssmap_remove_from(map, from), 1);
+	assert_int_equal(ssmap_remove_in(map, from), 1);
 
 	assert_ssmap_equal(map, expected);
 
@@ -636,9 +636,9 @@ static void ssmap__null_inputs(void **state) {
 	assert_false(ssmap_remove(NULL, NULL));
 	assert_false(ssmap_remove(map, NULL));
 	assert_int_equal(ssmap_remove_all(NULL), 0);
-	assert_int_equal(ssmap_remove_from(NULL, NULL), 0);
-	assert_int_equal(ssmap_remove_from(map, NULL), 0);
-	assert_int_equal(ssmap_remove_from(NULL, map), 0);
+	assert_int_equal(ssmap_remove_in(NULL, NULL), 0);
+	assert_int_equal(ssmap_remove_in(map, NULL), 0);
+	assert_int_equal(ssmap_remove_in(NULL, map), 0);
 	ssmap_it_remove(NULL);
 	assert_false(ssmap_equal(NULL, NULL));
 	assert_false(ssmap_equal(map, NULL));
@@ -698,7 +698,7 @@ int main(void) {
 
 		TEST(ssmap_remove_all__),
 
-		TEST(ssmap_remove_from__),
+		TEST(ssmap_remove_in__),
 
 		TEST(ssmap_it_remove__many),
 		TEST(ssmap_it_remove__partial),
