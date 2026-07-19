@@ -117,41 +117,23 @@ struct SSmapPair ssmap_at(const struct SSmap* const map, const size_t i) {
 	return res;
 }
 
-struct SSmapPair ssmap_find(const struct SSmap* const map, fn_3pred_str_str pred_key_val, const void* const data) {
+struct SSmapPair ssmap_find(const struct SSmap* const map, const struct SSmapFilter filter) {
 	struct SSmapPair res = { 0 };
 
 	if (!map)
 		return res;
 
-	struct PPmapPair pres = ppmap_find(map->ppmap, (fn_3pred)pred_key_val, data);
+	const struct PPmapFilter ppmap_filter = {
+		.key = (fn_pred)filter.key,
+		.val = (fn_pred)filter.val,
+		.key_val = (fn_2pred)filter.key_val,
+		.data = filter.data,
+		.key_data = (fn_2pred)filter.key_data,
+		.val_data = (fn_2pred)filter.val_data,
+		.key_val_data = (fn_3pred)filter.key_val_data,
+	};
 
-	res.key = pres.key;
-	res.val = pres.val;
-
-	return res;
-}
-
-struct SSmapPair ssmap_find_key(const struct SSmap* const map, fn_2pred_str pred_key, const void* const data) {
-	struct SSmapPair res = { 0 };
-
-	if (!map)
-		return res;
-
-	struct PPmapPair pres = ppmap_find_key(map->ppmap, (fn_2pred)pred_key, data);
-
-	res.key = pres.key;
-	res.val = pres.val;
-
-	return res;
-}
-
-struct SSmapPair ssmap_find_val(const struct SSmap* const map, fn_2pred_str pred_val, const void* const data) {
-	struct SSmapPair res = { 0 };
-
-	if (!map)
-		return res;
-
-	struct PPmapPair pres = ppmap_find_val(map->ppmap, (fn_2pred)pred_val, data);
+	struct PPmapPair pres = ppmap_find2(map->ppmap, ppmap_filter);
 
 	res.key = pres.key;
 	res.val = pres.val;
@@ -163,16 +145,21 @@ const struct SSmapIt *ssmap_it(const struct SSmap* const map) {
 	return map ? it_init(ppmap_it(map->ppmap)) : NULL;
 }
 
-const struct SSmapIt *ssmap_filter_it(const struct SSmap* const map, fn_3pred_str_str pred_key_val, const void* const data) {
-	return map ? it_init(ppmap_filter_it(map->ppmap, (fn_3pred)pred_key_val, data)) : NULL;
-}
+const struct SSmapIt *ssmap_filter_it(const struct SSmap* const map, const struct SSmapFilter filter) {
+	if (!map)
+		return NULL;
 
-const struct SSmapIt *ssmap_key_filter_it(const struct SSmap* const map, fn_2pred_str pred_key, const void* const data) {
-	return map ? it_init(ppmap_key_filter_it(map->ppmap, (fn_2pred)pred_key, data)) : NULL;
-}
+	const struct PPmapFilter ppmap_filter = {
+		.key = (fn_pred)filter.key,
+		.val = (fn_pred)filter.val,
+		.key_val = (fn_2pred)filter.key_val,
+		.data = filter.data,
+		.key_data = (fn_2pred)filter.key_data,
+		.val_data = (fn_2pred)filter.val_data,
+		.key_val_data = (fn_3pred)filter.key_val_data,
+	};
 
-const struct SSmapIt *ssmap_val_filter_it(const struct SSmap* const map, fn_2pred_str pred_val, const void* const data) {
-	return map ? it_init(ppmap_val_filter_it(map->ppmap, (fn_2pred)pred_val, data)) : NULL;
+	return it_init(ppmap_filter_it2(map->ppmap, ppmap_filter));
 }
 
 const struct SSmapIt *ssmap_it_next(const struct SSmapIt* const it) {

@@ -36,12 +36,8 @@ struct SSmap {
 	const struct PPmap *ppmap;
 };
 
-static bool match_both_start_with_a(const char* const key, const char* const val, const void* const data) {
+static bool match_both_start_with_a(const char* const key, const char* const val) {
 	return *key == 'a' && *val == 'a';
-}
-
-static bool match_val_start_with_b(const char* const val, const void* const data) {
-	return *val == 'b';
 }
 
 // also tests constructor
@@ -135,7 +131,7 @@ static void ssmap_at__(void **state) {
 	ssmap_free(map);
 }
 
-static void ssmap_find__matches(void **state) {
+static void ssmap_find__(void **state) {
 	const struct SSmap *map = ssmap_init();
 
 	assert_false(ssmap_put(map, "0", "aaa"));
@@ -154,58 +150,11 @@ static void ssmap_find__matches(void **state) {
 	expect_string(mock_3pred_str_str, data, "x");
 	will_return(mock_3pred_str_str, true);
 
-	const struct SSmapPair kv_pair = ssmap_find(map, mock_3pred_str_str, "x");
+	const struct SSmapFilter filter = { .key_val_data = mock_3pred_str_str, .data = "x", };
+	const struct SSmapPair kv_pair = ssmap_find(map, filter);
 	assert_str_equal(kv_pair.key, "1");
 	assert_str_equal(kv_pair.val, "bbb");
 
-
-	ssmap_free(map);
-}
-
-static void ssmap_find_key__matches(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	assert_false(ssmap_put(map, "0", "aaa"));
-	assert_false(ssmap_put(map, "1", "bbb"));
-	assert_false(ssmap_put(map, "2", "ccc"));
-
-	// skip 0
-	expect_string(mock_2pred_str, str, "0");
-	expect_string(mock_2pred_str, data, "x");
-	will_return(mock_2pred_str, false);
-
-	// get 1
-	expect_string(mock_2pred_str, str, "1");
-	expect_string(mock_2pred_str, data, "x");
-	will_return(mock_2pred_str, true);
-
-	const struct SSmapPair k_pair = ssmap_find_key(map, mock_2pred_str, "x");
-	assert_str_equal(k_pair.key, "1");
-	assert_str_equal(k_pair.val, "bbb");
-
-	ssmap_free(map);
-}
-
-static void ssmap_find_val__matches(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	assert_false(ssmap_put(map, "0", "aaa"));
-	assert_false(ssmap_put(map, "1", "bbb"));
-	assert_false(ssmap_put(map, "2", "ccc"));
-
-	// skip 0
-	expect_string(mock_2pred_str, str, "aaa");
-	expect_string(mock_2pred_str, data, "x");
-	will_return(mock_2pred_str, false);
-
-	// get 1
-	expect_string(mock_2pred_str, str, "bbb");
-	expect_string(mock_2pred_str, data, "x");
-	will_return(mock_2pred_str, true);
-
-	const struct SSmapPair v_pair = ssmap_find_val(map, mock_2pred_str, "x");
-	assert_str_equal(v_pair.key, "1");
-	assert_str_equal(v_pair.val, "bbb");
 
 	ssmap_free(map);
 }
@@ -251,7 +200,7 @@ static void ssmap_it_next__partial(void **state) {
 	assert_nul(ssmap_it_next(it));
 }
 
-static void ssmap_filter_it__many(void **state) {
+static void ssmap_filter_it__(void **state) {
 	const struct SSmap *map = ssmap_init();
 
 	assert_false(ssmap_put(map, "ak0", "bv0"));
@@ -260,7 +209,9 @@ static void ssmap_filter_it__many(void **state) {
 	assert_false(ssmap_put(map, "ak3", "av3"));
 	assert_false(ssmap_put(map, "ak4", "bv4"));
 
-	const struct SSmapIt *it = ssmap_filter_it(map, match_both_start_with_a, NULL);
+	const struct SSmapFilter filter = { .key_val = match_both_start_with_a, };
+	const struct SSmapIt *it = ssmap_filter_it(map, filter);
+
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak1");
 	assert_str_equal(it->val, "av1");
@@ -269,49 +220,6 @@ static void ssmap_filter_it__many(void **state) {
 	assert_non_nul(it);
 	assert_str_equal(it->key, "ak3");
 	assert_str_equal(it->val, "av3");
-
-	assert_nul(ssmap_it_next(it));
-
-	ssmap_free(map);
-}
-
-static void ssmap_key_filter_it__many(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	assert_false(ssmap_put(map, "ak0", "bv0"));
-	assert_false(ssmap_put(map, "ak1", "av1"));
-	assert_false(ssmap_put(map, "bk2", "av2"));
-	assert_false(ssmap_put(map, "ak3", "av3"));
-	assert_false(ssmap_put(map, "ak4", "bv4"));
-
-	const struct SSmapIt *it = ssmap_key_filter_it(map, match_val_start_with_b, NULL);
-	assert_non_nul(it);
-	assert_str_equal(it->key, "bk2");
-	assert_str_equal(it->val, "av2");
-
-	assert_nul(ssmap_it_next(it));
-
-	ssmap_free(map);
-}
-
-static void ssmap_val_filter_it__many(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	assert_false(ssmap_put(map, "ak0", "bv0"));
-	assert_false(ssmap_put(map, "ak1", "av1"));
-	assert_false(ssmap_put(map, "bk2", "av2"));
-	assert_false(ssmap_put(map, "ak3", "av3"));
-	assert_false(ssmap_put(map, "ak4", "bv4"));
-
-	const struct SSmapIt *it = ssmap_val_filter_it(map, match_val_start_with_b, NULL);
-	assert_non_nul(it);
-	assert_str_equal(it->key, "ak0");
-	assert_str_equal(it->val, "bv0");
-
-	it = ssmap_it_next(it);
-	assert_non_nul(it);
-	assert_str_equal(it->key, "ak4");
-	assert_str_equal(it->val, "bv4");
 
 	assert_nul(ssmap_it_next(it));
 
@@ -702,6 +610,7 @@ static void ssmap_str__(void **state) {
 
 static void ssmap__null_inputs(void **state) {
 	const struct SSmap *map = ssmap_init();
+	const struct SSmapFilter filter = { 0 };
 
 	assert_nul(ssmap_clone(NULL));
 	ssmap_free(NULL);
@@ -713,19 +622,9 @@ static void ssmap__null_inputs(void **state) {
 	assert_false(ssmap_contains_val(NULL, NULL));
 	assert_false(ssmap_contains_val(map, NULL));
 	assert_nul(ssmap_at(NULL, 0).val);
-	ssmap_find(NULL, NULL, NULL);
-	ssmap_find(map, NULL, NULL);
-	ssmap_find_key(NULL, NULL, NULL);
-	ssmap_find_key(map, NULL, NULL);
-	ssmap_find_val(NULL, NULL, NULL);
-	ssmap_find_val(map, NULL, NULL);
+	ssmap_find(NULL, filter);
 	assert_nul(ssmap_it(NULL));
-	assert_nul(ssmap_filter_it(NULL, NULL, NULL));
-	assert_nul(ssmap_filter_it(map, NULL, NULL));
-	assert_nul(ssmap_key_filter_it(NULL, NULL, NULL));
-	assert_nul(ssmap_key_filter_it(map, NULL, NULL));
-	assert_nul(ssmap_val_filter_it(NULL, NULL, NULL));
-	assert_nul(ssmap_val_filter_it(map, NULL, NULL));
+	assert_nul(ssmap_filter_it(NULL, filter));
 	assert_nul(ssmap_it_next(NULL));
 	assert_false(ssmap_put(NULL, NULL, NULL));
 	assert_false(ssmap_put(map, NULL, NULL));
@@ -765,18 +664,14 @@ int main(void) {
 
 		TEST(ssmap_at__),
 
-		TEST(ssmap_find__matches),
-		TEST(ssmap_find_key__matches),
-		TEST(ssmap_find_val__matches),
+		TEST(ssmap_find__),
 
 		TEST(ssmap_it__many),
 		TEST(ssmap_it__empty),
 
 		TEST(ssmap_it_next__partial),
 
-		TEST(ssmap_filter_it__many),
-		TEST(ssmap_key_filter_it__many),
-		TEST(ssmap_val_filter_it__many),
+		TEST(ssmap_filter_it__),
 
 		TEST(ssmap_equal__case_sensitive),
 		TEST(ssmap_equal__case_insensitive_key),
