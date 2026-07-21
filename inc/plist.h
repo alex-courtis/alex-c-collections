@@ -135,17 +135,17 @@ size_t plist_append_all(const struct Plist* const list, const struct Plist* cons
 // add from vals, return number added, NOP when NULL clone_val [equal_val, clone_val]
 size_t plist_append_all_clone(const struct Plist* const list, const struct Plist* const from);
 
-// if the list contains val, remove the first and return it [equal_val]
+// if the list contains val, remove the first occurrence and return it [equal_val]
 const void *plist_remove(const struct Plist* const list, const void* const val);
 
-// if the list contains val, remove the first, free it and return true [equal_val]
-bool plist_remove_free(const struct Plist* const list, const void* const val);
+// if the list contains val, remove the first occurrence and free it [equal_val, free_val]
+void plist_remove_free(const struct Plist* const list, const void* const val);
 
 // remove val at i, return val if removed
 const void *plist_remove_at(const struct Plist* const list, const size_t i);
 
-// remove and free val at i, return true if removed [free_val]
-bool plist_remove_at_free(const struct Plist* const list, const size_t i);
+// remove and free val at i, NOP when index >= size [free_val]
+void plist_remove_at_free(const struct Plist* const list, const size_t i);
 
 // remove all vals, returning number removed
 size_t plist_remove_all(const struct Plist* const list);
@@ -153,10 +153,10 @@ size_t plist_remove_all(const struct Plist* const list);
 // remove all vals and free, returning number removed [free_val]
 size_t plist_remove_all_free(const struct Plist* const list);
 
-// remove the it.val, it is unusable, plist_it_next must be called
+// remove the it.val, it is unusable, plist_it_next or pset_it_prev must be called
 void plist_it_remove(const struct PlistIt* const it);
 
-// remove and free the it.val, it is unusable, plist_it_next must be called [free_val]
+// remove and free the it.val, it is unusable, plist_it_next or pset_it_prev must be called [free_val]
 void plist_it_remove_free(const struct PlistIt* const it);
 
 // shell sort in place, NULL less_than_val NOP
@@ -168,16 +168,6 @@ void plist_sort(const struct Plist* const list, fn_less_than less_than_val);
 
 // same length, vals equal in order, uses params from a [equal_val]
 bool plist_equal(const struct Plist* const a, const struct Plist* const b);
-
-/*
- * Conversion
- */
-
-// list ordered vals, caller frees slist, caller frees contents when alloc_val present [alloc_val]
-struct Pslist *plist_pslist(const struct Plist* const list);
-
-// list ordered vals, caller frees slist and vals, NULL when NULL clone_val [clone_val]
-struct Pslist *plist_pslist_clone(const struct Plist* const list);
 
 /*
  * Info

@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include "fn.h"
-#include "pslist.h"
 #include "str.h"
 
 #include "plist.h"
@@ -890,7 +889,7 @@ static void plist_remove_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V0, 1);
 
-	assert_true(plist_remove_free(list, V0));
+	plist_remove_free(list, V0);
 
 	assert_int_equal(plist_size(list), 2);
 	assert_ptr_equal(plist_at(list, 0), V0);
@@ -898,16 +897,16 @@ static void plist_remove_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V2, 1);
 
-	assert_true(plist_remove_free(list, V2));
+	plist_remove_free(list, V2);
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), V0);
 
 	expect_ptr_count(mock_free, ptr, V0, 1);
 
-	assert_true(plist_remove_free(list, V0));
+	plist_remove_free(list, V0);
 
-	assert_false(plist_remove_free(list, V0));
+	plist_remove_free(list, V0);
 
 	plist_free(list);
 }
@@ -921,12 +920,12 @@ static void plist_remove_free__free(void **state) {
 	assert_true(plist_append(list, val0));
 	assert_true(plist_append(list, val1));
 
-	assert_true(plist_remove_free(list, val1));
+	plist_remove_free(list, val1);
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), val0);
 
-	assert_false(plist_remove_free(list, val1));
+	plist_remove_free(list, val1);
 
 	plist_free_vals(list);
 }
@@ -943,7 +942,7 @@ static void plist_remove_at_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V1, 1);
 
-	assert_true(plist_remove_at_free(list, 1));
+	plist_remove_at_free(list, 1);
 
 	assert_int_equal(plist_size(list), 2);
 	assert_ptr_equal(plist_at(list, 0), V0);
@@ -951,16 +950,16 @@ static void plist_remove_at_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V2, 1);
 
-	assert_true(plist_remove_at_free(list, 1));
+	plist_remove_at_free(list, 1);
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), V0);
 
 	expect_ptr_count(mock_free, ptr, V0, 1);
 
-	assert_true(plist_remove_at_free(list, 0));
+	plist_remove_at_free(list, 0);
 
-	assert_false(plist_remove_at_free(list, 0));
+	plist_remove_at_free(list, 0);
 
 	plist_free(list);
 }
@@ -974,12 +973,12 @@ static void plist_remove_at_free__free(void **state) {
 	assert_true(plist_append(list, val0));
 	assert_true(plist_append(list, val1));
 
-	assert_true(plist_remove_at_free(list, 1));
+	plist_remove_at_free(list, 1);
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), val0);
 
-	assert_false(plist_remove_free(list, val1));
+	plist_remove_free(list, val1);
 
 	plist_free_vals(list);
 }
@@ -1726,76 +1725,6 @@ static void plist_equal__equal_val_different(void **state) {
 	plist_free(b);
 }
 
-static void plist_pslist__empty(void **state) {
-	const struct Plist *list = plist_init();
-
-	assert_nul(plist_pslist(list));
-
-	plist_free(list);
-}
-
-static void plist_pslist__many(void **state) {
-	const struct Plist *list = plist_init();
-
-	assert_true(plist_append(list, V0));
-	assert_true(plist_append(list, V1));
-
-	struct Pslist *pslist = plist_pslist(list);
-
-	assert_int_equal(pslist_length(pslist), 2);
-	assert_ptr_equal(pslist_at(pslist, 0), V0);
-	assert_ptr_equal(pslist_at(pslist, 1), V1);
-
-	pslist_free(&pslist);
-	plist_free(list);
-}
-
-static void plist_pslist__alloc_val(void **state) {
-	const struct PlistParams params = { .alloc_val = mock_alloc, };
-	const struct Plist *list = plist_init_with(params);
-
-	expect_ptr(mock_alloc, ptr, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
-
-	assert_true(plist_append(list, V0));
-
-	expect_ptr(mock_alloc, ptr, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
-
-	struct Pslist *pslist = plist_pslist(list);
-
-	assert_int_equal(pslist_length(pslist), 1);
-	assert_ptr_equal(pslist_at(pslist, 0), V0);
-
-	pslist_free(&pslist);
-	plist_free(list);
-}
-
-static void plist_pslist_clone__clone_val(void **state) {
-	const struct PlistParams params = { .clone_val = mock_clone, };
-	const struct Plist *list = plist_init_with(params);
-
-	assert_true(plist_append(list, V0));
-
-	expect_ptr(mock_clone, ptr, V0);
-	will_return_ptr_type(mock_clone, V0, void*);
-
-	struct Pslist *pslist = plist_pslist_clone(list);
-
-	pslist_free(&pslist);
-	plist_free(list);
-}
-
-static void plist_pslist_clone__no_clone_val(void **state) {
-	const struct Plist *list = plist_init();
-
-	assert_true(plist_append(list, V0));
-
-	assert_nul(plist_pslist_clone(list));
-
-	plist_free(list);
-}
-
 static void plist_str__empty(void **state) {
 	const struct PlistParams params = { .str_val = mock_str, };
 	const struct Plist *list = plist_init_with(params);
@@ -1859,7 +1788,7 @@ static void plist__null_inputs(void **state) {
 	assert_int_equal(plist_append_all_clone(NULL, NULL), 0);
 	assert_int_equal(plist_append_all_clone(list, NULL), 0);
 	assert_nul(plist_remove_at(NULL, 0));
-	assert_false(plist_remove_at_free(NULL, 0));
+	plist_remove_at_free(NULL, 0);
 	assert_nul(plist_clone_deep(NULL));
 	assert_nul(plist_clone(NULL));
 	plist_free(NULL);
@@ -1891,15 +1820,13 @@ static void plist__null_inputs(void **state) {
 	assert_int_equal(plist_append_many_v(NULL, NULL), 0);
 	assert_nul(plist_remove(NULL, NULL));
 	assert_nul(plist_remove(list, NULL));
-	assert_false(plist_remove_free(NULL, NULL));
-	assert_false(plist_remove_free(list, NULL));
+	plist_remove_free(NULL, NULL);
+	plist_remove_free(list, NULL);
 	assert_int_equal(plist_remove_all(NULL), 0);
 	assert_int_equal(plist_remove_all_free(NULL), 0);
 	plist_sort(NULL, NULL);
 	assert_false(plist_equal(NULL, NULL));
 	assert_false(plist_equal(list, NULL));
-	assert_nul(plist_pslist(NULL));
-	assert_nul(plist_pslist_clone(NULL));
 	assert_nul(plist_str(NULL));
 	assert_int_equal(plist_size(NULL), 0);
 
@@ -2027,12 +1954,6 @@ int main(void) {
 		TEST(plist_equal__val_pointers_different),
 		TEST(plist_equal__equal_val_ok),
 		TEST(plist_equal__equal_val_different),
-
-		TEST(plist_pslist__empty),
-		TEST(plist_pslist__many),
-		TEST(plist_pslist__alloc_val),
-		TEST(plist_pslist_clone__clone_val),
-		TEST(plist_pslist_clone__no_clone_val),
 
 		TEST(plist_str__empty),
 		TEST(plist_str__pointers),

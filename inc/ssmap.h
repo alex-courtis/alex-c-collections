@@ -143,14 +143,20 @@ bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b);
  * Conversion
  */
 
+// TODO remove
+
 // map ordered keys, caller frees list and contents
 struct Pslist *ssmap_keys_pslist(const struct SSmap* const map);
 
 // map ordered keys, same params
 const struct Sset *ssmap_keys_sset(const struct SSmap* const map);
 
+// TODO replace with Slist
+
 // map ordered vals, caller frees list and contents
 struct Pslist *ssmap_vals_pslist(const struct SSmap* const map);
+
+// TODO remove
 
 // map ordered vals, same params
 const struct Sset *ssmap_vals_sset(const struct SSmap* const map);

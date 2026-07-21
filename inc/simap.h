@@ -144,6 +144,8 @@ bool simap_equal(const struct SImap* const a, const struct SImap* const b);
  * Conversion
  */
 
+// TODO remove
+
 // map ordered keys, caller frees list and contents
 struct Pslist *simap_keys_pslist(const struct SImap* const map);
 

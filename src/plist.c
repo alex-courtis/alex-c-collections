@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "fn.h"
-#include "pslist.h"
 #include "str.h"
 
 #include "plist.h"
@@ -207,20 +206,6 @@ static const struct Plist *clone(const struct Plist* const from, fn_clone clone_
 	}
 
 	return to;
-}
-
-static struct Pslist *pslist(const struct Plist* const list, fn_clone clone_val) {
-	struct Pslist *slist = NULL;
-
-	for (const void **v = list->vals; v < list->vals + list->size; v++) {
-		if (clone_val) {
-			pslist_append(&slist, (void*)clone_val(*v));
-		} else {
-			pslist_append(&slist, (void*)*v);
-		}
-	}
-
-	return slist;
 }
 
 const struct Plist *plist_init(void) {
@@ -461,9 +446,9 @@ const void *plist_remove(const struct Plist* const list, const void* const val) 
 	}
 }
 
-bool plist_remove_free(const struct Plist* const list, const void* const val) {
+void plist_remove_free(const struct Plist* const list, const void* const val) {
 	if (!list)
-		return NULL;
+		return;
 
 	const void *removed = plist_remove(list, val);
 
@@ -473,9 +458,6 @@ bool plist_remove_free(const struct Plist* const list, const void* const val) {
 		} else {
 			free((void*)removed);
 		}
-		return true;
-	} else {
-		return false;
 	}
 }
 
@@ -483,9 +465,9 @@ const void *plist_remove_at(const struct Plist* const list, const size_t i) {
 	return list ? remove_at(list, i) : NULL;
 }
 
-bool plist_remove_at_free(const struct Plist* const list, const size_t i) {
+void plist_remove_at_free(const struct Plist* const list, const size_t i) {
 	if (!list)
-		return false;
+		return;
 
 	const void *removed = remove_at(list, i);
 
@@ -495,9 +477,6 @@ bool plist_remove_at_free(const struct Plist* const list, const size_t i) {
 		} else {
 			free((void*)removed);
 		}
-		return true;
-	} else {
-		return false;
 	}
 }
 
@@ -555,17 +534,6 @@ bool plist_equal(const struct Plist* const a, const struct Plist* const b) {
 	}
 
 	return true;
-}
-
-struct Pslist *plist_pslist(const struct Plist* const list) {
-	return list ? pslist(list, list->params.alloc_val) : NULL;
-}
-
-struct Pslist *plist_pslist_clone(const struct Plist* const list) {
-	if (!list || !list->params.clone_val)
-		return NULL;
-
-	return pslist(list, list->params.clone_val);
 }
 
 char *plist_str(const struct Plist* const list) {
