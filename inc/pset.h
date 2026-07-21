@@ -83,13 +83,13 @@ bool pset_contains(const struct Pset* const set, const void* const val);
 // element at zero indexed position
 const void *pset_at(const struct Pset* const set, const size_t i);
 
-// find the first, NULL when no match or NULL match
+// find the first, NULL when no matches, first entry when empty filter
 const void *pset_find(const struct Pset* const set, const struct PsetFilter filter);
 
 // create an iterator, caller must pset_it_free or invoke pset_next until NULL
 const struct PsetIt *pset_it(const struct Pset* const set);
 
-// create a filtering iterator, return NULL when no matches, caller must pset_it_free or invoke pset_next until NULL
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
 const struct PsetIt *pset_filter_it(const struct Pset* const set, const struct PsetFilter filter);
 
 // next iterator val, NULL at end of set

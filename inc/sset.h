@@ -71,13 +71,13 @@ bool sset_contains(const struct Sset* const set, const char* const val);
 // element at zero indexed position
 const char *sset_at(const struct Sset* const set, const size_t i);
 
-// find the first, NULL when no match or NULL match
+// find the first, NULL when no matches, first entry when empty filter
 const void *sset_find(const struct Sset* const set, const struct SsetFilter filter);
 
 // create an iterator, caller must sset_it_free or invoke pset_next until NULL
 const struct SsetIt *sset_it(const struct Sset* const set);
 
-// create a filtering iterator, return NULL when no matches, caller must sset_it_free or invoke sset_next until NULL
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
 const struct SsetIt *sset_filter_it(const struct Sset* const set, const struct SsetFilter filter);
 
 // next iterator val, NULL at end of set

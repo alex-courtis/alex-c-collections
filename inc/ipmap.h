@@ -104,13 +104,13 @@ bool ipmap_first_key(size_t* kp, const struct IPmap *const map, const void* cons
 // element at zero indexed position
 struct IPmapPair ipmap_at(const struct IPmap* const map, const size_t i);
 
-// find the first key/val pred, {NULL,NULL} when no matches, first when empty filter
+// find the first, {0,NULL} when no matches, first entry when empty filter
 struct IPmapPair ipmap_find(const struct IPmap* const map, const struct IPmapFilter filter);
 
 // create an iterator, caller must ipmap_it_free or invoke ipmap_next until NULL
 const struct IPmapIt *ipmap_it(const struct IPmap* const map);
 
-// create a filtering iterator, return NULL when no matches, caller must ipmap_it_free or invoke ipmap_next until NULL
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
 const struct IPmapIt *ipmap_filter_it(const struct IPmap* const map, const struct IPmapFilter filter);
 
 // next iterator entry, NULL at end of map

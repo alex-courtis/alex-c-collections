@@ -96,7 +96,7 @@ const void *simap_first_key(const struct SImap *const map, const size_t val);
 // element at zero indexed position
 struct SImapPair simap_at(const struct SImap* const map, const size_t i);
 
-// find the first key/val pred, {NULL,NULL} when no matches, first when empty filter
+// find the first, {NULL,0} when no matches, first entry when empty filter
 struct SImapPair simap_find(const struct SImap* const map, const struct SImapFilter filter);
 
 // create an iterator, caller must simap_it_free or invoke simap_next until NULL

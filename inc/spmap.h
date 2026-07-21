@@ -105,13 +105,13 @@ const char *spmap_first_key(const struct SPmap *const map, const void* const val
 // element at zero indexed position
 struct SPmapPair spmap_at(const struct SPmap* const map, const size_t i);
 
-// find the first key/val pred, {NULL,NULL} when no matches, first when empty filter
+// find the first, {NULL,NULL} when no matches, first entry when empty filter
 struct SPmapPair spmap_find(const struct SPmap* const map, const struct SPmapFilter filter);
 
 // create an iterator, caller must spmap_it_free or invoke spmap_next until NULL
 const struct SPmapIt *spmap_it(const struct SPmap* const map);
 
-// create a filtering iterator, return NULL when no matches, caller must spmap_it_free or invoke spmap_next until NULL
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
 const struct SPmapIt *spmap_filter_it(const struct SPmap* const map, const struct SPmapFilter filter);
 
 // next iterator entry, NULL at end of map

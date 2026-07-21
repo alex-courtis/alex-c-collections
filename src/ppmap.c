@@ -168,6 +168,8 @@ static const struct PPmap *clone(const struct PPmap* const from, fn_clone clone_
 static size_t remove_all(const struct PPmap* const cmap, bool do_free_val) {
 	struct PPmap *map = (struct PPmap*)cmap;
 
+	// TODO do not free the same val pointer twice
+
 	if (map->params.free_key || do_free_val) {
 		const void **k;
 		const void **v;
@@ -515,7 +517,7 @@ const void *ppmap_remove(const struct PPmap* const map, const void* const key) {
 				map->params.free_key((void*)*k);
 			}
 			*k = NULL;
-			const void* val_old = *v;
+			const void *val_old = *v;
 			*v = NULL;
 			map_m->size--;
 

@@ -110,13 +110,13 @@ const void *ppmap_first_key(const struct PPmap *const map, const void* const val
 // element at zero indexed position
 struct PPmapPair ppmap_at(const struct PPmap* const map, const size_t i);
 
-// find the first key/val pred, {NULL,NULL} when no matches, first when empty filter
+// find the first, {NULL,NULL} when no matches, first entry when empty filter
 struct PPmapPair ppmap_find(const struct PPmap* const map, const struct PPmapFilter filter);
 
 // create an iterator, caller must ppmap_it_free or invoke ppmap_next until NULL
 const struct PPmapIt *ppmap_it(const struct PPmap* const map);
 
-// create a filtering iterator, return NULL when no matches, caller must ppmap_it_free or invoke ppmap_next until NULL
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
 const struct PPmapIt *ppmap_filter_it(const struct PPmap* const map, const struct PPmapFilter filter);
 
 // next iterator entry, NULL at end of map

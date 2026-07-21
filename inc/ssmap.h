@@ -95,13 +95,13 @@ const char *ssmap_first_key(const struct SSmap *const map, const char* const val
 // element at zero indexed position
 struct SSmapPair ssmap_at(const struct SSmap* const map, const size_t i);
 
-// find the first key/val pred, {NULL,NULL} when no matches, first when empty filter
+// find the first, {NULL,NULL} when no matches, first entry when empty filter
 struct SSmapPair ssmap_find(const struct SSmap* const map, const struct SSmapFilter filter);
 
 // create an iterator, caller must ssmap_it_free or invoke ssmap_next until NULL
 const struct SSmapIt *ssmap_it(const struct SSmap* const map);
 
-// create a filtering iterator, return NULL when no matches, caller must ssmap_it_free or invoke ssmap_next until NULL
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
 const struct SSmapIt *ssmap_filter_it(const struct SSmap* const map, const struct SSmapFilter filter);
 
 // next iterator entry, NULL at end of map
