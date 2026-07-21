@@ -1095,8 +1095,6 @@ static void pset_add__again(void **state) {
 	assert_true(pset_add(set, V1));
 	assert_int_equal(pset_size(set), 4);
 
-	// TODO change to pset_at
-
 	// 0
 	const struct PsetIt *it = pset_it(set);
 	assert_non_nul(it);
