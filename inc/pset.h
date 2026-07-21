@@ -40,9 +40,9 @@ struct PsetFilter {
  */
 struct PsetParams {
 	const fn_equal equal_val; // compare val pointers
-	const fn_clone alloc_val; // use key pointer
+	const fn_clone alloc_val; // use pointer
 	const fn_free free_val;   // free
-	const fn_clone clone_val; // use key pointer
+	const fn_clone clone_val; // use pointer
 	const fn_str str_val;     // %p
 	const size_t initial;     // 10
 	const size_t grow;        // 10

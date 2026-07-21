@@ -198,18 +198,18 @@ static const struct Pset *clone(const struct Pset* const from, fn_clone clone_va
 	return to;
 }
 
-static struct Pslist *slist(const struct Pset* const set, fn_clone clone_val) {
-	struct Pslist *list = NULL;
+static struct Pslist *pslist(const struct Pset* const set, fn_clone clone_val) {
+	struct Pslist *pslist = NULL;
 
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (clone_val) {
-			pslist_append(&list, (void*)clone_val(*v));
+			pslist_append(&pslist, (void*)clone_val(*v));
 		} else {
-			pslist_append(&list, (void*)*v);
+			pslist_append(&pslist, (void*)*v);
 		}
 	}
 
-	return list;
+	return pslist;
 }
 
 const struct Pset *pset_init(void) {
@@ -427,14 +427,14 @@ bool pset_equal(const struct Pset* const a, const struct Pset* const b) {
 }
 
 struct Pslist *pset_pslist(const struct Pset* const set) {
-	return set ? slist(set, set->params.alloc_val) : NULL;
+	return set ? pslist(set, set->params.alloc_val) : NULL;
 }
 
 struct Pslist *pset_pslist_clone(const struct Pset* const set) {
 	if (!set || !set->params.clone_val)
 		return NULL;
 
-	return slist(set, set->params.clone_val);
+	return pslist(set, set->params.clone_val);
 }
 
 char *pset_str(const struct Pset* const set) {

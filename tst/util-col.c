@@ -40,6 +40,36 @@ size_t pset_add_many(const struct Pset* const set, ...) {
 	return added;
 }
 
+size_t plist_add_many_v(const struct Plist* const list, va_list __args) {
+	if (!list)
+		return 0;
+
+	size_t added = 0;
+
+	const void *val;
+	while ((val = va_arg(__args, void*))) {
+		if (plist_add(list, val)) {
+			added++;
+		}
+	}
+
+	return added;
+}
+
+size_t plist_add_many(const struct Plist* const list, ...) {
+	if (!list)
+		return 0;
+
+	va_list ap;
+	va_start(ap, list);
+
+	size_t added = plist_add_many_v(list, ap);
+
+	va_end(ap);
+
+	return added;
+}
+
 struct Sset {
 	const struct SsetParams params;
 	const struct Pset *pset;

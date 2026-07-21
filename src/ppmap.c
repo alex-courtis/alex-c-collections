@@ -242,19 +242,19 @@ static const struct Pset *vals_pset(const struct PPmap* const map, fn_clone clon
 }
 
 static struct Pslist *vals_pslist(const struct PPmap* const map, fn_clone clone_val) {
-	struct Pslist *list = NULL;
+	struct Pslist *pslist = NULL;
 
 	const void **k;
 	const void **v;
 	for (k = map->keys, v = map->vals; k < map->keys + map->size; k++, v++) {
 		if (*v && clone_val) {
-			pslist_append(&list, (void*)clone_val(*v));
+			pslist_append(&pslist, (void*)clone_val(*v));
 		} else {
-			pslist_append(&list, (void*)*v);
+			pslist_append(&pslist, (void*)*v);
 		}
 	}
 
-	return list;
+	return pslist;
 }
 
 const struct PPmap *ppmap_init(void) {
@@ -627,15 +627,15 @@ struct Pslist *ppmap_keys_pslist(const struct PPmap* const map) {
 	if (!map)
 		return NULL;
 
-	struct Pslist *list = NULL;
+	struct Pslist *pslist = NULL;
 
 	const void **k;
 	for (k = map->keys; k < map->keys + map->size; k++) {
 		const void *key = map->params.alloc_key ? map->params.alloc_key(*k) : *k;
-		pslist_append(&list, (void*)key);
+		pslist_append(&pslist, (void*)key);
 	}
 
-	return list;
+	return pslist;
 }
 
 const struct Pset *ppmap_keys_pset(const struct PPmap* const map) {

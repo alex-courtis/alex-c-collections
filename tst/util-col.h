@@ -5,12 +5,13 @@
 #include <stddef.h>
 
 #include "ipmap.h"
+#include "plist.h"
 #include "ppmap.h"
 #include "pset.h"
-#include "spmap.h"
 #include "simap.h"
-#include "ssmap.h"
+#include "spmap.h"
 #include "sset.h"
+#include "ssmap.h"
 
 // TODO static string functions
 
@@ -24,6 +25,14 @@ size_t pset_add_many_v(const struct Pset* const set, va_list __args);
 
 // add if the set does not contain each val, return number added, variadic args must be NULL terminated
 size_t sset_add_many(const struct Sset* const set, ... /* , NULL */ );
+
+// add if the set does not contain each val, return number added, variadic args must be NULL terminated [equal_val, alloc_val]
+size_t plist_add_many(const struct Plist* const list, ... /* , NULL */ );
+size_t plist_add_many_v(const struct Plist* const list, va_list __args);
+
+// TODO Slist
+// add if the set does not contain each val, return number added, variadic args must be NULL terminated
+// size_t slist_add_many(const struct Slist* const list, ... /* , NULL */ );
 
 // set key/vals, free old vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key [equal_key, alloc_key, alloc_val, free_key, free_val]
 size_t ppmap_put_many(const struct PPmap* const map, ... /* key, val, NULL */ );
