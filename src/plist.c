@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "fn.h"
@@ -46,7 +45,7 @@ static void grow(struct Plist *list) {
 }
 
 static const struct PlistIt *it_init(const struct Plist *list, const struct PlistFilter *filter) {
-	if (!list || list->size == 0)
+	if (list->size == 0)
 		return NULL;
 
 	struct PlistIt *it = calloc(1, sizeof(struct PlistIt));
@@ -61,9 +60,6 @@ static const struct PlistIt *it_init(const struct Plist *list, const struct Plis
 }
 
 static bool insert(const struct Plist* const list, size_t index, const void* const val, fn_clone alloc_val) {
-	if (!list || !val)
-		return false;
-
 	if (index > list->size) {
 		index = list->size;
 	}
@@ -94,7 +90,7 @@ static bool insert(const struct Plist* const list, size_t index, const void* con
 }
 
 static const void *remove_at(const struct Plist* const list, const size_t i) {
-	if (!list || i >= list->size)
+	if (i >= list->size)
 		return NULL;
 
 	const void **v = list->vals + i;
@@ -114,8 +110,6 @@ static const void *remove_at(const struct Plist* const list, const size_t i) {
 }
 
 static void free_vals(const struct Plist* const list) {
-	if (!list)
-		return;
 
 	// values to free, no duplicates or nulls
 	const void **to_free = calloc(list->size, sizeof(void*));
@@ -150,14 +144,7 @@ static void free_vals(const struct Plist* const list) {
 	free(to_free);
 }
 
-static size_t remove_all(const struct Plist* const list, bool do_free) {
-	if (!list)
-		return 0;
-
-	if (do_free) {
-		free_vals(list);
-	}
-
+static size_t remove_all(const struct Plist* const list) {
 	memset(list->vals, 0, list->size * sizeof(void*));
 
 	size_t removed = list->size;
@@ -328,19 +315,19 @@ const void *plist_find(const struct Plist* const list, const struct PlistFilter 
 }
 
 const struct PlistIt *plist_it(const struct Plist* const list) {
-	return plist_it_next(it_init(list, NULL));
+	return list ? plist_it_next(it_init(list, NULL)) : NULL;
 }
 
 const struct PlistIt *plist_it_end(const struct Plist* const list) {
-	return plist_it_prev(it_init(list, NULL));
+	return list ? plist_it_prev(it_init(list, NULL)) : NULL;
 }
 
 const struct PlistIt *plist_filter_it(const struct Plist* const list, const struct PlistFilter filter) {
-	return plist_it_next(it_init(list, &filter));
+	return list ? plist_it_next(it_init(list, &filter)) : NULL;
 }
 
 const struct PlistIt *plist_filter_it_end(const struct Plist* const list, const struct PlistFilter filter) {
-	return plist_it_prev(it_init(list, &filter));
+	return list ? plist_it_prev(it_init(list, &filter)) : NULL;
 }
 
 const struct PlistIt *plist_it_next(const struct PlistIt* const it) {
@@ -412,12 +399,12 @@ const struct PlistIt *plist_it_prev(const struct PlistIt* const it) {
 	return NULL;
 }
 
-bool plist_append(const struct Plist* const list, const void* const val) {
-	return list ? insert(list, list->size, val, list->params.alloc_val) : false;
-}
-
 bool plist_insert(const struct Plist* const list, size_t index, const void* const val) {
 	return list ? insert(list, index, val, list->params.alloc_val) : false;
+}
+
+bool plist_append(const struct Plist* const list, const void* const val) {
+	return list ? insert(list, list->size, val, list->params.alloc_val) : false;
 }
 
 bool plist_prepend(const struct Plist* const list, const void* const val) {
@@ -434,14 +421,18 @@ size_t plist_append_all_clone(const struct Plist* const list, const struct Plist
 
 const void *plist_remove(const struct Plist* const list, const void* const val) {
 	size_t i;
-	if (plist_index_of(&i, list, val)) {
-		return remove_at(list, i);
-	}
 
-	return NULL;
+	if (list && plist_index_of(&i, list, val)) {
+		return remove_at(list, i);
+	} else {
+		return NULL;
+	}
 }
 
 bool plist_remove_free(const struct Plist* const list, const void* const val) {
+	if (!list)
+		return NULL;
+
 	const void *removed = plist_remove(list, val);
 
 	if (removed) {
@@ -457,10 +448,13 @@ bool plist_remove_free(const struct Plist* const list, const void* const val) {
 }
 
 const void *plist_remove_at(const struct Plist* const list, const size_t i) {
-	return remove_at(list, i);
+	return list ? remove_at(list, i) : NULL;
 }
 
 bool plist_remove_at_free(const struct Plist* const list, const size_t i) {
+	if (!list)
+		return false;
+
 	const void *removed = remove_at(list, i);
 
 	if (removed) {
@@ -476,11 +470,16 @@ bool plist_remove_at_free(const struct Plist* const list, const size_t i) {
 }
 
 size_t plist_remove_all(const struct Plist* const list) {
-	return list ? remove_all(list, false) : 0;
+	return list ? remove_all(list) : 0;
 }
 
 size_t plist_remove_all_free(const struct Plist* const list) {
-	return list ? remove_all(list, true) : 0;
+	if (!list)
+		return 0;
+
+	free_vals(list);
+
+	return remove_all(list);
 }
 
 void plist_it_remove(const struct PlistIt* const it) {

@@ -1970,6 +1970,10 @@ static void plist__null_inputs(void **state) {
 	plist_it_remove_free(NULL);
 	assert_false(plist_append(NULL, NULL));
 	assert_false(plist_append(set, NULL));
+	assert_false(plist_insert(NULL, 0, NULL));
+	assert_false(plist_insert(set, 0, NULL));
+	assert_false(plist_prepend(NULL, NULL));
+	assert_false(plist_prepend(set, NULL));
 	assert_int_equal(plist_append_many(NULL), 0);
 	assert_int_equal(plist_append_many_v(NULL, NULL), 0);
 	assert_nul(plist_remove(NULL, NULL));

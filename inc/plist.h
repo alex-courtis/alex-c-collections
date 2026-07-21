@@ -115,11 +115,11 @@ const struct PlistIt *plist_it_prev(const struct PlistIt* const it);
  * Mutate
  */
 
-// add to end, return true if added [alloc_val]
-bool plist_append(const struct Plist* const list, const void* const val);
-
 // add at index, appends when index >= size, return true if added [alloc_val]
 bool plist_insert(const struct Plist* const list, size_t index, const void* const val);
+
+// add to end, return true if added [alloc_val]
+bool plist_append(const struct Plist* const list, const void* const val);
 
 // add to start, return true if added [alloc_val]
 bool plist_prepend(const struct Plist* const list, const void* const val);
