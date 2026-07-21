@@ -35,6 +35,10 @@ struct PlistFilter {
 	fn_pred_pp val_data;
 };
 
+
+// maybe 
+// const bool allow_null_val; // false
+
 /*
  * Optional constructor params (default)
  */
@@ -108,20 +112,20 @@ const struct PlistIt *plist_it_prev(const struct PlistIt* const it);
  * Mutate
  */
 
-// add if the list does not contain val, return true if added [equal_val, alloc_val]
+// add, return true if added [alloc_val]
 bool plist_add(const struct Plist* const list, const void* const val);
 
-// add from vals not contained in the list, return number added [equal_val, alloc_val]
+// add from vals, return number added [alloc_val]
 size_t plist_add_all(const struct Plist* const list, const struct Plist* const from);
 
-// add from vals not contained in the list, return number added, NOP when NULL clone_val [equal_val, clone_val]
+// add from vals, return number added, NOP when NULL clone_val [equal_val, clone_val]
 size_t plist_add_all_clone(const struct Plist* const list, const struct Plist* const from);
 
-// if the list contains val, remove it and return true [equal_val, alloc_val]
-bool plist_remove(const struct Plist* const list, const void* const val);
+// if the list contains vals, remove them and return number removed [equal_val]
+size_t plist_remove(const struct Plist* const list, const void* const val);
 
 // if the list contains val, remove it, free it and return true [equal_val, alloc_val, free_val]
-bool plist_remove_free(const struct Plist* const list, const void* const val);
+size_t plist_remove_free(const struct Plist* const list, const void* const val);
 
 // remove all vals, returning number removed
 size_t plist_remove_all(const struct Plist* const list);

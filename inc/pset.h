@@ -108,7 +108,7 @@ size_t pset_add_all(const struct Pset* const set, const struct Pset* const from)
 // add from vals not contained in the set, return number added, NOP when NULL clone_val [equal_val, clone_val]
 size_t pset_add_all_clone(const struct Pset* const set, const struct Pset* const from);
 
-// if the set contains val, remove it and return true [equal_val, alloc_val]
+// if the set contains val, remove it and return true [equal_val]
 bool pset_remove(const struct Pset* const set, const void* const val);
 
 // if the set contains val, remove it, free it and return true [equal_val, alloc_val, free_val]
