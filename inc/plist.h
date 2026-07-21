@@ -84,6 +84,11 @@ void plist_it_free(const struct PlistIt* const it);
 // true if this list contains the specified element [equal_val]
 bool plist_contains(const struct Plist* const list, const void* const val);
 
+// put first index of val in index if present, 0 and return false if not present [equal_val]
+bool plist_index_of(size_t *index, const struct Plist* const list, const void* const val);
+
+// TODO _get not _at
+
 // element at zero indexed position
 const void *plist_at(const struct Plist* const list, const size_t i);
 
@@ -123,11 +128,15 @@ size_t plist_append_all(const struct Plist* const list, const struct Plist* cons
 // add from vals, return number added, NOP when NULL clone_val [equal_val, clone_val]
 size_t plist_append_all_clone(const struct Plist* const list, const struct Plist* const from);
 
+// TODO this should be remove_val
+
 // if the list contains val, remove the first and return it [equal_val]
 const void *plist_remove(const struct Plist* const list, const void* const val);
 
 // if the list contains val, remove the first, free it and return true [equal_val]
 bool plist_remove_free(const struct Plist* const list, const void* const val);
+
+// TODO this should be remove
 
 // remove val at i, return val if removed
 const void *plist_remove_at(const struct Plist* const list, const size_t i);

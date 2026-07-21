@@ -496,15 +496,18 @@ static void plist_at__empty(void **state) {
 	plist_free(list);
 }
 
-static void plist_contains__empty(void **state) {
+static void plist_contains_index_of__empty(void **state) {
 	const struct Plist *list = plist_init();
 
 	assert_false(plist_contains(list, V0));
 
+	size_t i;
+	assert_false(plist_index_of(&i, list, V0));
+
 	plist_free(list);
 }
 
-static void plist_contains__many(void **state) {
+static void plist_contains_index_of__many(void **state) {
 	const struct Plist *list = plist_init();
 
 	assert_true(plist_append(list, V0));
@@ -514,21 +517,29 @@ static void plist_contains__many(void **state) {
 	assert_true(plist_contains(list, V1));
 	assert_false(plist_contains(list, V2));
 
+	size_t i;
+	assert_true(plist_index_of(&i, list, V1));
+	assert_int_equal(i, 1);
+
 	plist_free(list);
 }
 
-static void plist_contains__equal_val(void **state) {
+static void plist_contains_index_of__equal_val(void **state) {
 	const struct PlistParams params = { .equal_val = mock_equal, };
 	const struct Plist *list = plist_init_with(params);
 
 	assert_true(plist_append(list, V0));
 	assert_true(plist_append(list, V1));
 
-	expect_ptr(mock_equal, a, V0);
-	expect_ptr(mock_equal, b, V2);
-	will_return(mock_equal, true);
+	expect_ptr_count(mock_equal, a, V0, 2);
+	expect_ptr_count(mock_equal, b, V2, 2);
+	will_return_int_count(mock_equal, true, 2);
 
 	assert_true(plist_contains(list, V2));
+
+	size_t i;
+	assert_true(plist_index_of(&i, list, V2));
+	assert_int_equal(i, 0);
 
 	expect_ptr(mock_equal, a, V0);
 	expect_ptr(mock_equal, b, V3);
@@ -541,6 +552,17 @@ static void plist_contains__equal_val(void **state) {
 	assert_true(plist_contains(list, V3));
 
 	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, V3);
+	will_return(mock_equal, false);
+
+	expect_ptr(mock_equal, a, V1);
+	expect_ptr(mock_equal, b, V3);
+	will_return(mock_equal, true);
+
+	assert_true(plist_index_of(&i, list, V3));
+	assert_int_equal(i, 1);
+
+	expect_ptr(mock_equal, a, V0);
 	expect_ptr(mock_equal, b, V4);
 	will_return(mock_equal, false);
 
@@ -549,6 +571,17 @@ static void plist_contains__equal_val(void **state) {
 	will_return(mock_equal, false);
 
 	assert_false(plist_contains(list, V4));
+
+	expect_ptr(mock_equal, a, V0);
+	expect_ptr(mock_equal, b, V4);
+	will_return(mock_equal, false);
+
+	expect_ptr(mock_equal, a, V1);
+	expect_ptr(mock_equal, b, V4);
+	will_return(mock_equal, false);
+
+	assert_false(plist_index_of(&i, list, V4));
+	assert_int_equal(i, 0);
 
 	plist_free(list);
 }
@@ -1818,9 +1851,9 @@ int main(void) {
 		TEST(plist_append_many__many),
 		TEST(plist_append_many__no_vals),
 
-		TEST(plist_contains__empty),
-		TEST(plist_contains__many),
-		TEST(plist_contains__equal_val),
+		TEST(plist_contains_index_of__empty),
+		TEST(plist_contains_index_of__many),
+		TEST(plist_contains_index_of__equal_val),
 
 		TEST(plist_at__empty),
 		TEST(plist_at__many),

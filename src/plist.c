@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -46,13 +45,17 @@ static void grow(struct Plist *list) {
 	list->capacity = new_capacity;
 }
 
-static const struct PlistIt *it_init(const struct Plist *list) {
-	if (list->size == 0)
+static const struct PlistIt *it_init(const struct Plist *list, const struct PlistFilter *filter) {
+	if (!list || list->size == 0)
 		return NULL;
 
 	struct PlistIt *it = calloc(1, sizeof(struct PlistIt));
 	it->st = calloc(1, sizeof(struct PlistItState));
 	it->st->list = list;
+
+	if (filter) {
+		memcpy((void*)&it->st->filter, filter, sizeof(struct PlistFilter));
+	}
 
 	return it;
 }
@@ -286,11 +289,22 @@ void plist_it_free(const struct PlistIt* const it) {
 }
 
 bool plist_contains(const struct Plist* const list, const void* const val) {
+	return plist_index_of(NULL, list, val);
+}
+
+bool plist_index_of(size_t *index, const struct Plist* const list, const void* const val) {
 	if (!list || !val)
 		return false;
 
-	for (const void **v = list->vals; v < list->vals + list->size; v++) {
+	if (index)
+		*index = 0;
+
+	for (size_t i = 0; i < list->size; i++) {
+		const void **v = list->vals + i;
 		if (list->params.equal_val ? list->params.equal_val(*v, val) : *v == val) {
+			if (index) {
+				*index = i;
+			}
 			return true;
 		}
 	}
@@ -316,48 +330,20 @@ const void *plist_find(const struct Plist* const list, const struct PlistFilter 
 }
 
 const struct PlistIt *plist_it(const struct Plist* const list) {
-	if (!list || list->size == 0)
-		return NULL;
-
-	const struct PlistIt *it = it_init(list);
-
-	return plist_it_next(it);
+	return plist_it_next(it_init(list, NULL));
 }
 
 const struct PlistIt *plist_it_end(const struct Plist* const list) {
-	if (!list || list->size == 0)
-		return NULL;
-
-	const struct PlistIt *it = it_init(list);
-
-	return plist_it_prev(it);
+	return plist_it_prev(it_init(list, NULL));
 }
 
 const struct PlistIt *plist_filter_it(const struct Plist* const list, const struct PlistFilter filter) {
-	if (!list)
-		return NULL;
-
-	const struct PlistIt *it = it_init(list);
-	if (!it)
-		return NULL;
-
-	memcpy((void*)&it->st->filter, &filter, sizeof(struct PlistFilter));
-
-	return plist_it_next(it);
+	return plist_it_next(it_init(list, &filter));
 }
 
 // cppcheck-suppress unusedFunction
 const struct PlistIt *plist_filter_it_end(const struct Plist* const list, const struct PlistFilter filter) {
-	if (!list)
-		return NULL;
-
-	const struct PlistIt *it = it_init(list);
-	if (!it)
-		return NULL;
-
-	memcpy((void*)&it->st->filter, &filter, sizeof(struct PlistFilter));
-
-	return plist_it_prev(it);
+	return plist_it_prev(it_init(list, &filter));
 }
 
 const struct PlistIt *plist_it_next(const struct PlistIt* const it) {

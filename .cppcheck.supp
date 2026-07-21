@@ -11,6 +11,7 @@ unusedFunction:tst/wrap*.c
 
 # this is just not practical
 nullPointerOutOfMemory
+nullPointerArithmeticOutOfMemory
 
 # does not identify correctly
 unusedStructMember
