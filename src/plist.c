@@ -86,39 +86,6 @@ static bool append(const struct Plist* const list, const void* const val, fn_clo
 	return true;
 }
 
-// TODO deal with the clist/cset/cmap and map_m/set_m
-static const void *remove_val(const struct Plist* const clist, const void* const val) {
-	if (!val)
-		return NULL;
-
-	struct Plist *list = (struct Plist*)clist;
-
-	fprintf(stderr, "\nremove_\nsize=%zu\n", list->size);
-	for (size_t i = list->size; i > 0; i--) {
-		const void **v = list->vals + i - 1;
-		fprintf(stderr, "i=%zu *v=%p\n", i, *v);
-		if (list->params.equal_val ? list->params.equal_val(*v, val) : *v == val) {
-			const void *val_old = *v;
-
-			*v = NULL;
-			list->size--;
-
-			// shift down over removed
-			const void **m;
-			for (m = v; m < list->vals + list->size; m++) {
-				*m = *(m + 1);
-			}
-			*m = NULL;
-
-			fprintf(stderr, " removed\n");
-
-			return val_old;
-		}
-	}
-
-	return NULL;;
-}
-
 static size_t remove_all(const struct Plist* const clist, bool do_free) {
 	struct Plist *list = (struct Plist*)clist;
 
@@ -431,14 +398,16 @@ size_t plist_append_all_clone(const struct Plist* const list, const struct Plist
 }
 
 const void *plist_remove(const struct Plist* const list, const void* const val) {
-	return list ? remove_val(list, val) : NULL;
+	size_t i;
+	if (plist_index_of(&i, list, val)) {
+		return plist_remove_at(list, i);
+	}
+
+	return NULL;
 }
 
 bool plist_remove_free(const struct Plist* const list, const void* const val) {
-	if (!list)
-		return false;
-
-	const void *removed = remove_val(list, val);
+	const void *removed = plist_remove(list, val);
 
 	if (!removed)
 		return false;
