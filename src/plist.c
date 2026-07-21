@@ -314,7 +314,7 @@ const void *plist_find(const struct Plist* const list, const struct PlistFilter 
 	return NULL;
 }
 
-const struct PlistIt *plist_it(const struct Plist* const list) {
+const struct PlistIt *plist_it_start(const struct Plist* const list) {
 	return list ? plist_it_next(it_init(list, NULL)) : NULL;
 }
 
@@ -322,7 +322,7 @@ const struct PlistIt *plist_it_end(const struct Plist* const list) {
 	return list ? plist_it_prev(it_init(list, NULL)) : NULL;
 }
 
-const struct PlistIt *plist_filter_it(const struct Plist* const list, const struct PlistFilter filter) {
+const struct PlistIt *plist_filter_it_start(const struct Plist* const list, const struct PlistFilter filter) {
 	return list ? plist_it_next(it_init(list, &filter)) : NULL;
 }
 

@@ -94,13 +94,13 @@ const void *plist_at(const struct Plist* const list, const size_t i);
 const void *plist_find(const struct Plist* const list, const struct PlistFilter filter);
 
 // create an iterator at the start, caller must plist_it_free or invoke plist_next until NULL
-const struct PlistIt *plist_it(const struct Plist* const list);
+const struct PlistIt *plist_it_start(const struct Plist* const list);
 
 // create an iterator at the end
 const struct PlistIt *plist_it_end(const struct Plist* const list);
 
 // create a filtering iterator, return NULL when no matches, first entry when empty filter
-const struct PlistIt *plist_filter_it(const struct Plist* const list, const struct PlistFilter filter);
+const struct PlistIt *plist_filter_it_start(const struct Plist* const list, const struct PlistFilter filter);
 
 // create a filtering iterator at the end of the list, return NULL when no matches, last entry when empty filter
 const struct PlistIt *plist_filter_it_end(const struct Plist* const list, const struct PlistFilter filter);
