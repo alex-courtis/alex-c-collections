@@ -36,8 +36,7 @@ struct PlistFilter {
 };
 
 
-// maybe 
-// const bool allow_null_val; // false
+// TODO const bool allow_null_val; // false
 
 /*
  * Optional constructor params (default)
@@ -123,6 +122,12 @@ bool plist_append(const struct Plist* const list, const void* const val);
 
 // add to start, return true if added [alloc_val]
 bool plist_prepend(const struct Plist* const list, const void* const val);
+
+// replace val at index and return it, NOP when index >= size [alloc_val]
+const void *plist_replace(const struct Plist* const list, size_t index, const void* const val);
+
+// replace val at index and free it, NOP when index >= size [alloc_val]
+void plist_replace_free(const struct Plist* const list, size_t index, const void* const val);
 
 // add from vals, return number added [alloc_val]
 size_t plist_append_all(const struct Plist* const list, const struct Plist* const from);

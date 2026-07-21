@@ -411,6 +411,38 @@ bool plist_prepend(const struct Plist* const list, const void* const val) {
 	return list ? insert(list, 0, val, list->params.alloc_val) : false;
 }
 
+const void *plist_replace(const struct Plist* const list, size_t index, const void* const val) {
+	if (!list || index >= list->size)
+		return NULL;
+
+	// create new value
+	const void *new = list->params.alloc_val ? list->params.alloc_val(val) : val;
+	if (!new) {
+		return NULL;
+	}
+
+	const void *replaced = list->vals[index];
+
+	list->vals[index] = val;
+
+	return replaced;
+}
+
+void plist_replace_free(const struct Plist* const list, size_t index, const void* const val) {
+	if (!list)
+		return;
+
+	const void *replaced = plist_replace(list, index, val);
+
+	if (replaced) {
+		if (list->params.free_val) {
+			list->params.free_val((void*)replaced);
+		} else {
+			free((void*)replaced);
+		}
+	}
+}
+
 size_t plist_append_all(const struct Plist* const list, const struct Plist* const from) {
 	return list && from ? append_all(list, from, list->params.alloc_val) : 0;
 }

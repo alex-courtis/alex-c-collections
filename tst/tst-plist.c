@@ -7,7 +7,6 @@
 #include "util-col.h"
 
 #include <cmocka.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -398,6 +397,111 @@ static void plist_prepend__new(void **state) {
 	assert_ptr_equal(plist_at(list, 0), V2);
 	assert_ptr_equal(plist_at(list, 1), V1);
 	assert_ptr_equal(plist_at(list, 2), V0);
+
+	plist_free(list);
+}
+
+static void plist_replace__existing(void **state) {
+	const struct Plist *list = plist_init();
+
+	assert_true(plist_append(list, V0));
+	assert_true(plist_append(list, V1));
+	assert_true(plist_append(list, V2));
+
+	assert_ptr_equal(plist_replace(list, 1, V3), V1);
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_ptr_equal(plist_at(list, 1), V3);
+	assert_ptr_equal(plist_at(list, 2), V2);
+
+	plist_free(list);
+}
+
+static void plist_replace__beyond_end(void **state) {
+	const struct Plist *list = plist_init();
+
+	assert_true(plist_append(list, V0));
+	assert_true(plist_append(list, V1));
+	assert_true(plist_append(list, V2));
+
+	assert_nul(plist_replace(list, 3, V3));
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_ptr_equal(plist_at(list, 1), V1);
+	assert_ptr_equal(plist_at(list, 2), V2);
+
+	plist_free(list);
+}
+
+static void plist_replace__alloc_val_returned_null(void **state) {
+	const struct PlistParams params = { .alloc_val = mock_alloc, };
+	const struct Plist *list = plist_init_with(params);
+
+	expect_ptr(mock_alloc, ptr, V0);
+	will_return_ptr_type(mock_alloc, V0, void*);
+
+	assert_true(plist_append(list, V0));
+
+	expect_ptr(mock_alloc, ptr, V1);
+	will_return_ptr_type(mock_alloc, NULL, void*);
+
+	assert_nul(plist_replace(list, 0, V1));
+
+	assert_int_equal(plist_size(list), 1);
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+
+	plist_free(list);
+}
+
+static void plist_replace_free__no_free_val(void **state) {
+	const struct Plist *list = plist_init();
+
+	assert_true(plist_append(list, V0));
+	assert_true(plist_append(list, strdup("to free")));
+	assert_true(plist_append(list, V2));
+
+	plist_replace_free(list, 1, V3);
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_ptr_equal(plist_at(list, 1), V3);
+	assert_ptr_equal(plist_at(list, 2), V2);
+
+	plist_free(list);
+}
+
+static void plist_replace_free__free_val(void **state) {
+	const struct PlistParams params = { .free_val = mock_free, };
+	const struct Plist *list = plist_init_with(params);
+
+	assert_true(plist_append(list, V0));
+	assert_true(plist_append(list, V1));
+	assert_true(plist_append(list, V2));
+
+	expect_ptr(mock_free, ptr, V1);
+
+	plist_replace_free(list, 1, V3);
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_ptr_equal(plist_at(list, 1), V3);
+	assert_ptr_equal(plist_at(list, 2), V2);
+
+	plist_free(list);
+}
+
+static void plist_replace_free__beyond_end(void **state) {
+	const struct PlistParams params = { .free_val = mock_free, };
+	const struct Plist *list = plist_init_with(params);
+
+	assert_true(plist_append(list, V0));
+	assert_true(plist_append(list, V1));
+	assert_true(plist_append(list, V2));
+
+	plist_replace_free(list, 3, V3);
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_ptr_equal(plist_at(list, 1), V1);
+	assert_ptr_equal(plist_at(list, 2), V2);
 
 	plist_free(list);
 }
@@ -1395,7 +1499,6 @@ static void plist_it_remove__backwards(void **state) {
 
 	size_t iterations = 0;
 	for (const struct PlistIt *it = plist_it_end(list); it; it = plist_it_prev(it)) {
-		fprintf(stderr, "plist_it_remove\n");
 		iterations++;
 		plist_it_remove(it);
 	}
@@ -1782,6 +1885,8 @@ static void plist__null_inputs(void **state) {
 	assert_false(plist_insert(list, 0, NULL));
 	assert_false(plist_prepend(NULL, NULL));
 	assert_false(plist_prepend(list, NULL));
+	assert_nul(plist_replace(NULL, 0, NULL));
+	plist_replace_free(NULL, 0, NULL);
 	assert_int_equal(plist_append_many(NULL), 0);
 	assert_int_equal(plist_append_many_v(NULL, NULL), 0);
 	assert_nul(plist_remove(NULL, NULL));
@@ -1828,6 +1933,14 @@ int main(void) {
 
 		TEST(plist_append__new),
 		TEST(plist_prepend__new),
+
+		TEST(plist_replace__existing),
+		TEST(plist_replace__beyond_end),
+		TEST(plist_replace__alloc_val_returned_null),
+
+		TEST(plist_replace_free__no_free_val),
+		TEST(plist_replace_free__free_val),
+		TEST(plist_replace_free__beyond_end),
 
 		TEST(plist_append_all__many),
 		TEST(plist_append_all__alloc_val),

@@ -30,10 +30,6 @@ size_t sset_add_many(const struct Sset* const set, ... /* , NULL */ );
 size_t plist_append_many(const struct Plist* const list, ... /* , NULL */ );
 size_t plist_append_many_v(const struct Plist* const list, va_list __args);
 
-// TODO Slist
-// add if the set does not contain each val, return number added, variadic args must be NULL terminated
-// size_t slist_add_many(const struct Slist* const list, ... /* , NULL */ );
-
 // set key/vals, free old vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key [equal_key, alloc_key, alloc_val, free_key, free_val]
 size_t ppmap_put_many(const struct PPmap* const map, ... /* key, val, NULL */ );
 size_t ppmap_put_many_v(const struct PPmap* const map, va_list __args);
