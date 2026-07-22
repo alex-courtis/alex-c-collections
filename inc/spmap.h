@@ -177,23 +177,17 @@ bool spmap_equal(const struct SPmap* const a, const struct SPmap* const b);
  * Conversion
  */
 
-// TODO remove
-
 // map ordered keys, caller frees list and contents
-struct Pslist *spmap_keys_pslist(const struct SPmap* const map);
+const struct Plist *spmap_keys_plist(const struct SPmap* const map);
 
 // map ordered keys, same params
 const struct Sset *spmap_keys_sset(const struct SPmap* const map);
 
-// TODO replace with Plist
+// map ordered vals, caller frees contents when alloc_val present [alloc_val]
+const struct Plist *spmap_vals_plist(const struct SPmap* const map);
 
-// map ordered vals, caller frees list, caller frees contents when alloc_val present [alloc_val]
-struct Pslist *spmap_vals_pslist(const struct SPmap* const map);
-
-// TODO replace with Plist
-
-// map ordered vals, caller frees list and vals, NULL when NULL clone_val [clone_val]
-struct Pslist *spmap_vals_pslist_clone(const struct SPmap* const map);
+// map ordered vals, caller frees contents, NULL when NULL clone_val [clone_val]
+const struct Plist *spmap_vals_plist_clone(const struct SPmap* const map);
 
 /*
  * Info

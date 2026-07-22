@@ -318,12 +318,12 @@ bool ipmap_equal(const struct IPmap* const a, const struct IPmap* const b) {
 	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
 }
 
-struct Pslist *ipmap_vals_pslist(const struct IPmap* const map) {
-	return map ? ppmap_vals_pslist(map->ppmap) : NULL;
+const struct Plist *ipmap_vals_plist(const struct IPmap* const map) {
+	return map ? ppmap_vals_plist(map->ppmap) : NULL;
 }
 
-struct Pslist *ipmap_vals_pslist_clone(const struct IPmap* const map) {
-	return map ? ppmap_vals_pslist_clone(map->ppmap) : NULL;
+const struct Plist *ipmap_vals_plist_clone(const struct IPmap* const map) {
+	return map ? ppmap_vals_plist_clone(map->ppmap) : NULL;
 }
 
 char *ipmap_str(const struct IPmap* const map) {

@@ -7,5 +7,6 @@
   { "symbol": ["SSmap", "public", '"ssmap.h"', "public"] },
   { "symbol": ["Pset",  "public", '"pset.h"',  "public"] },
   { "symbol": ["Sset",  "public", '"sset.h"',  "public"] },
+  { "symbol": ["Plist", "public", '"plist.h"', "public"] },
 ]
 # vim:ft=yaml

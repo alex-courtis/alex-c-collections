@@ -12,8 +12,8 @@
 #include <string.h>
 
 #include "fn.h"
+#include "plist.h"
 #include "ppmap.h"
-#include "pslist.h"
 #include "str.h"
 
 #include "ipmap.h"
@@ -516,7 +516,7 @@ static void ipmap_equal__key_removed(void **state) {
 	ipmap_free(b);
 }
 
-static void ipmap_vals_pslist__many(void **state) {
+static void ipmap_vals_plist__many(void **state) {
 	const struct IPmapParams params = { .allow_null_val = true, };
 	const struct IPmap *map = ipmap_init_with(params);
 
@@ -524,18 +524,18 @@ static void ipmap_vals_pslist__many(void **state) {
 	ipmap_put(map, 1, NULL);
 	ipmap_put(map, 2, V2);
 
-	struct Pslist *list = ipmap_vals_pslist(map);
+	const struct Plist *list = ipmap_vals_plist(map);
 
-	assert_int_equal(pslist_length(list), 3);
-	assert_ptr_equal(pslist_at(list, 0), V0);
-	assert_nul(pslist_at(list, 1));
-	assert_ptr_equal(pslist_at(list, 2), V2);
+	assert_int_equal(plist_size(list), 3);
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_nul(plist_at(list, 1));
+	assert_ptr_equal(plist_at(list, 2), V2);
 
-	pslist_free(&list);
+	plist_free(list);
 	ipmap_free(map);
 }
 
-static void ipmap_vals_pslist_clone__many(void **state) {
+static void ipmap_vals_plist_clone__many(void **state) {
 	const struct IPmapParams params = {
 		.allow_null_val = true,
 		.clone_val = (fn_clone)clone_strdup,
@@ -546,14 +546,14 @@ static void ipmap_vals_pslist_clone__many(void **state) {
 	ipmap_put(map, 1, NULL);
 	ipmap_put(map, 2, "2");
 
-	struct Pslist *list = ipmap_vals_pslist_clone(map);
+	const struct Plist *list = ipmap_vals_plist_clone(map);
 
-	assert_int_equal(pslist_length(list), 3);
-	assert_str_equal(pslist_at(list, 0), "0");
-	assert_nul(pslist_at(list, 1));
-	assert_str_equal(pslist_at(list, 2), "2");
+	assert_int_equal(plist_size(list), 3);
+	assert_str_equal(plist_at(list, 0), "0");
+	assert_nul(plist_at(list, 1));
+	assert_str_equal(plist_at(list, 2), "2");
 
-	pslist_free_vals(&list, NULL);
+	plist_free_vals(list);
 	ipmap_free(map);
 }
 
@@ -955,8 +955,8 @@ static void ipmap__null_inputs(void **state) {
 	ipmap_it_remove_free(NULL);
 	assert_false(ipmap_equal(NULL, NULL));
 	assert_false(ipmap_equal(map, NULL));
-	assert_nul(ipmap_vals_pslist(NULL));
-	assert_nul(ipmap_vals_pslist_clone(NULL));
+	assert_nul(ipmap_vals_plist(NULL));
+	assert_nul(ipmap_vals_plist_clone(NULL));
 	assert_nul(ipmap_str(NULL));
 	assert_int_equal(ipmap_size(NULL), 0);
 
@@ -1001,8 +1001,8 @@ int main(void) {
 		TEST(ipmap_equal__),
 		TEST(ipmap_equal__key_removed),
 
-		TEST(ipmap_vals_pslist__many),
-		TEST(ipmap_vals_pslist_clone__many),
+		TEST(ipmap_vals_plist__many),
+		TEST(ipmap_vals_plist_clone__many),
 
 		TEST(ipmap_put_get_remove),
 

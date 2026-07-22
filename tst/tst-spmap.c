@@ -13,8 +13,8 @@
 #include <string.h>
 
 #include "fn.h"
+#include "plist.h"
 #include "ppmap.h"
-#include "pslist.h"
 #include "sset.h"
 #include "str.h"
 
@@ -619,20 +619,20 @@ static void spmap_str__(void **state) {
 	spmap_free(map);
 }
 
-static void spmap_keys_pslist__many(void **state) {
+static void spmap_keys_plist__many(void **state) {
 	const struct SPmap *map = spmap_init();
 
 	spmap_put(map, "a", V0);
 	spmap_put(map, "b", V1);
 
-	struct Pslist *list = spmap_keys_pslist(map);
+	const struct Plist *list = spmap_keys_plist(map);
 
-	assert_int_equal(pslist_length(list), 2);
-	assert_str_equal(pslist_at(list, 0), "a");
-	assert_str_equal(pslist_at(list, 1), "b");
+	assert_int_equal(plist_size(list), 2);
+	assert_str_equal(plist_at(list, 0), "a");
+	assert_str_equal(plist_at(list, 1), "b");
 
 	spmap_free(map);
-	pslist_free_vals(&list, NULL);
+	plist_free_vals(list);
 }
 
 static void spmap_keys_sset__many(void **state) {
@@ -673,7 +673,7 @@ static void spmap_keys_sset__params(void **state) {
 	sset_free(set);
 }
 
-static void spmap_vals_pslist__many(void **state) {
+static void spmap_vals_plist__many(void **state) {
 	const struct SPmapParams params = { .allow_null_val = true, };
 	const struct SPmap *map = spmap_init_with(params);
 
@@ -681,18 +681,18 @@ static void spmap_vals_pslist__many(void **state) {
 	spmap_put(map, "b", NULL);
 	spmap_put(map, "c", V2);
 
-	struct Pslist *list = spmap_vals_pslist(map);
+	const struct Plist *list = spmap_vals_plist(map);
 
-	assert_int_equal(pslist_length(list), 3);
-	assert_ptr_equal(pslist_at(list, 0), V0);
-	assert_nul(pslist_at(list, 1));
-	assert_ptr_equal(pslist_at(list, 2), V2);
+	assert_int_equal(plist_size(list), 3);
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_nul(plist_at(list, 1));
+	assert_ptr_equal(plist_at(list, 2), V2);
 
-	pslist_free(&list);
+	plist_free(list);
 	spmap_free(map);
 }
 
-static void spmap_vals_pslist_clone__many(void **state) {
+static void spmap_vals_plist_clone__many(void **state) {
 	const struct SPmapParams params = {
 		.allow_null_val = true,
 		.clone_val = (fn_clone)clone_strdup,
@@ -703,14 +703,14 @@ static void spmap_vals_pslist_clone__many(void **state) {
 	spmap_put(map, "b", NULL);
 	spmap_put(map, "c", "bb");
 
-	struct Pslist *list = spmap_vals_pslist_clone(map);
+	const struct Plist *list = spmap_vals_plist_clone(map);
 
-	assert_int_equal(pslist_length(list), 3);
-	assert_str_equal(pslist_at(list, 0), "aa");
-	assert_nul(pslist_at(list, 1));
-	assert_str_equal(pslist_at(list, 2), "bb");
+	assert_int_equal(plist_size(list), 3);
+	assert_str_equal(plist_at(list, 0), "aa");
+	assert_nul(plist_at(list, 1));
+	assert_str_equal(plist_at(list, 2), "bb");
 
-	pslist_free_vals(&list, NULL);
+	plist_free_vals(list);
 	spmap_free(map);
 }
 
@@ -862,10 +862,10 @@ static void spmap__null_inputs(void **state) {
 	spmap_it_remove_free(NULL);
 	assert_false(spmap_equal(NULL, NULL));
 	assert_false(spmap_equal(map, NULL));
-	assert_nul(spmap_keys_pslist(NULL));
+	assert_nul(spmap_keys_plist(NULL));
 	assert_nul(spmap_keys_sset(NULL));
-	assert_nul(spmap_vals_pslist(NULL));
-	assert_nul(spmap_vals_pslist_clone(NULL));
+	assert_nul(spmap_vals_plist(NULL));
+	assert_nul(spmap_vals_plist_clone(NULL));
 	assert_nul(spmap_str(NULL));
 	assert_int_equal(spmap_size(NULL), 0);
 
@@ -926,13 +926,13 @@ int main(void) {
 
 		TEST(spmap_str__),
 
-		TEST(spmap_keys_pslist__many),
+		TEST(spmap_keys_plist__many),
 
 		TEST(spmap_keys_sset__many),
 		TEST(spmap_keys_sset__params),
 
-		TEST(spmap_vals_pslist_clone__many),
-		TEST(spmap_vals_pslist__many),
+		TEST(spmap_vals_plist_clone__many),
+		TEST(spmap_vals_plist__many),
 
 		TEST(spmap_clone__many),
 		TEST(spmap_clone__params),

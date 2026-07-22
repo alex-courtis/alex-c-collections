@@ -10,8 +10,8 @@
 #include <stdlib.h>
 
 #include "fn.h"
+#include "plist.h"
 #include "ppmap.h"
-#include "pslist.h"
 #include "sset.h"
 #include "str.h"
 
@@ -623,20 +623,20 @@ static void simap_str__(void **state) {
 	simap_free(map);
 }
 
-static void simap_keys_pslist__many(void **state) {
+static void simap_keys_plist__many(void **state) {
 	const struct SImap *map = simap_init();
 
 	simap_put(map, "a", 10);
 	simap_put(map, "b", 11);
 
-	struct Pslist *list = simap_keys_pslist(map);
+	const struct Plist *list = simap_keys_plist(map);
 
-	assert_int_equal(pslist_length(list), 2);
-	assert_str_equal(pslist_at(list, 0), "a");
-	assert_str_equal(pslist_at(list, 1), "b");
+	assert_int_equal(plist_size(list), 2);
+	assert_str_equal(plist_at(list, 0), "a");
+	assert_str_equal(plist_at(list, 1), "b");
 
 	simap_free(map);
-	pslist_free_vals(&list, NULL);
+	plist_free_vals(list);
 }
 
 static void simap_keys_sset__many(void **state) {
@@ -747,7 +747,7 @@ static void simap__null_inputs(void **state) {
 	assert_int_equal(simap_remove_in(NULL, map), 0);
 	assert_false(simap_equal(NULL, NULL));
 	assert_false(simap_equal(map, NULL));
-	assert_nul(simap_keys_pslist(NULL));
+	assert_nul(simap_keys_plist(NULL));
 	assert_nul(simap_keys_sset(NULL));
 	assert_nul(simap_str(NULL));
 	assert_int_equal(simap_size(NULL), 0);
@@ -804,7 +804,7 @@ int main(void) {
 
 		TEST(simap_str__),
 
-		TEST(simap_keys_pslist__many),
+		TEST(simap_keys_plist__many),
 
 		TEST(simap_keys_sset__many),
 		TEST(simap_keys_sset__params),

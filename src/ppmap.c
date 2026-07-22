@@ -5,7 +5,7 @@
 
 #include "fn.h"
 #include "pset.h"
-#include "pslist.h"
+#include "plist.h"
 #include "str.h"
 
 #include "ppmap.h"
@@ -265,18 +265,28 @@ static void it_remove(const struct PPmapIt* const it, bool do_free) {
 }
 
 
-static struct Pslist *vals_pslist(const struct PPmap* const map, fn_clone clone_val) {
-	struct Pslist *pslist = NULL;
+static const struct Plist *vals_plist(const struct PPmap* const map, fn_clone clone_val) {
+	const struct PlistParams params = {
+		.equal_val = map->params.equal_val,
+		.alloc_val = map->params.alloc_val,
+		.free_val = map->params.free_val,
+		.clone_val = map->params.clone_val,
+		.str_val = map->params.str_val,
+		.allow_null_val = map->params.allow_null_val,
+		.initial = MAX(map->size, map->params.initial),
+		.grow  = map->params.grow,
+	};
+	const struct Plist *list = plist_init_with(params);
 
-	for (const void **k = map->keys, **v = map->vals; k < map->keys + map->size; k++, v++) {
+	for (const void **v = map->vals; v < map->vals + map->size; v++) {
 		if (*v && clone_val) {
-			pslist_append(&pslist, (void*)clone_val(*v));
+			plist_append(list, (void*)clone_val(*v));
 		} else {
-			pslist_append(&pslist, (void*)*v);
+			plist_append(list, (void*)*v);
 		}
 	}
 
-	return pslist;
+	return list;
 }
 
 const struct PPmap *ppmap_init(void) {
@@ -643,18 +653,26 @@ bool ppmap_equal(const struct PPmap* const a, const struct PPmap* const b) {
 	return true;
 }
 
-struct Pslist *ppmap_keys_pslist(const struct PPmap* const map) {
+const struct Plist *ppmap_keys_plist(const struct PPmap* const map) {
 	if (!map)
 		return NULL;
 
-	struct Pslist *pslist = NULL;
+	const struct PlistParams params = {
+		.equal_val = map->params.equal_key,
+		.alloc_val = map->params.alloc_key,
+		.free_val = map->params.free_key,
+		.clone_val = map->params.alloc_key,
+		.str_val = map->params.str_key,
+		.initial = MAX(map->size, map->params.initial),
+		.grow  = map->params.grow,
+	};
+	const struct Plist *list = plist_init_with(params);
 
 	for (const void **k = map->keys; k < map->keys + map->size; k++) {
-		const void *key = map->params.alloc_key ? map->params.alloc_key(*k) : *k;
-		pslist_append(&pslist, (void*)key);
+		plist_append(list, *k);
 	}
 
-	return pslist;
+	return list;
 }
 
 const struct Pset *ppmap_keys_pset(const struct PPmap* const map) {
@@ -679,15 +697,15 @@ const struct Pset *ppmap_keys_pset(const struct PPmap* const map) {
 	return set;
 }
 
-struct Pslist *ppmap_vals_pslist(const struct PPmap* const map) {
-	return map ? vals_pslist(map, map->params.alloc_val) : NULL;
+const struct Plist *ppmap_vals_plist(const struct PPmap* const map) {
+	return map ? vals_plist(map, NULL) : NULL;
 }
 
-struct Pslist *ppmap_vals_pslist_clone(const struct PPmap* const map) {
+const struct Plist *ppmap_vals_plist_clone(const struct PPmap* const map) {
 	if (!map || !map->params.clone_val)
 		return NULL;
 
-	return vals_pslist(map, map->params.clone_val);
+	return vals_plist(map, map->params.clone_val);
 }
 
 char *ppmap_str(const struct PPmap* const map) {

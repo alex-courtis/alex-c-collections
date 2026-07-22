@@ -223,8 +223,8 @@ bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b) {
 	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
 }
 
-struct Pslist *ssmap_keys_pslist(const struct SSmap* const map) {
-	return map ? ppmap_keys_pslist(map->ppmap) : NULL;
+const struct Plist *ssmap_keys_plist(const struct SSmap* const map) {
+	return map ? ppmap_keys_plist(map->ppmap) : NULL;
 }
 
 const struct Sset *ssmap_keys_sset(const struct SSmap* const map) {
@@ -245,8 +245,8 @@ const struct Sset *ssmap_keys_sset(const struct SSmap* const map) {
 	return set;
 }
 
-struct Pslist *ssmap_vals_pslist(const struct SSmap* const map) {
-	return map ? ppmap_vals_pslist(map->ppmap) : NULL;
+const struct Plist *ssmap_vals_plist(const struct SSmap* const map) {
+	return map ? ppmap_vals_plist(map->ppmap) : NULL;
 }
 
 char *ssmap_str(const struct SSmap* const map) {

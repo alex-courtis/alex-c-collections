@@ -146,8 +146,15 @@ bool pset_equal(const struct Pset* const a, const struct Pset* const b);
  * Conversion
  */
 
+// TODO replace with Plist
+
 // set ordered vals, caller frees list, caller frees contents when alloc_val present [alloc_val]
 struct Pslist *pset_pslist(const struct Pset* const set);
+
+// set ordered vals, caller frees list, caller frees contents when alloc_val present [alloc_val]
+struct Plist *pset_plist(const struct Pset* const set);
+
+// TODO replace with Plist
 
 // set ordered vals, caller frees list and vals, NULL when NULL clone_val [clone_val]
 struct Pslist *pset_pslist_clone(const struct Pset* const set);

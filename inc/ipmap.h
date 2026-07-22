@@ -176,15 +176,11 @@ bool ipmap_equal(const struct IPmap* const a, const struct IPmap* const b);
  * Conversion
  */
 
-// TODO replace with Plist
+// map ordered vals, caller frees contents when alloc_val present [alloc_val]
+const struct Plist *ipmap_vals_plist(const struct IPmap* const map);
 
-// map ordered vals, caller frees list, caller frees contents when alloc_val present [alloc_val]
-struct Pslist *ipmap_vals_pslist(const struct IPmap* const map);
-
-// TODO replace with Plist
-
-// map ordered vals, caller frees list and vals, NULL when NULL clone_val [clone_val]
-struct Pslist *ipmap_vals_pslist_clone(const struct IPmap* const map);
+// map ordered vals, caller frees contents, NULL when NULL clone_val [clone_val]
+const struct Plist *ipmap_vals_plist_clone(const struct IPmap* const map);
 
 /*
  * Info

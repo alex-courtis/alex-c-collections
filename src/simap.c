@@ -274,8 +274,8 @@ bool simap_equal(const struct SImap* const a, const struct SImap* const b) {
 	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
 }
 
-struct Pslist *simap_keys_pslist(const struct SImap* const map) {
-	return map ? ppmap_keys_pslist(map->ppmap) : NULL;
+const struct Plist *simap_keys_plist(const struct SImap* const map) {
+	return map ? ppmap_keys_plist(map->ppmap) : NULL;
 }
 
 const struct Sset *simap_keys_sset(const struct SImap* const map) {
