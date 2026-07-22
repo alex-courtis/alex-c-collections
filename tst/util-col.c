@@ -70,6 +70,25 @@ size_t plist_append_many(const struct Plist* const list, ...) {
 	return added;
 }
 
+struct Slist {
+	const struct SlistParams params;
+	const struct Plist *plist;
+};
+
+size_t slist_append_many(const struct Slist* const list, ...) {
+	if (!list)
+		return 0;
+
+	va_list ap;
+	va_start(ap, list);
+
+	size_t added = plist_append_many_v(list->plist, ap);
+
+	va_end(ap);
+
+	return added;
+}
+
 struct Sset {
 	const struct SsetParams params;
 	const struct Pset *pset;

@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "fn.h"
-#include "pslist.h"
 #include "pset.h"
 
 #include "sset.h"
