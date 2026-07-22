@@ -174,12 +174,12 @@ static void it_remove(const struct PlistIt* const it, bool do_free) {
 		plist_remove_at(st->list, st->position);
 	}
 
-	if (st->position > 0) {
-		if (st->was_next) {
+	if (st->was_next) {
+		if (st->position > 0) {
 			st->position--;
+		} else {
+			st->attached = false;
 		}
-	} else {
-		st->attached = false;
 	}
 
 	((struct PlistIt*)it)->val = NULL;

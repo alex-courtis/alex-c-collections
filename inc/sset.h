@@ -72,7 +72,7 @@ bool sset_contains(const struct Sset* const set, const char* const val);
 const char *sset_at(const struct Sset* const set, const size_t i);
 
 // find the first, NULL when no matches, first entry when empty filter
-const void *sset_find(const struct Sset* const set, const struct SsetFilter filter);
+const char *sset_find(const struct Sset* const set, const struct SsetFilter filter);
 
 // create an iterator, caller must sset_it_free or invoke pset_next until NULL
 const struct SsetIt *sset_it(const struct Sset* const set);

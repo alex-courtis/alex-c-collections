@@ -89,7 +89,7 @@ const void *plist_at(const struct Plist* const list, const size_t i);
 // find the first, NULL when no matches, first entry when empty filter
 const void *plist_find(const struct Plist* const list, const struct PlistFilter filter);
 
-// create an iterator at the start, caller must plist_it_free or invoke plist_next until NULL
+// create an iterator at the start, caller must plist_it_free or invoke plist_next/prev until NULL
 const struct PlistIt *plist_it_start(const struct Plist* const list);
 
 // create an iterator at the end
@@ -150,10 +150,10 @@ size_t plist_remove_all(const struct Plist* const list);
 // remove all vals and free, returning number removed [free_val]
 size_t plist_remove_all_free(const struct Plist* const list);
 
-// remove the it.val, it is unusable, plist_it_next or pset_it_prev must be called
+// remove the it.val, it is unusable, plist_it_next or plist_it_prev must be called
 void plist_it_remove(const struct PlistIt* const it);
 
-// remove and free the it.val, it is unusable, plist_it_next or pset_it_prev must be called [free_val]
+// remove and free the it.val, it is unusable, plist_it_next or plist_it_prev must be called [free_val]
 void plist_it_remove_free(const struct PlistIt* const it);
 
 // shell sort in place, NULL less_than_val NOP

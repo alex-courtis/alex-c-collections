@@ -100,7 +100,7 @@ const char *sset_at(const struct Sset* const set, const size_t i) {
 	return set ? pset_at(set->pset, i) : NULL;
 }
 
-const void *sset_find(const struct Sset* const set, const struct SsetFilter filter) {
+const char *sset_find(const struct Sset* const set, const struct SsetFilter filter) {
 	return set ? pset_find(set->pset, pset_filter_init(&filter)) : NULL;
 }
 

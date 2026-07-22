@@ -8,5 +8,6 @@
   { "symbol": ["Pset",  "public", '"pset.h"',  "public"] },
   { "symbol": ["Sset",  "public", '"sset.h"',  "public"] },
   { "symbol": ["Plist", "public", '"plist.h"', "public"] },
+  { "symbol": ["Slist", "public", '"slist.h"', "public"] },
 ]
 # vim:ft=yaml
