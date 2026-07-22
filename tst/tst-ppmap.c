@@ -38,6 +38,10 @@ static void *alloc_key_duplicate(const void* const val) {
 	return sprintf_alloc("%s%s", (char*)val, (char*)val);
 }
 
+static const char *starts_with_a_or_null(const char* const key) {
+	return key && *key == 'a' ? strdup(key) : NULL;
+}
+
 static void ppmap_init__defaults(void **state) {
 	const struct PPmap *map = ppmap_init();
 
@@ -2464,25 +2468,21 @@ static void ppmap_str__pointers(void **state) {
 	ppmap_free(map);
 }
 
-static char* str_first(const void *val) {
-	return strndup(val, 1);
-}
-
 static void ppmap_str__str_val(void **state) {
 	const struct PPmapParams params = {
 		.allow_null_val = true,
-		.str_val = str_first,
+		.str_val = (fn_str)starts_with_a_or_null,
 	};
 	const struct PPmap *map = ppmap_init_with(params);
 
-	ppmap_put(map, K0, "AAA");
+	ppmap_put(map, K0, "a0");
 	ppmap_put(map, K1, NULL);
-	ppmap_put(map, K2, "BBB");
+	ppmap_put(map, K2, "b2");
 
 	char *expected = sprintf_alloc(
-			"%p = A\n"
+			"%p = a0\n"
 			"%p = (null)\n"
-			"%p = B\n",
+			"%p = (null)\n",
 			K0,
 			K1,
 			K2
@@ -2499,20 +2499,20 @@ static void ppmap_str__str_val(void **state) {
 static void ppmap_str__str_key(void **state) {
 	const struct PPmapParams params = {
 		.allow_null_val = true,
-		.str_key = (fn_str)str_or_null,
+		.str_key = (fn_str)starts_with_a_or_null,
 	};
 	const struct PPmap *map = ppmap_init_with(params);
 
-	assert_nul(ppmap_put(map, "zero", V0));
-	assert_nul(ppmap_put(map, "one", NULL));
-	assert_nul(ppmap_put(map, "two", V2));
+	assert_nul(ppmap_put(map, "a0", V0));
+	assert_nul(ppmap_put(map, "a1", NULL));
+	assert_nul(ppmap_put(map, "b2", V2));
 
 	const void **k = map->keys;
 	k[2] = NULL;
 
 	char *expected = sprintf_alloc(
-			"zero = %p\n"
-			"one = (null)\n"
+			"a0 = %p\n"
+			"a1 = (null)\n"
 			"(null) = %p\n",
 			V0,
 			V2

@@ -26,7 +26,7 @@ size_t pset_add_many_v(const struct Pset* const set, va_list __args);
 // add if the set does not contain each val, return number added, variadic args must be NULL terminated
 size_t sset_add_many(const struct Sset* const set, ... /* , NULL */ );
 
-// add if the set does not contain each val, return number added, variadic args must be NULL terminated [equal_val, alloc_val]
+// add if the list does not contain each val, return number added, NULL vals cannot be appended, variadic args must be NULL terminated [equal_val, alloc_val]
 size_t plist_append_many(const struct Plist* const list, ... /* , NULL */ );
 size_t plist_append_many_v(const struct Plist* const list, va_list __args);
 

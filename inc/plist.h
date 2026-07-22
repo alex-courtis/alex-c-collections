@@ -10,7 +10,6 @@
  * Array backed pointer list.
  * Entries preserve insertion order.
  * Operations linearly traverse values.
- * NULL not permitted.
  */
 struct Plist; // IWYU pragma: keep
 
@@ -35,20 +34,18 @@ struct PlistFilter {
 	fn_pred_pp val_data;
 };
 
-
-// TODO const bool allow_null_val; // false
-
 /*
  * Optional constructor params (default)
  */
 struct PlistParams {
-	const fn_equal equal_val; // compare val pointers
-	const fn_clone alloc_val; // use val pointer
-	const fn_free free_val;   // free
-	const fn_clone clone_val; // use val pointer
-	const fn_str str_val;     // %p
-	const size_t initial;     // 10
-	const size_t grow;        // 10
+	const fn_equal equal_val;  // compare val pointers
+	const fn_clone alloc_val;  // use val pointer
+	const fn_free free_val;    // free
+	const fn_clone clone_val;  // use val pointer
+	const fn_str str_val;      // %p
+	const bool allow_null_val; // false
+	const size_t initial;      // 10
+	const size_t grow;         // 10
 };
 
 /*

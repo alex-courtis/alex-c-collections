@@ -446,10 +446,16 @@ char *pset_str(const struct Pset* const set) {
 	for (const void **v = set->vals; v < set->vals + set->size; v++) {
 		if (set->params.str_val) {
 			char *val_str = set->params.str_val(*v);
-			out = sprintf_append(out, "%s\n", val_str);
-			free(val_str);
-		} else {
+			if (val_str) {
+				out = sprintf_append(out, "%s\n", val_str);
+				free(val_str);
+			} else {
+				out = sprintf_append(out, "(null)\n");
+			}
+		} else if (*v) {
 			out = sprintf_append(out, "%p\n", *v);
+		} else {
+			out = sprintf_append(out, "(null)\n");
 		}
 	}
 

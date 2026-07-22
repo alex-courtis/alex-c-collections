@@ -24,8 +24,8 @@ struct Pset {
 	size_t size;
 };
 
-static char* str_first(const void *val) {
-	return strndup(val, 1);
+static const char *starts_with_a_or_null(const char* const key) {
+	return key && *key == 'a' ? strdup(key) : NULL;
 }
 
 static void pset_init__defaults(void **state) {
@@ -1377,12 +1377,14 @@ static void pset_str__pointers(void **state) {
 	assert_true(pset_add(set, V1));
 	assert_true(pset_add(set, V2));
 
+	const void **v = set->vals;
+	v[1] = NULL;
+
 	char *expected = sprintf_alloc(
 			"%p\n"
-			"%p\n"
+			"(null)\n"
 			"%p\n",
 			V0,
-			V1,
 			V2
 			);
 
@@ -1395,18 +1397,18 @@ static void pset_str__pointers(void **state) {
 }
 
 static void pset_str__str_val(void **state) {
-	const struct PsetParams params = { .str_val = str_first, };
+	const struct PsetParams params = { .str_val = (fn_str)starts_with_a_or_null, };
 	const struct Pset *set = pset_init_with(params);
 
-	assert_true(pset_add(set, "ONE"));
-	assert_true(pset_add(set, "TWO"));
-	assert_true(pset_add(set, "THREE"));
+	assert_true(pset_add(set, "a1"));
+	assert_true(pset_add(set, "b2"));
+	assert_true(pset_add(set, "a3"));
 
 	char *str = pset_str(set);
 	assert_str_equal(str,
-			"O\n"
-			"T\n"
-			"T\n"
+			"a1\n"
+			"(null)\n"
+			"a3\n"
 			);
 
 	free(str);

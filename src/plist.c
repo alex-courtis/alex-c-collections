@@ -59,13 +59,18 @@ static const struct PlistIt *it_init(const struct Plist *list, const struct Plis
 }
 
 static bool insert(const struct Plist* const list, size_t index, const void* const val, fn_clone alloc_val) {
+	if (!val && !list->params.allow_null_val) {
+		return false;
+	}
+
 	if (index > list->size) {
 		index = list->size;
 	}
 
-	// create new value
+	// create new value; alloc_val may return a valid new from a NULL val
 	const void *new = alloc_val ? alloc_val(val) : val;
-	if (!new) {
+
+	if (!new && !list->params.allow_null_val) {
 		return false;
 	}
 
@@ -263,11 +268,14 @@ bool plist_contains(const struct Plist* const list, const void* const val) {
 }
 
 bool plist_index_of(size_t *index, const struct Plist* const list, const void* const val) {
-	if (!list || !val)
-		return false;
-
 	if (index)
 		*index = 0;
+
+	if (!list)
+		return false;
+
+	if (!val && !list->params.allow_null_val)
+		return false;
 
 	for (size_t i = 0; i < list->size; i++) {
 		const void **v = list->vals + i;
@@ -400,15 +408,16 @@ const void *plist_replace(const struct Plist* const list, size_t index, const vo
 	if (!list || index >= list->size)
 		return NULL;
 
-	// create new value
+	// create new value; alloc_val may return a valid new from a NULL val
 	const void *new = list->params.alloc_val ? list->params.alloc_val(val) : val;
-	if (!new) {
+
+	if (!new && !list->params.allow_null_val) {
 		return NULL;
 	}
 
 	const void *replaced = list->vals[index];
 
-	list->vals[index] = val;
+	list->vals[index] = new;
 
 	return replaced;
 }
@@ -437,9 +446,11 @@ size_t plist_append_all_clone(const struct Plist* const list, const struct Plist
 }
 
 const void *plist_remove(const struct Plist* const list, const void* const val) {
-	size_t i;
+	if (!list)
+		return NULL;
 
-	if (list && plist_index_of(&i, list, val)) {
+	size_t i;
+	if (plist_index_of(&i, list, val)) {
 		return remove_at(list, i);
 	} else {
 		return NULL;
@@ -545,10 +556,16 @@ char *plist_str(const struct Plist* const list) {
 	for (const void **v = list->vals; v < list->vals + list->size; v++) {
 		if (list->params.str_val) {
 			char *val_str = list->params.str_val(*v);
-			out = sprintf_append(out, "%s\n", val_str);
-			free(val_str);
-		} else {
+			if (val_str) {
+				out = sprintf_append(out, "%s\n", val_str);
+				free(val_str);
+			} else {
+				out = sprintf_append(out, "(null)\n");
+			}
+		} else if (*v) {
 			out = sprintf_append(out, "%p\n", *v);
+		} else {
+			out = sprintf_append(out, "(null)\n");
 		}
 	}
 

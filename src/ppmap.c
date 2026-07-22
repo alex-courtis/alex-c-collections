@@ -692,28 +692,32 @@ char *ppmap_str(const struct PPmap* const map) {
 	const void **v;
 	for (k = map->keys, v = map->vals; k < map->keys + map->size; k++, v++) {
 
-		if (*k) {
-			if (map->params.str_key) {
-				char *key_old = map->params.str_key(*k);
-				out = sprintf_append(out, "%s = ", key_old);
-				free(key_old);
+		if (map->params.str_key) {
+			char *key_str = map->params.str_key(*k);
+			if (key_str) {
+				out = sprintf_append(out, "%s = ", key_str);
+				free(key_str);
 			} else {
-				out = sprintf_append(out, "%p = ", *k);
+				out = sprintf_append(out, "(null) = ");
 			}
+		} else if (*k) {
+			out = sprintf_append(out, "%p = ", *k);
 		} else {
 			out = sprintf_append(out, "(null) = ");
 		}
 
-		if (*v) {
-			if (map->params.str_val) {
-				char *val_old = map->params.str_val(*v);
-				out = sprintf_append(out, "%s\n", val_old);
-				free(val_old);
+		if (map->params.str_val) {
+			char *val_str = map->params.str_val(*v);
+			if (val_str) {
+				out = sprintf_append(out, "%s\n", val_str);
+				free(val_str);
 			} else {
-				out = sprintf_append(out, "%p\n", *v);
+				out = sprintf_append(out, "(null)\n");
 			}
+		} else if (*v) {
+			out = sprintf_append(out, "%p\n", *v);
 		} else {
-			out = sprintf_append(out, "%s", "(null)\n");
+			out = sprintf_append(out, "(null)\n");
 		}
 	}
 
