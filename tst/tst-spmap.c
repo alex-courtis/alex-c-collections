@@ -451,23 +451,22 @@ static void spmap_remove_all_free__(void **state) {
 	const struct SPmapParams params = { .free_val = mock_free, };
 	const struct SPmap *map = spmap_init_with(params);
 
-	// assert_int_equal(spmap_remove_all_free(map), 0);
-	//
-	// assert_false(spmap_put(map, "a", V0));
-	// assert_false(spmap_put(map, "b", V1));
-	// assert_false(spmap_put(map, "c", V1));
-	//
-	// expect_ptr(mock_free, ptr, V0);
-	// // TODO no double free
-	// expect_ptr(mock_free, ptr, V1);
-	//
-	// assert_int_equal(spmap_remove_all_free(map), 3);
-	//
-	// assert_int_equal(spmap_size(map), 0);
-	//
-	// assert_false(spmap_contains_key(map, "a"));
-	// assert_false(spmap_contains_key(map, "b"));
-	// assert_false(spmap_contains_key(map, "c"));
+	assert_int_equal(spmap_remove_all_free(map), 0);
+
+	assert_false(spmap_put(map, "a", V0));
+	assert_false(spmap_put(map, "b", V1));
+	assert_false(spmap_put(map, "c", V1));
+
+	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V1);
+
+	assert_int_equal(spmap_remove_all_free(map), 3);
+
+	assert_int_equal(spmap_size(map), 0);
+
+	assert_false(spmap_contains_key(map, "a"));
+	assert_false(spmap_contains_key(map, "b"));
+	assert_false(spmap_contains_key(map, "c"));
 
 	spmap_free(map);
 }

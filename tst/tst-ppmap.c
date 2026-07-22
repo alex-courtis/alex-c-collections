@@ -307,14 +307,32 @@ static void ppmap_clone_deep__alloc_val_and_clone_val(void **state) {
 	ppmap_free(to);
 }
 
+static void ppmap_free__free_key__duplicate_missing_key(void **state) {
+	const struct PPmapParams params = {
+		.free_key = free,
+	};
+	const struct PPmap *map = ppmap_init_with(params);
+
+	const char *key = strdup("no double free");
+
+	ppmap_put(map, K0, V0);
+	ppmap_put(map, K1, V1);
+	ppmap_put(map, K2, V1);
+
+	map->keys[0] = key;
+	map->keys[1] = key;
+	map->keys[2] = NULL;
+
+	ppmap_free(map);
+}
+
 static void ppmap_free_vals__null_free_val(void **state) {
 	const struct PPmap *map = ppmap_init();
 
-	const char *val = strdup("0");
+	const char *val = strdup("no double free");
 
 	ppmap_put(map, K0, val);
-
-	assert_int_equal(ppmap_size(map), 1);
+	ppmap_put(map, K1, val);
 
 	ppmap_free_vals(map);
 }
@@ -329,10 +347,11 @@ static void ppmap_free_vals__free_val(void **state) {
 	ppmap_put(map, K0, V0);
 	ppmap_put(map, K1, NULL);
 	ppmap_put(map, K2, V2);
+	ppmap_put(map, K3, V0);
 
-	assert_int_equal(ppmap_size(map), 3);
+	assert_int_equal(ppmap_size(map), 4);
 
-	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V0); // only once
 	expect_ptr(mock_free, ptr, V2);
 
 	ppmap_free_vals(map);
@@ -1713,23 +1732,37 @@ static void ppmap_remove_all__many(void **state) {
 	ppmap_free(map);
 }
 
+static void ppmap_remove_all__free_key(void **state) {
+	const struct PPmapParams params = { .free_key = mock_free, };
+	const struct PPmap *map = ppmap_init_with(params);
+
+	assert_nul(ppmap_put(map, K0, V0));
+	assert_nul(ppmap_put(map, K1, V1));
+
+	expect_ptr(mock_free, ptr, K0);
+	expect_ptr(mock_free, ptr, K1);
+
+	assert_int_equal(ppmap_remove_all(map), 2);
+
+	ppmap_free(map);
+}
+
 static void ppmap_remove_all_free__no_free_val(void **state) {
 	const struct PPmap *map = ppmap_init();
 
-	// TODO no double free
-	// assert_int_equal(ppmap_remove_all_free(map), 0);
-	//
-	// char *val = strdup("to be freed only once");
-	//
-	// assert_nul(ppmap_put(map, K0, val));
-	// assert_nul(ppmap_put(map, K1, val));
-	//
-	// assert_int_equal(ppmap_remove_all_free(map), 2);
-	//
-	// assert_int_equal(ppmap_size(map), 0);
-	//
-	// assert_false(ppmap_contains_key(map, K0));
-	// assert_false(ppmap_contains_key(map, K1));
+	assert_int_equal(ppmap_remove_all_free(map), 0);
+
+	const char *val = strdup("to be freed only once");
+
+	assert_nul(ppmap_put(map, K0, val));
+	assert_nul(ppmap_put(map, K1, val));
+
+	assert_int_equal(ppmap_remove_all_free(map), 2);
+
+	assert_int_equal(ppmap_size(map), 0);
+
+	assert_false(ppmap_contains_key(map, K0));
+	assert_false(ppmap_contains_key(map, K1));
 
 	ppmap_free(map);
 }
@@ -1742,13 +1775,15 @@ static void ppmap_remove_all_free__free_key_free_val(void **state) {
 
 	assert_nul(ppmap_put(map, K0, V0));
 	assert_nul(ppmap_put(map, K1, V1));
+	assert_nul(ppmap_put(map, K2, V0));
 
 	expect_ptr(mock_free, ptr, K0);
-	expect_ptr(mock_free, ptr, V0);
 	expect_ptr(mock_free, ptr, K1);
+	expect_ptr(mock_free, ptr, K2);
+	expect_ptr(mock_free, ptr, V0);
 	expect_ptr(mock_free, ptr, V1);
 
-	assert_int_equal(ppmap_remove_all_free(map), 2);
+	assert_int_equal(ppmap_remove_all_free(map), 3);
 
 	assert_int_equal(ppmap_size(map), 0);
 
@@ -2605,6 +2640,8 @@ int main(void) {
 		TEST(ppmap_clone_deep__no_clone_val),
 		TEST(ppmap_clone_deep__alloc_val_and_clone_val),
 
+		TEST(ppmap_free__free_key__duplicate_missing_key),
+
 		TEST(ppmap_free_vals__null_free_val),
 		TEST(ppmap_free_vals__free_val),
 		TEST(ppmap_free_vals__free_val_hierarchical),
@@ -2689,6 +2726,7 @@ int main(void) {
 		TEST(ppmap_remove_free__free_val),
 
 		TEST(ppmap_remove_all__many),
+		TEST(ppmap_remove_all__free_key),
 
 		TEST(ppmap_remove_all_free__no_free_val),
 		TEST(ppmap_remove_all_free__free_key_free_val),
