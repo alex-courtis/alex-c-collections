@@ -453,21 +453,23 @@ static void sset_sort__many_case_insensitive(void **state) {
 	sset_free(expected);
 }
 
-static void sset_pslist__(void **state) {
-	const struct Sset *set = sset_init();
+// TODO implement Slist
 
-	sset_add(set, "a");
-	sset_add(set, "b");
-
-	struct Pslist *list = sset_pslist(set);
-
-	assert_int_equal(pslist_length(list), 2);
-	assert_str_equal(pslist_at(list, 0), "a");
-	assert_str_equal(pslist_at(list, 1), "b");
-
-	pslist_free_vals(&list, NULL);
-	sset_free(set);
-}
+// static void sset_pslist__(void **state) {
+// 	const struct Sset *set = sset_init();
+//
+// 	sset_add(set, "a");
+// 	sset_add(set, "b");
+//
+// 	struct Pslist *list = sset_pslist(set);
+//
+// 	assert_int_equal(pslist_length(list), 2);
+// 	assert_str_equal(pslist_at(list, 0), "a");
+// 	assert_str_equal(pslist_at(list, 1), "b");
+//
+// 	pslist_free_vals(&list, NULL);
+// 	sset_free(set);
+// }
 
 // also tests constructor
 static void sset_clone__(void **state) {
@@ -530,7 +532,7 @@ static void sset__null_inputs(void **state) {
 	assert_int_equal(sset_remove_in(NULL, set), 0);
 	assert_false(sset_equal(NULL, NULL));
 	assert_false(sset_equal(set, NULL));
-	assert_nul(sset_pslist(NULL));
+	// assert_nul(sset_pslist(NULL));
 	assert_nul(sset_str(NULL));
 	sset_sort(NULL);
 	assert_int_equal(sset_size(NULL), 0);
@@ -580,7 +582,7 @@ int main(void) {
 		TEST(sset_sort__words),
 		TEST(sset_sort__many_case_insensitive),
 
-		TEST(sset_pslist__),
+		// TEST(sset_pslist__),
 
 		TEST(sset_clone__),
 

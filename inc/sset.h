@@ -122,7 +122,7 @@ bool sset_equal(const struct Sset* const a, const struct Sset* const b);
 // TODO replace with Slist
 
 // set ordered vals, caller frees list and vals
-struct Pslist *sset_pslist(const struct Sset* const set);
+// struct Pslist *sset_pslist(const struct Sset* const set);
 
 /*
  * Info

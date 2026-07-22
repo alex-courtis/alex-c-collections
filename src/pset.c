@@ -1,9 +1,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include "fn.h"
-#include "pslist.h"
+#include "plist.h"
 #include "str.h"
 
 #include "pset.h"
@@ -198,18 +199,27 @@ static const struct Pset *clone(const struct Pset* const from, fn_clone clone_va
 	return to;
 }
 
-static struct Pslist *pslist(const struct Pset* const set, fn_clone clone_val) {
-	struct Pslist *pslist = NULL;
+static const struct Plist *plist(const struct Pset* const map, fn_clone clone_val) {
+	const struct PlistParams params = {
+		.equal_val = map->params.equal_val,
+		.alloc_val = map->params.alloc_val,
+		.free_val = map->params.free_val,
+		.clone_val = map->params.clone_val,
+		.str_val = map->params.str_val,
+		.initial = MAX(map->size, map->params.initial),
+		.grow  = map->params.grow,
+	};
+	const struct Plist *list = plist_init_with(params);
 
-	for (const void **v = set->vals; v < set->vals + set->size; v++) {
-		if (clone_val) {
-			pslist_append(&pslist, (void*)clone_val(*v));
+	for (const void **v = map->vals; v < map->vals + map->size; v++) {
+		if (*v && clone_val) {
+			plist_append(list, (void*)clone_val(*v));
 		} else {
-			pslist_append(&pslist, (void*)*v);
+			plist_append(list, (void*)*v);
 		}
 	}
 
-	return pslist;
+	return list;
 }
 
 const struct Pset *pset_init(void) {
@@ -426,15 +436,15 @@ bool pset_equal(const struct Pset* const a, const struct Pset* const b) {
 	return true;
 }
 
-struct Pslist *pset_pslist(const struct Pset* const set) {
-	return set ? pslist(set, set->params.alloc_val) : NULL;
+const struct Plist *pset_plist(const struct Pset* const set) {
+	return set ? plist(set, NULL) : NULL;
 }
 
-struct Pslist *pset_pslist_clone(const struct Pset* const set) {
+const struct Plist *pset_plist_clone(const struct Pset* const set) {
 	if (!set || !set->params.clone_val)
 		return NULL;
 
-	return pslist(set, set->params.clone_val);
+	return plist(set, set->params.clone_val);
 }
 
 char *pset_str(const struct Pset* const set) {
