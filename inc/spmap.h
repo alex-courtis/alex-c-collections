@@ -195,17 +195,6 @@ struct Pslist *spmap_vals_pslist(const struct SPmap* const map);
 // map ordered vals, caller frees list and vals, NULL when NULL clone_val [clone_val]
 struct Pslist *spmap_vals_pslist_clone(const struct SPmap* const map);
 
-// TODO remove
-
-// map ordered vals, same params, caller frees set, caller frees vals when alloc_val present [alloc_val]
-const struct Pset *spmap_vals_pset(const struct SPmap* const map);
-
-// TODO remove
-
-// map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val or both alloc_val and clone_val [clone_val]
-const struct Pset *spmap_vals_pset_clone(const struct SPmap* const map);
-
-
 /*
  * Info
  */

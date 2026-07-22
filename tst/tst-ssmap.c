@@ -371,44 +371,6 @@ static void ssmap_vals_pslist__many(void **state) {
 	ssmap_free(map);
 }
 
-static void ssmap_vals_sset__many(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	ssmap_put(map, "a", "aa");
-	ssmap_put(map, "b", "bb");
-
-	const struct Sset *expected = sset_init();
-	sset_add(expected, "aa");
-	sset_add(expected, "bb");
-
-	const struct Sset *actual = ssmap_vals_sset(map);
-
-	assert_sset_equal(actual, expected);
-
-	ssmap_free(map);
-	sset_free(expected);
-	sset_free(actual);
-}
-
-static void ssmap_vals_sset__params(void **state) {
-	const struct SSmapParams params = {
-		.case_insensitive_val = true,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct SSmap *map = ssmap_init_with(params);
-
-	const struct Sset *set = ssmap_vals_sset(map);
-
-	assert_true(set->params.case_insensitive);
-	assert_int_equal(set->params.initial, 99);
-	assert_int_equal(set->params.grow, 1);
-
-	ssmap_free(map);
-
-	sset_free(set);
-}
-
 static void ssmap_put_get_remove_free__case_sensitive(void **state) {
 	const struct SSmapParams params = { .allow_null_val = true, };
 	const struct SSmap *map = ssmap_init_with(params);
@@ -660,7 +622,6 @@ static void ssmap__null_inputs(void **state) {
 	assert_nul(ssmap_keys_pslist(NULL));
 	assert_nul(ssmap_keys_sset(NULL));
 	assert_nul(ssmap_vals_pslist(NULL));
-	assert_nul(ssmap_vals_sset(NULL));
 	assert_nul(ssmap_str(NULL));
 	assert_int_equal(ssmap_size(NULL), 0);
 
@@ -700,9 +661,6 @@ int main(void) {
 		TEST(ssmap_keys_sset__params),
 
 		TEST(ssmap_vals_pslist__many),
-
-		TEST(ssmap_vals_sset__many),
-		TEST(ssmap_vals_sset__params),
 
 		TEST(ssmap_put_get_remove_free__case_sensitive),
 		TEST(ssmap_put_get_remove_free__case_insensitive),

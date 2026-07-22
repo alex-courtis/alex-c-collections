@@ -249,24 +249,6 @@ struct Pslist *ssmap_vals_pslist(const struct SSmap* const map) {
 	return map ? ppmap_vals_pslist(map->ppmap) : NULL;
 }
 
-const struct Sset *ssmap_vals_sset(const struct SSmap* const map) {
-	if (!map)
-		return NULL;
-
-	const struct SsetParams params = {
-		.case_insensitive = map->params.case_insensitive_val,
-		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
-		.grow = map->params.grow,
-	};
-	const struct Sset *set = sset_init_with(params);
-
-	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
-		sset_add(set, it->val);
-	}
-
-	return set;
-}
-
 char *ssmap_str(const struct SSmap* const map) {
 	return map ? ppmap_str(map->ppmap) : NULL;
 }

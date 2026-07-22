@@ -2,7 +2,7 @@ INCS = -Iinc
 
 CPPFLAGS += $(INCS)
 
-OFLAGS = -O3
+OFLAGS = -O0
 WFLAGS = -pedantic \
 		 -Wall \
 		 -Wextra \

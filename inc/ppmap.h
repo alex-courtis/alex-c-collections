@@ -202,16 +202,6 @@ struct Pslist *ppmap_vals_pslist(const struct PPmap* const map);
 // map ordered vals, caller frees list and vals, NULL when NULL clone_val [clone_val]
 struct Pslist *ppmap_vals_pslist_clone(const struct PPmap* const map);
 
-// TODO remove
-
-// map ordered vals, same params, caller frees set, caller frees vals when alloc_val present [alloc_val]
-const struct Pset *ppmap_vals_pset(const struct PPmap* const map);
-
-// TODO remove
-
-// map ordered vals, same params, caller frees set and vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_val, clone_val]
-const struct Pset *ppmap_vals_pset_clone(const struct PPmap* const map);
-
 /*
  * Info
  */

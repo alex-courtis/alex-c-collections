@@ -156,11 +156,6 @@ const struct Sset *ssmap_keys_sset(const struct SSmap* const map);
 // map ordered vals, caller frees list and contents
 struct Pslist *ssmap_vals_pslist(const struct SSmap* const map);
 
-// TODO remove
-
-// map ordered vals, same params
-const struct Sset *ssmap_vals_sset(const struct SSmap* const map);
-
 /*
  * Info
  */
