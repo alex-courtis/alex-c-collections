@@ -149,6 +149,8 @@ const struct Plist *ssmap_keys_plist(const struct SSmap* const map);
 // map ordered keys, same params
 const struct Sset *ssmap_keys_sset(const struct SSmap* const map);
 
+// TODO this should be an Slist, check others
+
 // map ordered vals, caller frees list and contents
 const struct Plist *ssmap_vals_plist(const struct SSmap* const map);
 

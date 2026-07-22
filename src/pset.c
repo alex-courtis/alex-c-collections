@@ -199,20 +199,20 @@ static const struct Pset *clone(const struct Pset* const from, fn_clone clone_va
 	return to;
 }
 
-static const struct Plist *plist(const struct Pset* const map, fn_clone clone_val) {
+static const struct Plist *plist(const struct Pset* const set, fn_clone clone_val) {
 	const struct PlistParams params = {
-		.equal_val = map->params.equal_val,
-		.alloc_val = map->params.alloc_val,
-		.free_val = map->params.free_val,
-		.clone_val = map->params.clone_val,
-		.str_val = map->params.str_val,
-		.initial = MAX(map->size, map->params.initial),
-		.grow  = map->params.grow,
+		.equal_val = set->params.equal_val,
+		.alloc_val = set->params.alloc_val,
+		.free_val = set->params.free_val,
+		.clone_val = set->params.clone_val,
+		.str_val = set->params.str_val,
+		.initial = MAX(set->size, set->params.initial),
+		.grow  = set->params.grow,
 	};
 	const struct Plist *list = plist_init_with(params);
 
-	for (const void **v = map->vals; v < map->vals + map->size; v++) {
-		if (*v && clone_val) {
+	for (const void **v = set->vals; v < set->vals + set->size; v++) {
+		if (clone_val) {
 			plist_append(list, (void*)clone_val(*v));
 		} else {
 			plist_append(list, (void*)*v);
