@@ -148,34 +148,6 @@ static const void *remove_at(const struct Plist* const list, const size_t i) {
 	return val_old;
 }
 
-static bool remove(const void **removed, const struct Plist* const list, const void* const val, bool do_free) {
-	if (removed)
-		*removed = NULL;
-
-	size_t i;
-
-	if (!plist_index_of(&i, list, val))
-		return false;
-
-	const void *old = remove_at(list, i);
-
-	if (do_free) {
-		if (old) {
-			if (list->params.free_val) {
-				list->params.free_val((void*)old);
-			} else {
-				free((void*)old);
-			}
-		}
-	} else {
-		if (removed) {
-			*removed = old;
-		}
-	}
-
-	return true;
-}
-
 static void free_vals(const struct Plist* const list) {
 
 	// values to free, no duplicates or nulls
@@ -495,15 +467,32 @@ const void *plist_remove(const struct Plist* const list, const void* const val) 
 	if (!list)
 		return NULL;
 
-	const void *removed = NULL;
+	size_t i;
+	if (!plist_index_of(&i, list, val))
+		return NULL;
 
-	remove(&removed, list, val, false);
-
-	return removed;
+	return remove_at(list, i);
 }
 
 bool plist_remove_free(const struct Plist* const list, const void* const val) {
-	return list ? remove(NULL, list, val, true) : false;
+	if (!list)
+		return NULL;
+
+	size_t i;
+	if (!plist_index_of(&i, list, val))
+		return false;
+
+	const void *removed = remove_at(list, i);
+
+	if (removed) {
+		if (list->params.free_val) {
+			list->params.free_val((void*)removed);
+		} else {
+			free((void*)removed);
+		}
+	}
+
+	return true;
 }
 
 const void *plist_remove_at(const struct Plist* const list, const size_t i) {
