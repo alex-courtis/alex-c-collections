@@ -227,6 +227,60 @@ static void free_vals(const struct PPmap* const map) {
 	free(to_free);
 }
 
+static bool remove(const void **removed, const struct PPmap* const map, const void* const key, bool do_free) {
+	if (removed)
+		*removed = NULL;
+
+	if (!key)
+		return NULL;
+
+	bool was_removed = false;
+
+	const void *val_old = NULL;
+
+	for (const void **k = map->keys, **v = map->vals; k < map->keys + map->size; k++, v++) {
+
+		if (map->params.equal_key ? map->params.equal_key(*k, key) : *k == key) {
+			struct PPmap *map_m = (struct PPmap*)map;
+
+			if (map->params.free_key) {
+				map->params.free_key((void*)*k);
+			}
+			*k = NULL;
+			val_old = *v;
+			*v = NULL;
+			map_m->size--;
+
+			// shift down over removed
+			const void **mk;
+			const void **mv;
+			for (mk = k, mv = v; mk < map->keys + map->size; mk++, mv++) {
+				*mk = *(mk + 1);
+				*mv = *(mv + 1);
+			}
+			*mk = NULL;
+			*mv = NULL;
+
+			was_removed = true;
+			break;
+		}
+	}
+
+	if (removed) {
+		*removed = val_old;
+	}
+
+	if (do_free && val_old) {
+		if (map->params.free_val) {
+			map->params.free_val((void*)val_old);
+		} else {
+			free((void*)val_old);
+		}
+	}
+
+	return was_removed;
+}
+
 static size_t remove_all(const struct PPmap* const map) {
 	memset(map->keys, 0, map->size * sizeof(void*));
 	memset(map->vals, 0, map->size * sizeof(void*));
@@ -529,46 +583,14 @@ const void *ppmap_remove(const struct PPmap* const map, const void* const key) {
 	if (!map || !key)
 		return NULL;
 
-	for (const void **k = map->keys, **v = map->vals; k < map->keys + map->size; k++, v++) {
+	const void *removed = NULL;
+	remove(&removed, map, key, false);
 
-		if (map->params.equal_key ? map->params.equal_key(*k, key) : *k == key) {
-			struct PPmap *map_m = (struct PPmap*)map;
-
-			if (map->params.free_key) {
-				map->params.free_key((void*)*k);
-			}
-			*k = NULL;
-			const void *val_old = *v;
-			*v = NULL;
-			map_m->size--;
-
-			// shift down over removed
-			const void **mk;
-			const void **mv;
-			for (mk = k, mv = v; mk < map->keys + map->size; mk++, mv++) {
-				*mk = *(mk + 1);
-				*mv = *(mv + 1);
-			}
-			*mk = NULL;
-			*mv = NULL;
-
-			return val_old;
-		}
-	}
-
-	return NULL;
+	return removed;
 }
 
 bool ppmap_remove_free(const struct PPmap* const map, const void* const key) {
-	if (ppmap_contains_key(map, key)) {
-		const void *removed = ppmap_remove(map, key);
-		if (removed) {
-			map->params.free_val ? map->params.free_val((void*)removed) : free((void*)removed);
-		}
-		return true;
-	} else {
-		return false;
-	}
+	return map ? remove(NULL, map, key, true) : false;
 }
 
 size_t ppmap_remove_all(const struct PPmap* const map) {
