@@ -539,7 +539,7 @@ static void spmap_it_remove__many(void **state) {
 	for (const struct SPmapIt *it = spmap_it(map); it; it = spmap_it_next(it)) {
 		iterations++;
 		if (it->val == V1 || it->val == V3) {
-			spmap_it_remove(it);
+			assert_non_nul(spmap_it_remove(it));
 		}
 	}
 
@@ -555,7 +555,7 @@ static void spmap_it_remove__many(void **state) {
 static void spmap_it_remove__partial(void **state) {
 	const struct SPmapIt *it = calloc(1, sizeof(struct SPmapIt));
 
-	spmap_it_remove(it);
+	assert_nul(spmap_it_remove(it));
 }
 
 static void spmap_it_remove_free__many(void **state) {
@@ -581,7 +581,7 @@ static void spmap_it_remove_free__many(void **state) {
 	for (const struct SPmapIt *it = spmap_it(map); it; it = spmap_it_next(it)) {
 		iterations++;
 		if (it->val == V1 || it->val == V3) {
-			spmap_it_remove_free(it);
+			assert_true(spmap_it_remove_free(it));
 		}
 	}
 
@@ -597,7 +597,7 @@ static void spmap_it_remove_free__many(void **state) {
 static void spmap_it_remove_free__partial(void **state) {
 	const struct SPmapIt *it = calloc(1, sizeof(struct SPmapIt));
 
-	spmap_it_remove_free(it);
+	assert_false(spmap_it_remove_free(it));
 }
 
 static void spmap_str__(void **state) {
@@ -884,8 +884,8 @@ static void spmap__null_inputs(void **state) {
 	assert_int_equal(spmap_remove_in_free(NULL, NULL), 0);
 	assert_int_equal(spmap_remove_in_free(map, NULL), 0);
 	assert_int_equal(spmap_remove_in_free(NULL, map), 0);
-	spmap_it_remove(NULL);
-	spmap_it_remove_free(NULL);
+	assert_nul(spmap_it_remove(NULL));
+	assert_false(spmap_it_remove_free(NULL));
 	assert_false(spmap_equal(NULL, NULL));
 	assert_false(spmap_equal(map, NULL));
 	assert_nul(spmap_keys_slist(NULL));

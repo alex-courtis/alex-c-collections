@@ -205,19 +205,19 @@ size_t ssmap_remove_in(const struct SSmap* const map, const struct SSmap* const 
 	return map && in ? ppmap_remove_in_free(map->ppmap, in->ppmap) : false;
 }
 
-void ssmap_it_remove(const struct SSmapIt* const it) {
+bool ssmap_it_remove(const struct SSmapIt* const it) {
 	if (!it)
-		return;
+		return false;
 
 	if (!it->st) {
 		ssmap_it_free(it);
-		return;
+		return false;
 	}
-
-	ppmap_it_remove_free(it->st->pit);
 
 	((struct SSmapIt*)it)->key = NULL;
 	((struct SSmapIt*)it)->val = NULL;
+
+	return ppmap_it_remove_free(it->st->pit);
 }
 
 bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b) {

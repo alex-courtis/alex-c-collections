@@ -160,11 +160,11 @@ size_t spmap_remove_in(const struct SPmap* const map, const struct SPmap* const 
 // remove and free entries in keys, return number removed [equal_key, free_val]
 size_t spmap_remove_in_free(const struct SPmap* const map, const struct SPmap* const in);
 
-// remove the entry, it is unusable, spmap_it_next must be called
-void spmap_it_remove(const struct SPmapIt* const it);
+// remove the entry, return val if removed, it is unusable, spmap_it_next must be called
+const void *spmap_it_remove(const struct SPmapIt* const it);
 
-// remove and entry, free the val, it is unusable, spmap_it_next must be called [free_val]
-void spmap_it_remove_free(const struct SPmapIt* const it);
+// remove the entry and free the val, return true if removed, it is unusable, spmap_it_next must be called [free_val]
+bool spmap_it_remove_free(const struct SPmapIt* const it);
 
 /*
  * Comparison

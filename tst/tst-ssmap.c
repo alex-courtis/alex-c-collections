@@ -591,7 +591,7 @@ static void ssmap_it_remove__many(void **state) {
 	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
 		iterations++;
 		if (strcmp(it->key, "a") == 0 || strcmp(it->key, "c") == 0 || strcmp(it->key, "e") == 0) {
-			ssmap_it_remove(it);
+			assert_true(ssmap_it_remove(it));
 		}
 	}
 
@@ -607,7 +607,7 @@ static void ssmap_it_remove__many(void **state) {
 static void ssmap_it_remove__partial(void **state) {
 	const struct SSmapIt *it = calloc(1, sizeof(struct SSmapIt));
 
-	ssmap_it_remove(it);
+	assert_false(ssmap_it_remove(it));
 }
 
 static void ssmap_str__(void **state) {
@@ -665,7 +665,7 @@ static void ssmap__null_inputs(void **state) {
 	assert_int_equal(ssmap_remove_in(NULL, NULL), 0);
 	assert_int_equal(ssmap_remove_in(map, NULL), 0);
 	assert_int_equal(ssmap_remove_in(NULL, map), 0);
-	ssmap_it_remove(NULL);
+	assert_false(ssmap_it_remove(NULL));
 	assert_false(ssmap_equal(NULL, NULL));
 	assert_false(ssmap_equal(map, NULL));
 	assert_nul(ssmap_keys_slist(NULL));

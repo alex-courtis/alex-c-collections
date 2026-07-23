@@ -1178,7 +1178,7 @@ static void ppmap_it_remove__start(void **state) {
 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
 		iterations++;
 		if (it->val == V0 || it->val == V1) {
-			ppmap_it_remove(it);
+			assert_non_nul(ppmap_it_remove(it));
 		}
 	}
 
@@ -1210,7 +1210,7 @@ static void ppmap_it_remove__mid(void **state) {
 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
 		iterations++;
 		if (it->val == V1 || it->val == V3) {
-			ppmap_it_remove(it);
+			assert_non_nul(ppmap_it_remove(it));
 		}
 	}
 
@@ -1238,7 +1238,7 @@ static void ppmap_it_remove__end(void **state) {
 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
 		iterations++;
 		if (it->val == V1 || it->val == V2) {
-			ppmap_it_remove(it);
+			assert_non_nul(ppmap_it_remove(it));
 		}
 	}
 
@@ -1261,7 +1261,7 @@ static void ppmap_it_remove__all(void **state) {
 	size_t iterations = 0;
 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
 		iterations++;
-		ppmap_it_remove(it);
+		assert_non_nul(ppmap_it_remove(it));
 	}
 
 	assert_int_equal(ppmap_size(map), 0);
@@ -1273,7 +1273,7 @@ static void ppmap_it_remove__all(void **state) {
 static void ppmap_it_remove__partial(void **state) {
 	const struct PPmapIt *it = calloc(1, sizeof(struct PPmapIt));
 
-	ppmap_it_remove(it);
+	assert_nul(ppmap_it_remove(it));
 }
 
 static void ppmap_it_remove_free__many(void **state) {
@@ -1299,7 +1299,7 @@ static void ppmap_it_remove_free__many(void **state) {
 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
 		iterations++;
 		if (it->val == V1 || it->val == V3) {
-			ppmap_it_remove_free(it);
+			assert_true(ppmap_it_remove_free(it));
 		}
 	}
 
@@ -1310,6 +1310,12 @@ static void ppmap_it_remove_free__many(void **state) {
 
 	ppmap_free(map);
 	ppmap_free(expected);
+}
+
+static void ppmap_it_remove_free__partial(void **state) {
+	const struct PPmapIt *it = calloc(1, sizeof(struct PPmapIt));
+
+	assert_false(ppmap_it_remove_free(it));
 }
 
 static void ppmap_put__again(void **state) {
@@ -2437,8 +2443,8 @@ static void ppmap__null_inputs(void **state) {
 	assert_nul(ppmap_it(NULL));
 	assert_nul(ppmap_filter_it(NULL, filter));
 	assert_nul(ppmap_it_next(NULL));
-	ppmap_it_remove(NULL),
-	ppmap_it_remove_free(NULL),
+	assert_nul(ppmap_it_remove(NULL)),
+	assert_false(ppmap_it_remove_free(NULL)),
 	assert_false(ppmap_put(NULL, NULL, NULL));
 	assert_false(ppmap_put(map, NULL, NULL));
 	assert_nul(ppmap_put_if_absent(NULL, NULL, NULL));
@@ -2457,6 +2463,8 @@ static void ppmap__null_inputs(void **state) {
 	assert_int_equal(ppmap_put_all_clone_free(map, NULL), 0);
 	assert_nul(ppmap_remove(NULL, NULL));
 	assert_nul(ppmap_remove(map, NULL));
+	assert_false(ppmap_remove_free(NULL, NULL));
+	assert_false(ppmap_remove_free(map, NULL));
 	assert_int_equal(ppmap_remove_all(NULL), 0);
 	assert_int_equal(ppmap_remove_all_free(NULL), 0);
 	assert_int_equal(ppmap_remove_in(NULL, NULL), 0);
@@ -2552,6 +2560,7 @@ int main(void) {
 		TEST(ppmap_it_remove__partial),
 
 		TEST(ppmap_it_remove_free__many),
+		TEST(ppmap_it_remove_free__partial),
 
 		TEST(ppmap_put__again),
 

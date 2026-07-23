@@ -60,25 +60,6 @@ static const struct SPmapIt *it_init(const struct PPmapIt *pit) {
 	return it;
 }
 
-static void it_remove(const struct SPmapIt* const it, bool do_free) {
-	if (!it)
-		return;
-
-	if (!it->st) {
-		spmap_it_free(it);
-		return;
-	}
-
-	if (do_free) {
-		ppmap_it_remove_free(it->st->pit);
-	} else {
-		ppmap_it_remove(it->st->pit);
-	}
-
-	((struct SPmapIt*)it)->key = NULL;
-	((struct SPmapIt*)it)->val = NULL;
-}
-
 const struct SPmap *spmap_init(void) {
 	const struct SPmapParams params = { 0 };
 	return spmap_init_with(params);
@@ -256,12 +237,34 @@ size_t spmap_remove_in_free(const struct SPmap* const map, const struct SPmap* c
 	return map && in ? ppmap_remove_in_free(map->ppmap, in->ppmap) : 0;
 }
 
-void spmap_it_remove(const struct SPmapIt* const it) {
-	it_remove(it, false);
+const void *spmap_it_remove(const struct SPmapIt* const it) {
+	if (!it)
+		return NULL;
+
+	if (!it->st) {
+		spmap_it_free(it);
+		return NULL;
+	}
+
+	((struct SPmapIt*)it)->key = NULL;
+	((struct SPmapIt*)it)->val = NULL;
+
+	return ppmap_it_remove(it->st->pit);
 }
 
-void spmap_it_remove_free(const struct SPmapIt* const it) {
-	it_remove(it, true);
+bool spmap_it_remove_free(const struct SPmapIt* const it) {
+	if (!it)
+		return false;
+
+	if (!it->st) {
+		spmap_it_free(it);
+		return false;
+	}
+
+	((struct SPmapIt*)it)->key = NULL;
+	((struct SPmapIt*)it)->val = NULL;
+
+	return ppmap_it_remove_free(it->st->pit);
 }
 
 size_t spmap_put_all(const struct SPmap* const map, const struct SPmap* const from) {

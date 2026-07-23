@@ -165,13 +165,11 @@ size_t ppmap_remove_in(const struct PPmap* const map, const struct PPmap* const 
 // remove and free entries in keys, return number removed [equal_key, free_key, free_val]
 size_t ppmap_remove_in_free(const struct PPmap* const map, const struct PPmap* const in);
 
-// remove the it.val, return val if removed, it is unusable, ppmap_it_next must be called [free_key]
-bool ppmap_it_remove(const struct PPmapIt* const it);
-const char *ppmap_it_remove2(const struct PPmapIt* const it);
+// remove the entry, return val if removed, it is unusable, ppmap_it_next must be called [free_key]
+const void *ppmap_it_remove(const struct PPmapIt* const it);
 
-// remove and free the it.val, return true if removed, it is unusable, ppmap_it_next must be called [free_key, free_val]
-void ppmap_it_remove_free(const struct PPmapIt* const it);
-bool ppmap_it_remove_free2(const struct PPmapIt* const it);
+// remove the entry and free the val, return true if removed, it is unusable, ppmap_it_next must be called [free_key, free_val]
+bool ppmap_it_remove_free(const struct PPmapIt* const it);
 
 /*
  * Comparison

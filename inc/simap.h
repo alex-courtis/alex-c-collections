@@ -130,8 +130,8 @@ size_t simap_remove_all(const struct SImap* const map);
 // remove entries in keys, return number removed
 size_t simap_remove_in(const struct SImap* const map, const struct SImap* const in);
 
-// remove the entry, it is unusable, simap_it_next must be called
-void simap_it_remove(const struct SImapIt* const it);
+// remove the entry, return true if removed, it is unusable, ipmap_it_next must be called
+bool simap_it_remove(const struct SImapIt* const it);
 
 /*
  * Comparison

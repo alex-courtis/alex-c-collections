@@ -256,19 +256,19 @@ size_t simap_remove_in(const struct SImap* const map, const struct SImap* const 
 	return map && in ? ppmap_remove_in_free(map->ppmap, in->ppmap) : false;
 }
 
-void simap_it_remove(const struct SImapIt* const it) {
+bool simap_it_remove(const struct SImapIt* const it) {
 	if (!it)
-		return;
+		return false;
 
 	if (!it->st) {
 		simap_it_free(it);
-		return;
+		return false;
 	}
-
-	ppmap_it_remove_free(it->st->pit);
 
 	((struct SImapIt*)it)->key = NULL;
 	((struct SImapIt*)it)->val = 0;
+
+	return ppmap_it_remove_free(it->st->pit);
 }
 
 bool simap_equal(const struct SImap* const a, const struct SImap* const b) {

@@ -822,7 +822,7 @@ static void ipmap_it_remove__many(void **state) {
 	for (const struct IPmapIt *it = ipmap_it(map); it; it = ipmap_it_next(it)) {
 		iterations++;
 		if (it->val == V1 || it->val == V3) {
-			ipmap_it_remove(it);
+			assert_non_nul(ipmap_it_remove(it));
 		}
 	}
 
@@ -838,7 +838,7 @@ static void ipmap_it_remove__many(void **state) {
 static void ipmap_it_remove__partial(void **state) {
 	const struct IPmapIt *it = calloc(1, sizeof(struct IPmapIt));
 
-	ipmap_it_remove(it);
+	assert_nul(ipmap_it_remove(it));
 }
 
 static void ipmap_it_remove_free__many(void **state) {
@@ -864,7 +864,7 @@ static void ipmap_it_remove_free__many(void **state) {
 	for (const struct IPmapIt *it = ipmap_it(map); it; it = ipmap_it_next(it)) {
 		iterations++;
 		if (it->val == V1 || it->val == V3) {
-			ipmap_it_remove_free(it);
+			assert_true(ipmap_it_remove_free(it));
 		}
 	}
 
@@ -880,7 +880,7 @@ static void ipmap_it_remove_free__many(void **state) {
 static void ipmap_it_remove_free__partial(void **state) {
 	const struct IPmapIt *it = calloc(1, sizeof(struct IPmapIt));
 
-	ipmap_it_remove_free(it);
+	assert_false(ipmap_it_remove_free(it));
 }
 
 static void ipmap_str__(void **state) {
@@ -951,8 +951,8 @@ static void ipmap__null_inputs(void **state) {
 	assert_int_equal(ipmap_remove_in_free(NULL, NULL), 0);
 	assert_int_equal(ipmap_remove_in_free(map, NULL), 0);
 	assert_int_equal(ipmap_remove_in_free(NULL, map), 0);
-	ipmap_it_remove(NULL);
-	ipmap_it_remove_free(NULL);
+	assert_nul(ipmap_it_remove(NULL));
+	assert_false(ipmap_it_remove_free(NULL));
 	assert_false(ipmap_equal(NULL, NULL));
 	assert_false(ipmap_equal(map, NULL));
 	assert_nul(ipmap_vals_plist(NULL));

@@ -292,9 +292,9 @@ static size_t remove_all(const struct PPmap* const map) {
 	return removed;
 }
 
-static bool it_remove(const struct PPmapIt* const it, bool do_free) {
-	if (!it)
-		return false;
+static bool it_remove(const void **removed, const struct PPmapIt* const it, bool do_free) {
+	if (removed)
+		*removed = NULL;
 
 	struct PPmapItState *st = it->st;
 	if (!st) {
@@ -302,11 +302,7 @@ static bool it_remove(const struct PPmapIt* const it, bool do_free) {
 		return false;
 	}
 
-	if (do_free) {
-		ppmap_remove_free(st->map, it->key);
-	} else {
-		ppmap_remove(st->map, it->key);
-	}
+	bool was_removed = remove(removed, st->map, it->key, do_free);
 
 	if (st->position > 0) {
 		st->position--;
@@ -317,7 +313,7 @@ static bool it_remove(const struct PPmapIt* const it, bool do_free) {
 	((struct PPmapIt*)it)->key = NULL;
 	((struct PPmapIt*)it)->val = NULL;
 
-	return true;
+	return was_removed;
 }
 
 
@@ -580,7 +576,7 @@ size_t ppmap_put_all_clone_free(const struct PPmap* const map, const struct PPma
 }
 
 const void *ppmap_remove(const struct PPmap* const map, const void* const key) {
-	if (!map || !key)
+	if (!map)
 		return NULL;
 
 	const void *removed = NULL;
@@ -642,12 +638,18 @@ size_t ppmap_remove_in_free(const struct PPmap* const map, const struct PPmap* c
 	return removed;
 }
 
-bool ppmap_it_remove(const struct PPmapIt* const it) {
-	return it_remove(it, false);
+const void *ppmap_it_remove(const struct PPmapIt* const it) {
+	if (!it)
+		return NULL;
+
+	const void *removed = NULL;
+	it_remove(&removed, it, false);
+
+	return removed;
 }
 
-void ppmap_it_remove_free(const struct PPmapIt* const it) {
-	it_remove(it, true);
+bool ppmap_it_remove_free(const struct PPmapIt* const it) {
+	return it ? it_remove(NULL, it, true) : false;
 }
 
 bool ppmap_equal(const struct PPmap* const a, const struct PPmap* const b) {
