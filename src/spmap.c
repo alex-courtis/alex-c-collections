@@ -5,6 +5,7 @@
 
 #include "fn.h"
 #include "ppmap.h"
+#include "slist.h"
 #include "sset.h"
 
 #include "spmap.h"
@@ -85,7 +86,7 @@ const struct SPmap *spmap_init(void) {
 
 const struct SPmap *spmap_init_with(const struct SPmapParams params) {
 	const struct PPmapParams ppmap_params = {
-		.equal_key = params.case_insensitive ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
+		.equal_key = params.case_insensitive_key ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
 		.equal_val = params.equal_val,
 		.alloc_key = (fn_clone)clone_strdup,
 		.alloc_val = params.alloc_val,
@@ -283,8 +284,22 @@ bool spmap_equal(const struct SPmap* const a, const struct SPmap* const b) {
 	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
 }
 
-const struct Plist *spmap_keys_plist(const struct SPmap* const map) {
-	return map ? ppmap_keys_plist(map->ppmap) : NULL;
+const struct Slist *spmap_keys_slist(const struct SPmap* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SlistParams params = {
+		.case_insensitive = map->params.case_insensitive_key,
+		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct Slist *list = slist_init_with(params);
+
+	for (const struct SPmapIt *it = spmap_it(map); it; it = spmap_it_next(it)) {
+		slist_append(list, it->key);
+	}
+
+	return list;
 }
 
 const struct Sset *spmap_keys_sset(const struct SPmap* const map) {
@@ -292,7 +307,7 @@ const struct Sset *spmap_keys_sset(const struct SPmap* const map) {
 		return NULL;
 
 	const struct SsetParams params = {
-		.case_insensitive = map->params.case_insensitive,
+		.case_insensitive = map->params.case_insensitive_key,
 		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
 		.grow = map->params.grow,
 	};

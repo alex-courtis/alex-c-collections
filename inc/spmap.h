@@ -26,15 +26,15 @@ struct SPmapIt {
  * Optional constructor params (default)
  */
 struct SPmapParams {
-	const bool case_insensitive; // false
-	const fn_equal equal_val;    // compare key pointers
-	const fn_clone alloc_val;    // assign val pointer
-	const fn_free free_val;      // free
-	const fn_clone clone_val;    // NOP
-	const fn_str str_val;        // %p
-	const bool allow_null_val;   // false
-	const size_t initial;        // 10
-	const size_t grow;           // 10
+	const bool case_insensitive_key; // false
+	const fn_equal equal_val;        // compare key pointers
+	const fn_clone alloc_val;        // assign val pointer
+	const fn_free free_val;          // free
+	const fn_clone clone_val;        // NOP
+	const fn_str str_val;            // %p
+	const bool allow_null_val;       // false
+	const size_t initial;            // 10
+	const size_t grow;               // 10
 };
 
 /*
@@ -177,8 +177,8 @@ bool spmap_equal(const struct SPmap* const a, const struct SPmap* const b);
  * Conversion
  */
 
-// map ordered keys, caller frees list and contents
-const struct Plist *spmap_keys_plist(const struct SPmap* const map);
+// map ordered keys, same params
+const struct Slist *spmap_keys_slist(const struct SPmap* const map);
 
 // map ordered keys, same params
 const struct Sset *spmap_keys_sset(const struct SPmap* const map);

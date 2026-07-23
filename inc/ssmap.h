@@ -143,16 +143,14 @@ bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b);
  * Conversion
  */
 
-// map ordered keys, same params, caller frees contents
-const struct Plist *ssmap_keys_plist(const struct SSmap* const map);
+// map ordered keys, same params
+const struct Slist *ssmap_keys_slist(const struct SSmap* const map);
 
 // map ordered keys, same params
 const struct Sset *ssmap_keys_sset(const struct SSmap* const map);
 
-// TODO this should be an Slist, check others
-
 // map ordered vals, caller frees list and contents
-const struct Plist *ssmap_vals_plist(const struct SSmap* const map);
+const struct Slist *ssmap_vals_slist(const struct SSmap* const map);
 
 /*
  * Info

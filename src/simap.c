@@ -5,6 +5,7 @@
 
 #include "fn.h"
 #include "ppmap.h"
+#include "slist.h"
 #include "sset.h"
 
 #include "simap.h"
@@ -274,8 +275,22 @@ bool simap_equal(const struct SImap* const a, const struct SImap* const b) {
 	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
 }
 
-const struct Plist *simap_keys_plist(const struct SImap* const map) {
-	return map ? ppmap_keys_plist(map->ppmap) : NULL;
+const struct Slist *simap_keys_slist(const struct SImap* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SlistParams params = {
+		.case_insensitive = map->params.case_insensitive_key,
+		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct Slist *list = slist_init_with(params);
+
+	for (const struct SImapIt *it = simap_it(map); it; it = simap_it_next(it)) {
+		slist_append(list, it->key);
+	}
+
+	return list;
 }
 
 const struct Sset *simap_keys_sset(const struct SImap* const map) {

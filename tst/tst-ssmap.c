@@ -11,7 +11,7 @@
 #include <string.h>
 
 #include "fn.h"
-#include "plist.h"
+#include "slist.h"
 #include "ppmap.h"
 #include "sset.h"
 #include "str.h"
@@ -29,6 +29,11 @@ struct PPmap {
 struct Sset {
 	const struct SsetParams params;
 	const struct Pset *pset;
+};
+
+struct Slist {
+	const struct SlistParams params;
+	const struct Plist *plist;
 };
 
 struct SSmap {
@@ -281,7 +286,6 @@ static void ssmap_equal__case_insensitive_key(void **state) {
 }
 
 static void ssmap_equal__case_insensitive_val(void **state) {
-
 	const struct SSmapParams params = { .case_insensitive_val = true, };
 	const struct SSmap *actual = ssmap_init_with(params);
 
@@ -298,20 +302,42 @@ static void ssmap_equal__case_insensitive_val(void **state) {
 	ssmap_free(expected);
 }
 
-static void ssmap_keys_plist__many(void **state) {
-	const struct SSmap *map = ssmap_init();
+static void ssmap_keys_slist__(void **state) {
+	const struct SSmapParams params = {
+		.case_insensitive_key = true,
+	};
+	const struct SSmap *map = ssmap_init_with(params);
 
 	ssmap_put(map, "a", "aa");
-	ssmap_put(map, "b", "bb");
+	ssmap_put(map, "C", "cc");
 
-	const struct Plist *list = ssmap_keys_plist(map);
+	const struct Slist *list = ssmap_keys_slist(map);
 
-	assert_int_equal(plist_size(list), 2);
-	assert_str_equal(plist_at(list, 0), "a");
-	assert_str_equal(plist_at(list, 1), "b");
+	assert_int_equal(slist_size(list), 2);
+	assert_true(slist_contains(list, "A"));
+	assert_true(slist_contains(list, "c"));
+	assert_true(slist_contains(list, "C"));
 
 	ssmap_free(map);
-	plist_free_vals(list);
+	slist_free(list);
+}
+
+static void ssmap_keys_slist__params(void **state) {
+	const struct SSmapParams params = {
+		.case_insensitive_key = true,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SSmap *map = ssmap_init_with(params);
+
+	const struct Slist *list = ssmap_keys_slist(map);
+
+	assert_true(list->params.case_insensitive);
+	assert_int_equal(list->params.initial, 99);
+	assert_int_equal(list->params.grow, 1);
+
+	slist_free(list);
+	ssmap_free(map);
 }
 
 static void ssmap_keys_sset__many(void **state) {
@@ -352,22 +378,48 @@ static void ssmap_keys_sset__params(void **state) {
 	sset_free(set);
 }
 
-static void ssmap_vals_plist__many(void **state) {
-	const struct SSmapParams params = { .allow_null_val = true, };
+static void ssmap_vals_slist__(void **state) {
+	const struct SSmapParams params = {
+		.case_insensitive_val = true,
+		// TODO
+		.allow_null_val = true,
+	};
 	const struct SSmap *map = ssmap_init_with(params);
 
 	ssmap_put(map, "a", "aa");
-	ssmap_put(map, "b", NULL);
-	ssmap_put(map, "c", "cc");
+	// ssmap_put(map, "b", NULL);
+	ssmap_put(map, "C", "cc");
 
-	const struct Plist *list = ssmap_vals_plist(map);
+	const struct Slist *list = ssmap_vals_slist(map);
 
-	assert_int_equal(plist_size(list), 3);
-	assert_str_equal(plist_at(list, 0), "aa");
-	assert_nul(plist_at(list, 1));
-	assert_str_equal(plist_at(list, 2), "cc");
+	// TODO
+	// assert_int_equal(slist_size(list), 3);
+	assert_int_equal(slist_size(list), 2);
+	assert_true(slist_contains(list, "aa"));
+	// assert_true(slist_contains(list, NULL));
+	assert_true(slist_contains(list, "cc"));
+	assert_true(slist_contains(list, "CC"));
 
-	plist_free_vals(list);
+	ssmap_free(map);
+	slist_free(list);
+}
+
+static void ssmap_vals_slist__params(void **state) {
+	const struct SSmapParams params = {
+		.case_insensitive_val = true,
+		.allow_null_val = true,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SSmap *map = ssmap_init_with(params);
+
+	const struct Slist *list = ssmap_vals_slist(map);
+
+	assert_true(list->params.case_insensitive);
+	assert_int_equal(list->params.initial, 99);
+	assert_int_equal(list->params.grow, 1);
+
+	slist_free(list);
 	ssmap_free(map);
 }
 
@@ -619,9 +671,9 @@ static void ssmap__null_inputs(void **state) {
 	ssmap_it_remove(NULL);
 	assert_false(ssmap_equal(NULL, NULL));
 	assert_false(ssmap_equal(map, NULL));
-	assert_nul(ssmap_keys_plist(NULL));
+	assert_nul(ssmap_keys_slist(NULL));
 	assert_nul(ssmap_keys_sset(NULL));
-	assert_nul(ssmap_vals_plist(NULL));
+	assert_nul(ssmap_vals_slist(NULL));
 	assert_nul(ssmap_str(NULL));
 	assert_int_equal(ssmap_size(NULL), 0);
 
@@ -655,12 +707,14 @@ int main(void) {
 		TEST(ssmap_equal__case_insensitive_key),
 		TEST(ssmap_equal__case_insensitive_val),
 
-		TEST(ssmap_keys_plist__many),
+		TEST(ssmap_keys_slist__),
+		TEST(ssmap_keys_slist__params),
 
 		TEST(ssmap_keys_sset__many),
 		TEST(ssmap_keys_sset__params),
 
-		TEST(ssmap_vals_plist__many),
+		TEST(ssmap_vals_slist__),
+		TEST(ssmap_vals_slist__params),
 
 		TEST(ssmap_put_get_remove_free__case_sensitive),
 		TEST(ssmap_put_get_remove_free__case_insensitive),

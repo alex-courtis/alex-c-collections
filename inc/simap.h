@@ -144,8 +144,8 @@ bool simap_equal(const struct SImap* const a, const struct SImap* const b);
  * Conversion
  */
 
-// map ordered keys, same params, caller frees contents
-const struct Plist *simap_keys_plist(const struct SImap* const map);
+// map ordered keys, same params
+const struct Slist *simap_keys_slist(const struct SImap* const map);
 
 // map ordered keys, same params
 const struct Sset *simap_keys_sset(const struct SImap* const map);

@@ -10,8 +10,8 @@
 #include <stdlib.h>
 
 #include "fn.h"
-#include "plist.h"
 #include "ppmap.h"
+#include "slist.h"
 #include "sset.h"
 #include "str.h"
 
@@ -23,6 +23,11 @@ struct PPmap {
 	const void **vals;
 	size_t capacity;
 	size_t size;
+};
+
+struct Slist {
+	const struct SlistParams params;
+	const struct Plist *plist;
 };
 
 struct Sset {
@@ -623,20 +628,58 @@ static void simap_str__(void **state) {
 	simap_free(map);
 }
 
-static void simap_keys_plist__many(void **state) {
+static void simap_keys_slist__case_insensitive(void **state) {
 	const struct SImap *map = simap_init();
 
 	simap_put(map, "a", 10);
 	simap_put(map, "b", 11);
 
-	const struct Plist *list = simap_keys_plist(map);
+	const struct Slist *list = simap_keys_slist(map);
 
-	assert_int_equal(plist_size(list), 2);
-	assert_str_equal(plist_at(list, 0), "a");
-	assert_str_equal(plist_at(list, 1), "b");
+	assert_int_equal(slist_size(list), 2);
+	assert_str_equal(slist_at(list, 0), "a");
+	assert_str_equal(slist_at(list, 1), "b");
 
 	simap_free(map);
-	plist_free_vals(list);
+	slist_free(list);
+}
+
+static void simap_keys_slist__case_sensitive(void **state) {
+	const struct SImapParams params = { .case_insensitive_key = true, };
+	const struct SImap *map = simap_init_with(params);
+
+	simap_put(map, "A", 10);
+	simap_put(map, "b", 11);
+
+	const struct Slist *list = simap_keys_slist(map);
+
+	assert_int_equal(slist_size(list), 2);
+	assert_str_equal(slist_at(list, 0), "A");
+	assert_str_equal(slist_at(list, 1), "b");
+
+	assert_true(slist_contains(list, "a"));
+	assert_true(slist_contains(list, "A"));
+
+	slist_free(list);
+	simap_free(map);
+}
+
+static void simap_keys_slist__params(void **state) {
+	const struct SImapParams params = {
+		.case_insensitive_key = true,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SImap *map = simap_init_with(params);
+
+	const struct Slist *list = simap_keys_slist(map);
+
+	assert_true(list->params.case_insensitive);
+	assert_int_equal(list->params.initial, 99);
+	assert_int_equal(list->params.grow, 1);
+
+	slist_free(list);
+	simap_free(map);
 }
 
 static void simap_keys_sset__many(void **state) {
@@ -747,7 +790,7 @@ static void simap__null_inputs(void **state) {
 	assert_int_equal(simap_remove_in(NULL, map), 0);
 	assert_false(simap_equal(NULL, NULL));
 	assert_false(simap_equal(map, NULL));
-	assert_nul(simap_keys_plist(NULL));
+	assert_nul(simap_keys_slist(NULL));
 	assert_nul(simap_keys_sset(NULL));
 	assert_nul(simap_str(NULL));
 	assert_int_equal(simap_size(NULL), 0);
@@ -804,7 +847,9 @@ int main(void) {
 
 		TEST(simap_str__),
 
-		TEST(simap_keys_plist__many),
+		TEST(simap_keys_slist__case_insensitive),
+		TEST(simap_keys_slist__case_sensitive),
+		TEST(simap_keys_slist__params),
 
 		TEST(simap_keys_sset__many),
 		TEST(simap_keys_sset__params),

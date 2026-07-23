@@ -5,6 +5,7 @@
 
 #include "fn.h"
 #include "ppmap.h"
+#include "slist.h"
 #include "sset.h"
 
 #include "ssmap.h"
@@ -223,8 +224,22 @@ bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b) {
 	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
 }
 
-const struct Plist *ssmap_keys_plist(const struct SSmap* const map) {
-	return map ? ppmap_keys_plist(map->ppmap) : NULL;
+const struct Slist *ssmap_keys_slist(const struct SSmap* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SlistParams params = {
+		.case_insensitive = map->params.case_insensitive_key,
+		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct Slist *list = slist_init_with(params);
+
+	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
+		slist_append(list, it->key);
+	}
+
+	return list;
 }
 
 const struct Sset *ssmap_keys_sset(const struct SSmap* const map) {
@@ -245,8 +260,23 @@ const struct Sset *ssmap_keys_sset(const struct SSmap* const map) {
 	return set;
 }
 
-const struct Plist *ssmap_vals_plist(const struct SSmap* const map) {
-	return map ? ppmap_vals_plist(map->ppmap) : NULL;
+const struct Slist *ssmap_vals_slist(const struct SSmap* const map) {
+	if (!map)
+		return NULL;
+
+	const struct SlistParams params = {
+		.case_insensitive = map->params.case_insensitive_val,
+		.allow_null_val = map->params.allow_null_val,
+		.initial = MAX(ppmap_size(map->ppmap), map->params.initial),
+		.grow = map->params.grow,
+	};
+	const struct Slist *list = slist_init_with(params);
+
+	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
+		slist_append(list, it->val);
+	}
+
+	return list;
 }
 
 char *ssmap_str(const struct SSmap* const map) {

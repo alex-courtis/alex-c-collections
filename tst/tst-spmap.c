@@ -15,6 +15,7 @@
 #include "fn.h"
 #include "plist.h"
 #include "ppmap.h"
+#include "slist.h"
 #include "sset.h"
 #include "str.h"
 
@@ -31,6 +32,11 @@ struct PPmap {
 struct Sset {
 	const struct SsetParams params;
 	const struct Pset *pset;
+};
+
+struct Slist {
+	const struct SlistParams params;
+	const struct Plist *plist;
 };
 
 struct SPmap {
@@ -59,7 +65,7 @@ static void spmap_put_get_remove__case_sensitive(void **state) {
 }
 
 static void spmap_put_get_remove__case_insensitive(void **state) {
-	const struct SPmapParams params = { .case_insensitive = true, };
+	const struct SPmapParams params = { .case_insensitive_key = true, };
 	const struct SPmap *map = spmap_init_with(params);
 
 	assert_nul(spmap_put(map, "A", V0));
@@ -217,7 +223,7 @@ static void spmap_equal__case_sensitive(void **state) {
 
 static void spmap_equal__case_insensitive(void **state) {
 
-	const struct SPmapParams params = { .case_insensitive = true, };
+	const struct SPmapParams params = { .case_insensitive_key = true, };
 	const struct SPmap *actual = spmap_init_with(params);
 
 	assert_nul(spmap_put(actual, "a", V0));
@@ -619,20 +625,40 @@ static void spmap_str__(void **state) {
 	spmap_free(map);
 }
 
-static void spmap_keys_plist__many(void **state) {
-	const struct SPmap *map = spmap_init();
+static void spmap_keys_plist__(void **state) {
+	const struct SPmapParams params = { .case_insensitive_key = true, };
+	const struct SPmap *map = spmap_init_with(params);
 
 	spmap_put(map, "a", V0);
-	spmap_put(map, "b", V1);
+	spmap_put(map, "C", V1);
 
-	const struct Plist *list = spmap_keys_plist(map);
+	const struct Slist *list = spmap_keys_slist(map);
 
-	assert_int_equal(plist_size(list), 2);
-	assert_str_equal(plist_at(list, 0), "a");
-	assert_str_equal(plist_at(list, 1), "b");
+	assert_int_equal(slist_size(list), 2);
+	assert_true(slist_contains(list, "A"));
+	assert_true(slist_contains(list, "c"));
+	assert_true(slist_contains(list, "C"));
 
 	spmap_free(map);
-	plist_free_vals(list);
+	slist_free(list);
+}
+
+static void spmap_keys_slist__params(void **state) {
+	const struct SPmapParams params = {
+		.case_insensitive_key = true,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SPmap *map = spmap_init_with(params);
+
+	const struct Slist *list = spmap_keys_slist(map);
+
+	assert_true(list->params.case_insensitive);
+	assert_int_equal(list->params.initial, 99);
+	assert_int_equal(list->params.grow, 1);
+
+	slist_free(list);
+	spmap_free(map);
 }
 
 static void spmap_keys_sset__many(void **state) {
@@ -656,7 +682,7 @@ static void spmap_keys_sset__many(void **state) {
 
 static void spmap_keys_sset__params(void **state) {
 	const struct SPmapParams params = {
-		.case_insensitive = true,
+		.case_insensitive_key = true,
 		.initial = 99,
 		.grow = 1,
 	};
@@ -737,7 +763,7 @@ static void spmap_clone__many(void **state) {
 // also tests constructor
 static void spmap_clone__params(void **state) {
 	const struct SPmapParams params = {
-		.case_insensitive = true,
+		.case_insensitive_key = true,
 		.equal_val = mock_equal,
 		.alloc_val = mock_alloc,
 		.free_val = mock_free,
@@ -764,7 +790,7 @@ static void spmap_clone__params(void **state) {
 	assert_ptr_equal(to->ppmap->params.free_val, mock_free);
 	assert_ptr_equal(to->ppmap->params.clone_val, mock_clone);
 
-	assert_true(to->params.case_insensitive);
+	assert_true(to->params.case_insensitive_key);
 	assert_ptr_equal(to->params.equal_val, mock_equal);
 	assert_ptr_equal(to->params.alloc_val, mock_alloc);
 	assert_ptr_equal(to->params.free_val, mock_free);
@@ -862,7 +888,7 @@ static void spmap__null_inputs(void **state) {
 	spmap_it_remove_free(NULL);
 	assert_false(spmap_equal(NULL, NULL));
 	assert_false(spmap_equal(map, NULL));
-	assert_nul(spmap_keys_plist(NULL));
+	assert_nul(spmap_keys_slist(NULL));
 	assert_nul(spmap_keys_sset(NULL));
 	assert_nul(spmap_vals_plist(NULL));
 	assert_nul(spmap_vals_plist_clone(NULL));
@@ -926,7 +952,8 @@ int main(void) {
 
 		TEST(spmap_str__),
 
-		TEST(spmap_keys_plist__many),
+		TEST(spmap_keys_plist__),
+		TEST(spmap_keys_slist__params),
 
 		TEST(spmap_keys_sset__many),
 		TEST(spmap_keys_sset__params),
