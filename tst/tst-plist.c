@@ -1381,7 +1381,7 @@ static void plist_remove_at__inexistent(void **state) {
 
 	assert_int_equal(plist_size(list), 2);
 
-	assert_nul(plist_remove_at(list, 2));
+	assert_nul(plist_remove_at(list, 999));
 
 	assert_int_equal(plist_size(list), 2);
 	assert_ptr_equal(plist_at(list, 0), V0);

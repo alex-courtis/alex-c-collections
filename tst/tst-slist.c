@@ -61,13 +61,13 @@ static void slist_append_contains_remove_free__case_sensitive(void **state) {
 	assert_false(slist_contains(list, "b"));
 	assert_true(slist_contains(list, "B"));
 
-	slist_remove(list, "b");
+	assert_false(slist_remove(list, "b"));
 
 	assert_int_equal(slist_size(list), 2);
 	assert_false(slist_contains(list, "b"));
 	assert_true(slist_contains(list, "B"));
 
-	slist_remove(list, "B");
+	assert_true(slist_remove(list, "B"));
 
 	assert_int_equal(slist_size(list), 1);
 	assert_false(slist_contains(list, "b"));
@@ -84,7 +84,7 @@ static void slist_append_contains_remove_free__case_insensitive(void **state) {
 	assert_true(slist_contains(list, "b"));
 	assert_true(slist_contains(list, "B"));
 
-	slist_remove(list, "b");
+	assert_true(slist_remove(list, "b"));
 
 	assert_int_equal(slist_size(list), 1);
 
@@ -108,11 +108,11 @@ static void slist_append_contains_remove_free__allow_null_val(void **state) {
 	assert_true(slist_contains(list, "b"));
 	assert_true(slist_contains(list, NULL));
 
-	slist_remove(list, "b");
+	assert_true(slist_remove(list, "b"));
 
 	assert_int_equal(slist_size(list), 3);
 
-	slist_remove(list, NULL);
+	assert_true(slist_remove(list, NULL));
 
 	assert_int_equal(slist_size(list), 2);
 
@@ -255,25 +255,27 @@ static void slist_remove_at__(void **state) {
 	const struct Slist *list = slist_init();
 	slist_append_many(list, "0", "1", "2", "3", NULL);
 
-	slist_remove_at(list, 1);
+	assert_false(slist_remove_at(list, 999));
+
+	assert_true(slist_remove_at(list, 1));
 
 	assert_int_equal(slist_size(list), 3);
 	assert_str_equal(slist_at(list, 0), "0");
 	assert_str_equal(slist_at(list, 1), "2");
 	assert_str_equal(slist_at(list, 2), "3");
 
-	slist_remove_at(list, 0);
+	assert_true(slist_remove_at(list, 0));
 
 	assert_int_equal(slist_size(list), 2);
 	assert_str_equal(slist_at(list, 0), "2");
 	assert_str_equal(slist_at(list, 1), "3");
 
-	slist_remove_at(list, 1);
+	assert_true(slist_remove_at(list, 1));
 
 	assert_int_equal(slist_size(list), 1);
 	assert_str_equal(slist_at(list, 0), "2");
 
-	slist_remove_at(list, 0);
+	assert_true(slist_remove_at(list, 0));
 	assert_int_equal(slist_size(list), 0);
 
 	slist_free(list);
@@ -307,7 +309,7 @@ static void slist_it_remove__forwards(void **state) {
 	for (const struct SlistIt *it = slist_it_start(list); it; it = slist_it_next(it)) {
 		iterations++;
 		if (strcmp(it->val, "c") == 0) {
-			slist_it_remove(it);
+			assert_true(slist_it_remove(it));
 		}
 	}
 
@@ -330,7 +332,7 @@ static void slist_it_remove__backwards(void **state) {
 	for (const struct SlistIt *it = slist_it_end(list); it; it = slist_it_prev(it)) {
 		iterations++;
 		if (strcmp(it->val, "c") == 0) {
-			slist_it_remove(it);
+			assert_true(slist_it_remove(it));
 		}
 	}
 
@@ -345,7 +347,7 @@ static void slist_it_remove__backwards(void **state) {
 static void slist_it_remove__partial(void **state) {
 	const struct SlistIt *it = calloc(1, sizeof(struct SlistIt));
 
-	slist_it_remove(it);
+	assert_false(slist_it_remove(it));
 }
 
 static void slist_find__(void **state) {
@@ -647,7 +649,7 @@ static void slist__null_inputs(void **state) {
 	assert_nul(slist_filter_it_end(NULL, filter));
 	assert_nul(slist_it_next(NULL));
 	assert_nul(slist_it_prev(NULL));
-	slist_it_remove(NULL);
+	assert_false(slist_it_remove(NULL));
 	assert_false(slist_insert(NULL, 0, NULL));
 	assert_false(slist_insert(list, 0, NULL));
 	assert_false(slist_append(NULL, NULL));
@@ -656,9 +658,9 @@ static void slist__null_inputs(void **state) {
 	assert_false(slist_prepend(list, NULL));
 	assert_false(slist_replace(NULL, 0, NULL));
 	assert_int_equal(slist_append_many(NULL, NULL), 0);
-	slist_remove_at(NULL, 0);
-	slist_remove(NULL, NULL);
-	slist_remove(list, NULL);
+	assert_false(slist_remove_at(NULL, 0));
+	assert_false(slist_remove(NULL, NULL));
+	assert_false(slist_remove(list, NULL));
 	assert_int_equal(slist_remove_all(NULL), 0);
 	assert_false(slist_equal(NULL, NULL));
 	assert_false(slist_equal(list, NULL));

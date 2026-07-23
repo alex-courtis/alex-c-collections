@@ -115,20 +115,17 @@ bool slist_replace(const struct Slist* const list, size_t index, const char* con
 // add from vals, return number added
 size_t slist_append_all(const struct Slist* const list, const struct Slist* const from);
 
-// TODO bool
 // if the list contains val, remove the first occurrence and return true
-void slist_remove(const struct Slist* const list, const char* const val);
+bool slist_remove(const struct Slist* const list, const char* const val);
 
-// TODO bool
-// remove val at i
-void slist_remove_at(const struct Slist* const list, const size_t i);
+// remove val at i, return true if removed
+bool slist_remove_at(const struct Slist* const list, const size_t i);
 
 // remove all vals, returning number removed
 size_t slist_remove_all(const struct Slist* const list);
 
-// TODO bool
-// remove the it.val, it is unusable, slist_it_next or slist_it_prev must be called
-void slist_it_remove(const struct SlistIt* const it);
+// remove the it.val, return true if removed, it is unusable, slist_it_next or slist_it_prev must be called
+bool slist_it_remove(const struct SlistIt* const it);
 
 // shell sort in place
 void slist_sort(const struct Slist* const list);

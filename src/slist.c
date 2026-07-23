@@ -175,36 +175,30 @@ size_t slist_append_all(const struct Slist* const list, const struct Slist* cons
 	return list && from ? plist_append_all(list->plist, from->plist) : 0;
 }
 
-void slist_remove(const struct Slist* const list, const char* const val) {
-	if (!list)
-		return;
-
-	plist_remove_free(list->plist, val);
+bool slist_remove(const struct Slist* const list, const char* const val) {
+	return list ? plist_remove_free(list->plist, val) : false;
 }
 
-void slist_remove_at(const struct Slist* const list, const size_t i) {
-	if (!list)
-		return;
-
-	plist_remove_at_free(list->plist, i);
+bool slist_remove_at(const struct Slist* const list, const size_t i) {
+	return list ? plist_remove_at_free(list->plist, i) : false;
 }
 
 size_t slist_remove_all(const struct Slist* const list) {
 	return list ? plist_remove_all_free(list->plist) : 0;
 }
 
-void slist_it_remove(const struct SlistIt* const it) {
+bool slist_it_remove(const struct SlistIt* const it) {
 	if (!it)
-		return;
+		return false;
 
 	if (!it->st) {
 		slist_it_free(it);
-		return;
+		return false;
 	}
 
-	plist_it_remove_free(it->st->pit);
-
 	((struct SlistIt*)it)->val = NULL;
+
+	return plist_it_remove_free(it->st->pit);
 }
 
 void slist_sort(const struct Slist* const list) {
