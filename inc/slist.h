@@ -75,7 +75,7 @@ bool slist_index_of(size_t *index, const struct Slist* const list, const char* c
 // element at zero indexed position
 const char *slist_at(const struct Slist* const list, const size_t i);
 
-// find the first, NULL when no matches, first entry when empty filter
+// find the first, NULL when no matches or allow_null_val and NULL present, first entry when empty filter
 const char *slist_find(const struct Slist* const list, const struct SlistFilter filter);
 
 // create an iterator at the start, caller must slist_it_free or invoke slist_next/prev until NULL
@@ -109,21 +109,24 @@ bool slist_append(const struct Slist* const list, const char* const val);
 // add to start, return true if added
 bool slist_prepend(const struct Slist* const list, const char* const val);
 
-// replace val at index, NOP when index >= size
-void slist_replace(const struct Slist* const list, size_t index, const char* const val);
+// replace val at index, return true if replaced, NOP when index >= size
+bool slist_replace(const struct Slist* const list, size_t index, const char* const val);
 
 // add from vals, return number added
 size_t slist_append_all(const struct Slist* const list, const struct Slist* const from);
 
+// TODO bool
 // if the list contains val, remove the first occurrence and return true
 void slist_remove(const struct Slist* const list, const char* const val);
 
+// TODO bool
 // remove val at i
 void slist_remove_at(const struct Slist* const list, const size_t i);
 
 // remove all vals, returning number removed
 size_t slist_remove_all(const struct Slist* const list);
 
+// TODO bool
 // remove the it.val, it is unusable, slist_it_next or slist_it_prev must be called
 void slist_it_remove(const struct SlistIt* const it);
 

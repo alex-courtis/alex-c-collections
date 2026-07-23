@@ -167,9 +167,8 @@ bool slist_prepend(const struct Slist* const list, const char* const val) {
 	return list ? plist_prepend(list->plist, val) : false;
 }
 
-void slist_replace(const struct Slist* const list, size_t index, const char* const val) {
-	if (list)
-		plist_replace_free(list->plist, index, val);
+bool slist_replace(const struct Slist* const list, size_t index, const char* const val) {
+	return list ? plist_replace_free(list->plist, index, val) : false;
 }
 
 size_t slist_append_all(const struct Slist* const list, const struct Slist* const from) {

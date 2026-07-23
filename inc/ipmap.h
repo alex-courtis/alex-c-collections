@@ -104,7 +104,7 @@ bool ipmap_first_key(size_t* kp, const struct IPmap *const map, const void* cons
 // element at zero indexed position
 struct IPmapPair ipmap_at(const struct IPmap* const map, const size_t i);
 
-// find the first, {0,NULL} when no matches, first entry when empty filter
+// find the first, {0,NULL} when no matches or allow_null_val and NULL present, first entry when empty filter
 struct IPmapPair ipmap_find(const struct IPmap* const map, const struct IPmapFilter filter);
 
 // create an iterator, caller must ipmap_it_free or invoke ipmap_next until NULL

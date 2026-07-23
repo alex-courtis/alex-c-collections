@@ -180,10 +180,10 @@ static void slist_replace__(void **state) {
 	const struct Slist *list = slist_init();
 	slist_append_many(list, "0", "1", "2", NULL);
 
-	slist_replace(list, 0, "00");
-	slist_replace(list, 1, "11");
-	slist_replace(list, 2, "22");
-	slist_replace(list, 3, "33");
+	assert_true(slist_replace(list, 0, "00"));
+	assert_true(slist_replace(list, 1, "11"));
+	assert_true(slist_replace(list, 2, "22"));
+	assert_false(slist_replace(list, 3, "33"));
 
 	assert_int_equal(slist_size(list), 3);
 
@@ -654,7 +654,7 @@ static void slist__null_inputs(void **state) {
 	assert_false(slist_append(list, NULL));
 	assert_false(slist_prepend(NULL, NULL));
 	assert_false(slist_prepend(list, NULL));
-	slist_replace(NULL, 0, NULL);
+	assert_false(slist_replace(NULL, 0, NULL));
 	assert_int_equal(slist_append_many(NULL, NULL), 0);
 	slist_remove_at(NULL, 0);
 	slist_remove(NULL, NULL);

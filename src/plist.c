@@ -93,6 +93,41 @@ static bool insert(const struct Plist* const list, size_t index, const void* con
 	return true;
 }
 
+static bool replace(const void **replaced, const struct Plist* const list, size_t index, const void* const val, bool do_free) {
+	if (replaced)
+		*replaced = NULL;
+
+	if (index >= list->size)
+		return false;
+
+	// create new value; alloc_val may return a valid new from a NULL val
+	const void *new = list->params.alloc_val ? list->params.alloc_val(val) : val;
+
+	if (!new && !list->params.allow_null_val) {
+		return false;
+	}
+
+	const void *old = list->vals[index];
+
+	if (do_free) {
+		if (old) {
+			if (list->params.free_val) {
+				list->params.free_val((void*)old);
+			} else {
+				free((void*)old);
+			}
+		}
+	} else {
+		if (replaced) {
+			*replaced = old;
+		}
+	}
+
+	list->vals[index] = new;
+
+	return true;
+}
+
 static const void *remove_at(const struct Plist* const list, const size_t i) {
 	if (i >= list->size)
 		return NULL;
@@ -111,6 +146,34 @@ static const void *remove_at(const struct Plist* const list, const size_t i) {
 	*m = NULL;
 
 	return val_old;
+}
+
+static bool remove(const void **removed, const struct Plist* const list, const void* const val, bool do_free) {
+	if (removed)
+		*removed = NULL;
+
+	size_t i;
+
+	if (!plist_index_of(&i, list, val))
+		return false;
+
+	const void *old = remove_at(list, i);
+
+	if (do_free) {
+		if (old) {
+			if (list->params.free_val) {
+				list->params.free_val((void*)old);
+			} else {
+				free((void*)old);
+			}
+		}
+	} else {
+		if (removed) {
+			*removed = old;
+		}
+	}
+
+	return true;
 }
 
 static void free_vals(const struct Plist* const list) {
@@ -405,36 +468,19 @@ bool plist_prepend(const struct Plist* const list, const void* const val) {
 }
 
 const void *plist_replace(const struct Plist* const list, size_t index, const void* const val) {
-	if (!list || index >= list->size)
+	if (!list)
 		return NULL;
 
-	// create new value; alloc_val may return a valid new from a NULL val
-	const void *new = list->params.alloc_val ? list->params.alloc_val(val) : val;
+	const void *replaced = NULL;
 
-	if (!new && !list->params.allow_null_val) {
-		return NULL;
-	}
-
-	const void *replaced = list->vals[index];
-
-	list->vals[index] = new;
+	// TODO do we really need this?
+	replace(&replaced, list, index, val, false);
 
 	return replaced;
 }
 
-void plist_replace_free(const struct Plist* const list, size_t index, const void* const val) {
-	if (!list)
-		return;
-
-	const void *replaced = plist_replace(list, index, val);
-
-	if (replaced) {
-		if (list->params.free_val) {
-			list->params.free_val((void*)replaced);
-		} else {
-			free((void*)replaced);
-		}
-	}
+bool plist_replace_free(const struct Plist* const list, size_t index, const void* const val) {
+	return list ? replace(NULL, list, index, val, true) : false;
 }
 
 size_t plist_append_all(const struct Plist* const list, const struct Plist* const from) {
@@ -449,27 +495,15 @@ const void *plist_remove(const struct Plist* const list, const void* const val) 
 	if (!list)
 		return NULL;
 
-	size_t i;
-	if (plist_index_of(&i, list, val)) {
-		return remove_at(list, i);
-	} else {
-		return NULL;
-	}
+	const void *removed = NULL;
+
+	remove(&removed, list, val, false);
+
+	return removed;
 }
 
-void plist_remove_free(const struct Plist* const list, const void* const val) {
-	if (!list)
-		return;
-
-	const void *removed = plist_remove(list, val);
-
-	if (removed) {
-		if (list->params.free_val) {
-			list->params.free_val((void*)removed);
-		} else {
-			free((void*)removed);
-		}
-	}
+bool plist_remove_free(const struct Plist* const list, const void* const val) {
+	return list ? remove(NULL, list, val, true) : false;
 }
 
 const void *plist_remove_at(const struct Plist* const list, const size_t i) {

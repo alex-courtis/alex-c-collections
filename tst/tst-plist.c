@@ -707,7 +707,7 @@ static void plist_replace_free__no_free_val(void **state) {
 	assert_true(plist_append(list, strdup("to free")));
 	assert_true(plist_append(list, V2));
 
-	plist_replace_free(list, 1, V3);
+	assert_true(plist_replace_free(list, 1, V3));
 
 	assert_ptr_equal(plist_at(list, 0), V0);
 	assert_ptr_equal(plist_at(list, 1), V3);
@@ -726,7 +726,7 @@ static void plist_replace_free__free_val(void **state) {
 
 	expect_ptr(mock_free, ptr, V1);
 
-	plist_replace_free(list, 1, V3);
+	assert_true(plist_replace_free(list, 1, V3));
 
 	assert_ptr_equal(plist_at(list, 0), V0);
 	assert_ptr_equal(plist_at(list, 1), V3);
@@ -749,9 +749,9 @@ static void plist_replace_free__allow_null_val(void **state) {
 	expect_ptr(mock_free, ptr, V0);
 	expect_ptr(mock_free, ptr, V1);
 
-	plist_replace_free(list, 0, NULL);
-	plist_replace_free(list, 1, V3);
-	plist_replace_free(list, 2, V4);
+	assert_true(plist_replace_free(list, 0, NULL));
+	assert_true(plist_replace_free(list, 1, V3));
+	assert_true(plist_replace_free(list, 2, V4));
 
 	assert_ptr_equal(plist_at(list, 0), NULL);
 	assert_ptr_equal(plist_at(list, 1), V3);
@@ -768,7 +768,7 @@ static void plist_replace_free__beyond_end(void **state) {
 	assert_true(plist_append(list, V1));
 	assert_true(plist_append(list, V2));
 
-	plist_replace_free(list, 3, V3);
+	assert_false(plist_replace_free(list, 3, V3));
 
 	assert_ptr_equal(plist_at(list, 0), V0);
 	assert_ptr_equal(plist_at(list, 1), V1);
@@ -1274,7 +1274,7 @@ static void plist_remove_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V0, 1);
 
-	plist_remove_free(list, V0);
+	assert_true(plist_remove_free(list, V0));
 
 	assert_int_equal(plist_size(list), 2);
 	assert_ptr_equal(plist_at(list, 0), V0);
@@ -1282,16 +1282,16 @@ static void plist_remove_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V2, 1);
 
-	plist_remove_free(list, V2);
+	assert_true(plist_remove_free(list, V2));
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), V0);
 
 	expect_ptr_count(mock_free, ptr, V0, 1);
 
-	plist_remove_free(list, V0);
+	assert_true(plist_remove_free(list, V0));
 
-	plist_remove_free(list, V0);
+	assert_false(plist_remove_free(list, V0));
 
 	plist_free(list);
 }
@@ -1305,12 +1305,12 @@ static void plist_remove_free__free(void **state) {
 	assert_true(plist_append(list, val0));
 	assert_true(plist_append(list, val1));
 
-	plist_remove_free(list, val1);
+	assert_true(plist_remove_free(list, val1));
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), val0);
 
-	plist_remove_free(list, val1);
+	assert_false(plist_remove_free(list, val1));
 
 	plist_free_vals(list);
 }
@@ -1329,11 +1329,11 @@ static void plist_remove_free__allow_null_val(void **state) {
 
 	expect_ptr(mock_free, ptr, V1);
 
-	plist_remove_free(list, V1);
+	assert_true(plist_remove_free(list, V1));
 
 	// no mock_free
 
-	plist_remove_free(list, NULL);
+	assert_true(plist_remove_free(list, NULL));
 
 	assert_int_equal(plist_size(list), 2);
 	assert_ptr_equal(plist_at(list, 0), V0);
@@ -1450,7 +1450,7 @@ static void plist_remove_at_free__free(void **state) {
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), val0);
 
-	plist_remove_free(list, val1);
+	plist_remove_at_free(list, 1);
 
 	plist_free_vals(list);
 }
@@ -2790,13 +2790,13 @@ static void plist__null_inputs(void **state) {
 	assert_false(plist_prepend(NULL, NULL));
 	assert_false(plist_prepend(list, NULL));
 	assert_nul(plist_replace(NULL, 0, NULL));
-	plist_replace_free(NULL, 0, NULL);
+	assert_false(plist_replace_free(NULL, 0, NULL));
 	assert_int_equal(plist_append_many(NULL), 0);
 	assert_int_equal(plist_append_many_v(NULL, NULL), 0);
 	assert_nul(plist_remove(NULL, NULL));
 	assert_nul(plist_remove(list, NULL));
-	plist_remove_free(NULL, NULL);
-	plist_remove_free(list, NULL);
+	assert_false(plist_remove_free(NULL, NULL));
+	assert_false(plist_remove_free(list, NULL));
 	assert_int_equal(plist_remove_all(NULL), 0);
 	assert_int_equal(plist_remove_all_free(NULL), 0);
 	plist_sort(NULL, NULL);
