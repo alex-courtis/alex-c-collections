@@ -141,9 +141,8 @@ bool plist_remove_free(const struct Plist* const list, const void* const val);
 // remove val at i, return val if removed
 const void *plist_remove_at(const struct Plist* const list, const size_t i);
 
-// TODO bool
-// remove and free val at i, NOP when index >= size [free_val]
-void plist_remove_at_free(const struct Plist* const list, const size_t i);
+// remove and free val at i, return true if removed, NOP when index >= size [free_val]
+bool plist_remove_at_free(const struct Plist* const list, const size_t i);
 
 // remove all vals, returning number removed
 size_t plist_remove_all(const struct Plist* const list);
@@ -151,13 +150,11 @@ size_t plist_remove_all(const struct Plist* const list);
 // remove all vals and free, returning number removed [free_val]
 size_t plist_remove_all_free(const struct Plist* const list);
 
-// TODO bool
-// remove the it.val, it is unusable, plist_it_next or plist_it_prev must be called
-void plist_it_remove(const struct PlistIt* const it);
+// remove the it.val, return true if removed, it is unusable, plist_it_next or plist_it_prev must be called
+bool plist_it_remove(const struct PlistIt* const it);
 
-// TODO bool
-// remove and free the it.val, it is unusable, plist_it_next or plist_it_prev must be called [free_val]
-void plist_it_remove_free(const struct PlistIt* const it);
+// remove and free the it.val, return true if removed, it is unusable, plist_it_next or plist_it_prev must be called [free_val]
+bool plist_it_remove_free(const struct PlistIt* const it);
 
 // shell sort in place, NULL less_than_val NOP
 void plist_sort(const struct Plist* const list, fn_less_than less_than_val);

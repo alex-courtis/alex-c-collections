@@ -109,17 +109,15 @@ static bool replace(const void **replaced, const struct Plist* const list, size_
 
 	const void *old = list->vals[index];
 
-	if (do_free) {
-		if (old) {
-			if (list->params.free_val) {
-				list->params.free_val((void*)old);
-			} else {
-				free((void*)old);
-			}
-		}
-	} else {
-		if (replaced) {
-			*replaced = old;
+	if (replaced) {
+		*replaced = old;
+	}
+
+	if (do_free && old) {
+		if (list->params.free_val) {
+			list->params.free_val((void*)old);
+		} else {
+			free((void*)old);
 		}
 	}
 
@@ -128,12 +126,27 @@ static bool replace(const void **replaced, const struct Plist* const list, size_
 	return true;
 }
 
-static const void *remove_at(const struct Plist* const list, const size_t i) {
+static bool remove_at(const void **removed, const struct Plist* const list, const size_t i, bool do_free) {
+	if (removed)
+		*removed = NULL;
+
 	if (i >= list->size)
-		return NULL;
+		return false;
 
 	const void **v = list->vals + i;
-	const void *val_old = *v;
+	const void *old = *v;
+
+	if (removed) {
+		*removed = old;
+	}
+
+	if (do_free && old) {
+		if (list->params.free_val) {
+			list->params.free_val((void*)old);
+		} else {
+			free((void*)old);
+		}
+	}
 
 	*v = NULL;
 	((struct Plist*)list)->size--;
@@ -145,7 +158,7 @@ static const void *remove_at(const struct Plist* const list, const size_t i) {
 	}
 	*m = NULL;
 
-	return val_old;
+	return true;
 }
 
 static void free_vals(const struct Plist* const list) {
@@ -193,21 +206,19 @@ static size_t remove_all(const struct Plist* const list) {
 	return removed;
 }
 
-static void it_remove(const struct PlistIt* const it, bool do_free) {
+static bool it_remove(const struct PlistIt* const it, bool do_free) {
+	bool removed = false;
+
 	if (!it)
-		return;
+		return removed;
 
 	struct PlistItState *st = it->st;
 	if (!st) {
 		plist_it_free(it);
-		return;
+		return removed;
 	}
 
-	if (do_free) {
-		plist_remove_at_free(st->list, st->position);
-	} else {
-		plist_remove_at(st->list, st->position);
-	}
+	removed = remove_at(NULL, st->list, st->position, do_free);
 
 	if (st->was_next) {
 		if (st->position > 0) {
@@ -218,6 +229,12 @@ static void it_remove(const struct PlistIt* const it, bool do_free) {
 	}
 
 	((struct PlistIt*)it)->val = NULL;
+
+	if (removed)
+		return true;
+	else
+		return false;
+	// return removed;
 }
 
 static bool filter_blocks(const struct PlistFilter *filter, const void* const val) {
@@ -444,8 +461,6 @@ const void *plist_replace(const struct Plist* const list, size_t index, const vo
 		return NULL;
 
 	const void *replaced = NULL;
-
-	// TODO do we really need this?
 	replace(&replaced, list, index, val, false);
 
 	return replaced;
@@ -471,7 +486,10 @@ const void *plist_remove(const struct Plist* const list, const void* const val) 
 	if (!plist_index_of(&i, list, val))
 		return NULL;
 
-	return remove_at(list, i);
+	const void *removed = NULL;
+	remove_at(&removed, list, i, false);
+
+	return removed;
 }
 
 bool plist_remove_free(const struct Plist* const list, const void* const val) {
@@ -482,36 +500,21 @@ bool plist_remove_free(const struct Plist* const list, const void* const val) {
 	if (!plist_index_of(&i, list, val))
 		return false;
 
-	const void *removed = remove_at(list, i);
-
-	if (removed) {
-		if (list->params.free_val) {
-			list->params.free_val((void*)removed);
-		} else {
-			free((void*)removed);
-		}
-	}
-
-	return true;
+	return remove_at(NULL, list, i, true);
 }
 
 const void *plist_remove_at(const struct Plist* const list, const size_t i) {
-	return list ? remove_at(list, i) : NULL;
+	if (!list)
+		return NULL;
+
+	const void *removed = NULL;
+	remove_at(&removed, list, i, false);
+
+	return removed;
 }
 
-void plist_remove_at_free(const struct Plist* const list, const size_t i) {
-	if (!list)
-		return;
-
-	const void *removed = remove_at(list, i);
-
-	if (removed) {
-		if (list->params.free_val) {
-			list->params.free_val((void*)removed);
-		} else {
-			free((void*)removed);
-		}
-	}
+bool plist_remove_at_free(const struct Plist* const list, const size_t i) {
+	return list ? remove_at(NULL, list, i, true) : false;
 }
 
 size_t plist_remove_all(const struct Plist* const list) {
@@ -527,12 +530,12 @@ size_t plist_remove_all_free(const struct Plist* const list) {
 	return remove_all(list);
 }
 
-void plist_it_remove(const struct PlistIt* const it) {
-	it_remove(it, false);
+bool plist_it_remove(const struct PlistIt* const it) {
+	return it_remove(it, false);
 }
 
-void plist_it_remove_free(const struct PlistIt* const it) {
-	it_remove(it, true);
+bool plist_it_remove_free(const struct PlistIt* const it) {
+	return it_remove(it, true);
 }
 
 void plist_sort(const struct Plist* const list, fn_less_than less_than_val) {

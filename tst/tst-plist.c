@@ -23,6 +23,14 @@ struct Plist {
 	size_t size;
 };
 
+struct PlistItState {
+	const struct Plist *list;
+	const struct PlistFilter filter;
+	size_t position;
+	bool attached;
+	bool was_next; // last iteration was a next, otherwise prev
+};
+
 static const char *starts_with_a_or_null(const char* const key) {
 	return key && *key == 'a' ? strdup(key) : NULL;
 }
@@ -1414,7 +1422,7 @@ static void plist_remove_at_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V1, 1);
 
-	plist_remove_at_free(list, 1);
+	assert_true(plist_remove_at_free(list, 1));
 
 	assert_int_equal(plist_size(list), 2);
 	assert_ptr_equal(plist_at(list, 0), V0);
@@ -1422,16 +1430,16 @@ static void plist_remove_at_free__free_val(void **state) {
 
 	expect_ptr_count(mock_free, ptr, V2, 1);
 
-	plist_remove_at_free(list, 1);
+	assert_true(plist_remove_at_free(list, 1));
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), V0);
 
 	expect_ptr_count(mock_free, ptr, V0, 1);
 
-	plist_remove_at_free(list, 0);
+	assert_true(plist_remove_at_free(list, 0));
 
-	plist_remove_at_free(list, 0);
+	assert_false(plist_remove_at_free(list, 0));
 
 	plist_free(list);
 }
@@ -1445,12 +1453,12 @@ static void plist_remove_at_free__free(void **state) {
 	assert_true(plist_append(list, val0));
 	assert_true(plist_append(list, val1));
 
-	plist_remove_at_free(list, 1);
+	assert_true(plist_remove_at_free(list, 1));
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), val0);
 
-	plist_remove_at_free(list, 1);
+	assert_false(plist_remove_at_free(list, 1));
 
 	plist_free_vals(list);
 }
@@ -1468,11 +1476,11 @@ static void plist_remove_at_free__allow_null_val(void **state) {
 
 	expect_ptr(mock_free, ptr, V2);
 
-	plist_remove_at_free(list, 2);
+	assert_true(plist_remove_at_free(list, 2));
 
 	// no mock_free
 
-	assert_nul(plist_remove_at(list, 1));
+	assert_true(plist_remove_at_free(list, 1));
 
 	assert_int_equal(plist_size(list), 1);
 	assert_ptr_equal(plist_at(list, 0), V0);
@@ -2211,7 +2219,7 @@ static void plist_it_remove__forwards(void **state) {
 	size_t iterations = 0;
 	for (const struct PlistIt *it = plist_it_start(list); it; it = plist_it_next(it)) {
 		iterations++;
-		plist_it_remove(it);
+		assert_true(plist_it_remove(it));
 	}
 
 	assert_int_equal(plist_size(list), 0);
@@ -2231,7 +2239,7 @@ static void plist_it_remove__forwards__allow_null_val(void **state) {
 	size_t iterations = 0;
 	for (const struct PlistIt *it = plist_it_start(list); it; it = plist_it_next(it)) {
 		iterations++;
-		plist_it_remove(it);
+		assert_true(plist_it_remove(it));
 	}
 
 	assert_int_equal(plist_size(list), 0);
@@ -2250,7 +2258,7 @@ static void plist_it_remove__backwards(void **state) {
 	size_t iterations = 0;
 	for (const struct PlistIt *it = plist_it_end(list); it; it = plist_it_prev(it)) {
 		iterations++;
-		plist_it_remove(it);
+		assert_true(plist_it_remove(it));
 	}
 
 	assert_int_equal(plist_size(list), 0);
@@ -2270,7 +2278,7 @@ static void plist_it_remove__backwards__allow_null_val(void **state) {
 	size_t iterations = 0;
 	for (const struct PlistIt *it = plist_it_end(list); it; it = plist_it_prev(it)) {
 		iterations++;
-		plist_it_remove(it);
+		assert_true(plist_it_remove(it));
 	}
 
 	assert_int_equal(plist_size(list), 0);
@@ -2282,7 +2290,7 @@ static void plist_it_remove__backwards__allow_null_val(void **state) {
 static void plist_it_remove__partial(void **state) {
 	const struct PlistIt *it = calloc(1, sizeof(struct PlistIt));
 
-	plist_it_remove(it);
+	assert_false(plist_it_remove(it));
 }
 
 static void plist_it_remove_free__forwards(void **state) {
@@ -2411,6 +2419,23 @@ static void plist_it_remove_free__backwards__allow_null_val(void **state) {
 	plist_free(list);
 }
 
+static void plist_it_remove__bad_pos(void **state) {
+	const struct Plist *list = plist_init();
+	plist_append_many(list, V0, V1, NULL);
+
+	const struct PlistIt *it = plist_it_start(list);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V0);
+
+	it->st->position = 9999;
+
+	assert_false(plist_it_remove(it));
+
+	assert_int_equal(plist_size(list), 2);
+
+	plist_it_free(it);
+	plist_free(list);
+}
 
 static void plist_sort__empty(void **state) {
 	const struct Plist *actual = plist_init();
@@ -2763,7 +2788,7 @@ static void plist__null_inputs(void **state) {
 	assert_int_equal(plist_append_all_clone(NULL, NULL), 0);
 	assert_int_equal(plist_append_all_clone(list, NULL), 0);
 	assert_nul(plist_remove_at(NULL, 0));
-	plist_remove_at_free(NULL, 0);
+	assert_false(plist_remove_at_free(NULL, 0));
 	assert_nul(plist_clone_deep(NULL));
 	assert_nul(plist_clone(NULL));
 	plist_free(NULL);
@@ -2781,7 +2806,7 @@ static void plist__null_inputs(void **state) {
 	assert_nul(plist_filter_it_end(NULL, filter));
 	assert_nul(plist_it_next(NULL));
 	assert_nul(plist_it_prev(NULL));
-	plist_it_remove(NULL);
+	assert_false(plist_it_remove(NULL));
 	plist_it_remove_free(NULL);
 	assert_false(plist_append(NULL, NULL));
 	assert_false(plist_append(list, NULL));
@@ -2953,6 +2978,8 @@ int main(void) {
 		TEST(plist_it_remove_free__forwards__allow_null_val),
 		TEST(plist_it_remove_free__backwards),
 		TEST(plist_it_remove_free__backwards__allow_null_val),
+
+		TEST(plist_it_remove__bad_pos),
 
 		TEST(plist_sort__empty),
 		TEST(plist_sort__one),
