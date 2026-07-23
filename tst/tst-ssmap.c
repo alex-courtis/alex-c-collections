@@ -381,22 +381,19 @@ static void ssmap_keys_sset__params(void **state) {
 static void ssmap_vals_slist__(void **state) {
 	const struct SSmapParams params = {
 		.case_insensitive_val = true,
-		// TODO
 		.allow_null_val = true,
 	};
 	const struct SSmap *map = ssmap_init_with(params);
 
 	ssmap_put(map, "a", "aa");
-	// ssmap_put(map, "b", NULL);
+	ssmap_put(map, "b", NULL);
 	ssmap_put(map, "C", "cc");
 
 	const struct Slist *list = ssmap_vals_slist(map);
 
-	// TODO
-	// assert_int_equal(slist_size(list), 3);
-	assert_int_equal(slist_size(list), 2);
+	assert_int_equal(slist_size(list), 3);
 	assert_true(slist_contains(list, "aa"));
-	// assert_true(slist_contains(list, NULL));
+	assert_true(slist_contains(list, NULL));
 	assert_true(slist_contains(list, "cc"));
 	assert_true(slist_contains(list, "CC"));
 

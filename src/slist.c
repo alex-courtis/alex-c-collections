@@ -72,6 +72,7 @@ const struct Slist *slist_init_with(const struct SlistParams params) {
 		.alloc_val = (fn_clone)clone_strdup,
 		.free_val = free,
 		.str_val = (fn_str)str_or_null,
+		.allow_null_val = params.allow_null_val,
 		.initial = params.initial,
 		.grow = params.grow,
 	};

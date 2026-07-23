@@ -76,6 +76,54 @@ static void slist_append_contains_remove_free__case_sensitive(void **state) {
 	slist_free(list);
 }
 
+static void slist_append_contains_remove_free__case_insensitive(void **state) {
+	const struct SlistParams params = { .case_insensitive = true, };
+	const struct Slist *list = slist_init_with(params);
+	slist_append_many(list, "A", "B", NULL);
+
+	assert_true(slist_contains(list, "b"));
+	assert_true(slist_contains(list, "B"));
+
+	slist_remove(list, "b");
+
+	assert_int_equal(slist_size(list), 1);
+
+	assert_true(slist_contains(list, "a"));
+	assert_true(slist_contains(list, "A"));
+	assert_false(slist_contains(list, "b"));
+	assert_false(slist_contains(list, "B"));
+
+	slist_free(list);
+}
+
+static void slist_append_contains_remove_free__allow_null_val(void **state) {
+	const struct SlistParams params = { .allow_null_val = true, };
+	const struct Slist *list = slist_init_with(params);
+
+	assert_true(slist_append(list, "a"));
+	assert_true(slist_append(list, "b"));
+	assert_true(slist_append(list, NULL));
+	assert_true(slist_append(list, "d"));
+
+	assert_true(slist_contains(list, "b"));
+	assert_true(slist_contains(list, NULL));
+
+	slist_remove(list, "b");
+
+	assert_int_equal(slist_size(list), 3);
+
+	slist_remove(list, NULL);
+
+	assert_int_equal(slist_size(list), 2);
+
+	assert_true(slist_contains(list, "a"));
+	assert_false(slist_contains(list, "b"));
+	assert_false(slist_contains(list, NULL));
+	assert_true(slist_contains(list, "d"));
+
+	slist_free(list);
+}
+
 static void slist_append__(void **state) {
 	const struct Slist *list = slist_init();
 
@@ -142,26 +190,6 @@ static void slist_replace__(void **state) {
 	assert_str_equal(slist_at(list, 0), "00");
 	assert_str_equal(slist_at(list, 1), "11");
 	assert_str_equal(slist_at(list, 2), "22");
-
-	slist_free(list);
-}
-
-static void slist_append_contains_remove_free__case_insensitive(void **state) {
-	const struct SlistParams params = { .case_insensitive = true, };
-	const struct Slist *list = slist_init_with(params);
-	slist_append_many(list, "A", "B", NULL);
-
-	assert_true(slist_contains(list, "b"));
-	assert_true(slist_contains(list, "B"));
-
-	slist_remove(list, "b");
-
-	assert_int_equal(slist_size(list), 1);
-
-	assert_true(slist_contains(list, "a"));
-	assert_true(slist_contains(list, "A"));
-	assert_false(slist_contains(list, "b"));
-	assert_false(slist_contains(list, "B"));
 
 	slist_free(list);
 }
@@ -647,6 +675,7 @@ int main(void) {
 
 		TEST(slist_append_contains_remove_free__case_insensitive),
 		TEST(slist_append_contains_remove_free__case_sensitive),
+		TEST(slist_append_contains_remove_free__allow_null_val),
 
 		TEST(slist_append__),
 

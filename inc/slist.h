@@ -33,8 +33,6 @@ struct SlistFilter {
 	fn_pred_sp val_data;
 };
 
-// TODO allow_null_val
-
 /*
  * Optional constructor params (default)
  */
