@@ -238,14 +238,14 @@ static size_t remove_all(const struct PPmap* const map) {
 	return removed;
 }
 
-static void it_remove(const struct PPmapIt* const it, bool do_free) {
+static bool it_remove(const struct PPmapIt* const it, bool do_free) {
 	if (!it)
-		return;
+		return false;
 
 	struct PPmapItState *st = it->st;
 	if (!st) {
 		ppmap_it_free(it);
-		return;
+		return false;
 	}
 
 	if (do_free) {
@@ -262,6 +262,8 @@ static void it_remove(const struct PPmapIt* const it, bool do_free) {
 
 	((struct PPmapIt*)it)->key = NULL;
 	((struct PPmapIt*)it)->val = NULL;
+
+	return true;
 }
 
 
@@ -618,8 +620,8 @@ size_t ppmap_remove_in_free(const struct PPmap* const map, const struct PPmap* c
 	return removed;
 }
 
-void ppmap_it_remove(const struct PPmapIt* const it) {
-	it_remove(it, false);
+bool ppmap_it_remove(const struct PPmapIt* const it) {
+	return it_remove(it, false);
 }
 
 void ppmap_it_remove_free(const struct PPmapIt* const it) {
