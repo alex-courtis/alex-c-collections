@@ -270,6 +270,9 @@ static void slist_it_prev__(void **state) {
 }
 
 static void slist_insert__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "0", "a", "1", "b", "2", NULL);
+
 	assert_false(slist_insert(NULL, 0, "x"));
 
 	const struct Slist *set = slist_init();
@@ -283,9 +286,6 @@ static void slist_insert__(void **state) {
 
 	assert_false(slist_insert(set, 0, NULL));
 
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "0", "a", "1", "b", "2", NULL);
-
 	assert_slist_equal(set, expected);
 
 	slist_free(set);
@@ -293,6 +293,9 @@ static void slist_insert__(void **state) {
 }
 
 static void slist_append__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "a", "b", NULL);
+
 	assert_false(slist_append(NULL, "x"));
 
 	const struct Slist *set = slist_init();
@@ -303,9 +306,6 @@ static void slist_append__(void **state) {
 
 	assert_true(slist_append(set, "b"));
 
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "a", "b", NULL);
-
 	assert_slist_equal(set, expected);
 
 	slist_free(set);
@@ -313,6 +313,9 @@ static void slist_append__(void **state) {
 }
 
 static void slist_prepend__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "b", "a", NULL);
+
 	assert_false(slist_prepend(NULL, "x"));
 
 	const struct Slist *set = slist_init();
@@ -323,9 +326,6 @@ static void slist_prepend__(void **state) {
 
 	assert_true(slist_prepend(set, "b"));
 
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "b", "a", NULL);
-
 	assert_slist_equal(set, expected);
 
 	slist_free(set);
@@ -333,6 +333,9 @@ static void slist_prepend__(void **state) {
 }
 
 static void slist_replace__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "0", "b", NULL);
+
 	assert_false(slist_replace(NULL, 0, "x"));
 
 	const struct Slist *set = slist_init();
@@ -344,9 +347,6 @@ static void slist_replace__(void **state) {
 
 	assert_false(slist_replace(set, 2, "2"));
 
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "0", "b", NULL);
-
 	assert_slist_equal(set, expected);
 
 	slist_free(set);
@@ -354,6 +354,9 @@ static void slist_replace__(void **state) {
 }
 
 static void slist_append_all__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "A", "B", "A", "C", NULL);
+
 	assert_int_equal(slist_append_all(NULL, NULL), 0);
 
 	const struct Slist *to = slist_init();
@@ -366,9 +369,6 @@ static void slist_append_all__(void **state) {
 
 	assert_int_equal(slist_append_all(to, from), 2);
 
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "A", "B", "A", "C", NULL);
-
 	assert_slist_equal(to, expected);
 
 	assert_int_equal(slist_append_all(NULL, from), 0);
@@ -379,6 +379,9 @@ static void slist_append_all__(void **state) {
 }
 
 static void slist_remove__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "B", NULL);
+
 	assert_false(slist_remove(NULL, "x"));
 
 	const struct Slist *set = slist_init();
@@ -390,9 +393,6 @@ static void slist_remove__(void **state) {
 
 	assert_false(slist_remove(set, "x"));
 
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "B", NULL);
-
 	assert_slist_equal(set, expected);
 
 	slist_free(expected);
@@ -400,13 +400,13 @@ static void slist_remove__(void **state) {
 }
 
 static void slist_remove__case_insensitive(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "B", NULL);
+
 	const struct Slist *set = slist_init_with((struct SlistParams){ .case_insensitive = true, });
 	slist_append_many(set, "A", "B", NULL);
 
 	assert_true(slist_remove(set, "a"));
-
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "B", NULL);
 
 	assert_slist_equal(set, expected);
 
@@ -415,6 +415,9 @@ static void slist_remove__case_insensitive(void **state) {
 }
 
 static void slist_remove_at__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "B", NULL);
+
 	assert_false(slist_remove_at(NULL, 0));
 
 	const struct Slist *set = slist_init();
@@ -425,9 +428,6 @@ static void slist_remove_at__(void **state) {
 	assert_true(slist_remove_at(set, 1));
 
 	assert_false(slist_remove_at(set, 999));
-
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "B", NULL);
 
 	assert_slist_equal(set, expected);
 
@@ -452,6 +452,9 @@ static void slist_remove_all__(void **state) {
 }
 
 static void slist_it_remove__(void **state) {
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "a", "c", "d", "e", NULL);
+
 	assert_false(slist_it_remove(NULL));
 
 	const struct SlistIt *it = calloc(1, sizeof(struct SlistIt));
@@ -471,9 +474,6 @@ static void slist_it_remove__(void **state) {
 
 	it = slist_it_next(it);
 	assert_str_equal(it->val, "c");
-
-	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "a", "c", "d", "e", NULL);
 
 	assert_slist_equal(set, expected);
 
@@ -508,11 +508,11 @@ static void slist_sort__(void **state) {
 }
 
 static void slist_sort__case_insensitive(void **state) {
-	const struct Slist *actual = slist_init_with((struct SlistParams){ .case_insensitive = true, });
-	slist_append_many(actual, "Bb3", "aa1", "Aa0", "bb2", NULL);
-
 	const struct Slist *expected = slist_init();
 	slist_append_many(expected, "Aa0", "aa1", "Bb2", "bb3", NULL);
+
+	const struct Slist *actual = slist_init_with((struct SlistParams){ .case_insensitive = true, });
+	slist_append_many(actual, "Bb3", "aa1", "Aa0", "bb2", NULL);
 
 	slist_sort(actual);
 

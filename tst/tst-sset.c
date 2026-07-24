@@ -189,6 +189,9 @@ static void sset_it_next__(void **state) {
 }
 
 static void sset_add__(void **state) {
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "a", "b", NULL);
+
 	assert_false(sset_add(NULL, "x"));
 
 	const struct Sset *set = sset_init();
@@ -198,6 +201,10 @@ static void sset_add__(void **state) {
 	assert_false(sset_add(set, "a"));
 
 	assert_false(sset_add(set, NULL));
+
+	assert_true(sset_add(set, "b"));
+
+	assert_sset_equal(set, expected);
 
 	sset_free(set);
 }
@@ -213,6 +220,9 @@ static void sset_add__case_insensitive(void **state) {
 }
 
 static void sset_add_all__(void **state) {
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "A", "B", "C", NULL);
+
 	assert_int_equal(sset_add_all(NULL, NULL), 0);
 
 	const struct Sset *to = sset_init();
@@ -222,9 +232,6 @@ static void sset_add_all__(void **state) {
 
 	const struct Sset *from = sset_init();
 	sset_add_many(from, "A", "C", NULL);
-
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "A", "B", "C", NULL);
 
 	assert_int_equal(sset_add_all(to, from), 1);
 
@@ -238,6 +245,9 @@ static void sset_add_all__(void **state) {
 }
 
 static void sset_remove__(void **state) {
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "B", NULL);
+
 	assert_false(sset_remove(NULL, "x"));
 
 	const struct Sset *set = sset_init();
@@ -249,15 +259,24 @@ static void sset_remove__(void **state) {
 
 	assert_false(sset_remove(set, "x"));
 
+	assert_sset_equal(set, expected);
+
+	sset_free(expected);
 	sset_free(set);
 }
 
 static void sset_remove__case_insensitive(void **state) {
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "B", NULL);
+
 	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, });
 	sset_add_many(set, "A", "B", NULL);
 
 	assert_true(sset_remove(set, "a"));
 
+	assert_sset_equal(set, expected);
+
+	sset_free(expected);
 	sset_free(set);
 }
 
@@ -278,6 +297,9 @@ static void sset_remove_all__(void **state) {
 }
 
 static void sset_remove_in__(void **state) {
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "b", NULL);
+
 	assert_int_equal(sset_remove_in(NULL, NULL), 0);
 
 	const struct Sset *set = sset_init();
@@ -289,9 +311,6 @@ static void sset_remove_in__(void **state) {
 
 	const struct Sset *in = sset_init();
 	sset_add_many(in, "a", "c", "d", NULL);
-
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "b", NULL);
 
 	assert_int_equal(sset_remove_in(set, in), 2);
 
@@ -316,6 +335,9 @@ static void sset_remove_in__case_insensitive(void **state) {
 }
 
 static void sset_it_remove__(void **state) {
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "a", "c", "d", "e", NULL);
+
 	assert_false(sset_it_remove(NULL));
 
 	const struct SsetIt *it = calloc(1, sizeof(struct SsetIt));
@@ -336,7 +358,10 @@ static void sset_it_remove__(void **state) {
 	it = sset_it_next(it);
 	assert_str_equal(it->val, "c");
 
+	assert_sset_equal(set, expected);
+
 	sset_it_free(it);
+	sset_free(expected);
 	sset_free(set);
 }
 
@@ -366,7 +391,18 @@ static void sset_sort__(void **state) {
 }
 
 static void sset_sort__case_insensitive(void **state) {
-	// TODO
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "Aa0", "aa1", "Bb2", "bb3", NULL);
+
+	const struct Sset *actual = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(actual, "Bb3", "aa1", "Aa0", "bb2", NULL);
+
+	sset_sort(actual);
+
+	assert_sset_equal(actual, expected);
+
+	sset_free(actual);
+	sset_free(expected);
 }
 
 static void sset_equal__(void **state) {
