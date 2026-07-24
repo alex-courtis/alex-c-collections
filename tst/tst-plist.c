@@ -118,6 +118,23 @@ static void plist_clone__alloc_val(void **state) {
 	plist_free(list);
 }
 
+static void plist_clone__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	const struct Plist *clone = plist_clone(list);
+
+	assert_int_equal(clone->size, 3);
+	assert_ptr_equal(clone->vals[0], V0);
+	assert_ptr_equal(clone->vals[1], NULL);
+	assert_ptr_equal(clone->vals[2], V2);
+
+	plist_free(clone);
+	plist_free(list);
+}
+
 static void plist_clone_deep__null(void **state) {
 	assert_nul(plist_clone_deep(NULL));
 }
@@ -147,6 +164,28 @@ static void plist_clone_deep__no_clone_val(void **state) {
 	plist_free(list);
 }
 
+static void plist_clone_deep__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .clone_val = mock_clone, .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+	plist_append(list, V3);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	expect_ptr(mock_clone, ptr, NULL); will_return_ptr_type(mock_clone, V1, void*);
+	expect_ptr(mock_clone, ptr, V2); will_return_ptr_type(mock_clone, NULL, void*);
+	expect_ptr(mock_clone, ptr, V3); will_return_ptr_type(mock_clone, V3, void*);
+	const struct Plist *clone = plist_clone_deep(list);
+
+	assert_int_equal(clone->size, 4);
+	assert_ptr_equal(clone->vals[0], V0);
+	assert_ptr_equal(clone->vals[1], V1);
+	assert_ptr_equal(clone->vals[2], NULL);
+	assert_ptr_equal(clone->vals[3], V3);
+
+	plist_free(clone);
+	plist_free(list);
+}
 static void plist_free__null(void **state) {
 	plist_free(NULL);
 }
@@ -198,10 +237,22 @@ static void plist_free_vals__missing_val(void **state) {
 
 static void plist_free_vals__free_val(void **state) {
 	const struct Plist *list = plist_init_with((struct PlistParams){ .free_val = mock_free, });
-	plist_append_many(list, V0, V1, V0, V1, NULL);
+	plist_append_many(list, V0, V0, V0, V0, V0, V0, V1, NULL);
 
 	expect_ptr(mock_free, ptr, V0);
 	expect_ptr(mock_free, ptr, V1);
+
+	plist_free_vals(list);
+}
+
+static void plist_free_vals__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .free_val = mock_free, .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V2);
 
 	plist_free_vals(list);
 }
@@ -252,6 +303,19 @@ static void plist_contains__equal_val(void **state) {
 	expect_ptr(mock_equal, a, V0); expect_ptr(mock_equal, b, V1); will_return(mock_equal, false);
 
 	assert_false(plist_contains(list, V1));
+
+	plist_free(list);
+}
+
+static void plist_contains__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	assert_true(plist_contains(list, V0));
+	assert_true(plist_contains(list, NULL));
+	assert_true(plist_contains(list, V2));
 
 	plist_free(list);
 }
@@ -371,6 +435,19 @@ static void plist_at__present(void **state) {
 	assert_ptr_equal(plist_at(list, 0), V0);
 	assert_ptr_equal(plist_at(list, 1), V1);
 	assert_nul(plist_at(list, 2));
+
+	plist_free(list);
+}
+
+static void plist_at__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_ptr_equal(plist_at(list, 1), NULL);
+	assert_ptr_equal(plist_at(list, 2), V2);
 
 	plist_free(list);
 }
@@ -1095,6 +1172,31 @@ static void plist_append_all__alloc_val(void **state) {
 	plist_free(from);
 }
 
+static void plist_append_all__allow_null_val(void **state) {
+	const struct Plist *from = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(from, V3);
+	plist_append(from, NULL);
+	plist_append(from, V5);
+
+	const struct Plist *to = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(to, V0);
+	plist_append(to, NULL);
+	plist_append(to, V2);
+
+	assert_int_equal(plist_append_all(to, from), 3);
+
+	assert_int_equal(to->size, 6);
+	assert_ptr_equal(to->vals[0], V0);
+	assert_ptr_equal(to->vals[1], NULL);
+	assert_ptr_equal(to->vals[2], V2);
+	assert_ptr_equal(to->vals[3], V3);
+	assert_ptr_equal(to->vals[4], NULL);
+	assert_ptr_equal(to->vals[5], V5);
+
+	plist_free(to);
+	plist_free(from);
+}
+
 static void plist_append_all_clone__null(void **state) {
 	const struct Plist *list = plist_init();
 
@@ -1144,6 +1246,35 @@ static void plist_append_all_clone__no_clone_val(void **state) {
 
 	assert_int_equal(to->size, 1);
 	assert_ptr_equal(to->vals[0], V0);
+
+	plist_free(to);
+	plist_free(from);
+}
+
+static void plist_append_all_clone__allow_null_val(void **state) {
+	const struct Plist *from = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(from, NULL);
+	plist_append(from, V4);
+
+	const struct Plist *to = plist_init_with((struct PlistParams){ .allow_null_val = true, .clone_val = mock_clone, });
+	plist_append(to, V0);
+	plist_append(to, NULL);
+	plist_append(to, V2);
+
+	// NULL ok
+	expect_ptr(mock_clone, ptr, NULL); will_return_ptr_type(mock_clone, V3, void*);
+
+	// V4 ok
+	expect_ptr(mock_clone, ptr, V4); will_return_ptr_type(mock_clone, V4, void*);
+
+	assert_int_equal(plist_append_all_clone(to, from), 2);
+
+	assert_int_equal(to->size, 5);
+	assert_ptr_equal(to->vals[0], V0);
+	assert_ptr_equal(to->vals[1], NULL);
+	assert_ptr_equal(to->vals[2], V2);
+	assert_ptr_equal(to->vals[3], V3);
+	assert_ptr_equal(to->vals[4], V4);
 
 	plist_free(to);
 	plist_free(from);
@@ -1214,6 +1345,21 @@ static void plist_remove__equal_val(void **state) {
 	plist_free(list);
 }
 
+static void plist_remove__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	assert_nul(plist_remove(list, NULL));
+
+	assert_int_equal(list->size, 2);
+	assert_ptr_equal(list->vals[0], V0);
+	assert_ptr_equal(list->vals[1], V2);
+
+	plist_free(list);
+}
+
 static void plist_remove_free__null(void **state) {
 	const struct Plist *list = plist_init();
 
@@ -1257,6 +1403,21 @@ static void plist_remove_free__free(void **state) {
 	assert_true(plist_remove_free(list, val));
 
 	assert_int_equal(list->size, 0);
+
+	plist_free(list);
+}
+
+static void plist_remove_free__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .free_val = mock_free, .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	assert_true(plist_remove_free(list, NULL));
+
+	assert_int_equal(list->size, 2);
+	assert_ptr_equal(list->vals[0], V0);
+	assert_ptr_equal(list->vals[1], V2);
 
 	plist_free(list);
 }
@@ -1406,6 +1567,19 @@ static void plist_remove_all__present(void **state) {
 	plist_free(list);
 }
 
+static void plist_remove_all__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	assert_int_equal(plist_remove_all(list), 3);
+
+	assert_int_equal(list->size, 0);
+
+	plist_free(list);
+}
+
 static void plist_remove_all_free__null(void **state) {
 	assert_int_equal(plist_remove_all_free(NULL), 0);
 }
@@ -1435,6 +1609,20 @@ static void plist_remove_all_free__free_val(void **state) {
 
 	expect_ptr(mock_free, ptr, V0); expect_ptr(mock_free, ptr, V1);
 	assert_int_equal(plist_remove_all_free(list), 2);
+
+	assert_int_equal(list->size, 0);
+
+	plist_free(list);
+}
+
+static void plist_remove_all_free__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .free_val = mock_free, .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	expect_ptr(mock_free, ptr, V0); expect_ptr(mock_free, ptr, V2);
+	assert_int_equal(plist_remove_all_free(list), 3);
 
 	assert_int_equal(list->size, 0);
 
@@ -1932,10 +2120,28 @@ static void plist_str__empty(void **state) {
 
 static void plist_str__pointers(void **state) {
 	const struct Plist *list = plist_init();
-	plist_append_many(list, V0, V1, V2, NULL);
+	plist_append_many(list, V0, V1, NULL);
 
-	const void **v = list->vals;
-	v[1] = NULL;
+	char *expected = sprintf_alloc(
+			"%p\n"
+			"%p\n",
+			V0,
+			V1
+			);
+
+	char *actual = plist_str(list);
+	assert_str_equal(actual, expected);
+
+	free(actual);
+	free(expected);
+	plist_free(list);
+}
+
+static void plist_str__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
 
 	char *expected = sprintf_alloc(
 			"%p\n"
@@ -1990,12 +2196,12 @@ int main(void) {
 		TEST(plist_clone__params__constructor),
 		TEST(plist_clone__val_ptr),
 		TEST(plist_clone__alloc_val),
-		// TODO allow_null_val
+		TEST(plist_clone__allow_null_val),
 
 		TEST(plist_clone_deep__null),
 		TEST(plist_clone_deep__clone_val),
 		TEST(plist_clone_deep__no_clone_val),
-		// TODO allow_null_val
+		TEST(plist_clone_deep__allow_null_val),
 
 		TEST(plist_free__null),
 		TEST(plist_free__empty),
@@ -2005,7 +2211,7 @@ int main(void) {
 		TEST(plist_free_vals__null_free_val),
 		TEST(plist_free_vals__missing_val),
 		TEST(plist_free_vals__free_val),
-		// TODO allow_null_val
+		TEST(plist_free_vals__allow_null_val),
 
 		TEST(plist_it_free__null),
 		TEST(plist_it_free__incomplete),
@@ -2014,7 +2220,7 @@ int main(void) {
 		TEST(plist_contains__empty),
 		TEST(plist_contains__present),
 		TEST(plist_contains__equal_val),
-		// TODO allow_null_val
+		TEST(plist_contains__allow_null_val),
 
 		TEST(plist_index_of__null),
 		TEST(plist_index_of__empty),
@@ -2027,7 +2233,7 @@ int main(void) {
 		TEST(plist_at__null),
 		TEST(plist_at__empty),
 		TEST(plist_at__present),
-		// TODO allow_null_val
+		TEST(plist_at__allow_null_val),
 
 		TEST(plist_find__null),
 		TEST(plist_find__list_empty),
@@ -2099,12 +2305,12 @@ int main(void) {
 		TEST(plist_append_all__null),
 		TEST(plist_append_all__duplicates),
 		TEST(plist_append_all__alloc_val),
-		// TODO allow_null_val
+		TEST(plist_append_all__allow_null_val),
 
 		TEST(plist_append_all_clone__null),
 		TEST(plist_append_all_clone__clone_val),
 		TEST(plist_append_all_clone__no_clone_val),
-		// TODO allow_null_val
+		TEST(plist_append_all_clone__allow_null_val),
 
 		TEST(plist_remove__null),
 		TEST(plist_remove__empty),
@@ -2112,13 +2318,13 @@ int main(void) {
 		TEST(plist_remove__exists),
 		TEST(plist_remove__inexistent),
 		TEST(plist_remove__equal_val),
-		// TODO allow_null_val
+		TEST(plist_remove__allow_null_val),
 
 		TEST(plist_remove_free__null),
 		TEST(plist_remove_free__empty),
 		TEST(plist_remove_free__free_val),
 		TEST(plist_remove_free__free),
-		// TODO allow_null_val
+		TEST(plist_remove_free__allow_null_val),
 
 		TEST(plist_remove_at__null),
 		TEST(plist_remove_at__existing),
@@ -2133,18 +2339,17 @@ int main(void) {
 		TEST(plist_remove_all__null),
 		TEST(plist_remove_all__empty),
 		TEST(plist_remove_all__present),
-		// TODO allow_null_val
+		TEST(plist_remove_all__allow_null_val),
 
 		TEST(plist_remove_all_free__null),
 		TEST(plist_remove_all_free__empty),
 		TEST(plist_remove_all_free__no_free_val),
 		TEST(plist_remove_all_free__free_val),
-		// TODO allow_null_val
+		TEST(plist_remove_all_free__allow_null_val),
 
 		TEST(plist_it_remove__null),
 		TEST(plist_it_remove__incomplete),
 
-		// allow_null_val
 		TEST(plist_it_remove__forwards_first),
 		TEST(plist_it_remove__backwards_first),
 
@@ -2157,7 +2362,6 @@ int main(void) {
 		TEST(plist_it_remove__forwards_all),
 		TEST(plist_it_remove__backwards_all),
 
-		// allow_null_val
 		TEST(plist_it_remove_free__null),
 		TEST(plist_it_remove_free__incomplete),
 
@@ -2178,7 +2382,6 @@ int main(void) {
 		TEST(plist_sort__empty),
 		TEST(plist_sort__one),
 		TEST(plist_sort__many),
-		// TODO allow_null_val
 
 		TEST(plist_equal__null),
 		TEST(plist_equal__length_different),
@@ -2186,12 +2389,11 @@ int main(void) {
 		TEST(plist_equal__val_pointers_different),
 		TEST(plist_equal__equal_val_ok),
 		TEST(plist_equal__equal_val_different),
-		// TODO allow_null_val
 
 		TEST(plist_str__null),
 		TEST(plist_str__empty),
 		TEST(plist_str__pointers),
-		// TODO allow_null_val
+		TEST(plist_str__allow_null_val),
 		TEST(plist_str__str_val),
 
 		TEST(plist_size__null),
