@@ -406,7 +406,6 @@ const struct PlistIt *plist_it_next(const struct PlistIt* const it) {
 	return NULL;
 }
 
-// TODO collapse this and next
 const struct PlistIt *plist_it_prev(const struct PlistIt* const it) {
 	if (!it)
 		return NULL;

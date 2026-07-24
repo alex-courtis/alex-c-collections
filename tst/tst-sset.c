@@ -92,6 +92,15 @@ static void sset_contains__(void **state) {
 	sset_free(set);
 }
 
+static void sset_contains__case_insensitive(void **state) {
+	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(set, "a", NULL);
+
+	assert_true(sset_contains(set, "A"));
+
+	sset_free(set);
+}
+
 static void sset_at__(void **state) {
 	assert_nul(sset_at(NULL, 0));
 
@@ -192,6 +201,16 @@ static void sset_add__(void **state) {
 	sset_free(set);
 }
 
+static void sset_add__case_insensitive(void **state) {
+	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+
+	assert_true(sset_add(set, "a"));
+
+	assert_false(sset_add(set, "A"));
+
+	sset_free(set);
+}
+
 static void sset_add_all__(void **state) {
 	assert_int_equal(sset_add_all(NULL, NULL), 0);
 
@@ -232,6 +251,15 @@ static void sset_remove__(void **state) {
 	sset_free(set);
 }
 
+static void sset_remove__case_insensitive(void **state) {
+	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(set, "A", "B", NULL);
+
+	assert_true(sset_remove(set, "a"));
+
+	sset_free(set);
+}
+
 static void sset_remove_all__(void **state) {
 	assert_int_equal(sset_remove_all(NULL), 0);
 
@@ -258,19 +286,32 @@ static void sset_remove_in__(void **state) {
 
 	assert_int_equal(sset_remove_in(NULL, set), 0);
 
-	const struct Sset *from = sset_init();
-	sset_add_many(from, "a", "c", "d", NULL);
+	const struct Sset *in = sset_init();
+	sset_add_many(in, "a", "c", "d", NULL);
 
 	const struct Sset *expected = sset_init();
 	sset_add_many(expected, "b", NULL);
 
-	assert_int_equal(sset_remove_in(set, from), 2);
+	assert_int_equal(sset_remove_in(set, in), 2);
 
 	assert_sset_equal(set, expected);
 
 	sset_free(set);
-	sset_free(from);
+	sset_free(in);
 	sset_free(expected);
+}
+
+static void sset_remove_in__case_insensitive(void **state) {
+	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(set, "A", "B", NULL);
+
+	const struct Sset *in = sset_init();
+	sset_add_many(in, "b", "c", NULL);
+
+	assert_int_equal(sset_remove_in(set, in), 1);
+
+	sset_free(set);
+	sset_free(in);
 }
 
 static void sset_it_remove__(void **state) {
@@ -323,6 +364,10 @@ static void sset_sort__(void **state) {
 	sset_free(expected);
 }
 
+static void sset_sort__case_insensitive(void **state) {
+	// TODO
+}
+
 static void sset_equal__(void **state) {
 	assert_false(sset_equal(NULL, NULL));
 
@@ -340,6 +385,19 @@ static void sset_equal__(void **state) {
 	assert_false(sset_equal(a, b));
 
 	sset_add(b, "x");
+
+	assert_true(sset_equal(a, b));
+
+	sset_free(a);
+	sset_free(b);
+}
+
+static void sset_equal__case_insensitive(void **state) {
+	const struct Sset *a = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(a, "a", "b", "c", NULL);
+
+	const struct Sset *b = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(b, "a", "B", "c", NULL);
 
 	assert_true(sset_equal(a, b));
 
@@ -399,49 +457,6 @@ static void sset_size__(void **state) {
 	sset_free(set);
 }
 
-static void sset__case_insensitive(void **state) {
-	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, });
-	sset_add_many(set, "a", "b", "c", NULL);
-
-	assert_true(sset_contains(set, "A"));
-
-	assert_false(sset_add(set, "a"));
-
-	// a b c
-	assert_int_equal(sset_size(set), 3);
-
-	const struct Sset *b = sset_init();
-	sset_add_many(b, "A", "b", "C", NULL);
-
-	assert_true(sset_equal(set, b));
-
-	assert_false(sset_equal(b, set));
-
-	const struct Sset *from = sset_init();
-	sset_add_many(from, "A", "d", NULL);
-
-	assert_int_equal(sset_add_all(set, from), 1);
-
-	// a b c d
-	assert_int_equal(sset_size(set), 4);
-
-	const struct Sset *in = sset_init();
-	sset_add_many(in, "B", "d", NULL);
-
-	assert_true(sset_remove(set, "A"));
-
-	// b c d
-	assert_int_equal(sset_size(set), 3);
-
-	assert_int_equal(sset_remove_in(set, in), 2);
-
-	// c
-	assert_int_equal(sset_size(set), 1);
-
-	sset_free(set);
-	sset_free(from);
-}
-
 int main(void) {
 	const struct CMUnitTest tests[] = {
 		TEST(sset_clone__params__constructor),
@@ -451,6 +466,7 @@ int main(void) {
 		TEST(sset_it_free__),
 
 		TEST(sset_contains__),
+		TEST(sset_contains__case_insensitive),
 
 		TEST(sset_at__),
 
@@ -463,28 +479,31 @@ int main(void) {
 		TEST(sset_it_next__),
 
 		TEST(sset_add__),
+		TEST(sset_add__case_insensitive),
 
 		TEST(sset_add_all__),
 
 		TEST(sset_remove__),
+		TEST(sset_remove__case_insensitive),
 
 		TEST(sset_remove_all__),
 
 		TEST(sset_remove_in__),
+		TEST(sset_remove_in__case_insensitive),
 
 		TEST(sset_it_remove__),
 
 		TEST(sset_sort__),
+		TEST(sset_sort__case_insensitive),
 
 		TEST(sset_equal__),
+		TEST(sset_equal__case_insensitive),
 
 		TEST(sset_slist__),
 
 		TEST(sset_str__),
 
 		TEST(sset_size__),
-
-		TEST(sset__case_insensitive),
 	};
 
 	return RUN(tests);

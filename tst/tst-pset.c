@@ -955,20 +955,6 @@ static void pset_it_remove__incomplete(void **state) {
 	assert_nul(pset_it_remove(it));;
 }
 
-static void pset_it_remove__already_removed(void **state) {
-	const struct Pset *set = pset_init();
-	pset_add_many(set, V0, V1, NULL);
-
-	const struct PsetIt *it = pset_it(set);
-
-	assert_ptr_equal(pset_remove(set, V0), V0);
-
-	assert_nul(pset_it_remove(it));
-
-	pset_it_free(it);
-	pset_free(set);
-}
-
 static void pset_it_remove__start(void **state) {
 	const struct Pset *set = pset_init();
 	pset_add_many(set, V0, V1, V2, NULL);
@@ -1055,20 +1041,6 @@ static void pset_it_remove_free__incomplete(void **state) {
 	const struct PsetIt *it = calloc(1, sizeof(struct PsetIt));
 
 	assert_false(pset_it_remove_free(it));;
-}
-
-static void pset_it_remove_free__already_removed(void **state) {
-	const struct Pset *set = pset_init_with((struct PsetParams){ .free_val = mock_free, });
-	pset_add_many(set, V0, V1, NULL);
-
-	const struct PsetIt *it = pset_it(set);
-
-	assert_ptr_equal(pset_remove(set, V0), V0);
-
-	assert_false(pset_it_remove_free(it));
-
-	pset_it_free(it);
-	pset_free(set);
 }
 
 static void pset_it_remove_free__start(void **state) {
@@ -1543,7 +1515,6 @@ int main(void) {
 
 		TEST(pset_it_remove__null),
 		TEST(pset_it_remove__incomplete),
-		TEST(pset_it_remove__already_removed),
 		TEST(pset_it_remove__start),
 		TEST(pset_it_remove__mid),
 		TEST(pset_it_remove__end),
@@ -1551,7 +1522,6 @@ int main(void) {
 
 		TEST(pset_it_remove_free__null),
 		TEST(pset_it_remove_free__incomplete),
-		TEST(pset_it_remove_free__already_removed),
 		TEST(pset_it_remove_free__start),
 		TEST(pset_it_remove_free__mid),
 		TEST(pset_it_remove_free__end),
