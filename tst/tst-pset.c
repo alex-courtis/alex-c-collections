@@ -332,15 +332,13 @@ static void pset_add__grow(void **state) {
 }
 
 static void pset_add_all__null(void **state) {
-	const struct Pset *from = pset_init();
-	const struct Pset *to = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_int_equal(pset_add_all(NULL, NULL), 0);
-	assert_int_equal(pset_add_all(NULL, from), 0);
-	assert_int_equal(pset_add_all(to, NULL), 0);
+	assert_int_equal(pset_add_all(NULL, set), 0);
+	assert_int_equal(pset_add_all(set, NULL), 0);
 
-	pset_free(from);
-	pset_free(to);
+	pset_free(set);
 }
 
 static void pset_add_all__duplicates(void **state) {
@@ -382,15 +380,13 @@ static void pset_add_all__alloc_val(void **state) {
 }
 
 static void pset_add_all_clone__null(void **state) {
-	const struct Pset *from = pset_init();
-	const struct Pset *to = pset_init();
+	const struct Pset *set = pset_init();
 
 	assert_int_equal(pset_add_all_clone(NULL, NULL), 0);
-	assert_int_equal(pset_add_all_clone(NULL, from), 0);
-	assert_int_equal(pset_add_all_clone(to, NULL), 0);
+	assert_int_equal(pset_add_all_clone(NULL, set), 0);
+	assert_int_equal(pset_add_all_clone(set, NULL), 0);
 
-	pset_free(from);
-	pset_free(to);
+	pset_free(set);
 }
 
 static void pset_add_all_clone__clone_val(void **state) {
@@ -923,6 +919,177 @@ static void pset_it_remove_free__all(void **state) {
 	pset_free(set);
 }
 
+static void pset_sort__null(void **state) {
+	pset_sort(NULL, mock_less_than);
+}
+
+static void pset_sort__no_less_than(void **state) {
+	const struct Pset *set = pset_init();
+	pset_add_many(set, V0, V1, NULL);
+
+	pset_sort(set, NULL);
+
+	assert_int_equal(set->size, 2);
+	assert_ptr_equal(set->vals[0], V0);
+	assert_ptr_equal(set->vals[1], V1);
+
+	pset_free(set);
+}
+
+static void pset_sort__empty(void **state) {
+	const struct Pset *actual = pset_init();
+
+	pset_sort(actual, mock_less_than);
+
+	pset_free(actual);
+}
+
+static void pset_sort__one(void **state) {
+	const struct Pset *set = pset_init();
+	pset_add_many(set, V0, NULL);
+
+	pset_sort(set, mock_less_than);
+
+	assert_int_equal(set->size, 1);
+	assert_ptr_equal(set->vals[0], V0);
+
+	pset_free(set);
+}
+
+static void pset_sort__many(void **state) {
+	const struct Pset *actual = pset_init();
+
+	const int v[6] = { 0, 1, 2, 3, 4, 5 };
+
+	assert_true(pset_add(actual, &v[2]));
+	assert_true(pset_add(actual, &v[0]));
+	assert_true(pset_add(actual, &v[3]));
+	assert_true(pset_add(actual, &v[5]));
+	assert_true(pset_add(actual, &v[1]));
+	assert_true(pset_add(actual, &v[4]));
+
+	const struct Pset *expected = pset_init();
+	assert_true(pset_add(expected, &v[0]));
+	assert_true(pset_add(expected, &v[1]));
+	assert_true(pset_add(expected, &v[2]));
+	assert_true(pset_add(expected, &v[3]));
+	assert_true(pset_add(expected, &v[4]));
+	assert_true(pset_add(expected, &v[5]));
+
+	pset_sort(actual, test_less_than_int);
+
+	assert_pset_equal(actual, expected);
+
+	pset_free(actual);
+	pset_free(expected);
+}
+
+static void pset_equal__null(void **state) {
+	const struct Pset *set = pset_init();
+	pset_add_many(set, V0, V1, NULL);
+
+	assert_false(pset_equal(NULL, NULL));
+	assert_false(pset_equal(set, NULL));
+	assert_false(pset_equal(NULL, set));
+
+	pset_free(set);
+}
+
+static void pset_equal__length_different(void **state) {
+	const struct Pset *a = pset_init();
+	pset_add_many(a, V0, NULL);
+	const struct Pset *b = pset_init();
+	pset_add_many(b, V0, V1, NULL);
+
+	assert_pset_not_equal(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+static void pset_equal__val_pointers_ok(void **state) {
+	const struct Pset *a = pset_init();
+	pset_add_many(a, V0, V1, NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(b, V0, V1, NULL);
+
+	assert_pset_equal(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+static void pset_equal__val_pointers_different(void **state) {
+	const struct Pset *a = pset_init();
+	pset_add_many(a, V0, V1, NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(b, V0, V2, NULL);
+
+	assert_pset_not_equal(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+static void pset_equal__equal_val_ok(void **state) {
+	const struct Pset *a = pset_init_with((struct PsetParams){ .equal_val = (fn_equal)equal_strcmp, });
+	pset_add_many(a, "a", "b", NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(b, "a", "b", NULL);
+
+	assert_pset_equal(a, b);
+
+	pset_free(b);
+	pset_free(a);
+}
+
+static void pset_equal__equal_val_different(void **state) {
+	const struct Pset *a = pset_init_with((struct PsetParams){ .equal_val = (fn_equal)equal_strcmp, });
+	pset_add_many(a, "a", "b", NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(a, "a", "c", NULL);
+
+	assert_pset_not_equal(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static void pset_at__empty(void **state) {
 	const struct Pset *set = pset_init();
 
@@ -1239,149 +1406,6 @@ static void pset_add__again(void **state) {
 	pset_free(set);
 }
 
-static void pset_sort__null(void **state) {
-	pset_sort(NULL, mock_less_than);
-}
-
-static void pset_sort__no_less_than(void **state) {
-	const struct Pset *set = pset_init();
-	pset_add_many(set, V0, V1, NULL);
-
-	pset_sort(set, NULL);
-
-	assert_int_equal(set->size, 2);
-	assert_ptr_equal(set->vals[0], V0);
-	assert_ptr_equal(set->vals[1], V1);
-
-	pset_free(set);
-}
-
-static void pset_sort__empty(void **state) {
-	const struct Pset *actual = pset_init();
-
-	pset_sort(actual, mock_less_than);
-
-	pset_free(actual);
-}
-
-static void pset_sort__one(void **state) {
-	const struct Pset *set = pset_init();
-	pset_add_many(set, V0, NULL);
-
-	pset_sort(set, mock_less_than);
-
-	assert_int_equal(set->size, 1);
-	assert_ptr_equal(set->vals[0], V0);
-
-	pset_free(set);
-}
-
-static void pset_sort__many(void **state) {
-	const char *v[6] = { "a", "b", "c", "d", "e", "f" };
-
-	const struct Pset *set = pset_init();
-	pset_add_many(set, &v[2], &v[0], &v[3], &v[5], &v[1], &v[4], NULL);
-
-	pset_sort(set, (fn_less_than)less_than_strcmp);
-
-	assert_int_equal(set->size, 6);
-	assert_ptr_equal(set->vals[0], &v[0]);
-	assert_ptr_equal(set->vals[1], &v[1]);
-	assert_ptr_equal(set->vals[2], &v[2]);
-	assert_ptr_equal(set->vals[3], &v[3]);
-	assert_ptr_equal(set->vals[4], &v[4]);
-	assert_ptr_equal(set->vals[5], &v[5]);
-
-	pset_free(set);
-}
-
-static void pset_equal__length_different(void **state) {
-	const struct Pset *a = pset_init();
-	const struct Pset *b = pset_init();
-
-	assert_true(pset_add(a, V0));
-
-	assert_true(pset_add(b, V0));
-	assert_true(pset_add(b, V1));
-
-	assert_pset_not_equal(a, b);
-
-	pset_free(a);
-	pset_free(b);
-}
-
-static void pset_equal__val_pointers_ok(void **state) {
-	const struct Pset *a = pset_init();
-	const struct Pset *b = pset_init();
-
-	assert_true(pset_add(a, V0));
-	assert_true(pset_add(a, V1));
-
-	assert_pset_not_equal(a, NULL);
-
-	assert_true(pset_add(b, V0));
-	assert_true(pset_add(b, V1));
-
-	assert_pset_equal(a, b);
-
-	pset_free(a);
-	pset_free(b);
-}
-
-static void pset_equal__val_pointers_different(void **state) {
-	const struct Pset *a = pset_init();
-	const struct Pset *b = pset_init();
-
-	assert_true(pset_add(a, V0));
-	assert_true(pset_add(a, V1));
-
-	assert_true(pset_add(b, V0));
-	assert_true(pset_add(b, V2));
-
-	assert_pset_not_equal(a, b);
-
-	pset_free(a);
-	pset_free(b);
-}
-
-static void pset_equal__equal_val_ok(void **state) {
-	const struct PsetParams params = { .equal_val = (fn_equal)equal_strcmp, };
-	const struct Pset *a = pset_init_with(params);
-	const struct Pset *b = pset_init_with(params);
-
-	assert_true(pset_add(a, V0));
-	assert_true(pset_add(a, V1));
-
-	assert_true(pset_contains(a, V0));
-	assert_true(pset_contains(a, V1));
-	assert_false(pset_contains(a, V2));
-
-	assert_true(pset_add(b, V0));
-	assert_true(pset_add(b, V1));
-
-	assert_pset_equal(a, b);
-
-	pset_free(a);
-	pset_free(b);
-}
-
-static void pset_equal__equal_val_different(void **state) {
-	const struct PsetParams params = { .equal_val = (fn_equal)equal_strcmp, };
-	const struct Pset *a = pset_init_with(params);
-	const struct Pset *b = pset_init_with(params);
-
-	assert_true(pset_add(a, "0"));
-	assert_true(pset_add(a, "1"));
-
-	assert_true(pset_add(b, "0"));
-	assert_true(pset_add(b, "2"));
-
-	assert_pset_not_equal(a, b);
-
-	pset_free(a);
-	pset_free(b);
-}
-
 static void pset_plist__empty(void **state) {
 	const struct Pset *set = pset_init();
 
@@ -1589,6 +1613,44 @@ int main(void) {
 
 
 
+		//
+		// TEST(pset_at__empty),
+		// TEST(pset_at__many),
+		//
+
+
+		// TEST(pset_find__empty_filter),
+		// TEST(pset_find__empty_set),
+		//
+		// TEST(pset_find__val),
+		// TEST(pset_find__val_data),
+		//
+		// TEST(pset_it__empty),
+		// TEST(pset_it__free),
+		// TEST(pset_it__many),
+		// TEST(pset_it__cleared),
+		//
+		//
+		// TEST(pset_it_next__partial),
+		//
+		// TEST(pset_filter_it__empty_filter),
+		// TEST(pset_filter_it__empty_set),
+		// TEST(pset_filter_it__many),
+		// TEST(pset_filter_it__none),
+		//
+		// TEST(pset_add__again),
+		//
+		// TEST(pset_plist__empty),
+		// TEST(pset_plist__many),
+		// TEST(pset_plist__alloc_val),
+		// TEST(pset_plist_clone__clone_val),
+		// TEST(pset_plist_clone__no_clone_val),
+		//
+		// TEST(pset_str__empty),
+		// TEST(pset_str__pointers),
+		// TEST(pset_str__str_val),
+		//
+
 
 
 
@@ -1611,10 +1673,7 @@ int main(void) {
 		TEST(pset_add_all_clone__null),
 		TEST(pset_add_all_clone__clone_val),
 		TEST(pset_add_all_clone__no_clone_val),
-		//
-		// TEST(pset_at__empty),
-		// TEST(pset_at__many),
-		//
+
 		TEST(pset_remove__null),
 		TEST(pset_remove__empty),
 		TEST(pset_remove__null_val),
@@ -1667,51 +1726,18 @@ int main(void) {
 		TEST(pset_sort__one),
 		TEST(pset_sort__many),
 
+		TEST(pset_equal__null),
+		TEST(pset_equal__length_different),
+		TEST(pset_equal__val_pointers_ok),
+		TEST(pset_equal__val_pointers_different),
+		TEST(pset_equal__equal_val_ok),
+		TEST(pset_equal__equal_val_different),
 
 
 
 
 
 
-
-
-		// TEST(pset_find__empty_filter),
-		// TEST(pset_find__empty_set),
-		//
-		// TEST(pset_find__val),
-		// TEST(pset_find__val_data),
-		//
-		// TEST(pset_it__empty),
-		// TEST(pset_it__free),
-		// TEST(pset_it__many),
-		// TEST(pset_it__cleared),
-		//
-		//
-		// TEST(pset_it_next__partial),
-		//
-		// TEST(pset_filter_it__empty_filter),
-		// TEST(pset_filter_it__empty_set),
-		// TEST(pset_filter_it__many),
-		// TEST(pset_filter_it__none),
-		//
-		// TEST(pset_add__again),
-		//
-		// TEST(pset_equal__length_different),
-		// TEST(pset_equal__val_pointers_ok),
-		// TEST(pset_equal__val_pointers_different),
-		// TEST(pset_equal__equal_val_ok),
-		// TEST(pset_equal__equal_val_different),
-		//
-		// TEST(pset_plist__empty),
-		// TEST(pset_plist__many),
-		// TEST(pset_plist__alloc_val),
-		// TEST(pset_plist_clone__clone_val),
-		// TEST(pset_plist_clone__no_clone_val),
-		//
-		// TEST(pset_str__empty),
-		// TEST(pset_str__pointers),
-		// TEST(pset_str__str_val),
-		//
 		// TEST(pset__null_inputs),
 	};
 
