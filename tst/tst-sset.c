@@ -153,7 +153,7 @@ static void sset_it_remove__many(void **state) {
 	for (const struct SsetIt *it = sset_it(set); it; it = sset_it_next(it)) {
 		iterations++;
 		if (strcmp(it->val, "a") == 0 || strcmp(it->val, "c") == 0 || strcmp(it->val, "e") == 0) {
-			sset_it_remove(it);
+			assert_true(sset_it_remove(it));
 		}
 	}
 
@@ -168,7 +168,7 @@ static void sset_it_remove__many(void **state) {
 static void sset_it_remove__partial(void **state) {
 	const struct SsetIt *it = calloc(1, sizeof(struct SsetIt));
 
-	sset_it_remove(it);
+	assert_false(sset_it_remove(it));
 }
 
 static void sset_add_contains_remove_free__case_insensitive(void **state) {
@@ -484,11 +484,11 @@ static void sset__null_inputs(void **state) {
 	assert_false(sset_contains(NULL, NULL));
 	assert_false(sset_contains(set, NULL));
 	assert_nul(sset_at(NULL, 0));
-	sset_find(NULL, filter);
+	assert_nul(sset_find(NULL, filter));
 	assert_nul(sset_it(NULL));
 	assert_nul(sset_filter_it(NULL, filter));
 	assert_nul(sset_it_next(NULL));
-	sset_it_remove(NULL);
+	assert_false(sset_it_remove(NULL));
 	assert_false(sset_add(NULL, NULL));
 	assert_false(sset_add(set, NULL));
 	assert_int_equal(sset_add_many(NULL, NULL), 0);

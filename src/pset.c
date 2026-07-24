@@ -393,7 +393,6 @@ size_t pset_remove_in_free(const struct Pset* const set, const struct Pset* cons
 	return set && in ? remove_in(set, in, true) : 0;
 }
 
-// todo bool return
 const void *pset_it_remove(const struct PsetIt* const it) {
 	if (!it)
 		return NULL;

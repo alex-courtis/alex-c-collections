@@ -155,18 +155,18 @@ size_t sset_remove_in(const struct Sset* const set, const struct Sset* const in)
 	return set && in ? pset_remove_in_free(set->pset, in->pset) : false;
 }
 
-void sset_it_remove(const struct SsetIt* const it) {
+bool sset_it_remove(const struct SsetIt* const it) {
 	if (!it)
-		return;
+		return false;
 
 	if (!it->st) {
 		sset_it_free(it);
-		return;
+		return false;
 	}
 
-	pset_it_remove_free(it->st->pit);
-
 	((struct SsetIt*)it)->val = NULL;
+
+	return pset_it_remove_free(it->st->pit);
 }
 
 void sset_sort(const struct Sset* const set) {

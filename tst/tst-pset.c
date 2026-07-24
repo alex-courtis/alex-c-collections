@@ -1055,6 +1055,22 @@ static void pset_it_remove__partial(void **state) {
 	pset_it_remove(it);
 }
 
+static void pset_it_remove__removed_already(void **state) {
+	const struct PsetParams params = { .free_val = mock_free, };
+	const struct Pset *set = pset_init_with(params);
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+
+	const struct PsetIt *it = pset_it(set);
+
+	assert_ptr_equal(pset_remove(set, V0), V0);
+
+	assert_nul(pset_it_remove(it));
+
+	pset_free(set);
+}
+
 static void pset_it_remove_free__many(void **state) {
 	const struct PsetParams params = { .free_val = mock_free, };
 	const struct Pset *set = pset_init_with(params);
@@ -1073,6 +1089,22 @@ static void pset_it_remove_free__many(void **state) {
 			pset_it_remove_free(it);
 		}
 	}
+
+	pset_free(set);
+}
+
+static void pset_it_remove_free__removed_already(void **state) {
+	const struct PsetParams params = { .free_val = mock_free, };
+	const struct Pset *set = pset_init_with(params);
+
+	assert_true(pset_add(set, V0));
+	assert_true(pset_add(set, V1));
+
+	const struct PsetIt *it = pset_it(set);
+
+	assert_ptr_equal(pset_remove(set, V0), V0);
+
+	assert_false(pset_it_remove_free(it));
 
 	pset_free(set);
 }
@@ -1439,8 +1471,8 @@ static void pset__null_inputs(void **state) {
 	assert_nul(pset_it(NULL));
 	assert_nul(pset_filter_it(NULL, filter));
 	assert_nul(pset_it_next(NULL));
-	pset_it_remove(NULL);
-	pset_it_remove_free(NULL);
+	assert_nul(pset_it_remove(NULL));
+	assert_false(pset_it_remove_free(NULL));
 	assert_false(pset_add(NULL, NULL));
 	assert_false(pset_add(set, NULL));
 	assert_int_equal(pset_add_many(NULL), 0);
@@ -1545,8 +1577,10 @@ int main(void) {
 		TEST(pset_it_remove__end),
 		TEST(pset_it_remove__all),
 		TEST(pset_it_remove__partial),
+		TEST(pset_it_remove__removed_already),
 
 		TEST(pset_it_remove_free__many),
+		TEST(pset_it_remove_free__removed_already),
 
 		TEST(pset_add__again),
 
