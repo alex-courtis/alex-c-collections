@@ -595,6 +595,50 @@ static void plist_it_prev__incomplete(void **state) {
 	assert_nul(plist_it_prev(it));
 }
 
+static void plist_it_next__prev(void **state) {
+	const struct Plist *list = plist_init();
+	plist_append_many(list, V0, V1, V2, NULL);
+
+	const struct PlistIt *it = plist_it_start(list);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V0);
+
+	it = plist_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V1);
+
+	it = plist_it_prev(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V0);
+
+	it = plist_it_prev(it);
+	assert_nul(it);
+
+	plist_free(list);
+}
+
+static void plist_it_prev__next(void **state) {
+	const struct Plist *list = plist_init();
+	plist_append_many(list, V0, V1, V2, NULL);
+
+	const struct PlistIt *it = plist_it_end(list);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V2);
+
+	it = plist_it_prev(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V1);
+
+	it = plist_it_next(it);
+	assert_non_nul(it);
+	assert_ptr_equal(it->val, V2);
+
+	it = plist_it_next(it);
+	assert_nul(it);
+
+	plist_free(list);
+}
+
 static void plist_filter_it_start__null(void **state) {
 	assert_nul(plist_filter_it_start(NULL, (struct PlistFilter){ 0 }));
 }
@@ -2015,11 +2059,11 @@ static void plist_sort__one(void **state) {
 static void plist_sort__many(void **state) {
 	const char *v[6] = { "a", "b", "c", "d", "e", "f" };
 
-	const struct Plist *actual = plist_init();
-	plist_append_many(actual, v[2], v[0], v[3], v[5], v[1], v[4], NULL);
-
 	const struct Plist *expected = plist_init();
 	plist_append_many(expected, v[0], v[1], v[2], v[3], v[4], v[5], NULL);
+
+	const struct Plist *actual = plist_init();
+	plist_append_many(actual, v[2], v[0], v[3], v[5], v[1], v[4], NULL);
 
 	plist_sort(actual, (fn_less_than)less_than_strcmp);
 
@@ -2119,15 +2163,15 @@ static void plist_str__empty(void **state) {
 }
 
 static void plist_str__pointers(void **state) {
-	const struct Plist *list = plist_init();
-	plist_append_many(list, V0, V1, NULL);
-
 	char *expected = sprintf_alloc(
 			"%p\n"
 			"%p\n",
 			V0,
 			V1
 			);
+
+	const struct Plist *list = plist_init();
+	plist_append_many(list, V0, V1, NULL);
 
 	char *actual = plist_str(list);
 	assert_str_equal(actual, expected);
@@ -2138,11 +2182,6 @@ static void plist_str__pointers(void **state) {
 }
 
 static void plist_str__allow_null_val(void **state) {
-	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
-	plist_append(list, V0);
-	plist_append(list, NULL);
-	plist_append(list, V2);
-
 	char *expected = sprintf_alloc(
 			"%p\n"
 			"(null)\n"
@@ -2150,6 +2189,11 @@ static void plist_str__allow_null_val(void **state) {
 			V0,
 			V2
 			);
+
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
 
 	char *actual = plist_str(list);
 	assert_str_equal(actual, expected);
@@ -2256,7 +2300,8 @@ int main(void) {
 		TEST(plist_it_prev__null),
 		TEST(plist_it_prev__incomplete),
 
-		// TODO plist_it change direction
+		TEST(plist_it_next__prev),
+		TEST(plist_it_prev__next),
 
 		TEST(plist_filter_it_start__null),
 		TEST(plist_filter_it_start__list_empty),

@@ -207,6 +207,7 @@ static void sset_add__(void **state) {
 	assert_sset_equal(set, expected);
 
 	sset_free(set);
+	sset_free(expected);
 }
 
 static void sset_add__case_insensitive(void **state) {
