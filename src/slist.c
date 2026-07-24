@@ -120,7 +120,13 @@ bool slist_contains(const struct Slist* const list, const char* const val) {
 }
 
 bool slist_index_of(size_t *index, const struct Slist* const list, const char* const val) {
-	return list ? plist_index_of(index, list->plist, val) : false;
+	if (index)
+		*index = 0;
+
+	if (!list)
+		return false;
+
+	return plist_index_of(index, list->plist, val);
 }
 
 const char *slist_at(const struct Slist* const list, const size_t i) {

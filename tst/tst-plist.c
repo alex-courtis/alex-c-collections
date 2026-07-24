@@ -2256,6 +2256,8 @@ int main(void) {
 		TEST(plist_it_prev__null),
 		TEST(plist_it_prev__incomplete),
 
+		// TODO plist_it change direction
+
 		TEST(plist_filter_it_start__null),
 		TEST(plist_filter_it_start__list_empty),
 		TEST(plist_filter_it_start__filter_empty),

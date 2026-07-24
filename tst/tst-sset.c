@@ -59,6 +59,8 @@ static void sset_clone__params__constructor(void **state) {
 	assert_ptr_equal(clone->params.initial, 99);
 	assert_ptr_equal(clone->params.grow, 1);
 
+	assert_sset_equal(set, clone);
+
 	sset_free(set);
 	sset_free(clone);
 }
@@ -111,7 +113,7 @@ static void sset_at__(void **state) {
 
 	assert_str_equal(sset_at(set, 1), "b");
 
-	assert_nul(sset_at(set, 4));
+	assert_nul(sset_at(set, 3));
 
 	sset_free(set);
 }
