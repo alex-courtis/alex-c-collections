@@ -4,6 +4,8 @@ unusedFunction:tst/expect-*set.h
 
 unusedFunction:tst/util-file.c
 
+staticFunction:tst/util-col.c
+
 unusedFunction:tst/mock-fn.c
 
 # wraps are dynamically invoked at runtime only

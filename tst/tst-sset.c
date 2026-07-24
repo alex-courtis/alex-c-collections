@@ -41,46 +41,164 @@ static bool match_starts_with_a(const char* const a, const void* const b) {
 	return *a == 'a';
 }
 
-static void sset_add__clone_val_free_val(void **state) {
+static void sset_clone__params__constructor(void **state) {
+	assert_nul(sset_clone(NULL));
+
+	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, .initial = 99, .grow = 1, });
+	sset_add_many(set, "a", "b", NULL);
+
+	const struct Sset *clone = sset_clone(set);
+
+	assert_non_nul(clone);
+
+	assert_int_equal(clone->pset->size, 2);
+	assert_int_equal(clone->pset->capacity, 99);
+	assert_int_equal(clone->params.grow, 1);
+	assert_ptr_equal(clone->pset->params.equal_val, equal_strcasecmp);
+
+	assert_ptr_equal(clone->params.case_insensitive, true);
+	assert_ptr_equal(clone->params.initial, 99);
+	assert_ptr_equal(clone->params.grow, 1);
+
+	sset_free(set);
+	sset_free(clone);
+}
+
+static void sset_free__(void **state) {
+	sset_free(NULL);
+}
+
+static void sset_it_free__(void **state) {
+	sset_it_free(NULL);
+
+	const struct SsetIt *it = calloc(1, sizeof(struct SsetIt));
+
+	sset_it_free(it);
+}
+
+static void sset_contains__(void **state) {
+	assert_false(sset_contains(NULL, "x"));
+
 	const struct Sset *set = sset_init();
 
-	char *added = strdup("a");
-	char *rejected = strdup("a");
+	assert_false(sset_contains(set, "x"));
 
-	assert_true(sset_add(set, added));
-	assert_false(sset_add(set, rejected));
+	sset_add_many(set, "a", "b", "c", NULL);
 
-	assert_true(sset_contains(set, "a"));
+	assert_true(sset_contains(set, "b"));
 
-	free(added);
-	free(rejected);
-
-	assert_true(sset_contains(set, "a"));
+	assert_false(sset_contains(set, "x"));
 
 	sset_free(set);
 }
 
-static void sset_add_contains_remove_free__case_sensitive(void **state) {
-	const struct SsetParams params = { .case_insensitive = false, };
-	const struct Sset *set = sset_init_with(params);
+static void sset_at__(void **state) {
+	assert_nul(sset_at(NULL, 0));
 
-	assert_true(sset_add(set, "A"));
-	assert_true(sset_add(set, "B"));
+	const struct Sset *set = sset_init();
 
-	assert_false(sset_add(set, "B"));
+	assert_nul(sset_at(set, 0));
 
-	assert_false(sset_contains(set, "b"));
-	assert_true(sset_contains(set, "B"));
+	sset_add_many(set, "a", "b", "c", NULL);
 
-	assert_false(sset_remove(set, "b"));
-	assert_true(sset_remove(set, "B"));
+	assert_str_equal(sset_at(set, 1), "b");
+
+	assert_nul(sset_at(set, 4));
 
 	sset_free(set);
 }
 
-static void sset_add_all__many(void **state) {
+static void sset_find__(void **state) {
+	assert_nul(sset_find(NULL, (struct SsetFilter){ 0 }));
+
+	const struct Sset *set = sset_init();
+
+	assert_nul(sset_find(set, (struct SsetFilter){ 0 }));
+
+	sset_add_many(set, "x0", "x1", "a2", "x3", NULL);
+
+	assert_str_equal(sset_find(set, (struct SsetFilter){ 0 }), "x0");
+
+	assert_str_equal(sset_find(set, (struct SsetFilter){ .val_data = match_starts_with_a, .data = "x", }), "a2");
+
+	sset_free(set);
+}
+
+static void sset_it__(void **state) {
+	assert_nul(sset_it(NULL));
+
+	const struct Sset *set = sset_init();
+
+	assert_nul(sset_it(set));
+
+	sset_add_many(set, "a", "b", NULL);
+
+	const struct SsetIt *it = sset_it(set);
+
+	assert_non_nul(it);
+	assert_str_equal(it->val, "a");
+
+	it = sset_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->val, "b");
+
+	assert_nul(sset_it_next(it));
+
+	sset_free(set);
+}
+
+static void sset_filter_it__(void **state) {
+	assert_nul(sset_filter_it(NULL, (struct SsetFilter){ 0 }));
+
+	const struct Sset *set = sset_init();
+
+	assert_nul(sset_filter_it(set, (struct SsetFilter){ 0 }));
+
+	sset_add_many(set, "a1", "b1", "a2", "b2", NULL);
+
+	const struct SsetIt *it = sset_filter_it(set, (struct SsetFilter){ .val_data = match_starts_with_a, .data = "x", });
+
+	assert_non_nul(it);
+	assert_str_equal(it->val, "a1");
+
+	it = sset_it_next(it);
+	assert_non_nul(it);
+	assert_str_equal(it->val, "a2");
+
+	assert_nul(sset_it_next(it));
+
+	sset_free(set);
+}
+
+static void sset_it_next__(void **state) {
+	assert_nul(sset_it_next(NULL));
+
+	const struct SsetIt *it = calloc(1, sizeof(struct SsetIt));
+
+	assert_nul(sset_it_next(it));
+}
+
+static void sset_add__(void **state) {
+	assert_false(sset_add(NULL, "x"));
+
+	const struct Sset *set = sset_init();
+
+	assert_true(sset_add(set, "a"));
+
+	assert_false(sset_add(set, "a"));
+
+	assert_false(sset_add(set, NULL));
+
+	sset_free(set);
+}
+
+static void sset_add_all__(void **state) {
+	assert_int_equal(sset_add_all(NULL, NULL), 0);
+
 	const struct Sset *to = sset_init();
 	sset_add_many(to, "A", "B", NULL);
+
+	assert_int_equal(sset_add_all(to, NULL), 0);
 
 	const struct Sset *from = sset_init();
 	sset_add_many(from, "A", "C", NULL);
@@ -92,21 +210,31 @@ static void sset_add_all__many(void **state) {
 
 	assert_sset_equal(to, expected);
 
+	assert_int_equal(sset_add_all(NULL, from), 0);
+
 	sset_free(to);
 	sset_free(from);
 	sset_free(expected);
 }
 
-static void sset_at__(void **state) {
-	const struct Sset *set = sset_init();
-	sset_add_many(set, "a", "b", "c", NULL);
+static void sset_remove__(void **state) {
+	assert_false(sset_remove(NULL, "x"));
 
-	assert_str_equal(sset_at(set, 1), "b");
+	const struct Sset *set = sset_init();
+	sset_add_many(set, "A", "B", NULL);
+
+	assert_true(sset_remove(set, "A"));
+
+	assert_false(sset_remove(set, NULL));
+
+	assert_false(sset_remove(set, "x"));
 
 	sset_free(set);
 }
 
 static void sset_remove_all__(void **state) {
+	assert_int_equal(sset_remove_all(NULL), 0);
+
 	const struct Sset *set = sset_init();
 
 	assert_int_equal(sset_remove_all(set), 0);
@@ -117,15 +245,18 @@ static void sset_remove_all__(void **state) {
 
 	assert_int_equal(sset_size(set), 0);
 
-	assert_nul(sset_at(set, 0));
-	assert_nul(sset_at(set, 1));
-
 	sset_free(set);
 }
 
-static void sset_remove_in__many(void **state) {
+static void sset_remove_in__(void **state) {
+	assert_int_equal(sset_remove_in(NULL, NULL), 0);
+
 	const struct Sset *set = sset_init();
 	sset_add_many(set, "a", "b", "c", NULL);
+
+	assert_int_equal(sset_remove_in(set, NULL), 0);
+
+	assert_int_equal(sset_remove_in(NULL, set), 0);
 
 	const struct Sset *from = sset_init();
 	sset_add_many(from, "a", "c", "d", NULL);
@@ -142,156 +273,107 @@ static void sset_remove_in__many(void **state) {
 	sset_free(expected);
 }
 
-static void sset_it_remove__many(void **state) {
-	const struct Sset *set = sset_init();
-	sset_add_many(set, "a", "b", "c", "d", "e", NULL);
+static void sset_it_remove__(void **state) {
+	assert_false(sset_it_remove(NULL));
 
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "b", "d", NULL);
-
-	size_t iterations = 0;
-	for (const struct SsetIt *it = sset_it(set); it; it = sset_it_next(it)) {
-		iterations++;
-		if (strcmp(it->val, "a") == 0 || strcmp(it->val, "c") == 0 || strcmp(it->val, "e") == 0) {
-			assert_true(sset_it_remove(it));
-		}
-	}
-
-	assert_int_equal(iterations, 5);
-
-	assert_sset_equal(set, expected);
-
-	sset_free(set);
-	sset_free(expected);
-}
-
-static void sset_it_remove__partial(void **state) {
 	const struct SsetIt *it = calloc(1, sizeof(struct SsetIt));
 
 	assert_false(sset_it_remove(it));
-}
 
-static void sset_add_contains_remove_free__case_insensitive(void **state) {
-	const struct SsetParams params = { .case_insensitive = true, };
-	const struct Sset *set = sset_init_with(params);
-	sset_add_many(set, "A", "B", NULL);
-
-	assert_false(sset_add(set, "B"));
-
-	assert_true(sset_contains(set, "b"));
-	assert_true(sset_contains(set, "B"));
-
-	assert_true(sset_remove(set, "b"));
-
-	sset_free(set);
-}
-
-static void sset_find__(void **state) {
 	const struct Sset *set = sset_init();
-	sset_add_many(set, "x0", "x1", "a2", "x3", NULL);
+	sset_add_many(set, "a", "b", "c", "d", "e", NULL);
 
-	const struct SsetFilter filter = { .val_data = match_starts_with_a, .data = "x", };
-
-	assert_str_equal(sset_find(set, filter), "a2");
-
-	sset_free(set);
-}
-
-static void sset_it__many(void **state) {
-	const struct Sset *set = sset_init();
-	sset_add_many(set, "a", "b", NULL);
-
-	const struct SsetIt *it = sset_it(set);
-
-	assert_non_nul(it);
-	assert_str_equal(it->val, "a");
-
+	it = sset_it(set);
 	it = sset_it_next(it);
-	assert_non_nul(it);
 	assert_str_equal(it->val, "b");
 
-	sset_it_free(it);
+	assert_true(sset_it_remove(it));
 
-	sset_free(set);
-}
-
-static void sset_it__empty(void **state) {
-
-	const struct Sset *set = sset_init();
-
-	const struct SsetIt *it = sset_it(set);
-
-	assert_nul(it);
-
-	sset_free(set);
-}
-
-static void sset_it_free__partial(void **state) {
-	const struct SsetIt *it = calloc(1, sizeof(struct SsetIt));
-
-	sset_it_free(it);
-}
-
-static void sset_it_next__partial(void **state) {
-	const struct SsetIt *it = calloc(1, sizeof(struct SsetIt));
-
-	assert_nul(sset_it_next(it));
-}
-
-static void sset_filter_it__(void **state) {
-	const struct Sset *set = sset_init();
-	sset_add_many(set, "a1", "b1", "a2", "b2", NULL);
-
-	const struct SsetFilter filter = { .val_data = match_starts_with_a, .data = "x", };
-	const struct SsetIt *it = sset_filter_it(set, filter);
-
-	assert_non_nul(it);
-	assert_str_equal(it->val, "a1");
+	assert_false(sset_contains(set, "b"));
 
 	it = sset_it_next(it);
-	assert_non_nul(it);
-	assert_str_equal(it->val, "a2");
+	assert_str_equal(it->val, "c");
 
-	assert_nul(sset_it_next(it));
-
+	sset_it_free(it);
 	sset_free(set);
 }
 
-static void sset_equal__case_sensitive(void **state) {
-	const struct Sset *actual = sset_init();
-	sset_add_many(actual, "a", "b", NULL);
+static void sset_sort__(void **state) {
+	sset_sort(NULL);
 
-	assert_sset_not_equal(actual, NULL);
+	const struct Sset *actual = sset_init_with((struct SsetParams){ .initial = 400, .grow = 400, });
 
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "a", "b", NULL);
+	sset_sort(actual);
+
+	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
+		sset_add(actual, words_unsorted[i - 1]);
+	}
+
+	const struct Sset *expected = sset_init_with((struct SsetParams){ .initial = 400, .grow = 400, });
+
+	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
+		sset_add(expected, words_sorted[i]);
+	}
+
+	sset_sort(actual);
 
 	assert_sset_equal(actual, expected);
-
-	assert_true(sset_add(actual, "c"));
-	assert_true(sset_add(expected, "C"));
-
-	assert_sset_not_equal(actual, expected);
 
 	sset_free(actual);
 	sset_free(expected);
 }
 
-static void sset_equal__case_insensitive(void **state) {
-	const struct SsetParams params = { .case_insensitive = true, };
-	const struct Sset *actual = sset_init_with(params);
-	sset_add_many(actual, "a", "b", NULL);
+static void sset_equal__(void **state) {
+	assert_false(sset_equal(NULL, NULL));
 
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "A", "b", NULL);
+	const struct Sset *a = sset_init();
 
-	assert_sset_equal(actual, expected);
+	assert_false(sset_equal(a, NULL));
+	assert_false(sset_equal(NULL, a));
 
-	sset_free(actual);
-	sset_free(expected);
+	const struct Sset *b = sset_init();
+
+	assert_true(sset_equal(a, a));
+
+	sset_add(a, "x");
+
+	assert_false(sset_equal(a, b));
+
+	sset_add(b, "x");
+
+	assert_true(sset_equal(a, b));
+
+	sset_free(a);
+	sset_free(b);
+}
+
+static void sset_slist__(void **state) {
+	assert_nul(sset_slist(NULL));
+
+	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, .initial = 2, .grow = 1, });
+
+	const struct Slist *list = sset_slist(set);
+	assert_int_equal(slist_size(list), 0);
+
+	assert_true(list->params.case_insensitive);
+	assert_int_equal(list->params.initial, 2);
+	assert_int_equal(list->params.grow, 1);
+
+	slist_free(list);
+
+	sset_add_many(set, "a", "b", "c", NULL);
+
+	list = sset_slist(set);
+
+	assert_int_equal(slist_size(list), 3);
+
+	slist_free(list);
+	sset_free(set);
 }
 
 static void sset_str__(void **state) {
+	assert_nul(sset_str(NULL));
+
 	const struct Sset *set = sset_init();
 	sset_add_many(set, "a", "b", "c", NULL);
 
@@ -303,258 +385,106 @@ static void sset_str__(void **state) {
 	sset_free(set);
 }
 
-static void sset_sort__empty(void **state) {
-	const struct Sset *actual = sset_init();
-
-	const struct Sset *expected = sset_init();
-
-	sset_sort(actual);
-
-	assert_int_equal(sset_size(actual), 0);
-
-	assert_sset_equal(actual, expected);
-
-	sset_free(actual);
-	sset_free(expected);
-}
-
-static void sset_sort__one(void **state) {
-	const struct Sset *actual = sset_init();
-	sset_add_many(actual, "A", NULL);
-
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "A", NULL);
-
-	sset_sort(actual);
-
-	assert_sset_equal(actual, expected);
-
-	sset_free(actual);
-	sset_free(expected);
-}
-
-static void sset_sort__many(void **state) {
-	const struct Sset *actual = sset_init();
-	sset_add_many(actual, "3", "1", "0", "2", NULL);
-
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "0", "1", "2", "3", NULL);
-
-	sset_sort(actual);
-
-	assert_sset_equal(actual, expected);
-
-	sset_free(actual);
-	sset_free(expected);
-}
-
-static void sset_sort__words(void **state) {
-	const struct SsetParams params = { .initial = 400, .grow = 400, };
-
-	const struct Sset *actual = sset_init_with(params);
-
-	for (size_t i = sizeof(words_unsorted) / sizeof(words_unsorted[0]); i > 0; i--) {
-		assert_true(sset_add(actual, words_unsorted[i - 1]));
-	}
-
-	const struct Sset *expected = sset_init_with(params);
-
-	for (size_t i = 0; i < sizeof(words_sorted) / sizeof(words_sorted[0]); i++ ) {
-		assert_true(sset_add(expected, words_sorted[i]));
-	}
-
-	sset_sort(actual);
-
-	assert_sset_equal(actual, expected);
-
-	sset_free(actual);
-	sset_free(expected);
-}
-
-static void sset_sort__many_case_insensitive(void **state) {
-	const struct SsetParams params = { .case_insensitive = true, };
-	const struct Sset *actual = sset_init_with(params);
-	sset_add_many(actual, "Bb3", "aa1", "Aa0", "bb2", NULL);
-
-	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "Aa0", "aa1", "Bb2", "bb3", NULL);
-
-	sset_sort(actual);
-
-	assert_sset_equal(actual, expected);
-
-	sset_free(actual);
-	sset_free(expected);
-}
-
-static void sset_slist__case_sensitive(void **state) {
-	const struct Sset *set = sset_init();
-
-	sset_add(set, "a");
-	sset_add(set, "b");
-
-	const struct Slist *list = sset_slist(set);
-
-	assert_int_equal(slist_size(list), 2);
-	assert_str_equal(slist_at(list, 0), "a");
-	assert_str_equal(slist_at(list, 1), "b");
-
-	slist_free(list);
-	sset_free(set);
-}
-
-static void sset_slist__case_insensitive(void **state) {
-	const struct SsetParams params = { .case_insensitive = true, };
-	const struct Sset *set = sset_init_with(params);
-
-	sset_add(set, "A");
-	sset_add(set, "b");
-
-	const struct Slist *list = sset_slist(set);
-
-	assert_int_equal(slist_size(list), 2);
-	assert_str_equal(slist_at(list, 0), "A");
-	assert_str_equal(slist_at(list, 1), "b");
-
-	assert_true(slist_contains(list, "a"));
-	assert_true(slist_contains(list, "A"));
-
-	slist_free(list);
-	sset_free(set);
-}
-
-static void sset_slist__params(void **state) {
-	const struct SsetParams params = {
-		.case_insensitive = true,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct Sset *set = sset_init_with(params);
-
-	const struct Slist *list = sset_slist(set);
-
-	assert_true(list->params.case_insensitive);
-	assert_int_equal(list->params.initial, 99);
-	assert_int_equal(list->params.grow, 1);
-
-	slist_free(list);
-	sset_free(set);
-}
-
-// also tests constructor
-static void sset_clone__(void **state) {
-	const struct SsetParams params = {
-		.case_insensitive = true,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct Sset *from = sset_init_with(params);
-	sset_add_many(from, "a", "b", NULL);
-
-	const struct Sset *to = sset_clone(from);
-
-	assert_non_nul(to);
-
-	assert_int_equal(to->pset->size, 2);
-	assert_int_equal(to->pset->capacity, 99);
-	assert_int_equal(to->pset->params.grow, 1);
-	assert_ptr_equal(to->pset->params.equal_val, equal_strcasecmp);
-
-	assert_ptr_equal(to->params.case_insensitive, true);
-	assert_ptr_equal(to->params.initial, 99);
-	assert_ptr_equal(to->params.grow, 1);
-
-	assert_true(sset_contains(to, "a"));
-	assert_true(sset_contains(to, "b"));
-	assert_int_equal(sset_size(to), 2);
-
-	sset_free(from);
-	sset_free(to);
-}
-
-static void sset__null_inputs(void **state) {
-	const struct Sset *set = sset_init();
-	const struct SsetFilter filter = { 0 };
-
-	assert_int_equal(sset_add_all(NULL, NULL), 0);
-	assert_int_equal(sset_add_all(set, NULL), 0);
-	assert_nul(sset_clone(NULL));
-	sset_free(NULL);
-	sset_it_free(NULL);
-	assert_false(sset_contains(NULL, NULL));
-	assert_false(sset_contains(set, NULL));
-	assert_nul(sset_at(NULL, 0));
-	assert_nul(sset_find(NULL, filter));
-	assert_nul(sset_it(NULL));
-	assert_nul(sset_filter_it(NULL, filter));
-	assert_nul(sset_it_next(NULL));
-	assert_false(sset_it_remove(NULL));
-	assert_false(sset_add(NULL, NULL));
-	assert_false(sset_add(set, NULL));
-	assert_int_equal(sset_add_many(NULL, NULL), 0);
-	assert_false(sset_remove(NULL, NULL));
-	assert_false(sset_remove(set, NULL));
-	assert_int_equal(sset_remove_all(NULL), 0);
-	assert_int_equal(sset_remove_in(NULL, NULL), 0);
-	assert_int_equal(sset_remove_in(set, NULL), 0);
-	assert_int_equal(sset_remove_in(NULL, set), 0);
-	assert_false(sset_equal(NULL, NULL));
-	assert_false(sset_equal(set, NULL));
-	assert_nul(sset_slist(NULL));
-	assert_nul(sset_str(NULL));
-	sset_sort(NULL);
+static void sset_size__(void **state) {
 	assert_int_equal(sset_size(NULL), 0);
 
+	const struct Sset *set = sset_init();
+
+	assert_int_equal(sset_size(set), 0);
+
+	sset_add_many(set, "a", "b", "c", NULL);
+
+	assert_int_equal(sset_size(set), 3);
+
 	sset_free(set);
+}
+
+static void sset__case_insensitive(void **state) {
+	const struct Sset *set = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(set, "a", "b", "c", NULL);
+
+	assert_true(sset_contains(set, "A"));
+
+	assert_false(sset_add(set, "a"));
+
+	// a b c
+	assert_int_equal(sset_size(set), 3);
+
+	const struct Sset *b = sset_init();
+	sset_add_many(b, "A", "b", "C", NULL);
+
+	assert_true(sset_equal(set, b));
+
+	assert_false(sset_equal(b, set));
+
+	const struct Sset *from = sset_init();
+	sset_add_many(from, "A", "d", NULL);
+
+	assert_int_equal(sset_add_all(set, from), 1);
+
+	// a b c d
+	assert_int_equal(sset_size(set), 4);
+
+	const struct Sset *in = sset_init();
+	sset_add_many(in, "B", "d", NULL);
+
+	assert_true(sset_remove(set, "A"));
+
+	// b c d
+	assert_int_equal(sset_size(set), 3);
+
+	assert_int_equal(sset_remove_in(set, in), 2);
+
+	// c
+	assert_int_equal(sset_size(set), 1);
+
+	sset_free(set);
+	sset_free(from);
 }
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
-		TEST(sset_add__clone_val_free_val),
+		TEST(sset_clone__params__constructor),
 
-		TEST(sset_add_contains_remove_free__case_insensitive),
-		TEST(sset_add_contains_remove_free__case_sensitive),
+		TEST(sset_free__),
 
-		TEST(sset_add_all__many),
+		TEST(sset_it_free__),
+
+		TEST(sset_contains__),
 
 		TEST(sset_at__),
 
-		TEST(sset_remove_all__),
-
-		TEST(sset_remove_in__many),
-
-		TEST(sset_it_remove__many),
-		TEST(sset_it_remove__partial),
-
 		TEST(sset_find__),
 
-		TEST(sset_it__many),
-		TEST(sset_it__empty),
-
-		TEST(sset_it_free__partial),
-
-		TEST(sset_it_next__partial),
+		TEST(sset_it__),
 
 		TEST(sset_filter_it__),
 
-		TEST(sset_equal__case_sensitive),
-		TEST(sset_equal__case_insensitive),
+		TEST(sset_it_next__),
+
+		TEST(sset_add__),
+
+		TEST(sset_add_all__),
+
+		TEST(sset_remove__),
+
+		TEST(sset_remove_all__),
+
+		TEST(sset_remove_in__),
+
+		TEST(sset_it_remove__),
+
+		TEST(sset_sort__),
+
+		TEST(sset_equal__),
+
+		TEST(sset_slist__),
 
 		TEST(sset_str__),
 
-		TEST(sset_sort__empty),
-		TEST(sset_sort__one),
-		TEST(sset_sort__many),
-		TEST(sset_sort__words),
-		TEST(sset_sort__many_case_insensitive),
+		TEST(sset_size__),
 
-		TEST(sset_slist__case_sensitive),
-		TEST(sset_slist__case_insensitive),
-		TEST(sset_slist__params),
-
-		TEST(sset_clone__),
-
-		TEST(sset__null_inputs),
+		TEST(sset__case_insensitive),
 	};
 
 	return RUN(tests);
