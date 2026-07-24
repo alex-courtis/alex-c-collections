@@ -108,10 +108,10 @@ size_t pset_add_all(const struct Pset* const set, const struct Pset* const from)
 // add from vals not contained in the set, return number added, NOP when NULL clone_val [equal_val, clone_val]
 size_t pset_add_all_clone(const struct Pset* const set, const struct Pset* const from);
 
-// if the set contains val, remove it and return true [equal_val]
-bool pset_remove(const struct Pset* const set, const void* const val);
+// remove val, return val if removed [equal_val]
+const void *pset_remove(const struct Pset* const set, const void* const val);
 
-// if the set contains val, remove it, free it and return true [equal_val, alloc_val, free_val]
+// remove and free val, return true if removed [equal_val, alloc_val, free_val]
 bool pset_remove_free(const struct Pset* const set, const void* const val);
 
 // remove all vals, returning number removed
@@ -126,13 +126,11 @@ size_t pset_remove_in(const struct Pset* const set, const struct Pset* const in)
 // remove and free vals contained in, return number removed [equal_val, free_val]
 size_t pset_remove_in_free(const struct Pset* const set, const struct Pset* const in);
 
-// TODO bool
-// remove the it.val, it is unusable, pset_it_next must be called
-void pset_it_remove(const struct PsetIt* const it);
+// remove the it.val, return val if removed, it is unusable, pset_it_next must be called
+const void *pset_it_remove(const struct PsetIt* const it);
 
-// TODO bool
-// remove and free the it.val, it is unusable, pset_it_next must be called [free_val]
-void pset_it_remove_free(const struct PsetIt* const it);
+// remove and free the it.val, return true if removed, it is unusable, set_it_next must be called [free_val]
+bool pset_it_remove_free(const struct PsetIt* const it);
 
 // shell sort in place, NULL less_than_val NOP
 void pset_sort(const struct Pset* const set, fn_less_than less_than_val);
