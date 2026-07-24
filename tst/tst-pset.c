@@ -961,7 +961,7 @@ static void pset_it_remove__start(void **state) {
 
 	const struct PsetIt *it = pset_it(set);
 
-	pset_it_remove(it);
+	assert_ptr_equal(pset_it_remove(it), V0);
 
 	assert_int_equal(set->size, 2);
 	assert_ptr_equal(set->vals[0], V1);
@@ -983,7 +983,7 @@ static void pset_it_remove__mid(void **state) {
 	const struct PsetIt *it = pset_it(set);
 	it = pset_it_next(it);
 
-	pset_it_remove(it);
+	assert_ptr_equal(pset_it_remove(it), V1);
 
 	assert_int_equal(set->size, 2);
 	assert_ptr_equal(set->vals[0], V0);
@@ -1006,7 +1006,7 @@ static void pset_it_remove__end(void **state) {
 	it = pset_it_next(it);
 	it = pset_it_next(it);
 
-	pset_it_remove(it);
+	assert_ptr_equal(pset_it_remove(it), V2);
 
 	assert_int_equal(set->size, 2);
 	assert_ptr_equal(set->vals[0], V0);
@@ -1024,7 +1024,7 @@ static void pset_it_remove__all(void **state) {
 	size_t iterations = 0;
 	for (const struct PsetIt *it = pset_it(set); it; it = pset_it_next(it)) {
 		iterations++;
-		pset_it_remove(it);
+		assert_non_nul(pset_it_remove(it));
 	}
 
 	assert_int_equal(set->size, 0);
@@ -1050,7 +1050,7 @@ static void pset_it_remove_free__start(void **state) {
 	const struct PsetIt *it = pset_it(set);
 
 	expect_ptr(mock_free, ptr, V0);
-	pset_it_remove_free(it);
+	assert_true(pset_it_remove_free(it));
 
 	assert_int_equal(set->size, 2);
 	assert_ptr_equal(set->vals[0], V1);
@@ -1073,7 +1073,7 @@ static void pset_it_remove_free__mid(void **state) {
 	it = pset_it_next(it);
 
 	expect_ptr(mock_free, ptr, V1);
-	pset_it_remove_free(it);
+	assert_true(pset_it_remove_free(it));
 
 	assert_int_equal(set->size, 2);
 	assert_ptr_equal(set->vals[0], V0);
@@ -1097,7 +1097,7 @@ static void pset_it_remove_free__end(void **state) {
 	it = pset_it_next(it);
 
 	expect_ptr(mock_free, ptr, V2);
-	pset_it_remove_free(it);
+	assert_true(pset_it_remove_free(it));
 
 	assert_int_equal(set->size, 2);
 	assert_ptr_equal(set->vals[0], V0);
@@ -1119,7 +1119,7 @@ static void pset_it_remove_free__all(void **state) {
 	size_t iterations = 0;
 	for (const struct PsetIt *it = pset_it(set); it; it = pset_it_next(it)) {
 		iterations++;
-		pset_it_remove_free(it);
+		assert_true(pset_it_remove_free(it));
 	}
 
 	assert_int_equal(set->size, 0);

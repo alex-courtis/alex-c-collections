@@ -6,7 +6,6 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "fn.h"
 #include "slist.h"

@@ -1,4 +1,5 @@
 unusedFunction:tst/asserts.h
+unusedFunction:tst/assert-sset.h
 unusedFunction:tst/expect-*map.h
 unusedFunction:tst/expect-*set.h
 
