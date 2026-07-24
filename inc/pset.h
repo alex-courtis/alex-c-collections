@@ -6,8 +6,6 @@
 
 #include "fn.h"
 
-// TODO specialise plist
-
 /*
  * Array backed pointer set.
  * Entries preserve insertion order.
@@ -128,9 +126,11 @@ size_t pset_remove_in(const struct Pset* const set, const struct Pset* const in)
 // remove and free vals contained in, return number removed [equal_val, free_val]
 size_t pset_remove_in_free(const struct Pset* const set, const struct Pset* const in);
 
+// TODO bool
 // remove the it.val, it is unusable, pset_it_next must be called
 void pset_it_remove(const struct PsetIt* const it);
 
+// TODO bool
 // remove and free the it.val, it is unusable, pset_it_next must be called [free_val]
 void pset_it_remove_free(const struct PsetIt* const it);
 
