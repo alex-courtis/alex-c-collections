@@ -2073,6 +2073,25 @@ static void plist_sort__many(void **state) {
 	plist_free(expected);
 }
 
+static void plist_sort__allow_null_val(void **state) {
+	const char *v[6] = { "a", "b", "c", "d", "e", "f" };
+
+	const struct Plist *expected = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append_many(expected, v[0], v[1], v[2], v[3], v[4], v[5], NULL);
+	plist_append(expected, NULL);
+
+	const struct Plist *actual = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append_many(actual, v[2], v[0], v[3], v[5], v[1], v[4], NULL);
+	plist_insert(actual, 2, NULL);
+
+	plist_sort(actual, (fn_less_than)less_than_strcmp);
+
+	assert_plist_equal(actual, expected);
+
+	plist_free(actual);
+	plist_free(expected);
+}
+
 static void plist_equal__null(void **state) {
 	const struct Plist *list = plist_init();
 	plist_append_many(list, V0, V1, NULL);
@@ -2117,6 +2136,30 @@ static void plist_equal__val_pointers_different(void **state) {
 	plist_append_many(b, V0, V2, NULL);
 
 	assert_plist_not_equal(a, b);
+
+	plist_free(a);
+	plist_free(b);
+}
+
+static void plist_equal__allow_null_val(void **state) {
+	const struct Plist *a = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(a, NULL);
+	plist_append(a, V0);
+	plist_append(a, NULL);
+	plist_append(a, V2);
+	plist_append(a, NULL);
+
+	const struct Plist *b = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(b, V0);
+	plist_append(b, NULL);
+	plist_append(b, V2);
+	plist_append(b, NULL);
+
+	assert_plist_not_equal(a, b);
+
+	plist_insert(b, 0, NULL);
+
+	assert_plist_equal(a, b);
 
 	plist_free(a);
 	plist_free(b);
@@ -2429,11 +2472,13 @@ int main(void) {
 		TEST(plist_sort__empty),
 		TEST(plist_sort__one),
 		TEST(plist_sort__many),
+		TEST(plist_sort__allow_null_val),
 
 		TEST(plist_equal__null),
 		TEST(plist_equal__length_different),
 		TEST(plist_equal__val_pointers_ok),
 		TEST(plist_equal__val_pointers_different),
+		TEST(plist_equal__allow_null_val),
 		TEST(plist_equal__equal_val_ok),
 		TEST(plist_equal__equal_val_different),
 

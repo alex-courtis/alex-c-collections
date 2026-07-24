@@ -26,10 +26,10 @@ bool equal_strstr(const char* const a, const char* const b);
 //
 typedef bool (*fn_less_than)(const void* const a, const void* const b);
 
-// strcmp(a, b) <= 0
+// strcmp(a, b) <= 0, NULL is greater than
 bool less_than_strcmp(const char* const a, const char* const b);
 
-// strcasecmp(a, b) < 0
+// strcasecmp(a, b) < 0, NULL is greater than
 bool less_than_strcasecmp(const char* const a, const char* const b);
 
 // true if both present and equal value
