@@ -8,39 +8,11 @@
 #include <stdlib.h>
 
 #include "fn.h"
-#include "slist.h"
 #include "ppmap.h"
+#include "slist.h"
+#include "sset.h"
 
 #include "ssmap.h"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ssmap_put_many(map, "a", "0", "b", "1", "c", "2", "d", "3", "e", "4", NULL);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -78,7 +50,8 @@ static bool match_starts_with_a(const char* const a, const void* const b) {
 static void ssmap_clone__params__constructor(void **state) {
 	assert_nul(ssmap_clone(NULL));
 
-	const struct SSmap *map = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, .case_insensitive_val = true, .initial = 99, .grow = 1, });
+    struct SSmapParams params = { .case_insensitive_key = true, .case_insensitive_val = true, .initial = 99, .grow = 1, };
+	const struct SSmap *map = ssmap_init_with(params);
 	ssmap_put_many(map, "a", "0", "b", "1", NULL);
 
 	const struct SSmap *clone = ssmap_clone(map);
@@ -325,6 +298,113 @@ static void ssmap_it_next__(void **state) {
 	const struct SSmapIt *it = calloc(1, sizeof(struct SSmapIt));
 
 	assert_nul(ssmap_it_next(it));
+}
+
+static void ssmap_put__(void **state) {
+	assert_false(ssmap_put(NULL, "a", "0"));
+
+	const struct SSmap *map = ssmap_init();
+
+	assert_false(ssmap_put(map, "a", "0"));
+
+	assert_true(ssmap_put(map, "a", "1"));
+
+	assert_int_equal(ssmap_size(map), 1);
+
+	assert_str_equal(ssmap_get(map, "a"), "1");
+
+	ssmap_free(map);
+}
+
+static void ssmap_put__case_insensitive(void **state) {
+	const struct SSmap *map = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+
+	assert_false(ssmap_put(map, "a", "0"));
+
+	assert_true(ssmap_put(map, "A", "1"));
+
+	assert_str_equal(ssmap_get(map, "a"), "1");
+
+	ssmap_free(map);
+}
+
+static void ssmap_put_if_absent__(void **state) {
+	assert_false(ssmap_put_if_absent(NULL, "a", "0"));
+
+	const struct SSmap *map = ssmap_init();
+
+	assert_false(ssmap_put_if_absent(map, "a", "0"));
+
+	assert_true(ssmap_put_if_absent(map, "a", "1"));
+
+	assert_int_equal(ssmap_size(map), 1);
+
+	assert_str_equal(ssmap_get(map, "a"), "0");
+
+	assert_false(ssmap_put_if_absent(map, "b", "2"));
+
+	assert_str_equal(ssmap_get(map, "b"), "2");
+
+	ssmap_free(map);
+}
+
+static void ssmap_put_if_absent__case_insensitive(void **state) {
+	const struct SSmap *map = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+
+	assert_false(ssmap_put_if_absent(map, "a", "0"));
+
+	assert_true(ssmap_put_if_absent(map, "A", "1"));
+
+	assert_str_equal(ssmap_get(map, "a"), "0");
+
+	ssmap_free(map);
+}
+
+static void ssmap_put_all__(void **state) {
+	assert_int_equal(ssmap_put_all(NULL, NULL), 0);
+
+	const struct SSmap *map = ssmap_init();
+
+	assert_int_equal(ssmap_put_all(NULL, map), 0);
+	assert_int_equal(ssmap_put_all(map, NULL), 0);
+
+	ssmap_put_many(map, "a", "0", "b", "1", "c", "2", NULL);
+
+	const struct SSmap *from = ssmap_init();
+
+	ssmap_put_many(from, "a", "0", "c", "20", "d", "3", NULL);
+
+	assert_int_equal(ssmap_put_all(map, from), 2);
+
+	const struct SSmap *expected = ssmap_init();
+	ssmap_put_many(expected, "a", "0", "b", "1", "c", "20", "d", "3", NULL);
+
+	assert_ssmap_equal(map, expected);
+
+	ssmap_free(expected);
+	ssmap_free(from);
+	ssmap_free(map);
+}
+
+static void ssmap_put_all__case_insensitive(void **state) {
+	const struct SSmap *map = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+
+	ssmap_put_many(map, "a", "0", "b", "1", "c", "2", NULL);
+
+	const struct SSmap *from = ssmap_init();
+
+	ssmap_put_many(from, "A", "0", "C", "20", "D", "3", NULL);
+
+	assert_int_equal(ssmap_put_all(map, from), 2);
+
+	const struct SSmap *expected = ssmap_init();
+	ssmap_put_many(expected, "a", "0", "b", "1", "c", "20", "d", "3", NULL);
+
+	assert_ssmap_equal(map, expected);
+
+	ssmap_free(expected);
+	ssmap_free(from);
+	ssmap_free(map);
 }
 
 static void ssmap_remove__(void **state) {
@@ -643,14 +723,14 @@ int main(void) {
 
 		TEST(ssmap_it_next__),
 
-		// TEST(ssmap_put__),
-		// TEST(ssmap_put__case_insensitive),
+		TEST(ssmap_put__),
+		TEST(ssmap_put__case_insensitive),
 
-		// TEST(ssmap_put_if_absent__),
-		// TEST(ssmap_put_if_absent__case_insensitive),
+		TEST(ssmap_put_if_absent__),
+		TEST(ssmap_put_if_absent__case_insensitive),
 
-		// TEST(ssmap_put_all__),
-		// TEST(ssmap_put_all__case_insensitive),
+		TEST(ssmap_put_all__),
+		TEST(ssmap_put_all__case_insensitive),
 
 		TEST(ssmap_remove__),
 		TEST(ssmap_remove__case_insensitive_key),
