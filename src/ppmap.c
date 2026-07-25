@@ -87,7 +87,7 @@ static const void *put(const struct PPmap* const map, const void* const key, con
 		if (map->params.equal_key ? map->params.equal_key(*k, key) : *k == key) {
 			const void *val_old = *v;
 
-			const void *val_new = val && alloc_val ? alloc_val(val) : val;
+			const void *val_new = alloc_val ? alloc_val(val) : val;
 			if (!val_new && !map->params.allow_null_val) {
 				return NULL;
 			}
