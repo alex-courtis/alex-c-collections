@@ -1836,6 +1836,124 @@ static void ppmap_remove_all_free__allow_null_val(void **state) {
 	ppmap_free(map);
 }
 
+static void ppmap_remove_in__null(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	assert_int_equal(ppmap_remove_in(NULL, NULL), 0);
+	assert_int_equal(ppmap_remove_in(map, NULL), 0);
+	assert_int_equal(ppmap_remove_in(NULL, map), 0);
+
+	ppmap_free(map);
+}
+
+static void ppmap_remove_in__empty(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	const struct PPmap *in = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, });
+	ppmap_put_many(in, K0, V0, NULL);
+
+	assert_int_equal(ppmap_remove_in(map, in), 0);
+
+	ppmap_free(in);
+	ppmap_free(map);
+}
+
+static void ppmap_remove_in__exists(void **state) {
+	const struct PPmap *map = ppmap_init();
+	ppmap_put_many(map, K0, V0, K1, V1, NULL);
+
+	const struct PPmap *in = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, });
+	ppmap_put_many(in, K0, V4, K2, V5, NULL);
+
+	assert_int_equal(ppmap_remove_in(map, in), 1);
+
+	assert_int_equal(map->size, 1);
+	assert_ptr_equal(map->keys[0], K1);
+	assert_ptr_equal(map->vals[0], V1);
+
+	ppmap_free(in);
+	ppmap_free(map);
+}
+
+static void ppmap_remove_in__free_key(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_key = mock_free, });
+	ppmap_put_many(map, K0, V0, K1, V1, NULL);
+
+	const struct PPmap *in = ppmap_init();
+	ppmap_put_many(in, K0, V4, K2, V5, NULL);
+
+	expect_ptr(mock_free, ptr, K0);
+
+	assert_int_equal(ppmap_remove_in(map, in), 1);
+
+	assert_int_equal(map->size, 1);
+	assert_ptr_equal(map->keys[0], K1);
+	assert_ptr_equal(map->vals[0], V1);
+
+	expect_ptr(mock_free, ptr, K1);
+
+	ppmap_free(map);
+	ppmap_free(in);
+}
+
+static void ppmap_remove_in_free__null(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	assert_int_equal(ppmap_remove_in_free(NULL, NULL), 0);
+	assert_int_equal(ppmap_remove_in_free(map, NULL), 0);
+	assert_int_equal(ppmap_remove_in_free(NULL, map), 0);
+
+	ppmap_free(map);
+}
+
+static void ppmap_remove_in_free__empty(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	const struct PPmap *in = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, });
+	ppmap_put_many(in, K0, V0, NULL);
+
+	assert_int_equal(ppmap_remove_in_free(map, in), 0);
+
+	ppmap_free(in);
+	ppmap_free(map);
+}
+
+static void ppmap_remove_in_free__exists(void **state) {
+	const struct PPmap *map = ppmap_init();
+	ppmap_put_many(map, K0, strdup("to be freed"), K1, V1, NULL);
+
+	const struct PPmap *in = ppmap_init();
+	ppmap_put_many(in, K0, V4, K2, V5, NULL);
+
+	assert_int_equal(ppmap_remove_in_free(map, in), 1);
+
+	assert_int_equal(map->size, 1);
+	assert_ptr_equal(map->keys[0], K1);
+	assert_ptr_equal(map->vals[0], V1);
+
+	ppmap_free(map);
+	ppmap_free(in);
+}
+
+static void ppmap_remove_in_free__free_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
+	ppmap_put_many(map, K0, V0, K1, V1, NULL);
+
+	const struct PPmap *in = ppmap_init();
+	ppmap_put_many(in, K0, V4, K2, V5, NULL);
+
+	expect_ptr(mock_free, ptr, V0);
+
+	assert_int_equal(ppmap_remove_in_free(map, in), 1);
+
+	assert_int_equal(map->size, 1);
+	assert_ptr_equal(map->keys[0], K1);
+	assert_ptr_equal(map->vals[0], V1);
+
+	ppmap_free(map);
+	ppmap_free(in);
+}
+
 
 
 
@@ -2127,70 +2245,6 @@ static void ppmap_put_many__null_val_not_allowed(void **state) {
 	assert_ppmap_equal(to, expected);
 
 	ppmap_free(to);
-	ppmap_free(expected);
-}
-
-static void ppmap_remove_in__free_key(void **state) {
-	const struct PPmapParams params = { .free_val = mock_free, .free_key = mock_free, };
-	const struct PPmap *map = ppmap_init_with(params);
-
-	assert_nul(ppmap_put(map, K0, V0));
-	assert_nul(ppmap_put(map, K1, V1));
-	assert_nul(ppmap_put(map, K2, V2));
-
-	const struct PPmap *from = ppmap_init();
-
-	assert_nul(ppmap_put(from, K0, V0));
-	assert_nul(ppmap_put(from, K2, V2));
-	assert_nul(ppmap_put(from, K3, V3));
-
-	const struct PPmap *expected = ppmap_init();
-
-	assert_nul(ppmap_put(expected, K1, V1));
-
-	expect_ptr(mock_free, ptr, K0);
-	expect_ptr(mock_free, ptr, K2);
-
-	assert_int_equal(ppmap_remove_in(map, from), 2);
-
-	assert_ppmap_equal(map, expected);
-
-	expect_ptr(mock_free, ptr, K1);
-
-	ppmap_free(map);
-
-	ppmap_free(from);
-	ppmap_free(expected);
-}
-
-static void ppmap_remove_in_free__free_val(void **state) {
-	const struct PPmapParams params = { .free_val = mock_free, };
-	const struct PPmap *map = ppmap_init_with(params);
-
-	assert_nul(ppmap_put(map, K0, V0));
-	assert_nul(ppmap_put(map, K1, V1));
-	assert_nul(ppmap_put(map, K2, V2));
-
-	const struct PPmap *from = ppmap_init();
-
-	assert_nul(ppmap_put(from, K0, V0));
-	assert_nul(ppmap_put(from, K2, V2));
-	assert_nul(ppmap_put(from, K3, V3));
-
-	const struct PPmap *expected = ppmap_init();
-
-	assert_nul(ppmap_put(expected, K1, V1));
-
-	expect_ptr(mock_free, ptr, V0);
-	expect_ptr(mock_free, ptr, V2);
-
-	assert_int_equal(ppmap_remove_in_free(map, from), 2);
-
-	assert_ppmap_equal(map, expected);
-
-	ppmap_free(map);
-
-	ppmap_free(from);
 	ppmap_free(expected);
 }
 
@@ -2844,6 +2898,15 @@ int main(void) {
 		TEST(ppmap_remove_all_free__free_val),
 		TEST(ppmap_remove_all_free__allow_null_val),
 
+		TEST(ppmap_remove_in__null),
+		TEST(ppmap_remove_in__empty),
+		TEST(ppmap_remove_in__exists),
+		TEST(ppmap_remove_in__free_key),
+
+		TEST(ppmap_remove_in_free__null),
+		TEST(ppmap_remove_in_free__empty),
+		TEST(ppmap_remove_in_free__exists),
+		TEST(ppmap_remove_in_free__free_val),
 
 
 
@@ -2863,9 +2926,6 @@ int main(void) {
 		TEST(ppmap_put_many__no_keyvals),
 		TEST(ppmap_put_many__null_val_allowed),
 		TEST(ppmap_put_many__null_val_not_allowed),
-
-		TEST(ppmap_remove_in__free_key),
-		TEST(ppmap_remove_in_free__free_val),
 
 		TEST(ppmap_equal__length_different),
 		TEST(ppmap_equal__key_pointers_ok),
