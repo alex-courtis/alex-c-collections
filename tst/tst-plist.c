@@ -1868,7 +1868,7 @@ static void plist_it_remove__forwards_all(void **state) {
 	size_t iterations = 0;
 	for (const struct PlistIt *it = plist_it_start(list); it; it = plist_it_next(it)) {
 		iterations++;
-		plist_it_remove(it);
+		assert_non_nul(plist_it_remove(it));
 	}
 
 	assert_int_equal(list->size, 0);
@@ -1884,7 +1884,7 @@ static void plist_it_remove__backwards_all(void **state) {
 	size_t iterations = 0;
 	for (const struct PlistIt *it = plist_it_end(list); it; it = plist_it_prev(it)) {
 		iterations++;
-		plist_it_remove(it);
+		assert_non_nul(plist_it_remove(it));
 	}
 
 	assert_int_equal(list->size, 0);
