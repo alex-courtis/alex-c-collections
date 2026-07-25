@@ -7,7 +7,6 @@
 #include "tst.h"
 #include "util-col.h"
 
-#include <stdio.h>
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>

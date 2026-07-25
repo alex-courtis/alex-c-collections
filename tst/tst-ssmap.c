@@ -14,12 +14,6 @@
 
 #include "ssmap.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#include "data/words-sorted.c"
-#include "data/words-unsorted.c"
-#pragma GCC diagnostic pop // "-Wunused-variable"
-
 struct PPmap {
 	const struct PPmapParams params;
 	const void **keys;
@@ -60,7 +54,12 @@ static void ssmap_clone__params__constructor(void **state) {
 	assert_int_equal(clone->ppmap->size, 2);
 	assert_int_equal(clone->ppmap->capacity, 99);
 	assert_int_equal(clone->params.grow, 1);
+	assert_ptr_equal(clone->ppmap->params.equal_key, equal_strcasecmp);
+	assert_ptr_equal(clone->ppmap->params.alloc_key, clone_strdup);
+	assert_ptr_equal(clone->ppmap->params.str_key, str_or_null);
 	assert_ptr_equal(clone->ppmap->params.equal_val, equal_strcasecmp);
+	assert_ptr_equal(clone->ppmap->params.alloc_val, clone_strdup);
+	assert_ptr_equal(clone->ppmap->params.str_val, str_or_null);
 
 	assert_ptr_equal(clone->params.case_insensitive_key, true);
 	assert_ptr_equal(clone->params.case_insensitive_val, true);
