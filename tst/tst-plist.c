@@ -2245,8 +2245,8 @@ static void plist_str__pointers(void **state) {
 	char *expected = sprintf_alloc(
 			"%p\n"
 			"%p\n",
-			V0,
-			V1
+			(void*)V0,
+			(void*)V1
 			);
 
 	const struct Plist *list = plist_init();
@@ -2265,8 +2265,8 @@ static void plist_str__allow_null_val(void **state) {
 			"%p\n"
 			"(null)\n"
 			"%p\n",
-			V0,
-			V2
+			(void*)V0,
+			(void*)V2
 			);
 
 	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });

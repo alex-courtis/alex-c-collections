@@ -1,22 +1,25 @@
 #include "data.h"
 
-void *K0 = "K0";
-void *K1 = "K1";
-void *K2 = "K2";
-void *K3 = "K3";
-void *K4 = "K4";
-void *K5 = "K5";
+static float keys[6] = { 0, 1, 2, 3, 4, 5 };
+float *K0 = &keys[0];
+float *K1 = &keys[1];
+float *K2 = &keys[2];
+float *K3 = &keys[3];
+float *K4 = &keys[4];
+float *K5 = &keys[5];
 
-void *V0 = "V0";
-void *V1 = "V1";
-void *V2 = "V2";
-void *V3 = "V3";
-void *V4 = "V4";
-void *V5 = "V5";
+static float vals[6] = { 10, 11, 12, 13, 14, 15 };
+float *V0 = &vals[0];
+float *V1 = &vals[1];
+float *V2 = &vals[2];
+float *V3 = &vals[3];
+float *V4 = &vals[4];
+float *V5 = &vals[5];
 
-void *D0 = "D0";
-void *D1 = "D1";
-void *D2 = "D2";
-void *D3 = "D3";
-void *D4 = "D4";
-void *D5 = "D5";
+static float datas[6] = { 20, 21, 22, 23, 24, 25 };
+float *D0 = &datas[0];
+float *D1 = &datas[1];
+float *D2 = &datas[2];
+float *D3 = &datas[3];
+float *D4 = &datas[4];
+float *D5 = &datas[5];

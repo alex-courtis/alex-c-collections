@@ -895,8 +895,8 @@ static void ipmap_str__(void **state) {
 			"0 = %p\n"
 			"1 = (null)\n"
 			"999 = %p\n",
-			V0,
-			V2
+			(void*)V0,
+			(void*)V2
 			);
 
 	char *actual = ipmap_str(map);

@@ -1,5 +1,6 @@
 #include "assert-spmap.h"
 #include "asserts.h"
+#include "data.h"
 #include "mock-fn.h"
 #include "tst.h"
 #include "util-col.h"
@@ -8,7 +9,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "data.h"
 #include "fn.h"
 #include "ppmap.h"
 #include "slist.h"
@@ -94,17 +94,17 @@ static void spmap_it_free__(void **state) {
 }
 
 static void spmap_contains_key__(void **state) {
-	assert_false(spmap_contains_key(NULL, V5));
+	assert_false(spmap_contains_key(NULL, "x"));
 
 	const struct SPmap *map = spmap_init();
 
-	assert_false(spmap_contains_key(map, V5));
+	assert_false(spmap_contains_key(map, "x"));
 
 	spmap_put_many(map, "a", V0, "b", V1, "c", V2, NULL);
 
 	assert_true(spmap_contains_key(map, "b"));
 
-	assert_false(spmap_contains_key(map, V5));
+	assert_false(spmap_contains_key(map, "x"));
 
 	spmap_free(map);
 }
@@ -135,17 +135,17 @@ static void spmap_contains_val__(void **state) {
 }
 
 static void spmap_get__(void **state) {
-	assert_nul(spmap_get(NULL, V5));
+	assert_nul(spmap_get(NULL, "x"));
 
 	const struct SPmap *map = spmap_init();
 
-	assert_nul(spmap_get(map, V5));
+	assert_nul(spmap_get(map, "x"));
 
 	spmap_put_many(map, "a", V0, "b", V1, "c", V2, NULL);
 
 	assert_ptr_equal(spmap_get(map, "b"), V1);
 
-	assert_nul(spmap_get(map, V5));
+	assert_nul(spmap_get(map, "x"));
 
 	spmap_free(map);
 }
@@ -400,7 +400,7 @@ static void spmap_remove__(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "B", V1, NULL);
 
-	assert_false(spmap_remove(NULL, V5));
+	assert_false(spmap_remove(NULL, "x"));
 
 	const struct SPmap *map = spmap_init();
 	spmap_put_many(map, "A", V0, "B", V1, NULL);
@@ -409,7 +409,7 @@ static void spmap_remove__(void **state) {
 
 	assert_false(spmap_remove(map, NULL));
 
-	assert_false(spmap_remove(map, V5));
+	assert_false(spmap_remove(map, "x"));
 
 	assert_spmap_equal(map, expected);
 
@@ -647,8 +647,8 @@ static void spmap_str__(void **state) {
 			"a = %p\n"
 			"b = (null)\n"
 			"c = %p\n",
-			V0,
-			V2
+			(void*)V0,
+			(void*)V2
 			);
 
 	char *actual = spmap_str(map);

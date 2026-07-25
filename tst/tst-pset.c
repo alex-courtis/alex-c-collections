@@ -1391,8 +1391,8 @@ static void pset_str__pointers(void **state) {
 			"%p\n"
 			"(null)\n"
 			"%p\n",
-			V0,
-			V2
+			(void*)V0,
+			(void*)V2
 			);
 
 	char *actual = pset_str(set);

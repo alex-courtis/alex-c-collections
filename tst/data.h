@@ -2,27 +2,27 @@
 #define DATA_H
 
 // keys
-extern void *K0;
-extern void *K1;
-extern void *K2;
-extern void *K3;
-extern void *K4;
-extern void *K5;
+extern float *K0;
+extern float *K1;
+extern float *K2;
+extern float *K3;
+extern float *K4;
+extern float *K5;
 
 // vals
-extern void *V0;
-extern void *V1;
-extern void *V2;
-extern void *V3;
-extern void *V4;
-extern void *V5;
+extern float *V0;
+extern float *V1;
+extern float *V2;
+extern float *V3;
+extern float *V4;
+extern float *V5;
 
 // datas
-extern void *D0;
-extern void *D1;
-extern void *D2;
-extern void *D3;
-extern void *D4;
-extern void *D5;
+extern float *D0;
+extern float *D1;
+extern float *D2;
+extern float *D3;
+extern float *D4;
+extern float *D5;
 
 #endif // DATA_H

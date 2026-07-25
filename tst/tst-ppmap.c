@@ -2525,9 +2525,9 @@ static void ppmap_str__allow_null_val(void **state) {
 			"%p = %p\n"
 			"%p = (null)\n"
 			"(null) = %p\n",
-			K0, V0,
-			K1,
-			V2
+			(void*)K0, (void*)V0,
+			(void*)K1,
+			(void*)V2
 			);
 
 	char *actual = ppmap_str(map);
@@ -2547,9 +2547,9 @@ static void ppmap_str__str_val(void **state) {
 			"%p = a0\n"
 			"%p = (null)\n"
 			"%p = (null)\n",
-			K0,
-			K1,
-			K2
+			(void*)K0,
+			(void*)K1,
+			(void*)K2
 			);
 
 	char *actual = ppmap_str(map);
@@ -2571,8 +2571,8 @@ static void ppmap_str__str_key(void **state) {
 			"a0 = %p\n"
 			"a1 = (null)\n"
 			"(null) = %p\n",
-			V0,
-			V2
+			(void*)V0,
+			(void*)V2
 			);
 
 	char *actual = ppmap_str(map);
