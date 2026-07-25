@@ -817,13 +817,13 @@ static void ppmap_it_next__incomplete(void **state) {
 }
 
 static void ppmap_filter_it__null(void **state) {
-	assert_null(ppmap_filter_it(NULL, (struct PPmapFilter) { 0 }));
+	assert_nul(ppmap_filter_it(NULL, (struct PPmapFilter) { 0 }));
 }
 
 static void ppmap_filter_it__map_empty(void **state) {
 	const struct PPmap *map = ppmap_init();
 
-	assert_null(ppmap_filter_it(NULL, (struct PPmapFilter) { .key = mock_pred_p, }));
+	assert_nul(ppmap_filter_it(NULL, (struct PPmapFilter) { .key = mock_pred_p, }));
 
 	ppmap_free(map);
 }
@@ -880,7 +880,7 @@ static void ppmap_filter_it__no_match(void **state) {
 }
 
 static void ppmap_put__null(void **state) {
-	assert_null(ppmap_put(NULL, K0, V0));
+	assert_nul(ppmap_put(NULL, K0, V0));
 }
 
 static void ppmap_put__empty(void **state) {
@@ -1184,7 +1184,7 @@ static void ppmap_put_if_absent__equal_key(void **state) {
 }
 
 static void ppmap_put_free__null(void **state) {
-	assert_null(ppmap_put_free(NULL, K0, V0));
+	assert_false(ppmap_put_free(NULL, K0, V0));
 }
 
 static void ppmap_put_free__free(void **state) {
@@ -2227,582 +2227,6 @@ static void ppmap_it_remove_free__allow_null_val(void **state) {
 	ppmap_free(map);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// static void ppmap_it_remove__start(void **state) {
-// 	const struct PPmap *map = ppmap_init();
-//
-// 	assert_false(ppmap_put(map, K0, V0));
-// 	assert_false(ppmap_put(map, K1, V1));
-// 	assert_false(ppmap_put(map, K2, V2));
-//
-// 	const struct PPmap *expected = ppmap_init();
-//
-// 	assert_false(ppmap_put(expected, K2, V2));
-//
-// 	size_t iterations = 0;
-// 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
-// 		iterations++;
-// 		if (it->val == V0 || it->val == V1) {
-// 			assert_non_nul(ppmap_it_remove(it));
-// 		}
-// 	}
-//
-// 	assert_int_equal(ppmap_size(map), 1);
-// 	assert_int_equal(iterations, 3);
-//
-// 	assert_ppmap_equal(map, expected);
-//
-// 	ppmap_free(map);
-// 	ppmap_free(expected);
-// }
-
-// static void ppmap_it_remove__mid(void **state) {
-// 	const struct PPmap *map = ppmap_init();
-//
-// 	assert_false(ppmap_put(map, K0, V0));
-// 	assert_false(ppmap_put(map, K1, V1));
-// 	assert_false(ppmap_put(map, K2, V2));
-// 	assert_false(ppmap_put(map, K3, V3));
-// 	assert_false(ppmap_put(map, K4, V4));
-//
-// 	const struct PPmap *expected = ppmap_init();
-//
-// 	assert_false(ppmap_put(expected, K0, V0));
-// 	assert_false(ppmap_put(expected, K2, V2));
-// 	assert_false(ppmap_put(expected, K4, V4));
-//
-// 	size_t iterations = 0;
-// 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
-// 		iterations++;
-// 		if (it->val == V1 || it->val == V3) {
-// 			assert_non_nul(ppmap_it_remove(it));
-// 		}
-// 	}
-//
-// 	assert_int_equal(ppmap_size(map), 3);
-// 	assert_int_equal(iterations, 5);
-//
-// 	assert_ppmap_equal(map, expected);
-//
-// 	ppmap_free(map);
-// 	ppmap_free(expected);
-// }
-
-// static void ppmap_it_remove__end(void **state) {
-// 	const struct PPmap *map = ppmap_init();
-//
-// 	assert_false(ppmap_put(map, K0, V0));
-// 	assert_false(ppmap_put(map, K1, V1));
-// 	assert_false(ppmap_put(map, K2, V2));
-//
-// 	const struct PPmap *expected = ppmap_init();
-//
-// 	assert_false(ppmap_put(expected, K0, V0));
-//
-// 	size_t iterations = 0;
-// 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
-// 		iterations++;
-// 		if (it->val == V1 || it->val == V2) {
-// 			assert_non_nul(ppmap_it_remove(it));
-// 		}
-// 	}
-//
-// 	assert_int_equal(ppmap_size(map), 1);
-// 	assert_int_equal(iterations, 3);
-//
-// 	assert_ppmap_equal(map, expected);
-//
-// 	ppmap_free(map);
-// 	ppmap_free(expected);
-// }
-
-// static void ppmap_it_remove__all(void **state) {
-// 	const struct PPmap *map = ppmap_init();
-//
-// 	assert_false(ppmap_put(map, K0, V0));
-// 	assert_false(ppmap_put(map, K1, V1));
-// 	assert_false(ppmap_put(map, K2, V2));
-//
-// 	size_t iterations = 0;
-// 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
-// 		iterations++;
-// 		assert_non_nul(ppmap_it_remove(it));
-// 	}
-//
-// 	assert_int_equal(ppmap_size(map), 0);
-// 	assert_int_equal(iterations, 3);
-//
-// 	ppmap_free(map);
-// }
-
-// static void ppmap_it_remove__partial(void **state) {
-// 	const struct PPmapIt *it = calloc(1, sizeof(struct PPmapIt));
-//
-// 	assert_nul(ppmap_it_remove(it));
-// }
-//
-// static void ppmap_it_remove_free__many(void **state) {
-// 	const struct PPmapParams params = { .free_val = mock_free, };
-// 	const struct PPmap *map = ppmap_init_with(params);
-//
-// 	assert_false(ppmap_put(map, K0, V0));
-// 	assert_false(ppmap_put(map, K1, V1));
-// 	assert_false(ppmap_put(map, K2, V2));
-// 	assert_false(ppmap_put(map, K3, V3));
-// 	assert_false(ppmap_put(map, K4, V4));
-//
-// 	const struct PPmap *expected = ppmap_init();
-//
-// 	assert_false(ppmap_put(expected, K0, V0));
-// 	assert_false(ppmap_put(expected, K2, V2));
-// 	assert_false(ppmap_put(expected, K4, V4));
-//
-// 	expect_ptr(mock_free, ptr, V1);
-// 	expect_ptr(mock_free, ptr, V3);
-//
-// 	size_t iterations = 0;
-// 	for (const struct PPmapIt *it = ppmap_it(map); it; it = ppmap_it_next(it)) {
-// 		iterations++;
-// 		if (it->val == V1 || it->val == V3) {
-// 			assert_true(ppmap_it_remove_free(it));
-// 		}
-// 	}
-//
-// 	assert_int_equal(ppmap_size(map), 3);
-// 	assert_int_equal(iterations, 5);
-//
-// 	assert_ppmap_equal(map, expected);
-//
-// 	ppmap_free(map);
-// 	ppmap_free(expected);
-// }
-//
-// static void ppmap_it_remove_free__partial(void **state) {
-// 	const struct PPmapIt *it = calloc(1, sizeof(struct PPmapIt));
-//
-// 	assert_false(ppmap_it_remove_free(it));
-// }
-
-// static void ppmap_put__again(void **state) {
-// 	const struct PPmap *map = ppmap_init();
-//
-// 	assert_nul(ppmap_put(map, K0, V0));
-// 	assert_nul(ppmap_put(map, K1, V1));
-//
-// 	assert_int_equal(ppmap_size(map), 2);
-// 	assert_ptr_equal(ppmap_get(map, K0), V0);
-// 	assert_ptr_equal(ppmap_get(map, K1), V1);
-//
-// 	// remove zero
-// 	assert_ptr_equal(ppmap_remove(map, K0), V0);
-//
-// 	assert_int_equal(ppmap_size(map), 1);
-// 	assert_nul(ppmap_get(map, K0));
-//
-// 	// put zero again afterwards
-// 	assert_nul(ppmap_put(map, K0, V0));
-// 	assert_int_equal(ppmap_size(map), 2);
-//
-// 	// one
-// 	const struct PPmapIt *it = ppmap_it(map);
-// 	assert_non_nul(it);
-// 	assert_ptr_equal(it->key, K1);
-// 	assert_ptr_equal(it->val, V1);
-//
-// 	// zero moved later
-// 	it = ppmap_it_next(it);
-// 	assert_non_nul(it);
-// 	assert_ptr_equal(it->key, K0);
-// 	assert_ptr_equal(it->val, V0);
-//
-// 	// end
-// 	it = ppmap_it_next(it);
-// 	assert_nul(it);
-//
-// 	ppmap_free(map);
-// }
-
-static void ppmap_put_many__many(void **state) {
-	const struct PPmap *to = ppmap_init();
-	assert_nul(ppmap_put(to, K0, V0));
-	assert_nul(ppmap_put(to, K1, strdup("replaced")));
-	assert_nul(ppmap_put(to, K2, strdup("replaced")));
-
-	const struct PPmap *expected = ppmap_init();
-	assert_nul(ppmap_put(expected, K0, V0));
-	assert_nul(ppmap_put(expected, K1, V1));
-	assert_nul(ppmap_put(expected, K2, V2));
-
-	assert_int_equal(ppmap_put_many(to,
-				K1, V1,
-				K2, V2,
-				NULL),
-			2);
-
-	assert_ppmap_equal(to, expected);
-
-	ppmap_free(to);
-	ppmap_free(expected);
-}
-
-static void ppmap_put_many__no_keyvals(void **state) {
-	const struct PPmap *to = ppmap_init();
-
-	assert_int_equal(ppmap_put_many(to, NULL), 0);
-
-	ppmap_free(to);
-}
-
-static void ppmap_put_many__null_val_allowed(void **state) {
-	const struct PPmapParams params = { .allow_null_val = true, };
-	const struct PPmap *to = ppmap_init_with(params);
-
-	assert_nul(ppmap_put(to, K0, V0));
-	assert_nul(ppmap_put(to, K1, strdup("replaced")));
-	assert_nul(ppmap_put(to, K2, strdup("replaced")));
-
-	const struct PPmap *expected = ppmap_init_with(params);
-	assert_nul(ppmap_put(expected, K0, V0));
-	assert_nul(ppmap_put(expected, K1, NULL));
-	assert_nul(ppmap_put(expected, K2, V5));
-
-	assert_int_equal(ppmap_put_many(to,
-				K1, NULL,
-				K2, V5,
-				NULL),
-			2);
-
-	assert_ppmap_equal(to, expected);
-
-	ppmap_free(to);
-	ppmap_free(expected);
-}
-
-static void ppmap_put_many__null_val_not_allowed(void **state) {
-	const struct PPmap *to = ppmap_init();
-
-	assert_nul(ppmap_put(to, K0, V0));
-	assert_nul(ppmap_put(to, K1, strdup("replaced")));
-
-	const struct PPmap *expected = ppmap_init();
-	assert_nul(ppmap_put(expected, K0, V0));
-	assert_nul(ppmap_put(expected, K1, V1));
-
-	assert_int_equal(ppmap_put_many(to,
-				K0, NULL,
-				K1, V1,
-				NULL),
-			1);
-
-	assert_ppmap_equal(to, expected);
-
-	ppmap_free(to);
-	ppmap_free(expected);
-}
-
-static void ppmap_keys_plist__empty(void **state) {
-	const struct PPmap *map = ppmap_init();
-
-	const struct Plist *list = ppmap_keys_plist(map);
-
-	assert_non_nul(list);
-	assert_int_equal(plist_size(list), 0);
-
-	ppmap_free(map);
-	plist_free(list);
-}
-
-static void ppmap_keys_plist__many(void **state) {
-	const struct PPmap *map = ppmap_init();
-
-	ppmap_put(map, K0, V0);
-	ppmap_put(map, K1, V1);
-
-	const struct Plist *list = ppmap_keys_plist(map);
-
-	assert_non_nul(list);
-	assert_int_equal(plist_size(list), 2);
-	assert_ptr_equal(plist_at(list, 0), K0);
-	assert_ptr_equal(plist_at(list, 1), K1);
-
-	ppmap_free(map);
-	plist_free(list);
-}
-
-static void ppmap_keys_plist__alloc_key(void **state) {
-	const struct PPmapParams params = { .alloc_key = mock_alloc, };
-	const struct PPmap *map = ppmap_init_with(params);
-
-	expect_ptr(mock_alloc, ptr, K0);
-	will_return_ptr_type(mock_alloc, K0, void*);
-
-	ppmap_put(map, K0, V0);
-
-	expect_ptr(mock_alloc, ptr, K0);
-	will_return_ptr_type(mock_alloc, K0, void*);
-
-	const struct Plist *list = ppmap_keys_plist(map);
-
-	assert_int_equal(plist_size(list), 1);
-	assert_ptr_equal(plist_at(list, 0), K0);
-
-	plist_free(list);
-	ppmap_free(map);
-}
-
-static void ppmap_keys_pset__empty(void **state) {
-	const struct PPmap *map = ppmap_init();
-
-	const struct Pset *set = ppmap_keys_pset(map);
-
-	assert_non_nul(set);
-	assert_int_equal(pset_size(set), 0);
-
-	ppmap_free(map);
-	pset_free(set);
-}
-
-static void ppmap_keys_pset__many(void **state) {
-	const struct PPmapParams params = {
-		.initial = 1,
-		.grow = 1,
-	};
-	const struct PPmap *map = ppmap_init_with(params);
-
-	ppmap_put(map, K0, V0);
-	ppmap_put(map, K1, V1);
-	ppmap_put(map, K2, V1);
-
-	const struct Pset *expected = pset_init();
-	pset_add(expected, K0);
-	pset_add(expected, K1);
-	pset_add(expected, K2);
-
-	const struct Pset *actual = ppmap_keys_pset(map);
-
-	assert_pset_equal(actual, expected);
-
-	assert_int_equal(actual->size, 3);
-	assert_int_equal(actual->capacity, 3);
-
-	ppmap_free(map);
-	pset_free(expected);
-	pset_free(actual);
-}
-
-static void ppmap_keys_pset__params(void **state) {
-	const struct PPmapParams params = {
-		.equal_key = mock_equal,
-		.alloc_key = mock_alloc,
-		.free_key = mock_free,
-		.str_key = mock_str,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct PPmap *map = ppmap_init_with(params);
-
-	const struct Pset *set = ppmap_keys_pset(map);
-
-	assert_int_equal(set->size, 0);
-	assert_int_equal(set->capacity, 99);
-	assert_int_equal(set->params.grow, 1);
-	assert_ptr_equal(set->params.equal_val, mock_equal);
-	assert_ptr_equal(set->params.alloc_val, mock_alloc);
-	assert_ptr_equal(set->params.free_val, mock_free);
-	assert_ptr_equal(set->params.clone_val, mock_alloc);
-	assert_ptr_equal(set->params.str_val, mock_str);
-
-	ppmap_free(map);
-
-	pset_free(set);
-}
-
-static void ppmap_vals_plist__empty(void **state) {
-	const struct PPmap *map = ppmap_init();
-
-	const struct Plist *list = ppmap_vals_plist(map);
-
-	assert_non_nul(list);
-	assert_int_equal(plist_size(list), 0);
-
-	ppmap_free(map);
-	plist_free(list);
-}
-
-static void ppmap_vals_plist__many(void **state) {
-	const struct PPmapParams params = { .allow_null_val = true, };
-	const struct PPmap *map = ppmap_init_with(params);
-
-	ppmap_put(map, K0, V1);
-	ppmap_put(map, K1, NULL);
-	ppmap_put(map, K2, V3);
-
-	const struct Plist *list = ppmap_vals_plist(map);
-
-	assert_non_nul(list);
-	assert_int_equal(plist_size(list), 3);
-
-	assert_ptr_equal(plist_at(list, 0), V1);
-	assert_nul(plist_at(list, 1));
-	assert_ptr_equal(plist_at(list, 2), V3);
-
-	plist_free(list);
-	ppmap_free(map);
-}
-
-static void ppmap_vals_plist__alloc_val(void **state) {
-	const struct PPmapParams params = { .alloc_val = mock_alloc, };
-	const struct PPmap *map = ppmap_init_with(params);
-
-	expect_ptr(mock_alloc, ptr, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
-
-	ppmap_put(map, K0, V0);
-
-	expect_ptr(mock_alloc, ptr, V0);
-	will_return_ptr_type(mock_alloc, V0, void*);
-
-	const struct Plist *list = ppmap_vals_plist(map);
-
-	assert_int_equal(plist_size(list), 1);
-	assert_ptr_equal(plist_at(list, 0), V0);
-
-	plist_free(list);
-	ppmap_free(map);
-}
-
-static void ppmap_vals_plist_clone__clone_val(void **state) {
-	const struct PPmapParams params = { .clone_val = mock_clone, };
-	const struct PPmap *map = ppmap_init_with(params);
-
-	assert_nul(ppmap_put(map, K0, V0));
-
-	assert_nul(ppmap_put(map, K1, NULL));
-
-	expect_ptr(mock_clone, ptr, V0);
-	will_return_ptr_type(mock_clone, V0, void*);
-
-	const struct Plist *list = ppmap_vals_plist_clone(map);
-
-	assert_ptr_equal(plist_at(list, 0), V0);
-	assert_ptr_equal(plist_at(list, 1), NULL);
-
-	plist_free(list);
-	ppmap_free(map);
-}
-
-static void ppmap_vals_plist_clone__no_clone_val(void **state) {
-	const struct PPmap *map = ppmap_init();
-
-	assert_nul(ppmap_put(map, K0, V0));
-	assert_nul(ppmap_put(map, K1, NULL));
-
-	assert_nul(ppmap_vals_plist_clone(map));
-
-	ppmap_free(map);
-}
-
-static void ppmap__null_inputs(void **state) {
-	const struct PPmap *map = ppmap_init();
-	const struct PPmapFilter filter = { 0 };
-
-	assert_nul(ppmap_clone(NULL));
-	assert_nul(ppmap_clone_deep(NULL));
-	ppmap_free(NULL);
-	ppmap_free_vals(NULL);
-	ppmap_it_free(NULL);
-	assert_false(ppmap_get(NULL, NULL));
-	assert_false(ppmap_get(map, NULL));
-	assert_false(ppmap_contains_key(NULL, NULL));
-	assert_false(ppmap_contains_key(map, NULL));
-	assert_false(ppmap_contains_val(NULL, NULL));
-	assert_false(ppmap_contains_val(map, NULL));
-	assert_nul(ppmap_first_key(NULL, NULL));
-	assert_nul(ppmap_at(NULL, 0).val);
-	ppmap_find(NULL, filter);
-	assert_nul(ppmap_it(NULL));
-	assert_nul(ppmap_filter_it(NULL, filter));
-	assert_nul(ppmap_it_next(NULL));
-	assert_nul(ppmap_it_remove(NULL)),
-		assert_false(ppmap_it_remove_free(NULL)),
-		assert_false(ppmap_put(NULL, NULL, NULL));
-	assert_false(ppmap_put(map, NULL, NULL));
-	assert_nul(ppmap_put_if_absent(NULL, NULL, NULL));
-	assert_nul(ppmap_put_if_absent(map, NULL, NULL));
-	assert_false(ppmap_put_free(NULL, NULL, NULL));
-	assert_false(ppmap_put_free(map, NULL, NULL));
-	assert_int_equal(ppmap_put_many(NULL, NULL), 0);
-	assert_int_equal(ppmap_put_many_v(NULL, NULL), 0);
-	assert_int_equal(ppmap_put_all(NULL, NULL), 0);
-	assert_int_equal(ppmap_put_all(map, NULL), 0);
-	assert_int_equal(ppmap_put_all_free(NULL, NULL), 0);
-	assert_int_equal(ppmap_put_all_free(map, NULL), 0);
-	assert_int_equal(ppmap_put_all_clone(NULL, NULL), 0);
-	assert_int_equal(ppmap_put_all_clone(map, NULL), 0);
-	assert_int_equal(ppmap_put_all_clone_free(NULL, NULL), 0);
-	assert_int_equal(ppmap_put_all_clone_free(map, NULL), 0);
-	assert_nul(ppmap_remove(NULL, NULL));
-	assert_nul(ppmap_remove(map, NULL));
-	assert_false(ppmap_remove_free(NULL, NULL));
-	assert_false(ppmap_remove_free(map, NULL));
-	assert_int_equal(ppmap_remove_all(NULL), 0);
-	assert_int_equal(ppmap_remove_all_free(NULL), 0);
-	assert_int_equal(ppmap_remove_in(NULL, NULL), 0);
-	assert_int_equal(ppmap_remove_in(map, NULL), 0);
-	assert_int_equal(ppmap_remove_in(NULL, map), 0);
-	assert_int_equal(ppmap_remove_in_free(NULL, NULL), 0);
-	assert_int_equal(ppmap_remove_in_free(map, NULL), 0);
-	assert_int_equal(ppmap_remove_in_free(NULL, map), 0);
-	assert_false(ppmap_equal(NULL, NULL));
-	assert_false(ppmap_equal(map, NULL));
-	assert_nul(ppmap_keys_plist(NULL));
-	assert_nul(ppmap_keys_pset(NULL));
-	assert_nul(ppmap_vals_plist_clone(NULL));
-	assert_nul(ppmap_vals_plist(NULL));
-	assert_nul(ppmap_str(NULL));
-	assert_int_equal(ppmap_size(NULL), 0);
-
-	ppmap_free(map);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static void ppmap_equal__null(void **state) {
 	const struct PPmap *map = ppmap_init();
 
@@ -2904,6 +2328,198 @@ static void ppmap_equal__equal_key_different(void **state) {
 	ppmap_free(b);
 }
 
+static void ppmap_keys_plist__null(void **state) {
+	assert_nul(ppmap_keys_plist(NULL));
+}
+
+static void ppmap_keys_plist__empty(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	const struct Plist *list = ppmap_keys_plist(map);
+
+	assert_non_nul(list);
+	assert_int_equal(plist_size(list), 0);
+
+	ppmap_free(map);
+	plist_free(list);
+}
+
+static void ppmap_keys_plist__many(void **state) {
+	const struct PPmap *map = ppmap_init();
+	ppmap_put_many(map, K0, V0, K1, V1, NULL);
+
+	const struct Plist *list = ppmap_keys_plist(map);
+
+	assert_non_nul(list);
+	assert_int_equal(plist_size(list), 2);
+	assert_ptr_equal(plist_at(list, 0), K0);
+	assert_ptr_equal(plist_at(list, 1), K1);
+
+	ppmap_free(map);
+	plist_free(list);
+}
+
+static void ppmap_keys_plist__alloc_key(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .alloc_key = mock_alloc, });
+
+	expect_ptr(mock_alloc, ptr, K0); will_return_ptr_type(mock_alloc, K0, void*);
+
+	ppmap_put(map, K0, V0);
+
+	expect_ptr(mock_alloc, ptr, K0); will_return_ptr_type(mock_alloc, K0, void*);
+
+	const struct Plist *list = ppmap_keys_plist(map);
+
+	assert_int_equal(plist_size(list), 1);
+	assert_ptr_equal(plist_at(list, 0), K0);
+
+	plist_free(list);
+	ppmap_free(map);
+}
+
+static void ppmap_keys_pset__null(void **state) {
+	assert_nul(ppmap_keys_pset(NULL));
+}
+
+static void ppmap_keys_pset__empty(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	const struct Pset *set = ppmap_keys_pset(map);
+
+	assert_non_nul(set);
+	assert_int_equal(pset_size(set), 0);
+
+	ppmap_free(map);
+	pset_free(set);
+}
+
+static void ppmap_keys_pset__many(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .initial = 1, .grow = 1, });
+	ppmap_put_many(map, K0, V0, K1, V1, K2, V1, NULL);
+
+	const struct Pset *expected = pset_init();
+	pset_add(expected, K0);
+	pset_add(expected, K1);
+	pset_add(expected, K2);
+
+	const struct Pset *actual = ppmap_keys_pset(map);
+
+	assert_pset_equal(actual, expected);
+
+	assert_int_equal(actual->size, 3);
+	assert_int_equal(actual->capacity, 3);
+
+	ppmap_free(map);
+	pset_free(expected);
+	pset_free(actual);
+}
+
+static void ppmap_keys_pset__params(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){
+		.equal_key = mock_equal,
+		.alloc_key = mock_alloc,
+		.free_key = mock_free,
+		.str_key = mock_str,
+		.initial = 99,
+		.grow = 1,
+	});
+
+	const struct Pset *set = ppmap_keys_pset(map);
+
+	assert_int_equal(set->size, 0);
+	assert_int_equal(set->capacity, 99);
+	assert_int_equal(set->params.grow, 1);
+	assert_ptr_equal(set->params.equal_val, mock_equal);
+	assert_ptr_equal(set->params.alloc_val, mock_alloc);
+	assert_ptr_equal(set->params.free_val, mock_free);
+	assert_ptr_equal(set->params.clone_val, mock_alloc);
+	assert_ptr_equal(set->params.str_val, mock_str);
+
+	ppmap_free(map);
+
+	pset_free(set);
+}
+
+static void ppmap_vals_plist__null(void **state) {
+	assert_nul(ppmap_vals_plist(NULL));
+}
+
+static void ppmap_vals_plist__empty(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	const struct Plist *list = ppmap_vals_plist(map);
+
+	assert_non_nul(list);
+	assert_int_equal(plist_size(list), 0);
+
+	ppmap_free(map);
+	plist_free(list);
+}
+
+static void ppmap_vals_plist__many(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, });
+	ppmap_put_many(map, K0, V1, K1, NULL, K2, V3, NULL);
+
+	const struct Plist *list = ppmap_vals_plist(map);
+
+	assert_non_nul(list);
+	assert_int_equal(plist_size(list), 3);
+
+	assert_ptr_equal(plist_at(list, 0), V1);
+	assert_nul(plist_at(list, 1));
+	assert_ptr_equal(plist_at(list, 2), V3);
+
+	plist_free(list);
+	ppmap_free(map);
+}
+
+static void ppmap_vals_plist__alloc_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .alloc_val = mock_alloc, });
+
+	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
+
+	ppmap_put(map, K0, V0);
+
+	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct Plist *list = ppmap_vals_plist(map);
+
+	assert_int_equal(plist_size(list), 1);
+	assert_ptr_equal(plist_at(list, 0), V0);
+
+	plist_free(list);
+	ppmap_free(map);
+}
+
+static void ppmap_vals_plist_clone__null(void **state) {
+	assert_nul(ppmap_vals_plist_clone(NULL));
+}
+
+static void ppmap_vals_plist_clone__clone_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .clone_val = mock_clone, });
+	ppmap_put_many(map, K0, V0, K1, NULL, NULL);
+
+	expect_ptr(mock_clone, ptr, V0);
+	will_return_ptr_type(mock_clone, V0, void*);
+
+	const struct Plist *list = ppmap_vals_plist_clone(map);
+
+	assert_ptr_equal(plist_at(list, 0), V0);
+	assert_ptr_equal(plist_at(list, 1), NULL);
+
+	plist_free(list);
+	ppmap_free(map);
+}
+
+static void ppmap_vals_plist_clone__no_clone_val(void **state) {
+	const struct PPmap *map = ppmap_init();
+	ppmap_put_many(map, K0, V0, K1, V1, NULL);
+
+	assert_nul(ppmap_vals_plist_clone(map));
+
+	ppmap_free(map);
+}
+
 static void ppmap_str__null(void **state) {
 	assert_nul(ppmap_str(NULL));
 }
@@ -2945,11 +2561,7 @@ static void ppmap_str__allow_null_val(void **state) {
 
 static void ppmap_str__str_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, .str_val = (fn_str)starts_with_a_or_null, });
-	ppmap_put_many(map, K0, V0, K1, NULL, K2, V2, NULL);
-
-	ppmap_put(map, K0, "a0");
-	ppmap_put(map, K1, NULL);
-	ppmap_put(map, K2, "b2");
+	ppmap_put_many(map, K0, "a0", K1, NULL, K2, "b2", NULL);
 
 	char *expected = sprintf_alloc(
 			"%p = a0\n"
@@ -3201,10 +2813,6 @@ int main(void) {
 		TEST(ppmap_it_remove_free__free_key),
 		TEST(ppmap_it_remove_free__allow_null_val),
 
-
-
-
-
 		TEST(ppmap_equal__null),
 		TEST(ppmap_equal__length_different),
 		TEST(ppmap_equal__key_pointers_ok),
@@ -3214,6 +2822,25 @@ int main(void) {
 		TEST(ppmap_equal__equal_key_ok),
 		TEST(ppmap_equal__equal_key_different),
 
+		TEST(ppmap_keys_plist__null),
+		TEST(ppmap_keys_plist__empty),
+		TEST(ppmap_keys_plist__many),
+		TEST(ppmap_keys_plist__alloc_key),
+
+		TEST(ppmap_keys_pset__null),
+		TEST(ppmap_keys_pset__empty),
+		TEST(ppmap_keys_pset__many),
+		TEST(ppmap_keys_pset__params),
+
+		TEST(ppmap_vals_plist__null),
+		TEST(ppmap_vals_plist__empty),
+		TEST(ppmap_vals_plist__many),
+		TEST(ppmap_vals_plist__alloc_val),
+
+		TEST(ppmap_vals_plist_clone__null),
+		TEST(ppmap_vals_plist_clone__clone_val),
+		TEST(ppmap_vals_plist_clone__no_clone_val),
+
 		TEST(ppmap_str__null),
 		TEST(ppmap_str__empty),
 		TEST(ppmap_str__allow_null_val),
@@ -3222,34 +2849,6 @@ int main(void) {
 
 		TEST(ppmap_size__null),
 		TEST(ppmap_size__present),
-
-
-
-
-
-
-
-
-
-
-
-
-		// TEST(ppmap_keys_plist__empty),
-		// TEST(ppmap_keys_plist__many),
-		// TEST(ppmap_keys_plist__alloc_key),
-		//
-		// TEST(ppmap_keys_pset__empty),
-		// TEST(ppmap_keys_pset__many),
-		// TEST(ppmap_keys_pset__params),
-		//
-		// TEST(ppmap_vals_plist__empty),
-		// TEST(ppmap_vals_plist__many),
-		// TEST(ppmap_vals_plist__alloc_val),
-		//
-		// TEST(ppmap_vals_plist_clone__clone_val),
-		// TEST(ppmap_vals_plist_clone__no_clone_val),
-		//
-		// TEST(ppmap__null_inputs),
 	};
 
 	return RUN(tests);
