@@ -283,7 +283,7 @@ const struct Plist *plist_clone(const struct Plist* const from) {
 }
 
 const struct Plist *plist_clone_deep(const struct Plist* const from) {
-	return from && from->params.clone_val ? clone(from, from->params.alloc_val ? from->params.alloc_val : from->params.clone_val) : NULL;
+	return from && from->params.clone_val ? clone(from, from->params.clone_val) : NULL;
 }
 
 void plist_free(const struct Plist * const list) {

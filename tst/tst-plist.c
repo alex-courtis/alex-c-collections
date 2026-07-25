@@ -191,24 +191,6 @@ static void plist_clone_deep__allow_null_val(void **state) {
 	plist_free(list);
 }
 
-static void plist_clone_deep__alloc_val_overrides_clone_val(void **state) {
-	const struct Plist *list = plist_init_with((struct PlistParams){ .clone_val = mock_clone, .alloc_val = mock_alloc, });
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-	plist_append(list, V0);
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-
-	const struct Plist *clone = plist_clone_deep(list);
-
-	assert_non_nul(clone);
-	assert_int_equal(clone->size, 1);
-	assert_ptr_equal(clone->vals[0], V0);
-
-	plist_free(clone);
-	plist_free(list);
-}
-
 static void plist_free__null(void **state) {
 	plist_free(NULL);
 }
@@ -2343,7 +2325,6 @@ int main(void) {
 		TEST(plist_clone_deep__clone_val),
 		TEST(plist_clone_deep__no_clone_val),
 		TEST(plist_clone_deep__allow_null_val),
-		TEST(plist_clone_deep__alloc_val_overrides_clone_val),
 
 		TEST(plist_free__null),
 		TEST(plist_free__empty),

@@ -353,7 +353,7 @@ const struct PPmap *ppmap_clone(const struct PPmap* const from) {
 }
 
 const struct PPmap *ppmap_clone_deep(const struct PPmap* const from) {
-	return from && from->params.clone_val ? clone(from, from->params.alloc_val ? from->params.alloc_val : from->params.clone_val) : NULL;
+	return from && from->params.clone_val ? clone(from, from->params.clone_val) : NULL;
 }
 
 void ppmap_free(const struct PPmap* const map) {

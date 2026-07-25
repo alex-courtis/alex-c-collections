@@ -247,25 +247,6 @@ static void ppmap_clone_deep__allow_null_val(void **state) {
 	ppmap_free(clone);
 }
 
-static void ppmap_clone_deep__alloc_val_overrides_clone_val(void **state) {
-	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .alloc_val = mock_alloc, .clone_val = mock_clone, });
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-	ppmap_put(map, K0, V0);
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-
-	const struct PPmap *clone = ppmap_clone_deep(map);
-
-	assert_non_nul(clone);
-	assert_int_equal(clone->size, 1);
-	assert_ptr_equal(clone->keys[0], K0);
-	assert_ptr_equal(clone->vals[0], V0);
-
-	ppmap_free(map);
-	ppmap_free(clone);
-}
-
 static void ppmap_free__null(void **state) {
 	ppmap_free(NULL);
 }
@@ -2633,7 +2614,6 @@ int main(void) {
 		TEST(ppmap_clone_deep__clone_val),
 		TEST(ppmap_clone_deep__no_clone_val),
 		TEST(ppmap_clone_deep__allow_null_val),
-		TEST(ppmap_clone_deep__alloc_val_overrides_clone_val),
 
 		TEST(ppmap_free__null),
 		TEST(ppmap_free__empty),

@@ -74,7 +74,7 @@ const struct SPmap *spmap_init_with(const struct SPmapParams params);
 // same params, caller frees vals when alloc_val present [alloc_val]
 const struct SPmap *spmap_clone(const struct SPmap* const from);
 
-// same params, caller frees vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_key, alloc_val, clone_val]
+// same params, caller frees vals, NULL on NULL clone_val [clone_val]
 const struct SPmap *spmap_clone_deep(const struct SPmap* const from);
 
 // free map
