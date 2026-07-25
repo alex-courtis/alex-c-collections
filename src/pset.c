@@ -246,7 +246,7 @@ const struct Pset *pset_clone(const struct Pset* const from) {
 }
 
 const struct Pset *pset_clone_deep(const struct Pset* const from) {
-	return from && from->params.clone_val ? clone(from, from->params.clone_val) : NULL;
+	return from && from->params.clone_val ? clone(from, from->params.alloc_val ? from->params.alloc_val : from->params.clone_val) : NULL;
 }
 
 void pset_free(const struct Pset * const set) {

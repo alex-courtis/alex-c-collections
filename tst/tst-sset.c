@@ -49,7 +49,6 @@ static void sset_clone__params__constructor(void **state) {
 	const struct Sset *clone = sset_clone(set);
 
 	assert_non_nul(clone);
-
 	assert_int_equal(clone->pset->size, 2);
 	assert_int_equal(clone->pset->capacity, 99);
 	assert_int_equal(clone->params.grow, 1);

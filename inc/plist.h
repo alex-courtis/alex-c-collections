@@ -61,7 +61,7 @@ const struct Plist *plist_init_with(const struct PlistParams params);
 // same params, caller frees vals when alloc_val present [alloc_val]
 const struct Plist *plist_clone(const struct Plist* const from);
 
-// list ordered vals, caller frees vals, NULL when NULL clone_val [clone_val]
+// list ordered vals, caller frees vals, NULL when NULL clone_val, alloc_val overrides clone_val [alloc_val, clone_val]
 const struct Plist *plist_clone_deep(const struct Plist* const from);
 
 // free list

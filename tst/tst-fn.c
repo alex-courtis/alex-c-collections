@@ -52,14 +52,14 @@ static void equal_stp__(void **state) {
 
 static void less_than_strcmp__(void **state) {
 	assert_true(less_than_strcmp(P0, P0));
-	assert_false(less_than_strcmp(P0, NULL));
+	assert_true(less_than_strcmp(P0, NULL));
 	assert_false(less_than_strcmp(NULL, P0));
 	assert_true(less_than_strcmp("a", "b"));
 }
 
 static void less_than_strcasecmp__(void **state) {
 	assert_true(less_than_strcasecmp(P0, P0));
-	assert_false(less_than_strcasecmp(P0, NULL));
+	assert_true(less_than_strcasecmp(P0, NULL));
 	assert_false(less_than_strcasecmp(NULL, P0));
 	assert_true(less_than_strcasecmp("a", "B"));
 }

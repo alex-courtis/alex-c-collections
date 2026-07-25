@@ -79,6 +79,8 @@ const struct PPmap *ppmap_init_with(const struct PPmapParams params);
 // same params, caller frees keys when alloc_key present and vals when alloc_val present [alloc_key, alloc_val]
 const struct PPmap *ppmap_clone(const struct PPmap* const from);
 
+// TODO why does alloc_val override?
+
 // same params, caller frees keys when alloc_key present, caller frees vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_key, alloc_val, clone_val]
 const struct PPmap *ppmap_clone_deep(const struct PPmap* const from);
 

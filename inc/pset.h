@@ -61,7 +61,7 @@ const struct Pset *pset_init_with(const struct PsetParams params);
 // same params, caller frees vals when alloc_val present [alloc_val]
 const struct Pset *pset_clone(const struct Pset* const from);
 
-// set ordered vals, caller frees vals, NULL when NULL clone_val [clone_val]
+// set ordered vals, caller frees vals, NULL when NULL clone_val, alloc_val overrides clone_val [alloc_val, clone_val]
 const struct Pset *pset_clone_deep(const struct Pset* const from);
 
 // free set
