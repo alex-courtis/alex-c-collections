@@ -1,22 +1,52 @@
-#include "assert-sset.h"
 #include "assert-ssmap.h"
 #include "asserts.h"
-#include "mock-fn.h"
 #include "tst.h"
 #include "util-col.h"
 
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "fn.h"
 #include "slist.h"
 #include "ppmap.h"
-#include "sset.h"
-#include "str.h"
 
 #include "ssmap.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ssmap_put_many(set, "a", "0", "b", "1", "c", "2", "d", "3", "e", "4", NULL);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#include "data/words-sorted.c"
+#include "data/words-unsorted.c"
+#pragma GCC diagnostic pop // "-Wunused-variable"
 
 struct PPmap {
 	const struct PPmapParams params;
@@ -26,14 +56,14 @@ struct PPmap {
 	size_t size;
 };
 
-struct Sset {
-	const struct SsetParams params;
-	const struct Pset *pset;
-};
-
 struct Slist {
 	const struct SlistParams params;
 	const struct Plist *plist;
+};
+
+struct Sset {
+	const struct SsetParams params;
+	const struct Pset *pset;
 };
 
 struct SSmap {
@@ -41,697 +71,558 @@ struct SSmap {
 	const struct PPmap *ppmap;
 };
 
-static bool match_both_start_with_a(const char* const key, const char* const val) {
-	return *key == 'a' && *val == 'a';
+static bool match_starts_with_a(const char* const a, const void* const b) {
+	return *a == 'a';
 }
 
-// also tests constructor
-static void ssmap_clone__(void **state) {
-	const struct SSmapParams params = {
-		.case_insensitive_key = true,
-		.case_insensitive_val = true,
-		.allow_null_val = true,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct SSmap *from = ssmap_init_with(params);
+static void ssmap_clone__params__constructor(void **state) {
+	assert_nul(ssmap_clone(NULL));
 
-	const struct SSmap *to = ssmap_clone(from);
+	const struct SSmap *set = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, .case_insensitive_val = true, .initial = 99, .grow = 1, });
+	ssmap_put_many(set, "a", "0", "b", "1", NULL);
 
-	assert_non_nul(to);
+	const struct SSmap *clone = ssmap_clone(set);
 
-	assert_int_equal(to->ppmap->size, 0);
-	assert_int_equal(to->ppmap->capacity, 99);
-	assert_int_equal(to->ppmap->params.grow, 1);
-	assert_true(to->ppmap->params.allow_null_val);
-	assert_ptr_equal(to->ppmap->params.equal_key, equal_strcasecmp);
-	assert_ptr_equal(to->ppmap->params.equal_val, equal_strcasecmp);
-	assert_ptr_equal(to->ppmap->params.alloc_key, clone_strdup);
-	assert_ptr_equal(to->ppmap->params.alloc_val, clone_strdup);
-	assert_ptr_equal(to->ppmap->params.free_key, free);
-	assert_ptr_equal(to->ppmap->params.free_val, free);
+	assert_non_nul(clone);
+	assert_int_equal(clone->ppmap->size, 2);
+	assert_int_equal(clone->ppmap->capacity, 99);
+	assert_int_equal(clone->params.grow, 1);
+	assert_ptr_equal(clone->ppmap->params.equal_val, equal_strcasecmp);
 
-	assert_true(to->params.case_insensitive_key);
-	assert_true(to->params.case_insensitive_val);
-	assert_ptr_equal(to->params.initial, 99);
-	assert_ptr_equal(to->params.grow, 1);
+	assert_ptr_equal(clone->params.case_insensitive_key, true);
+	assert_ptr_equal(clone->params.case_insensitive_val, true);
+	assert_ptr_equal(clone->params.initial, 99);
+	assert_ptr_equal(clone->params.grow, 1);
 
-	assert_ssmap_equal(from, to);
+	assert_ssmap_equal(set, clone);
 
-	ssmap_free(from);
-	ssmap_free(to);
+	ssmap_free(set);
+	ssmap_free(clone);
 }
 
-static void ssmap_it_free__partial(void **state) {
+static void ssmap_free__(void **state) {
+	ssmap_free(NULL);
+}
+
+static void ssmap_it_free__(void **state) {
+	ssmap_it_free(NULL);
+
 	const struct SSmapIt *it = calloc(1, sizeof(struct SSmapIt));
 
 	ssmap_it_free(it);
 }
 
 static void ssmap_contains_key__(void **state) {
-	const struct SSmap *map = ssmap_init();
+	assert_false(ssmap_contains_key(NULL, "x"));
 
-	assert_false(ssmap_contains_key(map, "a"));
+	const struct SSmap *set = ssmap_init();
 
-	assert_false(ssmap_put(map, "a", "aa"));
-	assert_false(ssmap_put(map, "b", "bb"));
+	assert_false(ssmap_contains_key(set, "x"));
 
-	assert_true(ssmap_contains_key(map, "a"));
-	assert_true(ssmap_contains_key(map, "b"));
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", NULL);
 
-	assert_false(ssmap_contains_key(map, "c"));
+	assert_true(ssmap_contains_key(set, "b"));
 
-	assert_false(ssmap_contains_key(map, NULL));
+	assert_false(ssmap_contains_key(set, "x"));
 
-	ssmap_free(map);
+	ssmap_free(set);
+}
+
+static void ssmap_contains_key__case_insensitive(void **state) {
+	const struct SSmap *set = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+	ssmap_put_many(set, "a", "0", NULL);
+
+	assert_true(ssmap_contains_key(set, "A"));
+
+	ssmap_free(set);
 }
 
 static void ssmap_contains_val__(void **state) {
-	const struct SSmap *map = ssmap_init();
+	assert_false(ssmap_contains_val(NULL, "9"));
 
-	assert_false(ssmap_contains_key(map, "aa"));
+	const struct SSmap *set = ssmap_init();
 
-	assert_false(ssmap_put(map, "a", "aa"));
-	assert_false(ssmap_put(map, "b", "bb"));
+	assert_false(ssmap_contains_val(set, "9"));
 
-	assert_true(ssmap_contains_val(map, "aa"));
-	assert_true(ssmap_contains_val(map, "bb"));
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", NULL);
 
-	assert_false(ssmap_contains_val(map, "c"));
+	assert_true(ssmap_contains_val(set, "1"));
 
-	assert_false(ssmap_contains_val(map, NULL));
+	assert_false(ssmap_contains_val(set, "9"));
 
-	ssmap_free(map);
+	ssmap_free(set);
 }
 
-static void ssmap_first_key__(void **state) {
-	const struct SSmap *map = ssmap_init();
+static void ssmap_contains_val__case_insensitive(void **state) {
+	const struct SSmap *set = ssmap_init_with((struct SSmapParams){ .case_insensitive_val = true, });
+	ssmap_put_many(set, "a", "aa", NULL);
 
-	assert_false(ssmap_put(map, "a", "aa"));
-	assert_false(ssmap_put(map, "b", "bb"));
-	assert_false(ssmap_put(map, "c", "bb"));
+	assert_true(ssmap_contains_val(set, "AA"));
 
-	assert_str_equal(ssmap_first_key(map, "aa"), "a");
-	assert_str_equal(ssmap_first_key(map, "bb"), "b");
-	assert_nul(ssmap_first_key(map, "cc"));
-
-	ssmap_free(map);
+	ssmap_free(set);
 }
 
 static void ssmap_at__(void **state) {
-	const struct SSmap *map = ssmap_init();
-	assert_false(ssmap_put(map, "a", "aa"));
-	assert_false(ssmap_put(map, "b", "bb"));
-	assert_false(ssmap_put(map, "c", "cc"));
+	assert_nul(ssmap_at(NULL, 0).key);
+	assert_nul(ssmap_at(NULL, 0).val);
 
-	assert_str_equal(ssmap_at(map, 1).key, "b");
-	assert_str_equal(ssmap_at(map, 1).val, "bb");
+	const struct SSmap *set = ssmap_init();
 
-	ssmap_free(map);
+	assert_nul(ssmap_at(set, 0).key);
+	assert_nul(ssmap_at(set, 0).val);
+
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", NULL);
+
+	assert_str_equal(ssmap_at(set, 1).key, "b");
+	assert_str_equal(ssmap_at(set, 1).val, "1");
+
+	assert_nul(ssmap_at(set, 3).key);
+	assert_nul(ssmap_at(set, 3).val);
+
+	ssmap_free(set);
 }
 
 static void ssmap_find__(void **state) {
-	const struct SSmap *map = ssmap_init();
+	assert_nul(ssmap_find(NULL, (struct SSmapFilter){ 0 }).key);
+	assert_nul(ssmap_find(NULL, (struct SSmapFilter){ 0 }).val);
 
-	assert_false(ssmap_put(map, "0", "aaa"));
-	assert_false(ssmap_put(map, "1", "bbb"));
-	assert_false(ssmap_put(map, "2", "ccc"));
+	const struct SSmap *set = ssmap_init();
 
-	// skip 0
-	expect_string(mock_pred_s_s_p, s1, "0");
-	expect_string(mock_pred_s_s_p, s2, "aaa");
-	expect_string(mock_pred_s_s_p, p, "x");
-	will_return(mock_pred_s_s_p, false);
+	assert_nul(ssmap_find(set, (struct SSmapFilter){ 0 }).key);
+	assert_nul(ssmap_find(set, (struct SSmapFilter){ 0 }).val);
 
-	// get 1
-	expect_string(mock_pred_s_s_p, s1, "1");
-	expect_string(mock_pred_s_s_p, s2, "bbb");
-	expect_string(mock_pred_s_s_p, p, "x");
-	will_return(mock_pred_s_s_p, true);
+	ssmap_put_many(set, "a", "x0", "b", "x1", "c", "a2", "d", "x3", NULL);
 
-	const struct SSmapFilter filter = { .key_val_data = mock_pred_s_s_p, .data = "x", };
-	const struct SSmapPair kv_pair = ssmap_find(map, filter);
-	assert_str_equal(kv_pair.key, "1");
-	assert_str_equal(kv_pair.val, "bbb");
+	assert_str_equal(ssmap_find(set, (struct SSmapFilter){ 0 }).key, "a");
+	assert_str_equal(ssmap_find(set, (struct SSmapFilter){ 0 }).val, "x0");
 
+    struct SSmapPair pair = ssmap_find(set, (struct SSmapFilter){ .val_data = match_starts_with_a, .data = "x", });
 
-	ssmap_free(map);
+	assert_str_equal(pair.key, "c");
+	assert_str_equal(pair.val, "a2");
+
+    pair = ssmap_find(set, (struct SSmapFilter){ .key_data = match_starts_with_a, .data = "x", });
+
+	assert_str_equal(pair.key, "a");
+	assert_str_equal(pair.val, "x0");
+
+	ssmap_free(set);
 }
 
-static void ssmap_it__many(void **state) {
-	const struct SSmapParams params = { .allow_null_val = true, };
-	const struct SSmap *map = ssmap_init_with(params);
+static void ssmap_it__(void **state) {
+	assert_nul(ssmap_it(NULL));
 
-	assert_false(ssmap_put(map, "a", "aa"));
-	assert_false(ssmap_put(map, "b", NULL));
-	assert_false(ssmap_put(map, "c", "cc"));
+	const struct SSmap *set = ssmap_init();
 
-	const struct SSmapIt *it = ssmap_it(map);
+	assert_nul(ssmap_it(set));
+
+	ssmap_put_many(set, "a", "0", "b", "1", NULL);
+
+	const struct SSmapIt *it = ssmap_it(set);
 
 	assert_non_nul(it);
 	assert_str_equal(it->key, "a");
-	assert_str_equal(it->val, "aa");
+	assert_str_equal(it->val, "0");
 
 	it = ssmap_it_next(it);
 	assert_non_nul(it);
 	assert_str_equal(it->key, "b");
-	assert_nul(it->val);
-
-	ssmap_it_free(it);
-
-	ssmap_free(map);
-}
-
-static void ssmap_it__empty(void **state) {
-
-	const struct SSmap *map = ssmap_init();
-
-	const struct SSmapIt *it = ssmap_it(map);
-
-	assert_nul(it);
-
-	ssmap_free(map);
-}
-
-static void ssmap_it_next__partial(void **state) {
-	const struct SSmapIt *it = calloc(1, sizeof(struct SSmapIt));
+	assert_str_equal(it->val, "1");
 
 	assert_nul(ssmap_it_next(it));
+
+	ssmap_free(set);
 }
 
 static void ssmap_filter_it__(void **state) {
-	const struct SSmap *map = ssmap_init();
+	assert_nul(ssmap_filter_it(NULL, (struct SSmapFilter){ 0 }));
 
-	assert_false(ssmap_put(map, "ak0", "bv0"));
-	assert_false(ssmap_put(map, "ak1", "av1"));
-	assert_false(ssmap_put(map, "bk2", "av2"));
-	assert_false(ssmap_put(map, "ak3", "av3"));
-	assert_false(ssmap_put(map, "ak4", "bv4"));
+	const struct SSmap *set = ssmap_init();
 
-	const struct SSmapFilter filter = { .key_val = match_both_start_with_a, };
-	const struct SSmapIt *it = ssmap_filter_it(map, filter);
+	assert_nul(ssmap_filter_it(set, (struct SSmapFilter){ 0 }));
+
+	ssmap_put_many(set, "a", "x0", "b", "a1", "c", "a2", "d", "x3", NULL);
+
+	const struct SSmapIt *it = ssmap_filter_it(set, (struct SSmapFilter){ .val_data = match_starts_with_a, .data = "x", });
 
 	assert_non_nul(it);
-	assert_str_equal(it->key, "ak1");
-	assert_str_equal(it->val, "av1");
+	assert_str_equal(it->key, "b");
+	assert_str_equal(it->val, "a1");
 
 	it = ssmap_it_next(it);
 	assert_non_nul(it);
-	assert_str_equal(it->key, "ak3");
-	assert_str_equal(it->val, "av3");
+	assert_str_equal(it->key, "c");
+	assert_str_equal(it->val, "a2");
 
 	assert_nul(ssmap_it_next(it));
 
-	ssmap_free(map);
+	it = ssmap_filter_it(set, (struct SSmapFilter){ .key_data = match_starts_with_a, .data = "x", });
+
+	assert_non_nul(it);
+	assert_str_equal(it->key, "a");
+	assert_str_equal(it->val, "x0");
+
+	assert_nul(ssmap_it_next(it));
+
+	ssmap_free(set);
 }
 
-static void ssmap_equal__case_sensitive(void **state) {
+static void ssmap_it_next__(void **state) {
+	assert_nul(ssmap_it_next(NULL));
 
-	const struct SSmap *actual = ssmap_init();
-	assert_false(ssmap_put(actual, "a", "aa"));
-	assert_false(ssmap_put(actual, "b", "aa"));
+	const struct SSmapIt *it = calloc(1, sizeof(struct SSmapIt));
 
-	assert_ssmap_not_equal(actual, NULL);
+	assert_nul(ssmap_it_next(it));
+}
 
+static void ssmap_remove__(void **state) {
 	const struct SSmap *expected = ssmap_init();
-	assert_false(ssmap_put(expected, "a", "aa"));
-	assert_false(ssmap_put(expected, "b", "aa"));
+	ssmap_put_many(expected, "B", "1", NULL);
 
-	assert_ssmap_equal(actual, expected);
+	assert_false(ssmap_remove(NULL, "x"));
 
-	assert_false(ssmap_put(actual, "c", "cc"));
+	const struct SSmap *set = ssmap_init();
+	ssmap_put_many(set, "A", "0", "B", "1", NULL);
 
-	assert_ssmap_not_equal(actual, expected);
+	assert_true(ssmap_remove(set, "A"));
 
-	ssmap_free(actual);
+	assert_false(ssmap_remove(set, NULL));
+
+	assert_false(ssmap_remove(set, "x"));
+
+	assert_ssmap_equal(set, expected);
+
 	ssmap_free(expected);
+	ssmap_free(set);
 }
 
-static void ssmap_equal__case_insensitive_key(void **state) {
-
-	const struct SSmapParams params = { .case_insensitive_key = true, };
-	const struct SSmap *actual = ssmap_init_with(params);
-
-	assert_false(ssmap_put(actual, "a", "aa"));
-	assert_false(ssmap_put(actual, "b", "bb"));
-
+static void ssmap_remove__case_insensitive_key(void **state) {
 	const struct SSmap *expected = ssmap_init();
-	assert_false(ssmap_put(expected, "A", "aa"));
-	assert_false(ssmap_put(expected, "B", "bb"));
+	ssmap_put_many(expected, "B", "1", NULL);
 
-	assert_ssmap_equal(actual, expected);
+	const struct SSmap *set = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+	ssmap_put_many(set, "A", "0", "B", "1", NULL);
 
-	ssmap_free(actual);
+	assert_true(ssmap_remove(set, "a"));
+
+	assert_ssmap_equal(set, expected);
+
 	ssmap_free(expected);
-}
-
-static void ssmap_equal__case_insensitive_val(void **state) {
-	const struct SSmapParams params = { .case_insensitive_val = true, };
-	const struct SSmap *actual = ssmap_init_with(params);
-
-	assert_false(ssmap_put(actual, "a", "aa"));
-	assert_false(ssmap_put(actual, "b", "bb"));
-
-	const struct SSmap *expected = ssmap_init();
-	assert_false(ssmap_put(expected, "a", "AA"));
-	assert_false(ssmap_put(expected, "b", "BB"));
-
-	assert_ssmap_equal(actual, expected);
-
-	ssmap_free(actual);
-	ssmap_free(expected);
-}
-
-static void ssmap_keys_slist__(void **state) {
-	const struct SSmapParams params = {
-		.case_insensitive_key = true,
-	};
-	const struct SSmap *map = ssmap_init_with(params);
-
-	ssmap_put(map, "a", "aa");
-	ssmap_put(map, "C", "cc");
-
-	const struct Slist *list = ssmap_keys_slist(map);
-
-	assert_int_equal(slist_size(list), 2);
-	assert_true(slist_contains(list, "A"));
-	assert_true(slist_contains(list, "c"));
-	assert_true(slist_contains(list, "C"));
-
-	ssmap_free(map);
-	slist_free(list);
-}
-
-static void ssmap_keys_slist__params(void **state) {
-	const struct SSmapParams params = {
-		.case_insensitive_key = true,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct SSmap *map = ssmap_init_with(params);
-
-	const struct Slist *list = ssmap_keys_slist(map);
-
-	assert_true(list->params.case_insensitive);
-	assert_int_equal(list->params.initial, 99);
-	assert_int_equal(list->params.grow, 1);
-
-	slist_free(list);
-	ssmap_free(map);
-}
-
-static void ssmap_keys_sset__many(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	ssmap_put(map, "a", "aa");
-	ssmap_put(map, "b", "bb");
-
-	const struct Sset *expected = sset_init();
-	sset_add(expected, "a");
-	sset_add(expected, "b");
-
-	const struct Sset *actual = ssmap_keys_sset(map);
-
-	assert_sset_equal(actual, expected);
-
-	ssmap_free(map);
-	sset_free(expected);
-	sset_free(actual);
-}
-
-static void ssmap_keys_sset__params(void **state) {
-	const struct SSmapParams params = {
-		.case_insensitive_key = true,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct SSmap *map = ssmap_init_with(params);
-
-	const struct Sset *set = ssmap_keys_sset(map);
-
-	assert_true(set->params.case_insensitive);
-	assert_int_equal(set->params.initial, 99);
-	assert_int_equal(set->params.grow, 1);
-
-	ssmap_free(map);
-
-	sset_free(set);
-}
-
-static void ssmap_vals_slist__(void **state) {
-	const struct SSmapParams params = {
-		.case_insensitive_val = true,
-		.allow_null_val = true,
-	};
-	const struct SSmap *map = ssmap_init_with(params);
-
-	ssmap_put(map, "a", "aa");
-	ssmap_put(map, "b", NULL);
-	ssmap_put(map, "C", "cc");
-
-	const struct Slist *list = ssmap_vals_slist(map);
-
-	assert_int_equal(slist_size(list), 3);
-	assert_true(slist_contains(list, "aa"));
-	assert_true(slist_contains(list, NULL));
-	assert_true(slist_contains(list, "cc"));
-	assert_true(slist_contains(list, "CC"));
-
-	ssmap_free(map);
-	slist_free(list);
-}
-
-static void ssmap_vals_slist__params(void **state) {
-	const struct SSmapParams params = {
-		.case_insensitive_val = true,
-		.allow_null_val = true,
-		.initial = 99,
-		.grow = 1,
-	};
-	const struct SSmap *map = ssmap_init_with(params);
-
-	const struct Slist *list = ssmap_vals_slist(map);
-
-	assert_true(list->params.case_insensitive);
-	assert_int_equal(list->params.initial, 99);
-	assert_int_equal(list->params.grow, 1);
-
-	slist_free(list);
-	ssmap_free(map);
-}
-
-static void ssmap_put_get_remove_free__case_sensitive(void **state) {
-	const struct SSmapParams params = { .allow_null_val = true, };
-	const struct SSmap *map = ssmap_init_with(params);
-
-	assert_false(ssmap_put(map, "a", "A"));
-	assert_false(ssmap_put(map, "b", "B"));
-	assert_false(ssmap_put(map, "c", "C"));
-	assert_false(ssmap_put(map, "d", NULL));
-
-	assert_true(ssmap_put(map, "c", "duplicate"));
-
-	assert_int_equal(ssmap_size(map), 4);
-
-	assert_str_equal(ssmap_get(map, "b"), "B");
-
-	assert_nul(ssmap_get(map, "d"));
-	assert_true(ssmap_contains_key(map, "d"));
-
-	assert_nul(ssmap_get(map, "x"));
-
-	assert_true(ssmap_remove(map, "b"));
-	assert_false(ssmap_remove(map, "b"));
-
-	assert_nul(ssmap_get(map, "b"));
-
-	assert_true(ssmap_put(map, "a", NULL));
-
-	ssmap_free(map);
-}
-
-static void ssmap_put_get_remove_free__case_insensitive(void **state) {
-	const struct SSmapParams params = { .case_insensitive_key = true, };
-	const struct SSmap *map = ssmap_init_with(params);
-
-	assert_false(ssmap_put(map, "A", "aaa"));
-	assert_false(ssmap_put(map, "B", "bbb"));
-
-	assert_str_equal(ssmap_get(map, "b"), "bbb");
-
-	assert_nul(ssmap_get(map, "x"));
-
-	assert_true(ssmap_remove(map, "b"));
-
-	assert_nul(ssmap_get(map, "b"));
-
-	ssmap_free(map);
-}
-
-static void ssmap_put_if_absent__(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	assert_false(ssmap_put_if_absent(map, "a", "aa"));
-	assert_str_equal(ssmap_get(map, "a"), "aa");
-
-	assert_true(ssmap_put_if_absent(map, "a", "xx"));
-
-	assert_false(ssmap_put_if_absent(map, "b", NULL));
-	assert_nul(ssmap_get(map, "b"));
-
-	ssmap_free(map);
-}
-
-static void ssmap_put_all__many(void **state) {
-	const struct SSmap *to = ssmap_init();
-	assert_false(ssmap_put(to, "a", "0"));
-	assert_false(ssmap_put(to, "b", "1"));
-
-	const struct SSmap *from = ssmap_init();
-	assert_false(ssmap_put(from, "b", "11"));
-	assert_false(ssmap_put(from, "c", "2"));
-
-	const struct SSmap *expected = ssmap_init();
-	assert_false(ssmap_put(expected, "a", "0"));
-	assert_false(ssmap_put(expected, "b", "11"));
-	assert_false(ssmap_put(expected, "c", "2"));
-
-	assert_int_equal(ssmap_put_all(to, from), 1);
-
-	assert_ssmap_equal(to, expected);
-
-	ssmap_free(to);
-	ssmap_free(from);
-	ssmap_free(expected);
-}
-
-static void ssmap_put_many__many(void **state) {
-	const struct SSmap *to = ssmap_init();
-	assert_false(ssmap_put(to, "a", "0"));
-	assert_false(ssmap_put(to, "b", "1"));
-
-	const struct SSmap *expected = ssmap_init();
-	assert_false(ssmap_put(expected, "a", "0"));
-	assert_false(ssmap_put(expected, "b", "1"));
-	assert_false(ssmap_put(expected, "c", "2"));
-
-	assert_int_equal(ssmap_put_many(to,
-				"b", "1",
-				"c", "2",
-				NULL),
-			1);
-
-	assert_ssmap_equal(to, expected);
-
-	ssmap_free(to);
-	ssmap_free(expected);
+	ssmap_free(set);
 }
 
 static void ssmap_remove_all__(void **state) {
-	const struct SSmap *map = ssmap_init();
+	assert_int_equal(ssmap_remove_all(NULL), 0);
 
-	assert_int_equal(ssmap_remove_all(map), 0);
+	const struct SSmap *set = ssmap_init();
 
-	assert_false(ssmap_put(map, "a", "0"));
-	assert_false(ssmap_put(map, "b", "1"));
+	assert_int_equal(ssmap_remove_all(set), 0);
 
-	assert_int_equal(ssmap_remove_all(map), 2);
+	ssmap_put_many(set, "a", "0", "b", "1", NULL);
 
-	assert_int_equal(ssmap_size(map), 0);
+	assert_int_equal(ssmap_remove_all(set), 2);
 
-	assert_false(ssmap_contains_key(map, "a"));
-	assert_false(ssmap_contains_val(map, "0"));
-	assert_false(ssmap_contains_key(map, "b"));
-	assert_false(ssmap_contains_val(map, "1"));
+	assert_int_equal(ssmap_size(set), 0);
 
-	ssmap_free(map);
+	ssmap_free(set);
 }
 
 static void ssmap_remove_in__(void **state) {
-	const struct SSmap *map = ssmap_init();
-
-	ssmap_put(map, "a", "0");
-	ssmap_put(map, "b", "1");
-	ssmap_put(map, "c", "2");
-
-	const struct SSmap *from = ssmap_init();
-
-	ssmap_put(from, "b", "1");
-	ssmap_put(from, "d", "3");
-
 	const struct SSmap *expected = ssmap_init();
+	ssmap_put_many(expected, "b", "1", NULL);
 
-	ssmap_put(expected, "a", "0");
-	ssmap_put(expected, "c", "2");
+	assert_int_equal(ssmap_remove_in(NULL, NULL), 0);
 
-	assert_int_equal(ssmap_remove_in(map, from), 1);
+	const struct SSmap *set = ssmap_init();
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", NULL);
 
-	assert_ssmap_equal(map, expected);
+	assert_int_equal(ssmap_remove_in(set, NULL), 0);
 
-	ssmap_free(map);
-	ssmap_free(from);
+	assert_int_equal(ssmap_remove_in(NULL, set), 0);
+
+	const struct SSmap *in = ssmap_init();
+	ssmap_put_many(in, "a", "0", "c", "2", "d", "3", NULL);
+
+	assert_int_equal(ssmap_remove_in(set, in), 2);
+
+	assert_ssmap_equal(set, expected);
+
+	ssmap_free(set);
+	ssmap_free(in);
 	ssmap_free(expected);
 }
 
-static void ssmap_it_remove__many(void **state) {
-	const struct SSmap *map = ssmap_init();
+static void ssmap_remove_in__case_insensitive_key(void **state) {
+	const struct SSmap *set = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+	ssmap_put_many(set, "A", "0", "B", "1", NULL);
 
-	assert_false(ssmap_put(map, "a", "0"));
-	assert_false(ssmap_put(map, "b", "1"));
-	assert_false(ssmap_put(map, "c", "2"));
-	assert_false(ssmap_put(map, "d", "3"));
-	assert_false(ssmap_put(map, "e", "4"));
+	const struct SSmap *in = ssmap_init();
+	ssmap_put_many(in, "B", "1", "C", "2", NULL);
 
-	const struct SSmap *expected = ssmap_init();
+	assert_int_equal(ssmap_remove_in(set, in), 1);
 
-	assert_false(ssmap_put(expected, "b", "1"));
-	assert_false(ssmap_put(expected, "d", "3"));
-
-	size_t iterations = 0;
-	for (const struct SSmapIt *it = ssmap_it(map); it; it = ssmap_it_next(it)) {
-		iterations++;
-		if (strcmp(it->key, "a") == 0 || strcmp(it->key, "c") == 0 || strcmp(it->key, "e") == 0) {
-			assert_true(ssmap_it_remove(it));
-		}
-	}
-
-	assert_int_equal(ssmap_size(map), 2);
-	assert_int_equal(iterations, 5);
-
-	assert_ssmap_equal(map, expected);
-
-	ssmap_free(map);
-	ssmap_free(expected);
+	ssmap_free(set);
+	ssmap_free(in);
 }
 
-static void ssmap_it_remove__partial(void **state) {
+static void ssmap_it_remove__(void **state) {
+	const struct SSmap *expected = ssmap_init();
+	ssmap_put_many(expected, "a", "0", "c", "2", "d", "3", "e", "4", NULL);
+
+	assert_false(ssmap_it_remove(NULL));
+
 	const struct SSmapIt *it = calloc(1, sizeof(struct SSmapIt));
 
 	assert_false(ssmap_it_remove(it));
+
+	const struct SSmap *set = ssmap_init();
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", "d", "3", "e", "4", NULL);
+
+	it = ssmap_it(set);
+	it = ssmap_it_next(it);
+	assert_str_equal(it->key, "b");
+	assert_str_equal(it->val, "1");
+
+	assert_true(ssmap_it_remove(it));
+
+	assert_false(ssmap_contains_key(set, "b"));
+
+	it = ssmap_it_next(it);
+	assert_str_equal(it->key, "c");
+	assert_str_equal(it->val, "2");
+
+	assert_ssmap_equal(set, expected);
+
+	ssmap_it_free(it);
+	ssmap_free(expected);
+	ssmap_free(set);
+}
+
+static void ssmap_equal__(void **state) {
+	assert_false(ssmap_equal(NULL, NULL));
+
+	const struct SSmap *a = ssmap_init();
+
+	assert_false(ssmap_equal(a, NULL));
+	assert_false(ssmap_equal(NULL, a));
+
+	const struct SSmap *b = ssmap_init();
+
+	assert_true(ssmap_equal(a, a));
+
+	ssmap_put_many(a, "a", "0", NULL);
+
+	assert_false(ssmap_equal(a, b));
+
+	ssmap_put_many(b, "a", "0", NULL);
+
+	assert_true(ssmap_equal(a, b));
+
+	ssmap_free(a);
+	ssmap_free(b);
+}
+
+static void ssmap_equal__case_insensitive_key(void **state) {
+	const struct SSmap *a = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+	ssmap_put_many(a, "a", "0", "b", "1", "c", "2", NULL);
+
+	const struct SSmap *b = ssmap_init();
+	ssmap_put_many(b, "a", "0", "B", "1", "c", "2", NULL);
+
+	assert_true(ssmap_equal(a, b));
+
+	ssmap_free(a);
+	ssmap_free(b);
+}
+
+static void ssmap_equal__case_insensitive_val(void **state) {
+	const struct SSmap *a = ssmap_init_with((struct SSmapParams){ .case_insensitive_val = true, });
+	ssmap_put_many(a, "a", "AA", "b", "1", "c", "cc", NULL);
+
+	const struct SSmap *b = ssmap_init();
+	ssmap_put_many(b, "a", "aa", "b", "1", "c", "CC", NULL);
+
+	assert_true(ssmap_equal(a, b));
+
+	ssmap_free(a);
+	ssmap_free(b);
+}
+
+static void ssmap_keys_slist__(void **state) {
+	assert_nul(ssmap_keys_slist(NULL));
+
+	const struct SSmap *set = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, .initial = 2, .grow = 1, });
+
+	const struct Slist *list = ssmap_keys_slist(set);
+	assert_int_equal(slist_size(list), 0);
+
+	assert_true(list->params.case_insensitive);
+	assert_int_equal(list->params.initial, 2);
+	assert_int_equal(list->params.grow, 1);
+
+	slist_free(list);
+
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", NULL);
+
+	list = ssmap_keys_slist(set);
+
+	assert_int_equal(slist_size(list), 3);
+	assert_str_equal(slist_at(list, 0), "a");
+	assert_str_equal(slist_at(list, 1), "b");
+	assert_str_equal(slist_at(list, 2), "c");
+
+	slist_free(list);
+	ssmap_free(set);
+}
+
+static void ssmap_keys_sset__(void **state) {
+	assert_nul(ssmap_keys_sset(NULL));
+
+	const struct SSmap *map = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, .initial = 2, .grow = 1, });
+
+	const struct Sset *set = ssmap_keys_sset(map);
+	assert_int_equal(sset_size(set), 0);
+
+	assert_true(set->params.case_insensitive);
+	assert_int_equal(set->params.initial, 2);
+	assert_int_equal(set->params.grow, 1);
+
+	sset_free(set);
+
+	ssmap_put_many(map, "a", "0", "b", "1", "c", "2", NULL);
+
+	set = ssmap_keys_sset(map);
+
+	assert_int_equal(sset_size(set), 3);
+	assert_str_equal(sset_at(set, 0), "a");
+	assert_str_equal(sset_at(set, 1), "b");
+	assert_str_equal(sset_at(set, 2), "c");
+
+	sset_free(set);
+	ssmap_free(map);
+}
+
+static void ssmap_vals_slist__(void **state) {
+	assert_nul(ssmap_vals_slist(NULL));
+
+	const struct SSmap *set = ssmap_init_with((struct SSmapParams){ .case_insensitive_val = true, .initial = 2, .grow = 1, });
+
+	const struct Slist *list = ssmap_vals_slist(set);
+	assert_int_equal(slist_size(list), 0);
+
+	assert_true(list->params.case_insensitive);
+	assert_int_equal(list->params.initial, 2);
+	assert_int_equal(list->params.grow, 1);
+
+	slist_free(list);
+
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", NULL);
+
+	list = ssmap_vals_slist(set);
+
+	assert_int_equal(slist_size(list), 3);
+	assert_str_equal(slist_at(list, 0), "0");
+	assert_str_equal(slist_at(list, 1), "1");
+	assert_str_equal(slist_at(list, 2), "2");
+
+	slist_free(list);
+	ssmap_free(set);
 }
 
 static void ssmap_str__(void **state) {
-	const struct SSmapParams params = { .allow_null_val = true, };
-	const struct SSmap *map = ssmap_init_with(params);
+	assert_nul(ssmap_str(NULL));
 
-	assert_false(ssmap_put(map, "a", "aa"));
-	assert_false(ssmap_put(map, "b", NULL));
-	assert_false(ssmap_put(map, "c", "cc"));
+	const struct SSmap *map = ssmap_init_with((struct SSmapParams){ .allow_null_val = true, });
+	ssmap_put_many(map, "a", "aa", "b", NULL, "c", "cc", NULL);
 
-	char *expected = sprintf_alloc(
+	char *actual = ssmap_str(map);
+
+	assert_str_equal(actual,
 			"a = aa\n"
 			"b = (null)\n"
 			"c = cc\n"
 			);
 
-	char *actual = ssmap_str(map);
-
-	assert_str_equal(actual, expected);
-
 	free(actual);
-	free(expected);
 	ssmap_free(map);
 }
 
-static void ssmap__null_inputs(void **state) {
-	const struct SSmap *map = ssmap_init();
-	const struct SSmapFilter filter = { 0 };
-
-	assert_nul(ssmap_clone(NULL));
-	ssmap_free(NULL);
-	ssmap_it_free(NULL);
-	assert_false(ssmap_get(NULL, NULL));
-	assert_false(ssmap_get(map, NULL));
-	assert_false(ssmap_contains_key(NULL, NULL));
-	assert_false(ssmap_contains_key(map, NULL));
-	assert_false(ssmap_contains_val(NULL, NULL));
-	assert_false(ssmap_contains_val(map, NULL));
-	assert_nul(ssmap_first_key(NULL, NULL));
-	assert_nul(ssmap_at(NULL, 0).val);
-	ssmap_find(NULL, filter);
-	assert_nul(ssmap_it(NULL));
-	assert_nul(ssmap_filter_it(NULL, filter));
-	assert_nul(ssmap_it_next(NULL));
-	assert_false(ssmap_put(NULL, NULL, NULL));
-	assert_false(ssmap_put(map, NULL, NULL));
-	assert_false(ssmap_put_if_absent(NULL, NULL, NULL));
-	assert_false(ssmap_put_if_absent(map, NULL, NULL));
-	assert_int_equal(ssmap_put_all(NULL, NULL), 0);
-	assert_int_equal(ssmap_put_all(map, NULL), 0);
-	assert_int_equal(ssmap_put_many(NULL, NULL), 0);
-	assert_false(ssmap_remove(NULL, NULL));
-	assert_false(ssmap_remove(map, NULL));
-	assert_int_equal(ssmap_remove_all(NULL), 0);
-	assert_int_equal(ssmap_remove_in(NULL, NULL), 0);
-	assert_int_equal(ssmap_remove_in(map, NULL), 0);
-	assert_int_equal(ssmap_remove_in(NULL, map), 0);
-	assert_false(ssmap_it_remove(NULL));
-	assert_false(ssmap_equal(NULL, NULL));
-	assert_false(ssmap_equal(map, NULL));
-	assert_nul(ssmap_keys_slist(NULL));
-	assert_nul(ssmap_keys_sset(NULL));
-	assert_nul(ssmap_vals_slist(NULL));
-	assert_nul(ssmap_str(NULL));
+static void ssmap_size__(void **state) {
 	assert_int_equal(ssmap_size(NULL), 0);
 
-	ssmap_free(map);
+	const struct SSmap *set = ssmap_init();
+
+	assert_int_equal(ssmap_size(set), 0);
+
+	ssmap_put_many(set, "a", "0", "b", "1", "c", "2", NULL);
+
+	assert_int_equal(ssmap_size(set), 3);
+
+	ssmap_free(set);
 }
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
-		TEST(ssmap_clone__),
+		TEST(ssmap_clone__params__constructor),
 
-		TEST(ssmap_it_free__partial),
+		TEST(ssmap_free__),
+
+		TEST(ssmap_it_free__),
 
 		TEST(ssmap_contains_key__),
+		TEST(ssmap_contains_key__case_insensitive),
 
 		TEST(ssmap_contains_val__),
+		TEST(ssmap_contains_val__case_insensitive),
 
-		TEST(ssmap_first_key__),
+		// TEST(ssmap_get__),
+		// TEST(ssmap_get__case_insensitive),
+
+		// TEST(ssmap_first_key__),
+		// TEST(ssmap_first_key__case_insensitive),
 
 		TEST(ssmap_at__),
 
 		TEST(ssmap_find__),
 
-		TEST(ssmap_it__many),
-		TEST(ssmap_it__empty),
-
-		TEST(ssmap_it_next__partial),
+		TEST(ssmap_it__),
 
 		TEST(ssmap_filter_it__),
 
-		TEST(ssmap_equal__case_sensitive),
-		TEST(ssmap_equal__case_insensitive_key),
-		TEST(ssmap_equal__case_insensitive_val),
+		TEST(ssmap_it_next__),
 
-		TEST(ssmap_keys_slist__),
-		TEST(ssmap_keys_slist__params),
+		// TEST(ssmap_put__),
+		// TEST(ssmap_put__case_insensitive),
 
-		TEST(ssmap_keys_sset__many),
-		TEST(ssmap_keys_sset__params),
+		// TEST(ssmap_put_if_absent__),
+		// TEST(ssmap_put_if_absent__case_insensitive),
 
-		TEST(ssmap_vals_slist__),
-		TEST(ssmap_vals_slist__params),
+		// TEST(ssmap_put_all__),
+		// TEST(ssmap_put_all__case_insensitive),
 
-		TEST(ssmap_put_get_remove_free__case_sensitive),
-		TEST(ssmap_put_get_remove_free__case_insensitive),
-
-		TEST(ssmap_put_if_absent__),
-
-		TEST(ssmap_put_all__many),
-
-		TEST(ssmap_put_many__many),
+		TEST(ssmap_remove__),
+		TEST(ssmap_remove__case_insensitive_key),
 
 		TEST(ssmap_remove_all__),
 
 		TEST(ssmap_remove_in__),
+		TEST(ssmap_remove_in__case_insensitive_key),
 
-		TEST(ssmap_it_remove__many),
-		TEST(ssmap_it_remove__partial),
+		TEST(ssmap_it_remove__),
+
+		TEST(ssmap_equal__),
+		TEST(ssmap_equal__case_insensitive_key),
+		TEST(ssmap_equal__case_insensitive_val),
+
+		TEST(ssmap_keys_slist__),
+
+		TEST(ssmap_keys_sset__),
+
+		TEST(ssmap_vals_slist__),
 
 		TEST(ssmap_str__),
 
-		TEST(ssmap__null_inputs),
+		TEST(ssmap_size__),
 	};
 
 	return RUN(tests);
