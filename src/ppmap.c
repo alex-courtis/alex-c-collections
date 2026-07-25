@@ -50,13 +50,17 @@ static void grow(struct PPmap *map) {
 	map->capacity = new_capacity;
 }
 
-static const struct PPmapIt *it_init(const struct PPmap *map) {
+static const struct PPmapIt *it_init(const struct PPmap *map, const struct PPmapFilter *filter) {
 	if (map->size == 0)
 		return NULL;
 
 	struct PPmapIt *it = calloc(1, sizeof(struct PPmapIt));
 	it->st = calloc(1, sizeof(struct PPmapItState));
 	it->st->map = map;
+
+	if (filter) {
+		memcpy((void*)&it->st->filter, filter, sizeof(struct PPmapFilter));
+	}
 
 	return it;
 }
@@ -71,7 +75,7 @@ static bool filter_blocks(const struct PPmapFilter *filter, const void* const ke
 		(filter->key_val_data && !filter->key_val_data(key,  val, filter->data));
 }
 
-static const void *put(const struct PPmap* const map, const void* const key, const void* const val, fn_clone clone_val) {
+static const void *put(const struct PPmap* const map, const void* const key, const void* const val, fn_clone alloc_val) {
 	if (!val && !map->params.allow_null_val)
 		return NULL;
 
@@ -83,7 +87,7 @@ static const void *put(const struct PPmap* const map, const void* const key, con
 		if (map->params.equal_key ? map->params.equal_key(*k, key) : *k == key) {
 			const void *val_old = *v;
 
-			const void *val_new = val && clone_val ? clone_val(val) : val;
+			const void *val_new = val && alloc_val ? alloc_val(val) : val;
 			if (!val_new && !map->params.allow_null_val) {
 				return NULL;
 			}
@@ -98,8 +102,8 @@ static const void *put(const struct PPmap* const map, const void* const key, con
 	if (!key_new)
 		return NULL;
 
-	// alloc new val, maybe null
-	const void *val_new = val && clone_val ? clone_val(val) : val;
+	// alloc new value; alloc_val may return a valid new from a NULL val
+	const void *val_new = alloc_val ? alloc_val(val) : val;
 	if (!val_new && !map->params.allow_null_val) {
 		return NULL;
 	}
@@ -227,7 +231,7 @@ static void free_vals(const struct PPmap* const map) {
 	free(to_free);
 }
 
-static bool remove(const void **removed, const struct PPmap* const map, const void* const key, bool do_free) {
+static bool remove_(const void **removed, const struct PPmap* const map, const void* const key, bool do_free) {
 	if (removed)
 		*removed = NULL;
 
@@ -302,7 +306,7 @@ static bool it_remove(const void **removed, const struct PPmapIt* const it, bool
 		return false;
 	}
 
-	bool was_removed = remove(removed, st->map, it->key, do_free);
+	bool was_removed = remove_(removed, st->map, it->key, do_free);
 
 	if (st->position > 0) {
 		st->position--;
@@ -467,40 +471,23 @@ struct PPmapPair ppmap_find(const struct PPmap* const map, const struct PPmapFil
 		return res;
 
 	for (const void **k = map->keys, **v = map->vals; k < map->keys + map->size; k++, v++) {
-		if (filter_blocks(&filter, *k, *v))
-			continue;
+		if (!filter_blocks(&filter, *k, *v)) {
+			res.key = *k;
+			res.val = *v;
 
-		res.key = *k;
-		res.val = *v;
-		break;
+			return res;
+		}
 	}
 
 	return res;
 }
 
 const struct PPmapIt *ppmap_it(const struct PPmap* const map) {
-	if (!map)
-		return NULL;
-
-	const struct PPmapIt *it = it_init(map);
-
-	if (!it)
-		return NULL;
-
-	return ppmap_it_next(it);
+	return map ? ppmap_it_next(it_init(map, NULL)) : NULL;
 }
 
 const struct PPmapIt *ppmap_filter_it(const struct PPmap* const map, const struct PPmapFilter filter) {
-	if (!map)
-		return NULL;
-
-	const struct PPmapIt *it = it_init(map);
-	if (!it)
-		return NULL;
-
-	memcpy((void*)&it->st->filter, &filter, sizeof(struct PPmapFilter));
-
-	return ppmap_it_next(it);
+	return map ? ppmap_it_next(it_init(map, &filter)) : NULL;
 }
 
 const struct PPmapIt *ppmap_it_next(const struct PPmapIt* const it) {
@@ -580,13 +567,13 @@ const void *ppmap_remove(const struct PPmap* const map, const void* const key) {
 		return NULL;
 
 	const void *removed = NULL;
-	remove(&removed, map, key, false);
+	remove_(&removed, map, key, false);
 
 	return removed;
 }
 
 bool ppmap_remove_free(const struct PPmap* const map, const void* const key) {
-	return map ? remove(NULL, map, key, true) : false;
+	return map ? remove_(NULL, map, key, true) : false;
 }
 
 size_t ppmap_remove_all(const struct PPmap* const map) {
@@ -750,10 +737,12 @@ char *ppmap_str(const struct PPmap* const map) {
 			} else {
 				out = sprintf_append(out, "(null) = ");
 			}
-		} else if (*k) {
-			out = sprintf_append(out, "%p = ", *k);
 		} else {
-			out = sprintf_append(out, "(null) = ");
+			if (*k) {
+				out = sprintf_append(out, "%p = ", *k);
+			} else {
+				out = sprintf_append(out, "(null) = ");
+			}
 		}
 
 		if (map->params.str_val) {
@@ -764,10 +753,12 @@ char *ppmap_str(const struct PPmap* const map) {
 			} else {
 				out = sprintf_append(out, "(null)\n");
 			}
-		} else if (*v) {
-			out = sprintf_append(out, "%p\n", *v);
 		} else {
-			out = sprintf_append(out, "(null)\n");
+			if (*v) {
+				out = sprintf_append(out, "%p\n", *v);
+			} else {
+				out = sprintf_append(out, "(null)\n");
+			}
 		}
 	}
 
