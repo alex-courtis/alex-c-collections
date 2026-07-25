@@ -524,16 +524,47 @@ static void plist_find__val_data(void **state) {
 	plist_free(list);
 }
 
-static void plist_find__no_match(void **state) {
+static void plist_find__some_block(void **state) {
+	const struct Plist *list = plist_init();
+	plist_append_many(list, V0, V1, V2, NULL);
+
+	// val blocks
+	expect_ptr(mock_pred_p, p, V0); will_return(mock_pred_p, false);
+
+	// val passes, val_data blocks
+	expect_ptr(mock_pred_p, p, V1); will_return(mock_pred_p, true);
+	expect_ptr(mock_pred_p_p, p1, V1); expect_ptr(mock_pred_p_p, p2, D0); will_return(mock_pred_p_p, false);
+
+	// both pass
+	expect_ptr(mock_pred_p, p, V2); will_return(mock_pred_p, true);
+	expect_ptr(mock_pred_p_p, p1, V2); expect_ptr(mock_pred_p_p, p2, D0); will_return(mock_pred_p_p, true);
+
+	assert_ptr_equal(plist_find(list, (struct PlistFilter){ .val = mock_pred_p, .val_data = mock_pred_p_p, .data = D0, }), V2);
+
+	plist_free(list);
+}
+
+static void plist_find__all_block(void **state) {
 	const struct Plist *list = plist_init();
 	plist_append_many(list, V0, V1, NULL);
 
-	// skip V0
-	expect_ptr(mock_pred_p_p, p1, V0); expect_ptr(mock_pred_p_p, p2, D0); will_return(mock_pred_p_p, false);
-	// get V1
-	expect_ptr(mock_pred_p_p, p1, V1); expect_ptr(mock_pred_p_p, p2, D0); will_return(mock_pred_p_p, false);
+	// val blocks, val_data should not be called
+	expect_ptr(mock_pred_p, p, V0); will_return(mock_pred_p, false);
+	expect_ptr(mock_pred_p, p, V1); will_return(mock_pred_p, false);
 
-	assert_nul(plist_find(list, (struct PlistFilter){ .val_data = mock_pred_p_p, .data = D0, }));
+	assert_nul(plist_find(list, (struct PlistFilter){ .val = mock_pred_p, .val_data = mock_pred_p_p, .data = D0, }));
+
+	plist_free(list);
+}
+
+static void plist_find__none_block(void **state) {
+	const struct Plist *list = plist_init();
+	plist_append_many(list, V0, V1, NULL);
+
+	expect_ptr(mock_pred_p, p, V0); will_return(mock_pred_p, true);
+	expect_ptr(mock_pred_p_p, p1, V0); expect_ptr(mock_pred_p_p, p2, D0); will_return(mock_pred_p_p, true);
+
+	assert_ptr_equal(plist_find(list, (struct PlistFilter){ .val = mock_pred_p, .val_data = mock_pred_p_p, .data = D0, }), V0);
 
 	plist_free(list);
 }
@@ -2351,7 +2382,9 @@ int main(void) {
 		TEST(plist_find__filter_empty),
 		TEST(plist_find__val),
 		TEST(plist_find__val_data),
-		TEST(plist_find__no_match),
+		TEST(plist_find__some_block),
+		TEST(plist_find__all_block),
+		TEST(plist_find__none_block),
 
 		TEST(plist_it_start__null),
 		TEST(plist_it_start__empty),

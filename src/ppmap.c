@@ -169,32 +169,11 @@ static void free_keys(const struct PPmap* const map) {
 	if (!map->params.free_key)
 		return;
 
-	// keys to free, no duplicates or nulls
-	const void **to_free = calloc(map->size, sizeof(void*));
-	size_t ntf = 0;
-
 	for (const void **k = map->keys; k < map->keys + map->size; k++) {
-		if (!*k)
-			continue;
-
-		bool dup = false;
-		for (const void **ktf = to_free; ktf < to_free + ntf; ktf++) {
-			if (*k == *ktf) {
-				dup = true;
-				break;
-			}
-		}
-
-		if (!dup) {
-			*(to_free + ntf++) = *k;
+		if (*k) {
+			map->params.free_key((void*)*k);
 		}
 	}
-
-	for (const void **ktf = to_free; ktf < to_free + ntf; ktf++) {
-		map->params.free_key((void*)*ktf);
-	}
-
-	free(to_free);
 }
 
 static void free_vals(const struct PPmap* const map) {

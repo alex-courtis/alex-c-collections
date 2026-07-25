@@ -84,10 +84,10 @@ const struct PPmap *ppmap_clone(const struct PPmap* const from);
 // same params, caller frees keys when alloc_key present, caller frees vals, NULL on NULL clone_val, alloc_val overrides clone_val [alloc_key, alloc_val, clone_val]
 const struct PPmap *ppmap_clone_deep(const struct PPmap* const from);
 
-// free map
+// free map [free_key]
 void ppmap_free(const struct PPmap* const map);
 
-// free map and vals [free_val]
+// free map and vals [free_key, free_val]
 void ppmap_free_vals(const struct PPmap* const map);
 
 // free iterator
