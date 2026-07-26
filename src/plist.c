@@ -161,21 +161,47 @@ static bool remove_at(const void **removed, const struct Plist* const list, cons
 	return true;
 }
 
-// static size_t remove_in(const struct Pset* const set, const struct Pset* const in, bool do_free) {
-// 	size_t removed = 0;
-//
-// 	for (const void **v = in->vals; v < in->vals + in->size; v++) {
-// 		if (remove(NULL, set, *v, do_free)) {
-// 			removed++;
-// 		}
-// 	}
-//
-// 	return removed;
-// }
+static size_t remove_in(const struct Plist* const list, const struct Plist* const in, bool do_free) {
+	size_t removed = 0;
+
+	// values freed
+	const void **freed = calloc(list->size, sizeof(void*));
+	size_t nf = 0;
+
+	for (const void **v = in->vals; v < in->vals + in->size; v++) {
+		size_t i = 0;
+		while (plist_index_of(&i, list, *v)) {
+			removed++;
+
+			const void *val = NULL;
+			remove_at(&val, list, i, false);
+
+			if (val && do_free) {
+				bool already_freed = false;
+
+				for (const void **vf = freed; vf < freed + nf; vf++) {
+					if (val == *vf) {
+						already_freed = true;
+						break;
+					}
+				}
+
+				if (!already_freed) {
+					list->params.free_val ? list->params.free_val((void*)val) : free((void*)val);
+					*(freed + nf++) = val;
+				}
+			}
+		}
+	}
+
+	free(freed);
+
+	return removed;
+}
 
 static void free_vals(const struct Plist* const list) {
 
-	// values to free, no duplicates or nulls
+	// values freed
 	const void **freed = calloc(list->size, sizeof(void*));
 	size_t nf = 0;
 
@@ -532,13 +558,13 @@ size_t plist_remove_all_free(const struct Plist* const list) {
 	return remove_all(list);
 }
 
-// size_t plist_remove_in(const struct Plist* const map, const struct Plist* const in) {
-// 	return map && in ? remove_in(map, in, false) : 0;
-// }
-//
-// size_t plist_remove_in_free(const struct Plist* const set, const struct Plist* const in) {
-// 	return map && in ? remove_in(map, in, true) : 0;
-// }
+size_t plist_remove_in(const struct Plist* const map, const struct Plist* const in) {
+	return map && in ? remove_in(map, in, false) : 0;
+}
+
+size_t plist_remove_in_free(const struct Plist* const map, const struct Plist* const in) {
+	return map && in ? remove_in(map, in, true) : 0;
+}
 
 const void *plist_it_remove(const struct PlistIt* const it) {
 	if (!it)

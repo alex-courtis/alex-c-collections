@@ -27,6 +27,10 @@ static const char *starts_with_a_or_null(const char* const key) {
 	return key && *key == 'a' ? strdup(key) : NULL;
 }
 
+static bool equal_a_not_V0(const void* const a, const void* const b) {
+	return a != V0;
+}
+
 static void plist_init__defaults(void **state) {
 	const struct Plist *list = plist_init();
 
@@ -64,13 +68,13 @@ static void plist_clone__empty(void **state) {
 
 static void plist_clone__params__constructor(void **state) {
 	const struct Plist *list = plist_init_with((struct PlistParams){
-		.equal_val = mock_equal,
-		.alloc_val = mock_alloc,
-		.clone_val = mock_clone,
-		.str_val = mock_str,
-		.initial = 3,
-		.grow  = 4,
-	});
+			.equal_val = mock_equal,
+			.alloc_val = mock_alloc,
+			.clone_val = mock_clone,
+			.str_val = mock_str,
+			.initial = 3,
+			.grow  = 4,
+			});
 
 	const struct Plist *clone = plist_clone(list);
 
@@ -1685,10 +1689,11 @@ static void plist_remove_all_free__no_free_val(void **state) {
 
 static void plist_remove_all_free__free_val(void **state) {
 	const struct Plist *list = plist_init_with((struct PlistParams){ .free_val = mock_free, });
-	plist_append_many(list, V0, V1, NULL);
+	plist_append_many(list, V0, V1, V0, NULL);
 
-	expect_ptr(mock_free, ptr, V0); expect_ptr(mock_free, ptr, V1);
-	assert_int_equal(plist_remove_all_free(list), 2);
+	expect_ptr(mock_free, ptr, V0); // no double free
+	expect_ptr(mock_free, ptr, V1);
+	assert_int_equal(plist_remove_all_free(list), 3);
 
 	assert_int_equal(list->size, 0);
 
@@ -1707,6 +1712,142 @@ static void plist_remove_all_free__allow_null_val(void **state) {
 	assert_int_equal(list->size, 0);
 
 	plist_free(list);
+}
+
+static void plist_remove_in__null(void **state) {
+	const struct Plist *list = plist_init();
+
+	assert_int_equal(plist_remove_in(NULL, NULL), 0);
+	assert_int_equal(plist_remove_in(NULL, list), 0);
+	assert_int_equal(plist_remove_in(list, NULL), 0);
+
+	plist_free(list);
+}
+
+static void plist_remove_in__empty(void **state) {
+	const struct Plist *list = plist_init();
+
+	const struct Plist *in = plist_init();
+	plist_append_many(in, V0, V1, NULL);
+
+	assert_int_equal(plist_remove_in(list, in), 0);
+
+	plist_free(list);
+	plist_free(in);
+}
+
+static void plist_remove_in__present(void **state) {
+	const struct Plist *list = plist_init();
+	plist_append_many(list, V0, V1, V0, V4, V0, NULL);
+
+	const struct Plist *in = plist_init();
+	plist_append_many(in, V0, V2, NULL);
+
+	assert_int_equal(plist_remove_in(list, in), 3);
+
+	assert_int_equal(list->size, 2);
+	assert_ptr_equal(list->vals[0], V1);
+	assert_ptr_equal(list->vals[1], V4);
+
+	plist_free(list);
+	plist_free(in);
+}
+
+static void plist_remove_in__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	const struct Plist *in = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(in, NULL);
+	plist_append(in, V2);
+
+	assert_int_equal(plist_remove_in(list, in), 2);
+
+	assert_int_equal(list->size, 1);
+	assert_ptr_equal(list->vals[0], V0);
+
+	plist_free(list);
+	plist_free(in);
+}
+
+static void plist_remove_in_free__null(void **state) {
+	const struct Plist *list = plist_init();
+
+	assert_int_equal(plist_remove_in_free(NULL, NULL), 0);
+	assert_int_equal(plist_remove_in_free(NULL, list), 0);
+	assert_int_equal(plist_remove_in_free(list, NULL), 0);
+
+	plist_free(list);
+}
+
+static void plist_remove_in_free__empty(void **state) {
+	const struct Plist *list = plist_init();
+
+	const struct Plist *in = plist_init();
+	plist_append_many(in, V0, V1, NULL);
+
+	assert_int_equal(plist_remove_in_free(list, in), 0);
+
+	plist_free(list);
+	plist_free(in);
+}
+
+static void plist_remove_in_free__equal_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .equal_val = equal_a_not_V0, });
+	plist_append_many(list, strdup("V0"), strdup("V1"), V0, NULL);
+
+	const struct Plist *in = plist_init();
+	plist_append_many(in, V1, V2, NULL);
+
+	assert_int_equal(plist_remove_in_free(list, in), 2);
+
+	assert_int_equal(list->size, 1);
+	assert_ptr_equal(list->vals[0], V0);
+
+	plist_free(list);
+	plist_free(in);
+}
+
+static void plist_remove_in_free__free_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .equal_val = equal_ptr, .free_val = mock_free, });
+	plist_append_many(list, V1, V0, V0, V0, V1, V0, NULL);
+
+	const struct Plist *in = plist_init();
+	plist_append_many(in, V0, V2, NULL);
+
+	expect_ptr(mock_free, ptr, V0);
+
+	assert_int_equal(plist_remove_in_free(list, in), 4);
+
+	assert_int_equal(list->size, 2);
+	assert_ptr_equal(list->vals[0], V1);
+	assert_ptr_equal(list->vals[1], V1);
+
+	plist_free(list);
+	plist_free(in);
+}
+
+static void plist_remove_in_free__allow_null_val(void **state) {
+	const struct Plist *list = plist_init_with((struct PlistParams){ .allow_null_val = true, .free_val = mock_free,});
+	plist_append(list, V0);
+	plist_append(list, NULL);
+	plist_append(list, V2);
+
+	const struct Plist *in = plist_init_with((struct PlistParams){ .allow_null_val = true, });
+	plist_append(in, NULL);
+	plist_append(in, V2);
+
+	expect_ptr(mock_free, ptr, V2);
+
+	assert_int_equal(plist_remove_in_free(list, in), 2);
+
+	assert_int_equal(list->size, 1);
+	assert_ptr_equal(list->vals[0], V0);
+
+	plist_free(list);
+	plist_free(in);
 }
 
 static void plist_it_remove__null(void **state) {
@@ -2474,6 +2615,17 @@ int main(void) {
 		TEST(plist_remove_all_free__no_free_val),
 		TEST(plist_remove_all_free__free_val),
 		TEST(plist_remove_all_free__allow_null_val),
+
+		TEST(plist_remove_in__null),
+		TEST(plist_remove_in__empty),
+		TEST(plist_remove_in__present),
+		TEST(plist_remove_in__allow_null_val),
+
+		TEST(plist_remove_in_free__null),
+		TEST(plist_remove_in_free__empty),
+		TEST(plist_remove_in_free__equal_val),
+		TEST(plist_remove_in_free__free_val),
+		TEST(plist_remove_in_free__allow_null_val),
 
 		TEST(plist_it_remove__null),
 		TEST(plist_it_remove__incomplete),
