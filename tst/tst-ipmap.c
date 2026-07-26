@@ -52,13 +52,13 @@ static void ipmap_clone__(void **state) {
 
 	const struct IPmap *clone = ipmap_clone(map);
 
-	assert_ipmap_equal(map, clone);
+	assert_ipmap_equal_ordered(map, clone);
 
 	const struct IPmap *expected = ipmap_init();
 	ipmap_put(expected, 0, V0);
 	ipmap_put(expected, 1, V1);
 
-	assert_ipmap_equal(clone, expected);
+	assert_ipmap_equal_ordered(clone, expected);
 
 	ipmap_free(map);
 	ipmap_free(clone);
@@ -118,13 +118,13 @@ static void ipmap_clone_deep__(void **state) {
 
 	const struct IPmap *clone = ipmap_clone_deep(map);
 
-	assert_ipmap_equal(map, clone);
+	assert_ipmap_equal_ordered(map, clone);
 
 	const struct IPmap *expected = ipmap_init();
 	ipmap_put(expected, 0, V0);
 	ipmap_put(expected, 1, V1);
 
-	assert_ipmap_equal(clone, expected);
+	assert_ipmap_equal_ordered(clone, expected);
 
 	ipmap_free(map);
 	ipmap_free(expected);
@@ -550,7 +550,7 @@ static void ipmap_put_all__(void **state) {
 	ipmap_put(expected, 2, V2);
 	ipmap_put(expected, 3, V5);
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(expected);
 	ipmap_free(from);
@@ -583,7 +583,7 @@ static void ipmap_put_all_free__(void **state) {
 	ipmap_put(expected, 2, V4);
 	ipmap_put(expected, 3, V5);
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(expected);
 	ipmap_free(from);
@@ -621,7 +621,7 @@ static void ipmap_put_all_clone__(void **state) {
 	ipmap_put(expected, 2, V4);
 	ipmap_put(expected, 3, V5);
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(expected);
 	ipmap_free(from);
@@ -659,7 +659,7 @@ static void ipmap_put_all_clone_free__(void **state) {
 	ipmap_put(expected, 2, V2);
 	ipmap_put(expected, 3, V5);
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(expected);
 	ipmap_free(from);
@@ -680,7 +680,7 @@ static void ipmap_remove__(void **state) {
 
 	assert_nul(ipmap_remove(map, 99));
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(expected);
 	ipmap_free(map);
@@ -700,7 +700,7 @@ static void ipmap_remove_free__(void **state) {
 
 	assert_false(ipmap_remove_free(map, 99));
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(expected);
 	ipmap_free(map);
@@ -761,7 +761,7 @@ static void ipmap_remove_in__(void **state) {
 
 	assert_int_equal(ipmap_remove_in(map, in), 2);
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(map);
 	ipmap_free(in);
@@ -789,7 +789,7 @@ static void ipmap_remove_in_free__(void **state) {
 
 	assert_int_equal(ipmap_remove_in_free(map, in), 2);
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(map);
 	ipmap_free(in);
@@ -827,7 +827,7 @@ static void ipmap_it_remove__(void **state) {
 	assert_int_equal(it->key, 2);
 	assert_ptr_equal(it->val, V2);
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_it_free(it);
 	ipmap_free(expected);
@@ -870,27 +870,27 @@ static void ipmap_it_remove_free__(void **state) {
 
 	assert_nul(ipmap_it_next(it));
 
-	assert_ipmap_equal(map, expected);
+	assert_ipmap_equal_ordered(map, expected);
 
 	ipmap_free(expected);
 	ipmap_free(map);
 }
 
 static void ipmap_equal__(void **state) {
-	assert_false(ipmap_equal(NULL, NULL));
+	assert_ipmap_not_equal(NULL, NULL);
 
 	const struct IPmap *a = ipmap_init_with((struct IPmapParams){ .allow_null_val = true, });
 
-	assert_false(ipmap_equal(a, NULL));
-	assert_false(ipmap_equal(NULL, a));
+	assert_ipmap_not_equal(a, NULL);
+	assert_ipmap_not_equal(NULL, a);
 
 	const struct IPmap *b = ipmap_init_with((struct IPmapParams){ .allow_null_val = true, });
 
 	assert_ipmap_equal(a, b);
 
-	ipmap_put(a, 0, V0);
-	ipmap_put(a, 1, V1);
 	ipmap_put(a, 2, V2);
+	ipmap_put(a, 1, V1);
+	ipmap_put(a, 0, V0);
 
 	assert_ipmap_not_equal(a, b);
 
@@ -902,6 +902,37 @@ static void ipmap_equal__(void **state) {
 	ipmap_put(b, 2, V2);
 
 	assert_ipmap_equal(a, b);
+
+	ipmap_free(a);
+	ipmap_free(b);
+}
+
+static void ipmap_equal_ordered__(void **state) {
+	assert_ipmap_not_equal_ordered(NULL, NULL);
+
+	const struct IPmap *a = ipmap_init_with((struct IPmapParams){ .allow_null_val = true, });
+
+	assert_ipmap_not_equal_ordered(a, NULL);
+	assert_ipmap_not_equal_ordered(NULL, a);
+
+	const struct IPmap *b = ipmap_init_with((struct IPmapParams){ .allow_null_val = true, });
+
+	assert_ipmap_equal_ordered(a, b);
+
+	ipmap_put(a, 0, V0);
+	ipmap_put(a, 1, V1);
+	ipmap_put(a, 2, V2);
+
+	assert_ipmap_not_equal_ordered(a, b);
+
+	ipmap_put(b, 0, V0);
+	ipmap_put(b, 1, V1);
+
+	assert_ipmap_not_equal_ordered(a, b);
+
+	ipmap_put(b, 2, V2);
+
+	assert_ipmap_equal_ordered(a, b);
 
 	ipmap_free(a);
 	ipmap_free(b);
@@ -1075,6 +1106,8 @@ int main(void) {
 		TEST(ipmap_it_remove_free__),
 
 		TEST(ipmap_equal__),
+
+		TEST(ipmap_equal_ordered__),
 
 		TEST(ipmap_vals_plist__),
 
