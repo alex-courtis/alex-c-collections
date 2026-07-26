@@ -112,6 +112,8 @@ void sset_sort(const struct Sset* const set);
  * Comparison
  */
 
+// TODO unordered variant
+
 // same length, vals equal in order, case sensitivity is from a
 bool sset_equal(const struct Sset* const a, const struct Sset* const b);
 

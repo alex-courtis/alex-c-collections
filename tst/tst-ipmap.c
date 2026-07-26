@@ -932,7 +932,7 @@ static void ipmap_vals_plist__(void **state) {
 	plist_append(expected, NULL);
 	plist_append(expected, V2);
 
-	assert_plist_equal(list, expected);
+	assert_plist_equal_ordered(list, expected);
 
 	plist_free(list);
 	plist_free(expected);
@@ -960,7 +960,7 @@ static void ipmap_vals_plist_clone__(void **state) {
 	const struct Plist *expected = plist_init();
 	plist_append_many(expected, V4, V5, NULL);
 
-	assert_plist_equal(list, expected);
+	assert_plist_equal_ordered(list, expected);
 
 	plist_free(list);
 	plist_free(expected);

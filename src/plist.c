@@ -602,6 +602,19 @@ bool plist_equal(const struct Plist* const a, const struct Plist* const b) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
+	for (const void **bv = b->vals; bv < (b->vals + b->size); bv++) {
+		if (!plist_contains(a, *bv)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool plist_equal_ordered(const struct Plist* const a, const struct Plist* const b) {
+	if (!a || !b || a->size != b->size)
+		return false;
+
 	for (const void **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
 		if (a->params.equal_val) {
 			if (!a->params.equal_val(*av, *bv)) {

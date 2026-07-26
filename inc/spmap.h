@@ -170,6 +170,8 @@ bool spmap_it_remove_free(const struct SPmapIt* const it);
  * Comparison
  */
 
+// TODO unordered variant
+
 // same length, keys and vals equal in order, uses params from a [equal_val]
 bool spmap_equal(const struct SPmap* const a, const struct SPmap* const b);
 

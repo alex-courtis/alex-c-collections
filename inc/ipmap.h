@@ -169,6 +169,8 @@ bool ipmap_it_remove_free(const struct IPmapIt* const it);
  * Comparison
  */
 
+// TODO unordered variant
+
 // same length, keys and vals equal in order, uses params from a [equal_val]
 bool ipmap_equal(const struct IPmap* const a, const struct IPmap* const b);
 
