@@ -175,7 +175,7 @@ void sset_sort(const struct Sset* const set) {
 }
 
 bool sset_equal(const struct Sset* const a, const struct Sset* const b) {
-	return a && b ? pset_equal(a->pset, b->pset) : false;
+	return a && b ? pset_equal_ordered(a->pset, b->pset) : false;
 }
 
 const struct Slist *sset_slist(const struct Sset* const set) {

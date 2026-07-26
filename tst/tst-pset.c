@@ -1197,7 +1197,7 @@ static void pset_sort__many(void **state) {
 
 	pset_sort(actual, (fn_less_than)less_than_strcmp);
 
-	assert_pset_equal(actual, expected);
+	assert_pset_equal_ordered(actual, expected);
 
 	pset_free(actual);
 	pset_free(expected);
@@ -1207,9 +1207,9 @@ static void pset_equal__null(void **state) {
 	const struct Pset *set = pset_init();
 	pset_add_many(set, V0, V1, NULL);
 
-	assert_false(pset_equal(NULL, NULL));
-	assert_false(pset_equal(set, NULL));
-	assert_false(pset_equal(NULL, set));
+	assert_pset_not_equal(NULL, NULL);
+	assert_pset_not_equal(set, NULL);
+	assert_pset_not_equal(NULL, set);
 
 	pset_free(set);
 }
@@ -1228,7 +1228,7 @@ static void pset_equal__length_different(void **state) {
 
 static void pset_equal__val_pointers_ok(void **state) {
 	const struct Pset *a = pset_init();
-	pset_add_many(a, V0, V1, NULL);
+	pset_add_many(a, V1, V0, NULL);
 
 	const struct Pset *b = pset_init();
 	pset_add_many(b, V0, V1, NULL);
@@ -1257,7 +1257,7 @@ static void pset_equal__equal_val_ok(void **state) {
 	pset_add_many(a, "a", "b", NULL);
 
 	const struct Pset *b = pset_init();
-	pset_add_many(b, "a", "b", NULL);
+	pset_add_many(b, "b", "a", NULL);
 
 	assert_pset_equal(a, b);
 
@@ -1273,6 +1273,81 @@ static void pset_equal__equal_val_different(void **state) {
 	pset_add_many(b, "a", "c", NULL);
 
 	assert_pset_not_equal(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+static void pset_equal_ordered__null(void **state) {
+	const struct Pset *set = pset_init();
+	pset_add_many(set, V0, V1, NULL);
+
+	assert_pset_not_equal_ordered(NULL, NULL);
+	assert_pset_not_equal_ordered(set, NULL);
+	assert_pset_not_equal_ordered(NULL, set);
+
+	pset_free(set);
+}
+
+static void pset_equal_ordered__length_different(void **state) {
+	const struct Pset *a = pset_init();
+	pset_add_many(a, V0, NULL);
+	const struct Pset *b = pset_init();
+	pset_add_many(b, V0, V1, NULL);
+
+	assert_pset_not_equal_ordered(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+static void pset_equal_ordered__val_pointers_ok(void **state) {
+	const struct Pset *a = pset_init();
+	pset_add_many(a, V0, V1, NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(b, V0, V1, NULL);
+
+	assert_pset_equal_ordered(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+static void pset_equal_ordered__val_pointers_different(void **state) {
+	const struct Pset *a = pset_init();
+	pset_add_many(a, V0, V1, NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(b, V0, V2, NULL);
+
+	assert_pset_not_equal_ordered(a, b);
+
+	pset_free(a);
+	pset_free(b);
+}
+
+static void pset_equal_ordered__equal_val_ok(void **state) {
+	const struct Pset *a = pset_init_with((struct PsetParams){ .equal_val = (fn_equal)equal_strcmp, });
+	pset_add_many(a, "a", "b", NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(b, "a", "b", NULL);
+
+	assert_pset_equal_ordered(a, b);
+
+	pset_free(b);
+	pset_free(a);
+}
+
+static void pset_equal_ordered__equal_val_different(void **state) {
+	const struct Pset *a = pset_init_with((struct PsetParams){ .equal_val = (fn_equal)equal_strcmp, });
+	pset_add_many(a, "a", "b", NULL);
+
+	const struct Pset *b = pset_init();
+	pset_add_many(b, "a", "c", NULL);
+
+	assert_pset_not_equal_ordered(a, b);
 
 	pset_free(a);
 	pset_free(b);
@@ -1561,6 +1636,13 @@ int main(void) {
 		TEST(pset_equal__val_pointers_different),
 		TEST(pset_equal__equal_val_ok),
 		TEST(pset_equal__equal_val_different),
+
+		TEST(pset_equal_ordered__null),
+		TEST(pset_equal_ordered__length_different),
+		TEST(pset_equal_ordered__val_pointers_ok),
+		TEST(pset_equal_ordered__val_pointers_different),
+		TEST(pset_equal_ordered__equal_val_ok),
+		TEST(pset_equal_ordered__equal_val_different),
 
 		TEST(pset_plist__null),
 		TEST(pset_plist__empty),

@@ -429,6 +429,19 @@ bool pset_equal(const struct Pset* const a, const struct Pset* const b) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
+	for (const void **bv = b->vals; bv < (b->vals + b->size); bv++) {
+		if (!pset_contains(a, *bv)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool pset_equal_ordered(const struct Pset* const a, const struct Pset* const b) {
+	if (!a || !b || a->size != b->size)
+		return false;
+
 	for (const void **av = a->vals, **bv = b->vals; av < (a->vals + a->size); av++, bv++) {
 		if (a->params.equal_val) {
 			if (!a->params.equal_val(*av, *bv)) {

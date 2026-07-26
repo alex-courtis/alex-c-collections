@@ -2440,7 +2440,7 @@ static void ppmap_keys_pset__many(void **state) {
 
 	const struct Pset *actual = ppmap_keys_pset(map);
 
-	assert_pset_equal(actual, expected);
+	assert_pset_equal_ordered(actual, expected);
 
 	assert_int_equal(actual->size, 3);
 	assert_int_equal(actual->capacity, 3);

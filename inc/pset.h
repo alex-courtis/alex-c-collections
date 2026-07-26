@@ -139,10 +139,11 @@ void pset_sort(const struct Pset* const set, fn_less_than less_than_val);
  * Comparison
  */
 
-// TODO unordered variant
+// same length, contains same vals, uses params from a [equal_val]
+bool pset_equal(const struct Pset* const a, const struct Pset* const b);
 
 // same length, vals equal in order, uses params from a [equal_val]
-bool pset_equal(const struct Pset* const a, const struct Pset* const b);
+bool pset_equal_ordered(const struct Pset* const a, const struct Pset* const b);
 
 /*
  * Conversion
