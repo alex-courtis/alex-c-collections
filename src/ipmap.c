@@ -320,7 +320,7 @@ size_t ipmap_put_all_clone_free(const struct IPmap* const map, const struct IPma
 }
 
 bool ipmap_equal(const struct IPmap* const a, const struct IPmap* const b) {
-	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
+	return a && b ? ppmap_equal_ordered(a->ppmap, b->ppmap) : false;
 }
 
 const struct Plist *ipmap_vals_plist(const struct IPmap* const map) {

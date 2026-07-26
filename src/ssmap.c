@@ -221,7 +221,7 @@ bool ssmap_it_remove(const struct SSmapIt* const it) {
 }
 
 bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b) {
-	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
+	return a && b ? ppmap_equal_ordered(a->ppmap, b->ppmap) : false;
 }
 
 const struct Slist *ssmap_keys_slist(const struct SSmap* const map) {

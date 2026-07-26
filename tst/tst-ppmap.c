@@ -2266,9 +2266,9 @@ static void ppmap_it_remove_free__allow_null_val(void **state) {
 static void ppmap_equal__null(void **state) {
 	const struct PPmap *map = ppmap_init();
 
-	assert_false(ppmap_equal(NULL, NULL));
-	assert_false(ppmap_equal(map, NULL));
-	assert_false(ppmap_equal(NULL, map));
+	assert_ppmap_not_equal(NULL, NULL);
+	assert_ppmap_not_equal(map, NULL);
+	assert_ppmap_not_equal(NULL, map);
 
 	ppmap_free(map);
 }
@@ -2288,7 +2288,7 @@ static void ppmap_equal__length_different(void **state) {
 
 static void ppmap_equal__key_pointers_ok(void **state) {
 	const struct PPmap *a = ppmap_init();
-	ppmap_put_many(a, K0, V0, K1, V1, K2, V2, NULL);
+	ppmap_put_many(a, K2, V2, K1, V1, K0, V0, NULL);
 
 	const struct PPmap *b = ppmap_init();
 	ppmap_put_many(b, K0, V0, K1, V1, K2, V2, NULL);
@@ -2304,7 +2304,7 @@ static void ppmap_equal__key_pointers_different(void **state) {
 	ppmap_put_many(a, K0, V0, K1, V1, K2, V2, NULL);
 
 	const struct PPmap *b = ppmap_init();
-	ppmap_put_many(b, K0, V0, K1, V0, K2, V0, NULL);
+	ppmap_put_many(b, K2, V0, K1, V0, K0, V0, NULL);
 
 	assert_ppmap_not_equal(a, b);
 
@@ -2314,10 +2314,10 @@ static void ppmap_equal__key_pointers_different(void **state) {
 
 static void ppmap_equal__equal_val_ok(void **state) {
 	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_val = (fn_equal)equal_strcmp, });
-	ppmap_put_many(a, K0, "a", NULL);
+	ppmap_put_many(a, K0, "a", K1, "b", NULL);
 
 	const struct PPmap *b = ppmap_init();
-	ppmap_put_many(b, K0, "a", NULL);
+	ppmap_put_many(b, K1, "b", K0, "a", NULL);
 
 	assert_ppmap_equal(a, b);
 
@@ -2327,10 +2327,10 @@ static void ppmap_equal__equal_val_ok(void **state) {
 
 static void ppmap_equal__equal_val_different(void **state) {
 	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_val = (fn_equal)equal_strcmp, });
-	ppmap_put_many(a, K0, "a", NULL);
+	ppmap_put_many(a, K0, "a", K1, "a", NULL);
 
 	const struct PPmap *b = ppmap_init();
-	ppmap_put_many(b, K0, "b", NULL);
+	ppmap_put_many(b, K0, "a", K1, "b", NULL);
 
 	assert_ppmap_not_equal(a, b);
 
@@ -2340,7 +2340,7 @@ static void ppmap_equal__equal_val_different(void **state) {
 
 static void ppmap_equal__equal_key_ok(void **state) {
 	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_key = (fn_equal)equal_strcasecmp, });
-	ppmap_put_many(a, "zero", V0, "one", V1, "two", V2, NULL);
+	ppmap_put_many(a, "one", V1, "zero", V0, "two", V2, NULL);
 
 	const struct PPmap *b = ppmap_init();
 	ppmap_put_many(b, "ZERO", V0, "ONE", V1, "TWO", V2, NULL);
@@ -2353,12 +2353,113 @@ static void ppmap_equal__equal_key_ok(void **state) {
 
 static void ppmap_equal__equal_key_different(void **state) {
 	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_key = (fn_equal)equal_strcasecmp, });
-	ppmap_put_many(a, "zero", V0, "one", V1, "two", V2, NULL);
+	ppmap_put_many(a, "zero", V0, "two", V2, "one", V1, NULL);
 
 	const struct PPmap *b = ppmap_init();
 	ppmap_put_many(b, "ZERO", V0, "ONE", V1, "THREE", V2, NULL);
 
 	assert_ppmap_not_equal(a, b);
+
+	ppmap_free(a);
+	ppmap_free(b);
+}
+
+static void ppmap_equal_ordered__null(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	assert_ppmap_not_equal_ordered(NULL, NULL);
+	assert_ppmap_not_equal_ordered(map, NULL);
+	assert_ppmap_not_equal_ordered(NULL, map);
+
+	ppmap_free(map);
+}
+
+static void ppmap_equal_ordered__length_different(void **state) {
+	const struct PPmap *a = ppmap_init();
+	ppmap_put_many(a, K0, V0, K1, V1, NULL);
+
+	const struct PPmap *b = ppmap_init();
+	ppmap_put_many(b, K0, V0, NULL);
+
+	assert_ppmap_not_equal_ordered(a, b);
+
+	ppmap_free(a);
+	ppmap_free(b);
+}
+
+static void ppmap_equal_ordered__key_pointers_ok(void **state) {
+	const struct PPmap *a = ppmap_init();
+	ppmap_put_many(a, K0, V0, K1, V1, K2, V2, NULL);
+
+	const struct PPmap *b = ppmap_init();
+	ppmap_put_many(b, K0, V0, K1, V1, K2, V2, NULL);
+
+	assert_ppmap_equal_ordered(a, b);
+
+	ppmap_free(a);
+	ppmap_free(b);
+}
+
+static void ppmap_equal_ordered__key_pointers_different(void **state) {
+	const struct PPmap *a = ppmap_init();
+	ppmap_put_many(a, K0, V0, K1, V1, K2, V2, NULL);
+
+	const struct PPmap *b = ppmap_init();
+	ppmap_put_many(b, K0, V0, K1, V0, K2, V0, NULL);
+
+	assert_ppmap_not_equal_ordered(a, b);
+
+	ppmap_free(a);
+	ppmap_free(b);
+}
+
+static void ppmap_equal_ordered__equal_val_ok(void **state) {
+	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_val = (fn_equal)equal_strcmp, });
+	ppmap_put_many(a, K0, "a", NULL);
+
+	const struct PPmap *b = ppmap_init();
+	ppmap_put_many(b, K0, "a", NULL);
+
+	assert_ppmap_equal_ordered(a, b);
+
+	ppmap_free(a);
+	ppmap_free(b);
+}
+
+static void ppmap_equal_ordered__equal_val_different(void **state) {
+	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_val = (fn_equal)equal_strcmp, });
+	ppmap_put_many(a, K0, "a", NULL);
+
+	const struct PPmap *b = ppmap_init();
+	ppmap_put_many(b, K0, "b", NULL);
+
+	assert_ppmap_not_equal_ordered(a, b);
+
+	ppmap_free(a);
+	ppmap_free(b);
+}
+
+static void ppmap_equal_ordered__equal_key_ok(void **state) {
+	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_key = (fn_equal)equal_strcasecmp, });
+	ppmap_put_many(a, "zero", V0, "one", V1, "two", V2, NULL);
+
+	const struct PPmap *b = ppmap_init();
+	ppmap_put_many(b, "ZERO", V0, "ONE", V1, "TWO", V2, NULL);
+
+	assert_ppmap_equal_ordered(a, b);
+
+	ppmap_free(a);
+	ppmap_free(b);
+}
+
+static void ppmap_equal_ordered__equal_key_different(void **state) {
+	const struct PPmap *a = ppmap_init_with((struct PPmapParams){ .equal_key = (fn_equal)equal_strcasecmp, });
+	ppmap_put_many(a, "zero", V0, "one", V1, "two", V2, NULL);
+
+	const struct PPmap *b = ppmap_init();
+	ppmap_put_many(b, "ZERO", V0, "ONE", V1, "THREE", V2, NULL);
+
+	assert_ppmap_not_equal_ordered(a, b);
 
 	ppmap_free(a);
 	ppmap_free(b);
@@ -2857,6 +2958,15 @@ int main(void) {
 		TEST(ppmap_equal__equal_val_different),
 		TEST(ppmap_equal__equal_key_ok),
 		TEST(ppmap_equal__equal_key_different),
+
+		TEST(ppmap_equal_ordered__null),
+		TEST(ppmap_equal_ordered__length_different),
+		TEST(ppmap_equal_ordered__key_pointers_ok),
+		TEST(ppmap_equal_ordered__key_pointers_different),
+		TEST(ppmap_equal_ordered__equal_val_ok),
+		TEST(ppmap_equal_ordered__equal_val_different),
+		TEST(ppmap_equal_ordered__equal_key_ok),
+		TEST(ppmap_equal_ordered__equal_key_different),
 
 		TEST(ppmap_keys_plist__null),
 		TEST(ppmap_keys_plist__empty),

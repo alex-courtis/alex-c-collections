@@ -175,10 +175,11 @@ bool ppmap_it_remove_free(const struct PPmapIt* const it);
  * Comparison
  */
 
-// TODO unordered variant
+// same length, keys and vals equal, uses params from a [equal_key, equal_val]
+bool ppmap_equal(const struct PPmap* const a, const struct PPmap* const b);
 
 // same length, keys and vals equal in order, uses params from a [equal_key, equal_val]
-bool ppmap_equal(const struct PPmap* const a, const struct PPmap* const b);
+bool ppmap_equal_ordered(const struct PPmap* const a, const struct PPmap* const b);
 
 /*
  * Conversion

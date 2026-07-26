@@ -655,6 +655,19 @@ bool ppmap_equal(const struct PPmap* const a, const struct PPmap* const b) {
 	if (!a || !b || a->size != b->size)
 		return false;
 
+	for (const void **bk = b->keys, **bv = b->vals; bk < b->keys + b->size; bk++, bv++) {
+		if (ppmap_get(a, *bk) != *bv) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool ppmap_equal_ordered(const struct PPmap* const a, const struct PPmap* const b) {
+	if (!a || !b || a->size != b->size)
+		return false;
+
 	const void **ak, **bk;
 	const void **av, **bv;
 
