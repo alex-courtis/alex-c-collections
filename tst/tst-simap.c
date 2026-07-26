@@ -56,14 +56,16 @@ static void simap_clone__(void **state) {
 	assert_nul(simap_clone(NULL));
 
 	const struct SImap *map = simap_init();
-	simap_put_many(map, "a", 0, "b", 1, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
 
 	const struct SImap *clone = simap_clone(map);
 
 	assert_simap_equal_ordered(map, clone);
 
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "a", 0, "b", 1, NULL);
+	simap_put(expected, "a", 0);
+	simap_put(expected, "b", 1);
 
 	assert_simap_equal_ordered(clone, expected);
 
@@ -124,7 +126,9 @@ static void simap_contains_key__(void **state) {
 
 	assert_false(simap_contains_key(map, "x"));
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_true(simap_contains_key(map, "b"));
 
@@ -135,7 +139,7 @@ static void simap_contains_key__(void **state) {
 
 static void simap_contains_key__case_insensitive(void **state) {
 	const struct SImap *map = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
-	simap_put_many(map, "a", 0, NULL);
+	simap_put(map, "a", 0);
 
 	assert_true(simap_contains_key(map, "A"));
 
@@ -149,7 +153,9 @@ static void simap_contains_val__(void **state) {
 
 	assert_false(simap_contains_val(map, 0));
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_true(simap_contains_val(map, 1));
 
@@ -165,7 +171,9 @@ static void simap_get__(void **state) {
 
 	assert_int_equal(simap_get(map, "x"), 0);
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_int_equal(simap_get(map, "b"), 1);
 
@@ -177,7 +185,9 @@ static void simap_get__(void **state) {
 static void simap_get__case_insensitive(void **state) {
 	const struct SImap *map = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_int_equal(simap_get(map, "B"), 1);
 
@@ -199,7 +209,9 @@ static void simap_get_ptr__(void **state) {
 	assert_false(simap_get_ptr(&j, map, "x"));
 	assert_int_equal(j, 0);
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	size_t k = 99;
 	assert_true(simap_get_ptr(&k, map, "b"));
@@ -214,7 +226,9 @@ static void simap_get_ptr__(void **state) {
 
 static void simap_get_ptr__case_sensitive(void **state) {
 	const struct SImap *map = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
-	simap_put_many(map, "A", 0, "b", 1, "C", 2, NULL);
+	simap_put(map, "A", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "C", 2);
 
 	size_t i = 99;
 	assert_true(simap_get_ptr(&i, map, "B"));
@@ -234,7 +248,9 @@ static void simap_first_key__(void **state) {
 
 	assert_nul(simap_first_key(map, 5));
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_str_equal(simap_first_key(map, 1), "b");
 
@@ -252,7 +268,9 @@ static void simap_at__(void **state) {
 	assert_nul(simap_at(map, 0).key);
 	assert_int_equal(simap_at(NULL, 0).val, 0);
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_str_equal(simap_at(map, 1).key, "b");
 	assert_int_equal(simap_at(map, 1).val, 1);
@@ -272,7 +290,10 @@ static void simap_find__empty_filter(void **state) {
 	assert_nul(simap_find(map, (struct SImapFilter){ 0 }).key);
 	assert_int_equal(simap_find(map, (struct SImapFilter){ 0 }).val, 0);
 
-	simap_put_many(map, "b", 0, "a", 1, "c", 2, "d", 3, NULL);
+	simap_put(map, "b", 0);
+	simap_put(map, "a", 1);
+	simap_put(map, "c", 2);
+	simap_put(map, "d", 3);
 
 	assert_str_equal(simap_find(map, (struct SImapFilter){ 0 }).key, "b");
 	assert_int_equal(simap_find(map, (struct SImapFilter){ 0 }).val, 0);
@@ -282,7 +303,9 @@ static void simap_find__empty_filter(void **state) {
 
 static void simap_find__variants(void **state) {
 	const struct SImap *map = simap_init();
-	simap_put_many(map, "0", 10, "1", 11, "2", 12, NULL);
+	simap_put(map, "0", 10);
+	simap_put(map, "1", 11);
+	simap_put(map, "2", 12);
 
 	// key
 	expect_string(mock_pred_s, s, "0"); will_return(mock_pred_s, false);
@@ -338,7 +361,9 @@ static void simap_find__variants(void **state) {
 static void simap_find__some_block(void **state) {
 	const struct SImap *map = simap_init();
 
-	simap_put_many(map, "b0", 0, "a1", 1, "a2", 2, NULL);
+	simap_put(map, "b0", 0);
+	simap_put(map, "a1", 1);
+	simap_put(map, "a2", 2);
 
 	const struct SImapPair pair = simap_find(map, (struct SImapFilter){ .key = starts_with_a, .val = ne_1, });
 	assert_str_equal(pair.key, "a2");
@@ -349,7 +374,9 @@ static void simap_find__some_block(void **state) {
 
 static void simap_find__all_block(void **state) {
 	const struct SImap *map = simap_init();
-	simap_put_many(map, "a0", 1, "a1", 1, "a2", 1, NULL);
+	simap_put(map, "a0", 1);
+	simap_put(map, "a1", 1);
+	simap_put(map, "a2", 1);
 
 	const struct SImapPair pair = simap_find(map, (struct SImapFilter){ .key = starts_with_a, .val = ne_1, });
 	assert_nul(pair.key);
@@ -360,7 +387,9 @@ static void simap_find__all_block(void **state) {
 
 static void simap_find__none_block(void **state) {
 	const struct SImap *map = simap_init();
-	simap_put_many(map, "a0", 0, "a1", 0, "a2", 0, NULL);
+	simap_put(map, "a0", 0);
+	simap_put(map, "a1", 0);
+	simap_put(map, "a2", 0);
 
 	const struct SImapPair pair = simap_find(map, (struct SImapFilter){ .key = starts_with_a, .val = ne_1, });
 	assert_str_equal(pair.key, "a0");
@@ -376,7 +405,8 @@ static void simap_it__(void **state) {
 
 	assert_nul(simap_it(map));
 
-	simap_put_many(map, "a", 0, "b", 1, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
 
 	const struct SImapIt *it = simap_it(map);
 
@@ -401,13 +431,11 @@ static void simap_filter_it__(void **state) {
 
 	assert_nul(simap_filter_it(map, (struct SImapFilter){ 0 }));
 
-	simap_put_many(map,
-			"ak0", 100,
-			"ak1", 11,
-			"bk2", 12,
-			"ak3", 13,
-			"ak4", 101,
-			NULL);
+	simap_put(map, "ak0", 100);
+	simap_put(map, "ak1", 11);
+	simap_put(map, "bk2", 12);
+	simap_put(map, "ak3", 13);
+	simap_put(map, "ak4", 101);
 
 	const struct SImapFilter filter = { .key_val_data = match_key_a_val_lt_100, };
 	const struct SImapIt *it = simap_filter_it(map, filter);
@@ -501,16 +529,23 @@ static void simap_put_all__(void **state) {
 	assert_int_equal(simap_put_all(NULL, map), 0);
 	assert_int_equal(simap_put_all(map, NULL), 0);
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	const struct SImap *from = simap_init();
 
-	simap_put_many(from, "a", 0, "c", 4, "d", 5, NULL);
+	simap_put(from, "a", 0);
+	simap_put(from, "c", 4);
+	simap_put(from, "d", 5);
 
 	assert_int_equal(simap_put_all(map, from), 2);
 
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "a", 0, "b", 1, "c", 4, "d", 5, NULL);
+	simap_put(expected, "a", 0);
+	simap_put(expected, "b", 1);
+	simap_put(expected, "c", 4);
+	simap_put(expected, "d", 5);
 
 	assert_simap_equal_ordered(map, expected);
 
@@ -522,16 +557,23 @@ static void simap_put_all__(void **state) {
 static void simap_put_all__case_insensitive(void **state) {
 	const struct SImap *map = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	const struct SImap *from = simap_init();
 
-	simap_put_many(from, "A", 0, "C", 4, "D", 5, NULL);
+	simap_put(from, "A", 0);
+	simap_put(from, "C", 4);
+	simap_put(from, "D", 5);
 
 	assert_int_equal(simap_put_all(map, from), 2);
 
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "a", 0, "b", 1, "c", 4, "d", 5, NULL);
+	simap_put(expected, "a", 0);
+	simap_put(expected, "b", 1);
+	simap_put(expected, "c", 4);
+	simap_put(expected, "d", 5);
 
 	assert_simap_equal_ordered(map, expected);
 
@@ -542,12 +584,13 @@ static void simap_put_all__case_insensitive(void **state) {
 
 static void simap_remove__(void **state) {
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "B", 1, NULL);
+	simap_put(expected, "B", 1);
 
 	assert_false(simap_remove(NULL, "x"));
 
 	const struct SImap *map = simap_init();
-	simap_put_many(map, "A", 0, "B", 1, NULL);
+	simap_put(map, "A", 0);
+	simap_put(map, "B", 1);
 
 	assert_true(simap_remove(map, "A"));
 
@@ -563,10 +606,11 @@ static void simap_remove__(void **state) {
 
 static void simap_remove__case_insensitive(void **state) {
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "B", 1, NULL);
+	simap_put(expected, "B", 1);
 
 	const struct SImap *map = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
-	simap_put_many(map, "A", 0, "B", 1, NULL);
+	simap_put(map, "A", 0);
+	simap_put(map, "B", 1);
 
 	assert_true(simap_remove(map, "a"));
 
@@ -583,7 +627,8 @@ static void simap_remove_all__(void **state) {
 
 	assert_int_equal(simap_remove_all(map), 0);
 
-	simap_put_many(map, "a", 0, "b", 1, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
 
 	assert_int_equal(simap_remove_all(map), 2);
 
@@ -594,19 +639,23 @@ static void simap_remove_all__(void **state) {
 
 static void simap_remove_in__(void **state) {
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "b", 1, NULL);
+	simap_put(expected, "b", 1);
 
 	assert_int_equal(simap_remove_in(NULL, NULL), 0);
 
 	const struct SImap *map = simap_init();
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_int_equal(simap_remove_in(map, NULL), 0);
 
 	assert_int_equal(simap_remove_in(NULL, map), 0);
 
 	const struct SImap *in = simap_init();
-	simap_put_many(in, "a", 0, "c", 2, "d", 4, NULL);
+	simap_put(in, "a", 0);
+	simap_put(in, "c", 2);
+	simap_put(in, "d", 4);
 
 	assert_int_equal(simap_remove_in(map, in), 2);
 
@@ -619,15 +668,17 @@ static void simap_remove_in__(void **state) {
 
 static void simap_remove_in__case_insensitive(void **state) {
 	const struct SImap *map = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
-	simap_put_many(map, "A", 0, "B", 1, NULL);
+	simap_put(map, "A", 0);
+	simap_put(map, "B", 1);
 
 	const struct SImap *in = simap_init();
-	simap_put_many(in, "B", 1, "C", 2, NULL);
+	simap_put(in, "B", 1);
+	simap_put(in, "C", 2);
 
 	assert_int_equal(simap_remove_in(map, in), 1);
 
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "a", 0, NULL);
+	simap_put(expected, "a", 0);
 
 	assert_simap_equal_ordered(map, expected);
 
@@ -638,7 +689,10 @@ static void simap_remove_in__case_insensitive(void **state) {
 
 static void simap_it_remove__(void **state) {
 	const struct SImap *expected = simap_init();
-	simap_put_many(expected, "a", 0, "c", 2, "d", 3, "e", 4, NULL);
+	simap_put(expected, "a", 0);
+	simap_put(expected, "c", 2);
+	simap_put(expected, "d", 3);
+	simap_put(expected, "e", 4);
 
 	assert_false(simap_it_remove(NULL));
 
@@ -647,7 +701,11 @@ static void simap_it_remove__(void **state) {
 	assert_false(simap_it_remove(it));
 
 	const struct SImap *map = simap_init();
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, "d", 3, "e", 4, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
+	simap_put(map, "d", 3);
+	simap_put(map, "e", 4);
 
 	it = simap_it(map);
 	it = simap_it_next(it);
@@ -681,11 +739,13 @@ static void simap_equal__(void **state) {
 
 	assert_simap_equal(a, b);
 
-	simap_put_many(a, "a", 0, "b", 1, NULL);
+	simap_put(a, "a", 0);
+	simap_put(a, "b", 1);
 
 	assert_simap_not_equal(a, b);
 
-	simap_put_many(b, "b", 1, "a", 0, NULL);
+	simap_put(b, "b", 1);
+	simap_put(b, "a", 0);
 
 	assert_simap_equal(a, b);
 
@@ -695,10 +755,14 @@ static void simap_equal__(void **state) {
 
 static void simap_equal__case_insensitive(void **state) {
 	const struct SImap *a = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
-	simap_put_many(a, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(a, "a", 0);
+	simap_put(a, "b", 1);
+	simap_put(a, "c", 2);
 
 	const struct SImap *b = simap_init();
-	simap_put_many(b, "a", 0, "c", 2, "B", 1, NULL);
+	simap_put(b, "a", 0);
+	simap_put(b, "c", 2);
+	simap_put(b, "B", 1);
 
 	assert_simap_equal(a, b);
 
@@ -718,11 +782,11 @@ static void simap_equal_ordered__(void **state) {
 
 	assert_simap_equal_ordered(a, b);
 
-	simap_put_many(a, "a", 0, NULL);
+	simap_put(a, "a", 0);
 
 	assert_simap_not_equal_ordered(a, b);
 
-	simap_put_many(b, "a", 0, NULL);
+	simap_put(b, "a", 0);
 
 	assert_simap_equal_ordered(a, b);
 
@@ -732,10 +796,14 @@ static void simap_equal_ordered__(void **state) {
 
 static void simap_equal_ordered__case_insensitive(void **state) {
 	const struct SImap *a = simap_init_with((struct SImapParams){ .case_insensitive_key = true, });
-	simap_put_many(a, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(a, "a", 0);
+	simap_put(a, "b", 1);
+	simap_put(a, "c", 2);
 
 	const struct SImap *b = simap_init();
-	simap_put_many(b, "a", 0, "B", 1, "c", 2, NULL);
+	simap_put(b, "a", 0);
+	simap_put(b, "B", 1);
+	simap_put(b, "c", 2);
 
 	assert_simap_equal_ordered(a, b);
 
@@ -757,7 +825,9 @@ static void simap_keys_slist__(void **state) {
 
 	slist_free(list);
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	list = simap_keys_slist(map);
 
@@ -785,7 +855,9 @@ static void simap_keys_sset__(void **state) {
 
 	sset_free(set);
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	set = simap_keys_sset(map);
 
@@ -803,12 +875,10 @@ static void simap_str__(void **state) {
 	assert_nul(simap_str(NULL));
 
 	const struct SImap *map = simap_init();
-	simap_put_many(map,
-			"a", 10,
-			"b", 11,
-			"c", 12,
-			"x", 0,
-			NULL);
+	simap_put(map, "a", 10);
+	simap_put(map, "b", 11);
+	simap_put(map, "c", 12);
+	simap_put(map, "x", 0);
 
 	char *actual = simap_str(map);
 
@@ -830,7 +900,9 @@ static void simap_size__(void **state) {
 
 	assert_int_equal(simap_size(map), 0);
 
-	simap_put_many(map, "a", 0, "b", 1, "c", 2, NULL);
+	simap_put(map, "a", 0);
+	simap_put(map, "b", 1);
+	simap_put(map, "c", 2);
 
 	assert_int_equal(simap_size(map), 3);
 

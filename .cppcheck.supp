@@ -1,19 +1,13 @@
 unusedFunction:tst/asserts.h
-unusedFunction:tst/assert-*list.h
-unusedFunction:tst/assert-*map.h
-unusedFunction:tst/assert-*set.h
+
+unusedFunction:tst/expects.h
 unusedFunction:tst/expect-*list.h
 unusedFunction:tst/expect-*map.h
 unusedFunction:tst/expect-*set.h
 
-unusedFunction:tst/util-file.c
-
-staticFunction:tst/util-col.c
-
 unusedFunction:tst/mock-fn.c
 
-# wraps are dynamically invoked at runtime only
-unusedFunction:tst/wrap*.c
+staticFunction:tst/util-col.c
 
 # this is just not practical
 nullPointerOutOfMemory
@@ -24,9 +18,6 @@ unusedStructMember
 
 # not sure why this doesn't work
 missingIncludeSystem
-
-# this does not handle function pointer types
-funcArgNamesDifferentUnnamed
 
 # this is explicitly OK
 varFuncNullUB:tst/*c

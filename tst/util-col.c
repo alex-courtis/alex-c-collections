@@ -5,7 +5,6 @@
 #include "pset.h"
 #include "sset.h"
 #include "spmap.h"
-#include "simap.h"
 #include "ssmap.h"
 
 #include "util-col.h"
@@ -157,33 +156,6 @@ size_t spmap_put_many(const struct SPmap* const map, ...) {
 	va_start(ap, map);
 
 	size_t added = ppmap_put_many_v(map->ppmap, ap);
-
-	va_end(ap);
-
-	return added;
-}
-
-size_t simap_put_many(const struct SImap* const map, ...) {
-	if (!map)
-		return 0;
-
-	va_list ap;
-	va_start(ap, map);
-
-	size_t added = 0;
-
-	const char *key;
-
-	// NULL terminator is odd vararg: the key
-	while ((key = va_arg(ap, char*))) {
-
-		// trust that a value has been passed, NULL is valid
-		const size_t val = va_arg(ap, size_t);
-
-		if (simap_put(map, key, val)) {
-			added++;
-		}
-	}
 
 	va_end(ap);
 

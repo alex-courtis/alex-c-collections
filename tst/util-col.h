@@ -7,7 +7,6 @@
 #include "plist.h"
 #include "ppmap.h"
 #include "pset.h"
-#include "simap.h"
 #include "slist.h"
 #include "spmap.h"
 #include "sset.h"
@@ -37,10 +36,6 @@ size_t ppmap_put_many_v(const struct PPmap* const map, va_list __args);
 
 // set key/vals, free old vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key [alloc_val, free_val]
 size_t spmap_put_many(const struct SPmap* const map, ... /* key, val, NULL */ );
-
-// set key/vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key
-// CAUTION: val must be cast to size_t it may be passed as int
-size_t simap_put_many(const struct SImap* const map, ... /* key, val, NULL */ );
 
 // set key/vals, return number overwritten, variadic key/val pairs must be terminated with a NULL key
 size_t ssmap_put_many(const struct SSmap* const map, ... /* key, val, NULL */ );
