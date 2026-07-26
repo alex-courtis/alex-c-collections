@@ -81,8 +81,8 @@ void simap_it_free(const struct SImapIt* const it);
 // return val, will return 0 if not present
 size_t simap_get(const struct SImap* const map, const char* const key);
 
-// populate np with val if present, 0 and return false if not present
-bool simap_get_ptr(size_t* np, const struct SImap* const map, const char* const key);
+// populate val if present, 0 and return false if not present
+bool simap_get_ptr(size_t* val, const struct SImap* const map, const char* const key);
 
 // true if key is present
 bool simap_contains_key(const struct SImap* const map, const char* const key);

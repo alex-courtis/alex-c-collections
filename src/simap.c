@@ -120,17 +120,20 @@ size_t simap_get(const struct SImap* const map, const char* const key) {
 	}
 }
 
-bool simap_get_ptr(size_t* np, const struct SImap* const map, const char* const key) {
-	if (!map || !np)
+bool simap_get_ptr(size_t* val, const struct SImap* const map, const char* const key) {
+	if (val)
+		*val = 0;
+
+	if (!map || !val)
 		return false;
 
 	const size_t *vp = ppmap_get(map->ppmap, key);
 
 	if (vp) {
-		*np = *vp;
+		*val = *vp;
 		return true;
 	} else {
-		*np = 0;
+		*val = 0;
 		return false;
 	}
 }
