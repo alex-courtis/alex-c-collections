@@ -284,6 +284,10 @@ size_t spmap_put_all_clone_free(const struct SPmap* const map, const struct SPma
 }
 
 bool spmap_equal(const struct SPmap* const a, const struct SPmap* const b) {
+	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
+}
+
+bool spmap_equal_ordered(const struct SPmap* const a, const struct SPmap* const b) {
 	return a && b ? ppmap_equal_ordered(a->ppmap, b->ppmap) : false;
 }
 

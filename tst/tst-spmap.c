@@ -65,12 +65,12 @@ static void spmap_clone__(void **state) {
 
 	const struct SPmap *clone = spmap_clone(map);
 
-	assert_spmap_equal(map, clone);
+	assert_spmap_equal_ordered(map, clone);
 
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "b", V1, NULL);
 
-	assert_spmap_equal(clone, expected);
+	assert_spmap_equal_ordered(clone, expected);
 
 	spmap_free(map);
 	spmap_free(clone);
@@ -131,12 +131,12 @@ static void spmap_clone_deep__(void **state) {
 
 	const struct SPmap *clone = spmap_clone_deep(map);
 
-	assert_spmap_equal(map, clone);
+	assert_spmap_equal_ordered(map, clone);
 
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "b", V1, NULL);
 
-	assert_spmap_equal(clone, expected);
+	assert_spmap_equal_ordered(clone, expected);
 
 	spmap_free(map);
 	spmap_free(expected);
@@ -457,7 +457,7 @@ static void spmap_put_all__(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "b", V1, "c", V4, "d", V5, NULL);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(from);
@@ -478,7 +478,7 @@ static void spmap_put_all__case_insensitive(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "b", V1, "c", V4, "d", V5, NULL);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(from);
@@ -504,7 +504,7 @@ static void spmap_put_all_free__(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "b", V1, "c", V4, "d", V5, NULL);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(from);
@@ -536,7 +536,7 @@ static void spmap_put_all_clone__(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "b", V4, "c", V2, "d", V5, NULL);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(from);
@@ -568,7 +568,7 @@ static void spmap_put_all_clone_free__(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "b", V4, "c", V2, "d", V5, NULL);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(from);
@@ -590,7 +590,7 @@ static void spmap_remove__(void **state) {
 
 	assert_false(spmap_remove(map, "x"));
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(map);
@@ -605,7 +605,7 @@ static void spmap_remove__case_insensitive(void **state) {
 
 	assert_true(spmap_remove(map, "a"));
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(map);
@@ -626,7 +626,7 @@ static void spmap_remove_free__(void **state) {
 
 	assert_false(spmap_remove_free(map, "x"));
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(expected);
 	spmap_free(map);
@@ -682,7 +682,7 @@ static void spmap_remove_in__(void **state) {
 
 	assert_int_equal(spmap_remove_in(map, in), 2);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(map);
 	spmap_free(in);
@@ -701,7 +701,7 @@ static void spmap_remove_in__case_insensitive(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, NULL);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(map);
 	spmap_free(expected);
@@ -726,7 +726,7 @@ static void spmap_remove_in_free__(void **state) {
 
 	assert_int_equal(spmap_remove_in_free(map, in), 2);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_free(map);
 	spmap_free(in);
@@ -759,7 +759,7 @@ static void spmap_it_remove__(void **state) {
 	assert_str_equal(it->key, "c");
 	assert_ptr_equal(it->val, V2);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_it_free(it);
 	spmap_free(expected);
@@ -794,7 +794,7 @@ static void spmap_it_remove_free__(void **state) {
 	assert_str_equal(it->key, "c");
 	assert_ptr_equal(it->val, V2);
 
-	assert_spmap_equal(map, expected);
+	assert_spmap_equal_ordered(map, expected);
 
 	spmap_it_free(it);
 	spmap_free(expected);
@@ -813,11 +813,11 @@ static void spmap_equal__(void **state) {
 
 	assert_spmap_equal(a, b);
 
-	spmap_put_many(a, "a", V0, NULL);
+	spmap_put_many(a, "a", V0, "b", V1, NULL);
 
 	assert_spmap_not_equal(a, b);
 
-	spmap_put_many(b, "a", V0, NULL);
+	spmap_put_many(b, "b", V1, "a", V0, NULL);
 
 	assert_spmap_equal(a, b);
 
@@ -830,9 +830,46 @@ static void spmap_equal__case_insensitive(void **state) {
 	spmap_put_many(a, "a", V0, "b", V1, "c", V2, NULL);
 
 	const struct SPmap *b = spmap_init();
-	spmap_put_many(b, "a", V0, "B", V1, "c", V2, NULL);
+	spmap_put_many(b, "c", V2, "B", V1, "a", V0, NULL);
 
 	assert_spmap_equal(a, b);
+
+	spmap_free(a);
+	spmap_free(b);
+}
+
+static void spmap_equal_ordered__(void **state) {
+	assert_false(spmap_equal_ordered(NULL, NULL));
+
+	const struct SPmap *a = spmap_init();
+
+	assert_false(spmap_equal_ordered(a, NULL));
+	assert_false(spmap_equal_ordered(NULL, a));
+
+	const struct SPmap *b = spmap_init();
+
+	assert_spmap_equal_ordered(a, b);
+
+	spmap_put_many(a, "a", V0, NULL);
+
+	assert_spmap_not_equal_ordered(a, b);
+
+	spmap_put_many(b, "a", V0, NULL);
+
+	assert_spmap_equal_ordered(a, b);
+
+	spmap_free(a);
+	spmap_free(b);
+}
+
+static void spmap_equal_ordered__case_insensitive(void **state) {
+	const struct SPmap *a = spmap_init_with((struct SPmapParams){ .case_insensitive_key = true, });
+	spmap_put_many(a, "a", V0, "b", V1, "c", V2, NULL);
+
+	const struct SPmap *b = spmap_init();
+	spmap_put_many(b, "a", V0, "B", V1, "c", V2, NULL);
+
+	assert_spmap_equal_ordered(a, b);
 
 	spmap_free(a);
 	spmap_free(b);
@@ -1056,6 +1093,9 @@ int main(void) {
 
 		TEST(spmap_equal__),
 		TEST(spmap_equal__case_insensitive),
+
+		TEST(spmap_equal_ordered__),
+		TEST(spmap_equal_ordered__case_insensitive),
 
 		TEST(spmap_keys_slist__),
 
