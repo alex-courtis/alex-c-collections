@@ -136,10 +136,11 @@ bool ssmap_it_remove(const struct SSmapIt* const it);
  * Comparison
  */
 
-// TODO unordered variant
+// same length, keys and vals equal, uses case from a
+bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b);
 
 // same length, keys and vals equal in order, uses case from a
-bool ssmap_equal(const struct SSmap* const a, const struct SSmap* const b);
+bool ssmap_equal_ordered(const struct SSmap* const a, const struct SSmap* const b);
 
 /*
  * Conversion

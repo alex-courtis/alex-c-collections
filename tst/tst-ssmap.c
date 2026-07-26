@@ -51,12 +51,12 @@ static void ssmap_clone__(void **state) {
 
 	const struct SSmap *clone = ssmap_clone(map);
 
-	assert_ssmap_equal(map, clone);
+	assert_ssmap_equal_ordered(map, clone);
 
 	const struct SSmap *expected = ssmap_init();
 	ssmap_put_many(expected, "a", "0", "b", "1", NULL);
 
-	assert_ssmap_equal(clone, expected);
+	assert_ssmap_equal_ordered(clone, expected);
 
 	ssmap_free(map);
 	ssmap_free(clone);
@@ -406,7 +406,7 @@ static void ssmap_put_all__(void **state) {
 	const struct SSmap *expected = ssmap_init();
 	ssmap_put_many(expected, "a", "0", "b", "1", "c", "20", "d", "3", NULL);
 
-	assert_ssmap_equal(map, expected);
+	assert_ssmap_equal_ordered(map, expected);
 
 	ssmap_free(expected);
 	ssmap_free(from);
@@ -427,7 +427,7 @@ static void ssmap_put_all__case_insensitive(void **state) {
 	const struct SSmap *expected = ssmap_init();
 	ssmap_put_many(expected, "a", "0", "b", "1", "c", "20", "d", "3", NULL);
 
-	assert_ssmap_equal(map, expected);
+	assert_ssmap_equal_ordered(map, expected);
 
 	ssmap_free(expected);
 	ssmap_free(from);
@@ -449,7 +449,7 @@ static void ssmap_remove__(void **state) {
 
 	assert_false(ssmap_remove(map, "x"));
 
-	assert_ssmap_equal(map, expected);
+	assert_ssmap_equal_ordered(map, expected);
 
 	ssmap_free(expected);
 	ssmap_free(map);
@@ -464,7 +464,7 @@ static void ssmap_remove__case_insensitive_key(void **state) {
 
 	assert_true(ssmap_remove(map, "a"));
 
-	assert_ssmap_equal(map, expected);
+	assert_ssmap_equal_ordered(map, expected);
 
 	ssmap_free(expected);
 	ssmap_free(map);
@@ -504,7 +504,7 @@ static void ssmap_remove_in__(void **state) {
 
 	assert_int_equal(ssmap_remove_in(map, in), 2);
 
-	assert_ssmap_equal(map, expected);
+	assert_ssmap_equal_ordered(map, expected);
 
 	ssmap_free(map);
 	ssmap_free(in);
@@ -523,7 +523,7 @@ static void ssmap_remove_in__case_insensitive_key(void **state) {
 	const struct SSmap *expected = ssmap_init();
 	ssmap_put_many(expected, "a", "0", NULL);
 
-	assert_ssmap_equal(map, expected);
+	assert_ssmap_equal_ordered(map, expected);
 
 	ssmap_free(map);
 	ssmap_free(expected);
@@ -556,7 +556,7 @@ static void ssmap_it_remove__(void **state) {
 	assert_str_equal(it->key, "c");
 	assert_str_equal(it->val, "2");
 
-	assert_ssmap_equal(map, expected);
+	assert_ssmap_equal_ordered(map, expected);
 
 	ssmap_it_free(it);
 	ssmap_free(expected);
@@ -564,22 +564,22 @@ static void ssmap_it_remove__(void **state) {
 }
 
 static void ssmap_equal__(void **state) {
-	assert_false(ssmap_equal(NULL, NULL));
+	assert_ssmap_not_equal(NULL, NULL);
 
 	const struct SSmap *a = ssmap_init();
 
-	assert_false(ssmap_equal(a, NULL));
-	assert_false(ssmap_equal(NULL, a));
+	assert_ssmap_not_equal(a, NULL);
+	assert_ssmap_not_equal(NULL, a);
 
 	const struct SSmap *b = ssmap_init();
 
 	assert_ssmap_equal(a, b);
 
-	ssmap_put_many(a, "a", "0", NULL);
+	ssmap_put_many(a, "a", "0", "b", "1", NULL);
 
 	assert_ssmap_not_equal(a, b);
 
-	ssmap_put_many(b, "a", "0", NULL);
+	ssmap_put_many(b, "b", "1", "a", "0", NULL);
 
 	assert_ssmap_equal(a, b);
 
@@ -592,7 +592,7 @@ static void ssmap_equal__case_insensitive_key(void **state) {
 	ssmap_put_many(a, "a", "0", "b", "1", "c", "2", NULL);
 
 	const struct SSmap *b = ssmap_init();
-	ssmap_put_many(b, "a", "0", "B", "1", "c", "2", NULL);
+	ssmap_put_many(b, "c", "2", "a", "0", "B", "1", NULL);
 
 	assert_ssmap_equal(a, b);
 
@@ -605,9 +605,59 @@ static void ssmap_equal__case_insensitive_val(void **state) {
 	ssmap_put_many(a, "a", "AA", "b", "1", "c", "cc", NULL);
 
 	const struct SSmap *b = ssmap_init();
-	ssmap_put_many(b, "a", "aa", "b", "1", "c", "CC", NULL);
+	ssmap_put_many(b, "a", "aa", "c", "CC", "b", "1", NULL);
 
 	assert_ssmap_equal(a, b);
+
+	ssmap_free(a);
+	ssmap_free(b);
+}
+
+static void ssmap_equal_ordered__(void **state) {
+	assert_ssmap_not_equal_ordered(NULL, NULL);
+
+	const struct SSmap *a = ssmap_init();
+
+	assert_ssmap_not_equal_ordered(a, NULL);
+	assert_ssmap_not_equal_ordered(NULL, a);
+
+	const struct SSmap *b = ssmap_init();
+
+	assert_ssmap_equal_ordered(a, b);
+
+	ssmap_put_many(a, "a", "0", NULL);
+
+	assert_ssmap_not_equal_ordered(a, b);
+
+	ssmap_put_many(b, "a", "0", NULL);
+
+	assert_ssmap_equal_ordered(a, b);
+
+	ssmap_free(a);
+	ssmap_free(b);
+}
+
+static void ssmap_equal_ordered__case_insensitive_key(void **state) {
+	const struct SSmap *a = ssmap_init_with((struct SSmapParams){ .case_insensitive_key = true, });
+	ssmap_put_many(a, "a", "0", "b", "1", "c", "2", NULL);
+
+	const struct SSmap *b = ssmap_init();
+	ssmap_put_many(b, "a", "0", "B", "1", "c", "2", NULL);
+
+	assert_ssmap_equal_ordered(a, b);
+
+	ssmap_free(a);
+	ssmap_free(b);
+}
+
+static void ssmap_equal_ordered__case_insensitive_val(void **state) {
+	const struct SSmap *a = ssmap_init_with((struct SSmapParams){ .case_insensitive_val = true, });
+	ssmap_put_many(a, "a", "AA", "b", "1", "c", "cc", NULL);
+
+	const struct SSmap *b = ssmap_init();
+	ssmap_put_many(b, "a", "aa", "b", "1", "c", "CC", NULL);
+
+	assert_ssmap_equal_ordered(a, b);
 
 	ssmap_free(a);
 	ssmap_free(b);
@@ -782,6 +832,10 @@ int main(void) {
 		TEST(ssmap_equal__),
 		TEST(ssmap_equal__case_insensitive_key),
 		TEST(ssmap_equal__case_insensitive_val),
+
+		TEST(ssmap_equal_ordered__),
+		TEST(ssmap_equal_ordered__case_insensitive_key),
+		TEST(ssmap_equal_ordered__case_insensitive_val),
 
 		TEST(ssmap_keys_slist__),
 

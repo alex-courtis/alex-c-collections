@@ -656,7 +656,12 @@ bool ppmap_equal(const struct PPmap* const a, const struct PPmap* const b) {
 		return false;
 
 	for (const void **bk = b->keys, **bv = b->vals; bk < b->keys + b->size; bk++, bv++) {
-		if (ppmap_get(a, *bk) != *bv) {
+		const void *av = ppmap_get(a, *bk);
+		if (a->params.equal_val) {
+			if (!a->params.equal_val(av, *bv)) {
+				return false;
+			}
+		} else if (av != *bv) {
 			return false;
 		}
 	}
