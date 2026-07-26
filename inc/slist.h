@@ -134,10 +134,11 @@ void slist_sort(const struct Slist* const list);
  * Comparison
  */
 
-// TODO unordered variant
+// same length, vals equal
+bool slist_equal(const struct Slist* const a, const struct Slist* const b);
 
 // same length, vals equal in order
-bool slist_equal(const struct Slist* const a, const struct Slist* const b);
+bool slist_equal_ordered(const struct Slist* const a, const struct Slist* const b);
 
 /*
  * Info

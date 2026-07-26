@@ -53,7 +53,7 @@ static void slist_clone__params__constructor(void **state) {
 	assert_ptr_equal(clone->params.initial, 99);
 	assert_ptr_equal(clone->params.grow, 1);
 
-	assert_slist_equal(set, clone);
+	assert_slist_equal_ordered(set, clone);
 
 	slist_free(set);
 	slist_free(clone);
@@ -286,7 +286,7 @@ static void slist_insert__(void **state) {
 
 	assert_false(slist_insert(set, 0, NULL));
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_free(set);
 	slist_free(expected);
@@ -306,7 +306,7 @@ static void slist_append__(void **state) {
 
 	assert_true(slist_append(set, "b"));
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_free(set);
 	slist_free(expected);
@@ -326,7 +326,7 @@ static void slist_prepend__(void **state) {
 
 	assert_true(slist_prepend(set, "b"));
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_free(set);
 	slist_free(expected);
@@ -347,7 +347,7 @@ static void slist_replace__(void **state) {
 
 	assert_false(slist_replace(set, 2, "2"));
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_free(set);
 	slist_free(expected);
@@ -369,7 +369,7 @@ static void slist_append_all__(void **state) {
 
 	assert_int_equal(slist_append_all(to, from), 2);
 
-	assert_slist_equal(to, expected);
+	assert_slist_equal_ordered(to, expected);
 
 	assert_int_equal(slist_append_all(NULL, from), 0);
 
@@ -393,7 +393,7 @@ static void slist_remove__(void **state) {
 
 	assert_false(slist_remove(set, "x"));
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_free(expected);
 	slist_free(set);
@@ -408,7 +408,7 @@ static void slist_remove__case_insensitive(void **state) {
 
 	assert_true(slist_remove(set, "a"));
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_free(expected);
 	slist_free(set);
@@ -429,7 +429,7 @@ static void slist_remove_at__(void **state) {
 
 	assert_false(slist_remove_at(set, 999));
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_free(expected);
 	slist_free(set);
@@ -475,7 +475,7 @@ static void slist_it_remove__(void **state) {
 	it = slist_it_next(it);
 	assert_str_equal(it->val, "c");
 
-	assert_slist_equal(set, expected);
+	assert_slist_equal_ordered(set, expected);
 
 	slist_it_free(it);
 	slist_free(expected);
@@ -501,7 +501,7 @@ static void slist_sort__(void **state) {
 
 	slist_sort(actual);
 
-	assert_slist_equal(actual, expected);
+	assert_slist_equal_ordered(actual, expected);
 
 	slist_free(actual);
 	slist_free(expected);
@@ -516,31 +516,31 @@ static void slist_sort__case_insensitive(void **state) {
 
 	slist_sort(actual);
 
-	assert_slist_equal(actual, expected);
+	assert_slist_equal_ordered(actual, expected);
 
 	slist_free(actual);
 	slist_free(expected);
 }
 
 static void slist_equal__(void **state) {
-	assert_false(slist_equal(NULL, NULL));
+	assert_slist_not_equal(NULL, NULL);
 
 	const struct Slist *a = slist_init();
 
-	assert_false(slist_equal(a, NULL));
-	assert_false(slist_equal(NULL, a));
+	assert_slist_not_equal(a, NULL);
+	assert_slist_not_equal(NULL, a);
 
 	const struct Slist *b = slist_init();
 
-	assert_true(slist_equal(a, a));
+	assert_slist_equal(a, a);
 
-	slist_append(a, "x");
+	slist_append_many(a, "x", "y", NULL);
 
-	assert_false(slist_equal(a, b));
+	assert_slist_not_equal(a, b);
 
-	slist_append(b, "x");
+	slist_append_many(b, "y", "x", NULL);
 
-	assert_true(slist_equal(a, b));
+	assert_slist_equal(a, b);
 
 	slist_free(a);
 	slist_free(b);
@@ -548,12 +548,49 @@ static void slist_equal__(void **state) {
 
 static void slist_equal__case_insensitive(void **state) {
 	const struct Slist *a = slist_init_with((struct SlistParams){ .case_insensitive = true, });
+	slist_append_many(a, "c", "b", "a", NULL);
+
+	const struct Slist *b = slist_init_with((struct SlistParams){ .case_insensitive = true, });
+	slist_append_many(b, "a", "B", "c", NULL);
+
+	assert_slist_equal(a, b);
+
+	slist_free(a);
+	slist_free(b);
+}
+
+static void slist_equal_ordered__(void **state) {
+	assert_slist_not_equal_ordered(NULL, NULL);
+
+	const struct Slist *a = slist_init();
+
+	assert_slist_not_equal_ordered(a, NULL);
+	assert_slist_not_equal_ordered(NULL, a);
+
+	const struct Slist *b = slist_init();
+
+	assert_slist_equal_ordered(a, a);
+
+	slist_append(a, "x");
+
+	assert_slist_not_equal_ordered(a, b);
+
+	slist_append(b, "x");
+
+	assert_slist_equal_ordered(a, b);
+
+	slist_free(a);
+	slist_free(b);
+}
+
+static void slist_equal_ordered__case_insensitive(void **state) {
+	const struct Slist *a = slist_init_with((struct SlistParams){ .case_insensitive = true, });
 	slist_append_many(a, "a", "b", "c", NULL);
 
 	const struct Slist *b = slist_init_with((struct SlistParams){ .case_insensitive = true, });
 	slist_append_many(b, "a", "B", "c", NULL);
 
-	assert_true(slist_equal(a, b));
+	assert_slist_equal_ordered(a, b);
 
 	slist_free(a);
 	slist_free(b);
@@ -641,6 +678,9 @@ int main(void) {
 
 		TEST(slist_equal__),
 		TEST(slist_equal__case_insensitive),
+
+		TEST(slist_equal_ordered__),
+		TEST(slist_equal_ordered__case_insensitive),
 
 		TEST(slist_str__),
 

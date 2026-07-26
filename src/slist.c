@@ -213,6 +213,10 @@ void slist_sort(const struct Slist* const list) {
 }
 
 bool slist_equal(const struct Slist* const a, const struct Slist* const b) {
+	return a && b ? plist_equal(a->plist, b->plist) : false;
+}
+
+bool slist_equal_ordered(const struct Slist* const a, const struct Slist* const b) {
 	return a && b ? plist_equal_ordered(a->plist, b->plist) : false;
 }
 

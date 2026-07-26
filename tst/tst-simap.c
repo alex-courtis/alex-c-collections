@@ -727,7 +727,7 @@ static void simap_keys_slist__(void **state) {
 	const struct Slist *expected = slist_init();
 	slist_append_many(expected, "A", "b", "c", NULL);
 
-	assert_slist_equal(list, expected);
+	assert_slist_equal_ordered(list, expected);
 
 	slist_free(list);
 	slist_free(expected);
