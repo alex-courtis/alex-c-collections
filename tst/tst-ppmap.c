@@ -1356,20 +1356,23 @@ static void ppmap_put_all_free__alloc_val(void **state) {
 
 static void ppmap_put_all_free__free_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
-	ppmap_put_many(map, K0, V0, K1, V0, NULL);
+	ppmap_put_many(map, K0, V0, K1, V0, K2, V1, NULL);
 
 	const struct PPmap *from = ppmap_init();
-	ppmap_put_many(from, K0, V4, K1, V5, NULL);
+	ppmap_put_many(from, K0, V3, K1, V4, K2, V5, NULL);
 
 	expect_ptr(mock_free, ptr, V0); // no double free
+	expect_ptr(mock_free, ptr, V1);
 
-	assert_int_equal(ppmap_put_all_free(map, from), 2);
+	assert_int_equal(ppmap_put_all_free(map, from), 3);
 
-	assert_int_equal(map->size, 2);
+	assert_int_equal(map->size, 3);
 	assert_ptr_equal(map->keys[0], K0);
-	assert_ptr_equal(map->vals[0], V4);
+	assert_ptr_equal(map->vals[0], V3);
 	assert_ptr_equal(map->keys[1], K1);
-	assert_ptr_equal(map->vals[1], V5);
+	assert_ptr_equal(map->vals[1], V4);
+	assert_ptr_equal(map->keys[2], K2);
+	assert_ptr_equal(map->vals[2], V5);
 
 	ppmap_free(map);
 	ppmap_free(from);
@@ -1969,18 +1972,19 @@ static void ppmap_remove_in_free__allow_null_val(void **state) {
 
 static void ppmap_remove_in_free__free_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
-	ppmap_put_many(map, K0, V0, K1, V0, K2, V2, NULL);
+	ppmap_put_many(map, K0, V0, K1, V0, K2, V2, K3, V3, NULL);
 
 	const struct PPmap *in = ppmap_init();
-	ppmap_put_many(in, K0, V3, K1, V4, K3, V5, NULL);
+	ppmap_put_many(in, K0, V3, K1, V4, K2, V5, K5, V5, NULL);
 
 	expect_ptr(mock_free, ptr, V0); // no double free
+	expect_ptr(mock_free, ptr, V2);
 
-	assert_int_equal(ppmap_remove_in_free(map, in), 2);
+	assert_int_equal(ppmap_remove_in_free(map, in), 3);
 
 	assert_int_equal(map->size, 1);
-	assert_ptr_equal(map->keys[0], K2);
-	assert_ptr_equal(map->vals[0], V2);
+	assert_ptr_equal(map->keys[0], K3);
+	assert_ptr_equal(map->vals[0], V3);
 
 	ppmap_free(map);
 	ppmap_free(in);

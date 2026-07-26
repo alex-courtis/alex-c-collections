@@ -86,9 +86,7 @@ static bool put(const void **val_old, const struct PPmap* const map, const void*
 
 		// overwrite existing values
 		if (map->params.equal_key ? map->params.equal_key(*k, key) : *k == key) {
-			if (val_old) {
-				*val_old = *v;
-			}
+			*val_old = *v;
 
 			if (!overwrite) {
 				return true;
@@ -171,8 +169,9 @@ static size_t put_all(const struct PPmap* const map, const struct PPmap* const f
 static const struct PPmap *clone(const struct PPmap* const from, fn_clone clone_val) {
 	const struct PPmap *to =  ppmap_init_with(from->params);
 
+	const void *val_old = NULL;
 	for (const void **k = from->keys, **v = from->vals; k < from->keys + from->size; k++, v++) {
-		put(NULL, to, *k, *v, clone_val, true);
+		put(&val_old, to, *k, *v, clone_val, true);
 	}
 
 	return to;
@@ -282,9 +281,6 @@ static size_t remove_all(const struct PPmap* const map) {
 }
 
 static size_t remove_in(const struct PPmap* const map, const struct PPmap* const in, bool do_free) {
-	if (!map || !in)
-		return 0;
-
 	size_t removed = 0;
 
 	// values to free, no duplicates or nulls
