@@ -137,6 +137,9 @@ bool ipmap_contains_val(const struct IPmap* const map, const void* const val) {
 }
 
 bool ipmap_first_key(size_t* kp, const struct IPmap *const map, const void* const val) {
+	if (kp)
+		*kp = 0;
+
 	if (!map || !kp)
 		return false;
 
@@ -146,7 +149,6 @@ bool ipmap_first_key(size_t* kp, const struct IPmap *const map, const void* cons
 		*kp = *fp;
 		return true;
 	} else {
-		*kp = 0;
 		return false;
 	}
 }

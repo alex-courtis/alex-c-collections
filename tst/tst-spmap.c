@@ -811,15 +811,15 @@ static void spmap_equal__(void **state) {
 
 	const struct SPmap *b = spmap_init();
 
-	assert_true(spmap_equal(a, a));
+	assert_spmap_equal(a, b);
 
 	spmap_put_many(a, "a", V0, NULL);
 
-	assert_false(spmap_equal(a, b));
+	assert_spmap_not_equal(a, b);
 
 	spmap_put_many(b, "a", V0, NULL);
 
-	assert_true(spmap_equal(a, b));
+	assert_spmap_equal(a, b);
 
 	spmap_free(a);
 	spmap_free(b);
@@ -832,7 +832,7 @@ static void spmap_equal__case_insensitive(void **state) {
 	const struct SPmap *b = spmap_init();
 	spmap_put_many(b, "a", V0, "B", V1, "c", V2, NULL);
 
-	assert_true(spmap_equal(a, b));
+	assert_spmap_equal(a, b);
 
 	spmap_free(a);
 	spmap_free(b);
