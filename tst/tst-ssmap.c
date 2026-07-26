@@ -1,3 +1,5 @@
+#include "assert-sset.h"
+#include "assert-slist.h"
 #include "assert-ssmap.h"
 #include "asserts.h"
 #include "tst.h"
@@ -41,32 +43,58 @@ static bool match_starts_with_a(const char* const a, const void* const b) {
 	return *a == 'a';
 }
 
-static void ssmap_clone__params__constructor(void **state) {
+static void ssmap_clone__(void **state) {
 	assert_nul(ssmap_clone(NULL));
 
-    struct SSmapParams params = { .case_insensitive_key = true, .case_insensitive_val = true, .initial = 99, .grow = 1, };
-	const struct SSmap *map = ssmap_init_with(params);
+	const struct SSmap *map = ssmap_init();
 	ssmap_put_many(map, "a", "0", "b", "1", NULL);
 
 	const struct SSmap *clone = ssmap_clone(map);
 
+	assert_ssmap_equal(map, clone);
+
+	const struct SSmap *expected = ssmap_init();
+	ssmap_put_many(expected, "a", "0", "b", "1", NULL);
+
+	assert_ssmap_equal(clone, expected);
+
+	ssmap_free(map);
+	ssmap_free(clone);
+	ssmap_free(expected);
+}
+
+static void ssmap_clone__params__constructor(void **state) {
+    struct SSmapParams params = {
+		.case_insensitive_key = true,
+		.case_insensitive_val = true,
+		.allow_null_val = true,
+		.initial = 99,
+		.grow = 1,
+	};
+	const struct SSmap *map = ssmap_init_with(params);
+
+	const struct SSmap *clone = ssmap_clone(map);
+
 	assert_non_nul(clone);
-	assert_int_equal(clone->ppmap->size, 2);
+	assert_int_equal(clone->ppmap->size, 0);
 	assert_int_equal(clone->ppmap->capacity, 99);
 	assert_int_equal(clone->params.grow, 1);
 	assert_ptr_equal(clone->ppmap->params.equal_key, equal_strcasecmp);
-	assert_ptr_equal(clone->ppmap->params.alloc_key, clone_strdup);
-	assert_ptr_equal(clone->ppmap->params.str_key, str_or_null);
 	assert_ptr_equal(clone->ppmap->params.equal_val, equal_strcasecmp);
+	assert_ptr_equal(clone->ppmap->params.alloc_key, clone_strdup);
 	assert_ptr_equal(clone->ppmap->params.alloc_val, clone_strdup);
+	assert_ptr_equal(clone->ppmap->params.free_key, free);
+	assert_ptr_equal(clone->ppmap->params.free_val, free);
+	assert_ptr_equal(clone->ppmap->params.clone_val, NULL);
+	assert_ptr_equal(clone->ppmap->params.str_key, str_or_null);
 	assert_ptr_equal(clone->ppmap->params.str_val, str_or_null);
+	assert_true(clone->ppmap->params.allow_null_val);
 
 	assert_ptr_equal(clone->params.case_insensitive_key, true);
 	assert_ptr_equal(clone->params.case_insensitive_val, true);
+	assert_ptr_equal(clone->params.allow_null_val, true);
 	assert_ptr_equal(clone->params.initial, 99);
 	assert_ptr_equal(clone->params.grow, 1);
-
-	assert_ssmap_equal(map, clone);
 
 	ssmap_free(map);
 	ssmap_free(clone);
@@ -492,7 +520,13 @@ static void ssmap_remove_in__case_insensitive_key(void **state) {
 
 	assert_int_equal(ssmap_remove_in(map, in), 1);
 
+	const struct SSmap *expected = ssmap_init();
+	ssmap_put_many(expected, "a", "0", NULL);
+
+	assert_ssmap_equal(map, expected);
+
 	ssmap_free(map);
+	ssmap_free(expected);
 	ssmap_free(in);
 }
 
@@ -597,12 +631,13 @@ static void ssmap_keys_slist__(void **state) {
 
 	list = ssmap_keys_slist(map);
 
-	assert_int_equal(slist_size(list), 3);
-	assert_str_equal(slist_at(list, 0), "a");
-	assert_str_equal(slist_at(list, 1), "b");
-	assert_str_equal(slist_at(list, 2), "c");
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "a", "b", "c", NULL);
+
+	assert_slist_equal(list, expected);
 
 	slist_free(list);
+	slist_free(expected);
 	ssmap_free(map);
 }
 
@@ -624,12 +659,13 @@ static void ssmap_keys_sset__(void **state) {
 
 	set = ssmap_keys_sset(map);
 
-	assert_int_equal(sset_size(set), 3);
-	assert_str_equal(sset_at(set, 0), "a");
-	assert_str_equal(sset_at(set, 1), "b");
-	assert_str_equal(sset_at(set, 2), "c");
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "a", "b", "c", NULL);
+
+	assert_sset_equal(set, expected);
 
 	sset_free(set);
+	sset_free(expected);
 	ssmap_free(map);
 }
 
@@ -651,12 +687,13 @@ static void ssmap_vals_slist__(void **state) {
 
 	list = ssmap_vals_slist(map);
 
-	assert_int_equal(slist_size(list), 3);
-	assert_str_equal(slist_at(list, 0), "0");
-	assert_str_equal(slist_at(list, 1), "1");
-	assert_str_equal(slist_at(list, 2), "2");
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "0", "1", "2", NULL);
+
+	assert_slist_equal(list, expected);
 
 	slist_free(list);
+	slist_free(expected);
 	ssmap_free(map);
 }
 
@@ -694,6 +731,7 @@ static void ssmap_size__(void **state) {
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
+		TEST(ssmap_clone__),
 		TEST(ssmap_clone__params__constructor),
 
 		TEST(ssmap_free__),

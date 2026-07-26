@@ -1,5 +1,9 @@
+#include "assert-slist.h"
+#include "assert-plist.h"
+#include "assert-sset.h"
 #include "assert-spmap.h"
 #include "asserts.h"
+#include "expects.h"
 #include "data.h"
 #include "mock-fn.h"
 #include "tst.h"
@@ -52,32 +56,89 @@ static bool match_starts_with_a(const char* const a, const void* const b) {
 	return *a == 'a';
 }
 
-// TODO split into 3
-
-static void spmap_clone__params__constructor(void **state) {
+static void spmap_clone__(void **state) {
 	assert_nul(spmap_clone(NULL));
 
-    struct SPmapParams params = { .case_insensitive_key = true, .initial = 99, .grow = 1, };
-	const struct SPmap *map = spmap_init_with(params);
+	const struct SPmap *map = spmap_init();
 	spmap_put_many(map, "a", V0, "b", V1, NULL);
 
 	const struct SPmap *clone = spmap_clone(map);
 
+	assert_spmap_equal(map, clone);
+
+	const struct SPmap *expected = spmap_init();
+	spmap_put_many(expected, "a", V0, "b", V1, NULL);
+
+	assert_spmap_equal(clone, expected);
+
+	spmap_free(map);
+	spmap_free(clone);
+	spmap_free(expected);
+}
+
+static void spmap_clone__params__constructor(void **state) {
+	assert_nul(spmap_clone(NULL));
+
+	struct SPmapParams params = {
+		.case_insensitive_key = true,
+		.equal_val = mock_equal,
+		.alloc_val = mock_alloc,
+		.free_val = mock_free,
+		.clone_val = mock_clone ,
+		.str_val = mock_str,
+		.allow_null_val = true,
+		.initial = 99,
+		.grow = 1, };
+	const struct SPmap *map = spmap_init_with(params);
+
+	const struct SPmap *clone = spmap_clone(map);
+
 	assert_non_nul(clone);
-	assert_int_equal(clone->ppmap->size, 2);
+	assert_int_equal(clone->ppmap->size, 0);
 	assert_int_equal(clone->ppmap->capacity, 99);
 	assert_int_equal(clone->params.grow, 1);
 	assert_ptr_equal(clone->ppmap->params.equal_key, equal_strcasecmp);
+	assert_ptr_equal(clone->ppmap->params.equal_val, mock_equal);
 	assert_ptr_equal(clone->ppmap->params.alloc_key, clone_strdup);
+	assert_ptr_equal(clone->ppmap->params.alloc_val, mock_alloc);
+	assert_ptr_equal(clone->ppmap->params.free_key, free);
+	assert_ptr_equal(clone->ppmap->params.free_val, mock_free);
+	assert_ptr_equal(clone->ppmap->params.clone_val, mock_clone);
 	assert_ptr_equal(clone->ppmap->params.str_key, str_or_null);
+	assert_ptr_equal(clone->ppmap->params.str_val, mock_str);
+	assert_true(clone->ppmap->params.allow_null_val);
 
+	assert_ptr_equal(clone->params.equal_val, mock_equal);
+	assert_ptr_equal(clone->params.alloc_val, mock_alloc);
+	assert_ptr_equal(clone->params.free_val, mock_free);
+	assert_ptr_equal(clone->params.clone_val, mock_clone);
+	assert_ptr_equal(clone->params.str_val, mock_str);
 	assert_ptr_equal(clone->params.case_insensitive_key, true);
 	assert_ptr_equal(clone->params.initial, 99);
 	assert_ptr_equal(clone->params.grow, 1);
 
+	spmap_free(map);
+	spmap_free(clone);
+}
+
+static void spmap_clone_deep__(void **state) {
+	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .clone_val = mock_clone, });
+	spmap_put_many(map, "a", V0, "b", V1, NULL);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+
+	const struct SPmap *clone = spmap_clone_deep(map);
+
 	assert_spmap_equal(map, clone);
 
+	const struct SPmap *expected = spmap_init();
+	spmap_put_many(expected, "a", V0, "b", V1, NULL);
+
+	assert_spmap_equal(clone, expected);
+
 	spmap_free(map);
+	spmap_free(expected);
 	spmap_free(clone);
 }
 
@@ -210,12 +271,12 @@ static void spmap_find__(void **state) {
 	assert_str_equal(spmap_find(map, (struct SPmapFilter){ 0 }).key, "b");
 	assert_ptr_equal(spmap_find(map, (struct SPmapFilter){ 0 }).val, V0);
 
-    struct SPmapPair pair = spmap_find(map, (struct SPmapFilter){ .key_data = match_starts_with_a, .data = V5, });
+	struct SPmapPair pair = spmap_find(map, (struct SPmapFilter){ .key_data = match_starts_with_a, .data = V5, });
 
 	assert_str_equal(pair.key, "a");
 	assert_ptr_equal(pair.val, V1);
 
-    pair = spmap_find(map, (struct SPmapFilter){ .val_data = equal_ptr, .data = V3, });
+	pair = spmap_find(map, (struct SPmapFilter){ .val_data = equal_ptr, .data = V3, });
 
 	assert_str_equal(pair.key, "d");
 	assert_ptr_equal(pair.val, V3);
@@ -482,7 +543,13 @@ static void spmap_remove_in__case_insensitive(void **state) {
 
 	assert_int_equal(spmap_remove_in(map, in), 1);
 
+	const struct SPmap *expected = spmap_init();
+	spmap_put_many(expected, "a", V0, NULL);
+
+	assert_spmap_equal(map, expected);
+
 	spmap_free(map);
+	spmap_free(expected);
 	spmap_free(in);
 }
 
@@ -574,12 +641,13 @@ static void spmap_keys_slist__(void **state) {
 
 	list = spmap_keys_slist(map);
 
-	assert_int_equal(slist_size(list), 3);
-	assert_str_equal(slist_at(list, 0), "a");
-	assert_str_equal(slist_at(list, 1), "b");
-	assert_str_equal(slist_at(list, 2), "c");
+	const struct Slist *expected = slist_init();
+	slist_append_many(expected, "a", "b", "c", NULL);
+
+	assert_slist_equal(list, expected);
 
 	slist_free(list);
+	slist_free(expected);
 	spmap_free(map);
 }
 
@@ -601,12 +669,13 @@ static void spmap_keys_sset__(void **state) {
 
 	set = spmap_keys_sset(map);
 
-	assert_int_equal(sset_size(set), 3);
-	assert_str_equal(sset_at(set, 0), "a");
-	assert_str_equal(sset_at(set, 1), "b");
-	assert_str_equal(sset_at(set, 2), "c");
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "a", "b", "c", NULL);
+
+	assert_sset_equal(set, expected);
 
 	sset_free(set);
+	sset_free(expected);
 	spmap_free(map);
 }
 
@@ -633,7 +702,13 @@ static void spmap_vals_plist__(void **state) {
 	assert_ptr_equal(plist_at(list, 1), V1);
 	assert_ptr_equal(plist_at(list, 2), V2);
 
+	const struct Plist *expected = plist_init();
+	plist_append_many(expected, V0, V1, V2, NULL);
+
+	assert_plist_equal(list, expected);
+
 	plist_free(list);
+	plist_free(expected);
 	spmap_free(map);
 }
 
@@ -676,7 +751,10 @@ static void spmap_size__(void **state) {
 
 int main(void) {
 	const struct CMUnitTest tests[] = {
+		TEST(spmap_clone__),
 		TEST(spmap_clone__params__constructor),
+
+		TEST(spmap_clone_deep__),
 
 		TEST(spmap_free__),
 
