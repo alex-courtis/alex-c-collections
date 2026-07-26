@@ -887,7 +887,7 @@ static void spmap_keys_sset__(void **state) {
 	const struct Sset *expected = sset_init();
 	sset_add_many(expected, "A", "b", "c", NULL);
 
-	assert_sset_equal(set, expected);
+	assert_sset_equal_ordered(set, expected);
 
 	sset_free(set);
 	sset_free(expected);

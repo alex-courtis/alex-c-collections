@@ -58,7 +58,7 @@ static void sset_clone__params__constructor(void **state) {
 	assert_ptr_equal(clone->params.initial, 99);
 	assert_ptr_equal(clone->params.grow, 1);
 
-	assert_sset_equal(set, clone);
+	assert_sset_equal_ordered(set, clone);
 
 	sset_free(set);
 	sset_free(clone);
@@ -203,7 +203,7 @@ static void sset_add__(void **state) {
 
 	assert_true(sset_add(set, "b"));
 
-	assert_sset_equal(set, expected);
+	assert_sset_equal_ordered(set, expected);
 
 	sset_free(set);
 	sset_free(expected);
@@ -235,7 +235,7 @@ static void sset_add_all__(void **state) {
 
 	assert_int_equal(sset_add_all(to, from), 1);
 
-	assert_sset_equal(to, expected);
+	assert_sset_equal_ordered(to, expected);
 
 	assert_int_equal(sset_add_all(NULL, from), 0);
 
@@ -259,7 +259,7 @@ static void sset_remove__(void **state) {
 
 	assert_false(sset_remove(set, "x"));
 
-	assert_sset_equal(set, expected);
+	assert_sset_equal_ordered(set, expected);
 
 	sset_free(expected);
 	sset_free(set);
@@ -274,7 +274,7 @@ static void sset_remove__case_insensitive(void **state) {
 
 	assert_true(sset_remove(set, "a"));
 
-	assert_sset_equal(set, expected);
+	assert_sset_equal_ordered(set, expected);
 
 	sset_free(expected);
 	sset_free(set);
@@ -314,7 +314,7 @@ static void sset_remove_in__(void **state) {
 
 	assert_int_equal(sset_remove_in(set, in), 2);
 
-	assert_sset_equal(set, expected);
+	assert_sset_equal_ordered(set, expected);
 
 	sset_free(set);
 	sset_free(in);
@@ -358,7 +358,7 @@ static void sset_it_remove__(void **state) {
 	it = sset_it_next(it);
 	assert_str_equal(it->val, "c");
 
-	assert_sset_equal(set, expected);
+	assert_sset_equal_ordered(set, expected);
 
 	sset_it_free(it);
 	sset_free(expected);
@@ -384,7 +384,7 @@ static void sset_sort__(void **state) {
 
 	sset_sort(actual);
 
-	assert_sset_equal(actual, expected);
+	assert_sset_equal_ordered(actual, expected);
 
 	sset_free(actual);
 	sset_free(expected);
@@ -399,31 +399,31 @@ static void sset_sort__case_insensitive(void **state) {
 
 	sset_sort(actual);
 
-	assert_sset_equal(actual, expected);
+	assert_sset_equal_ordered(actual, expected);
 
 	sset_free(actual);
 	sset_free(expected);
 }
 
 static void sset_equal__(void **state) {
-	assert_false(sset_equal(NULL, NULL));
+	assert_sset_not_equal(NULL, NULL);
 
 	const struct Sset *a = sset_init();
 
-	assert_false(sset_equal(a, NULL));
-	assert_false(sset_equal(NULL, a));
+	assert_sset_not_equal(a, NULL);
+	assert_sset_not_equal(NULL, a);
 
 	const struct Sset *b = sset_init();
 
-	assert_true(sset_equal(a, a));
+	assert_sset_equal(a, a);
 
-	sset_add(a, "x");
+	sset_add_many(a, "x", "y", "z", NULL);
 
-	assert_false(sset_equal(a, b));
+	assert_sset_not_equal(a, b);
 
-	sset_add(b, "x");
+	sset_add_many(b, "y", "x", "z", NULL);
 
-	assert_true(sset_equal(a, b));
+	assert_sset_equal(a, b);
 
 	sset_free(a);
 	sset_free(b);
@@ -434,9 +434,46 @@ static void sset_equal__case_insensitive(void **state) {
 	sset_add_many(a, "a", "b", "c", NULL);
 
 	const struct Sset *b = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(b, "c", "B", "A", NULL);
+
+	assert_sset_equal(a, b);
+
+	sset_free(a);
+	sset_free(b);
+}
+
+static void sset_equal_ordered__(void **state) {
+	assert_sset_not_equal_ordered(NULL, NULL);
+
+	const struct Sset *a = sset_init();
+
+	assert_sset_not_equal_ordered(a, NULL);
+	assert_sset_not_equal_ordered(NULL, a);
+
+	const struct Sset *b = sset_init();
+
+	assert_sset_equal_ordered(a, a);
+
+	sset_add(a, "x");
+
+	assert_sset_not_equal_ordered(a, b);
+
+	sset_add(b, "x");
+
+	assert_sset_equal_ordered(a, b);
+
+	sset_free(a);
+	sset_free(b);
+}
+
+static void sset_equal_ordered__case_insensitive(void **state) {
+	const struct Sset *a = sset_init_with((struct SsetParams){ .case_insensitive = true, });
+	sset_add_many(a, "a", "b", "c", NULL);
+
+	const struct Sset *b = sset_init_with((struct SsetParams){ .case_insensitive = true, });
 	sset_add_many(b, "a", "B", "c", NULL);
 
-	assert_true(sset_equal(a, b));
+	assert_sset_equal_ordered(a, b);
 
 	sset_free(a);
 	sset_free(b);
@@ -535,6 +572,9 @@ int main(void) {
 
 		TEST(sset_equal__),
 		TEST(sset_equal__case_insensitive),
+
+		TEST(sset_equal_ordered__),
+		TEST(sset_equal_ordered__case_insensitive),
 
 		TEST(sset_slist__),
 
