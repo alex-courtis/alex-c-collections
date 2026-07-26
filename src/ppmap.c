@@ -282,6 +282,52 @@ static size_t remove_all(const struct PPmap* const map) {
 	return removed;
 }
 
+static size_t remove_in(const struct PPmap* const map, const struct PPmap* const in, bool do_free) {
+	if (!map || !in)
+		return 0;
+
+	size_t removed = 0;
+
+	// values to free, no duplicates or nulls
+	const void **to_free = calloc(map->size, sizeof(void*));
+	size_t ntf = 0;
+
+	for (const void **k = in->keys; k < in->keys + in->size; k++) {
+		const void *val = NULL;
+		if (remove_(&val, map, *k, false)) {
+			removed++;
+
+			if (val && do_free) {
+				bool dup = false;
+				for (const void **vf = to_free; vf < to_free + ntf; vf++) {
+					if (val == *vf) {
+						dup = true;
+						break;
+					}
+				}
+
+				if (!dup) {
+					*(to_free + ntf++) = val;
+				}
+			}
+		}
+	}
+
+	if (do_free) {
+		for (const void **vtf = to_free; vtf < to_free + ntf; vtf++) {
+			if (map->params.free_val) {
+				map->params.free_val((void*)*vtf);
+			} else {
+				free((void*)*vtf);
+			}
+		}
+	}
+
+	free(to_free);
+
+	return removed;
+}
+
 static bool it_remove(const void **removed, const struct PPmapIt* const it, bool do_free) {
 	if (removed)
 		*removed = NULL;
@@ -588,33 +634,11 @@ size_t ppmap_remove_all_free(const struct PPmap* const map) {
 }
 
 size_t ppmap_remove_in(const struct PPmap* const map, const struct PPmap* const in) {
-	if (!map || !in)
-		return 0;
-
-	size_t removed = 0;
-
-	for (const void **k = in->keys; k < in->keys + in->size; k++) {
-		if (ppmap_remove(map, *k) != NULL) {
-			removed++;
-		}
-	}
-
-	return removed;
+	return map && in ? remove_in(map, in, false) : 0;
 }
 
 size_t ppmap_remove_in_free(const struct PPmap* const map, const struct PPmap* const in) {
-	if (!map || !in)
-		return 0;
-
-	size_t removed = 0;
-
-	for (const void **k = in->keys; k < in->keys + in->size; k++) {
-		if (ppmap_remove_free(map, *k)) {
-			removed++;
-		}
-	}
-
-	return removed;
+	return map && in ? remove_in(map, in, true) : 0;
 }
 
 const void *ppmap_it_remove(const struct PPmapIt* const it) {
