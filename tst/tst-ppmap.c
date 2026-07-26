@@ -298,18 +298,9 @@ static void ppmap_free_vals__missing_val(void **state) {
 	free(val);
 }
 
-static void ppmap_free_vals__duplicate_val(void **state) {
-	const char *val = strdup("no double free");
-
-	const struct PPmap *map = ppmap_init();
-	ppmap_put_many(map, K0, val, K1, val, NULL);
-
-	ppmap_free_vals(map);
-}
-
 static void ppmap_free_vals__free_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
-	ppmap_put_many(map, K0, V0, K1, V1, K2, V2, NULL);
+	ppmap_put_many(map, K0, V0, K1, V1, K2, V2, K3, V2, NULL);
 
 	expect_ptr(mock_free, ptr, V0);
 	expect_ptr(mock_free, ptr, V1);
@@ -1363,14 +1354,14 @@ static void ppmap_put_all_free__alloc_val(void **state) {
 	ppmap_free(from);
 }
 
-static void ppmap_put_all_free__duplicate_val(void **state) {
-	const char *val = strdup("to be freed only once");
-
-	const struct PPmap *map = ppmap_init();
-	ppmap_put_many(map, K0, val, K1, val, NULL);
+static void ppmap_put_all_free__free_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
+	ppmap_put_many(map, K0, V0, K1, V0, NULL);
 
 	const struct PPmap *from = ppmap_init();
 	ppmap_put_many(from, K0, V4, K1, V5, NULL);
+
+	expect_ptr(mock_free, ptr, V0); // no double free
 
 	assert_int_equal(ppmap_put_all_free(map, from), 2);
 
@@ -1379,25 +1370,6 @@ static void ppmap_put_all_free__duplicate_val(void **state) {
 	assert_ptr_equal(map->vals[0], V4);
 	assert_ptr_equal(map->keys[1], K1);
 	assert_ptr_equal(map->vals[1], V5);
-
-	ppmap_free(map);
-	ppmap_free(from);
-}
-
-static void ppmap_put_all_free__free_val(void **state) {
-	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
-	assert_nul(ppmap_put(map, K0, V0));
-
-	const struct PPmap *from = ppmap_init();
-	ppmap_put_many(from, K0, V4, NULL);
-
-	expect_ptr(mock_free, ptr, V0);
-
-	assert_int_equal(ppmap_put_all_free(map, from), 1);
-
-	assert_int_equal(map->size, 1);
-	assert_ptr_equal(map->keys[0], K0);
-	assert_ptr_equal(map->vals[0], V4);
 
 	ppmap_free(map);
 	ppmap_free(from);
@@ -1558,14 +1530,15 @@ static void ppmap_put_all_clone_free__allow_null_val(void **state) {
 	ppmap_free(map);
 }
 
-static void ppmap_put_all_clone_free__duplicate_val(void **state) {
+static void ppmap_put_all_clone_free__free_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .clone_val = mock_clone, .free_val = mock_free, });
 	ppmap_put_many(map, K0, V0, K1, V0, NULL);
 
 	const struct PPmap *from = ppmap_init();
 	ppmap_put_many(from, K0, V4, K1, V5, NULL);
 
-	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V0); // no double free
+
 	expect_ptr(mock_clone, ptr, V4); will_return_ptr_type(mock_clone, V4, void*);
 	expect_ptr(mock_clone, ptr, V5); will_return_ptr_type(mock_clone, V5, void*);
 
@@ -1818,19 +1791,6 @@ static void ppmap_remove_all_free__present(void **state) {
 	ppmap_free(map);
 }
 
-static void ppmap_remove_all_free__duplicate_val(void **state) {
-	const char *val = strdup("to be freed only once");
-
-	const struct PPmap *map = ppmap_init();
-	ppmap_put_many(map, K0, val, K1, val, NULL);
-
-	assert_int_equal(ppmap_remove_all_free(map), 2);
-
-	assert_int_equal(map->size, 0);
-
-	ppmap_free(map);
-}
-
 static void ppmap_remove_all_free__free_key(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_key = mock_free, });
 	ppmap_put_many(map, K0, strdup("0"), K1, strdup("1"), NULL);
@@ -1847,9 +1807,9 @@ static void ppmap_remove_all_free__free_key(void **state) {
 
 static void ppmap_remove_all_free__free_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
-	ppmap_put_many(map, K0, V0, K1, V1, K2, V0, NULL);
+	ppmap_put_many(map, K0, V0, K1, V0, K2, V1, NULL);
 
-	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V0); // no double free
 	expect_ptr(mock_free, ptr, V1);
 
 	assert_int_equal(ppmap_remove_all_free(map), 3);
@@ -1906,23 +1866,6 @@ static void ppmap_remove_in__exists(void **state) {
 	assert_int_equal(map->size, 1);
 	assert_ptr_equal(map->keys[0], K1);
 	assert_ptr_equal(map->vals[0], V1);
-
-	ppmap_free(in);
-	ppmap_free(map);
-}
-
-static void ppmap_remove_in__duplicate_val(void **state) {
-	const struct PPmap *map = ppmap_init();
-	ppmap_put_many(map, K0, V0, K1, V1, K2, V2, NULL);
-
-	const struct PPmap *in = ppmap_init();
-	ppmap_put_many(in, K0, V4, K1, V5, K3, V3, NULL);
-
-	assert_int_equal(ppmap_remove_in(map, in), 2);
-
-	assert_int_equal(map->size, 1);
-	assert_ptr_equal(map->keys[0], K2);
-	assert_ptr_equal(map->vals[0], V2);
 
 	ppmap_free(in);
 	ppmap_free(map);
@@ -2005,25 +1948,6 @@ static void ppmap_remove_in_free__exists(void **state) {
 	ppmap_free(in);
 }
 
-static void ppmap_remove_in_free__duplicate_val(void **state) {
-	const char *val = strdup("to be freed only once");
-
-	const struct PPmap *map = ppmap_init();
-	ppmap_put_many(map, K0, val, K1, val, K2, V2, NULL);
-
-	const struct PPmap *in = ppmap_init();
-	ppmap_put_many(in, K0, V0, K1, V1, K3, V5, NULL);
-
-	assert_int_equal(ppmap_remove_in_free(map, in), 2);
-
-	assert_int_equal(map->size, 1);
-	assert_ptr_equal(map->keys[0], K2);
-	assert_ptr_equal(map->vals[0], V2);
-
-	ppmap_free(in);
-	ppmap_free(map);
-}
-
 static void ppmap_remove_in_free__allow_null_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, .free_val = mock_free, });
 	ppmap_put_many(map, K0, NULL, K1, V1, K2, NULL, NULL);
@@ -2045,18 +1969,18 @@ static void ppmap_remove_in_free__allow_null_val(void **state) {
 
 static void ppmap_remove_in_free__free_val(void **state) {
 	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .free_val = mock_free, });
-	ppmap_put_many(map, K0, V0, K1, V1, NULL);
+	ppmap_put_many(map, K0, V0, K1, V0, K2, V2, NULL);
 
 	const struct PPmap *in = ppmap_init();
-	ppmap_put_many(in, K0, V4, K2, V5, NULL);
+	ppmap_put_many(in, K0, V3, K1, V4, K3, V5, NULL);
 
-	expect_ptr(mock_free, ptr, V0);
+	expect_ptr(mock_free, ptr, V0); // no double free
 
-	assert_int_equal(ppmap_remove_in_free(map, in), 1);
+	assert_int_equal(ppmap_remove_in_free(map, in), 2);
 
 	assert_int_equal(map->size, 1);
-	assert_ptr_equal(map->keys[0], K1);
-	assert_ptr_equal(map->vals[0], V1);
+	assert_ptr_equal(map->keys[0], K2);
+	assert_ptr_equal(map->vals[0], V2);
 
 	ppmap_free(map);
 	ppmap_free(in);
@@ -2748,7 +2672,6 @@ int main(void) {
 		TEST(ppmap_free_vals__null),
 		TEST(ppmap_free_vals__empty),
 		TEST(ppmap_free_vals__missing_val),
-		TEST(ppmap_free_vals__duplicate_val),
 		TEST(ppmap_free_vals__free_val),
 		TEST(ppmap_free_vals__allow_null_val),
 
@@ -2850,7 +2773,6 @@ int main(void) {
 		TEST(ppmap_put_all_free__no_null_vals),
 		TEST(ppmap_put_all_free__allow_null_val),
 		TEST(ppmap_put_all_free__alloc_val),
-		TEST(ppmap_put_all_free__duplicate_val),
         TEST(ppmap_put_all_free__free_val),
 
 		TEST(ppmap_put_all_clone__null),
@@ -2862,7 +2784,7 @@ int main(void) {
 		TEST(ppmap_put_all_clone_free__no_clone_val),
 		TEST(ppmap_put_all_clone_free__no_null_vals),
 		TEST(ppmap_put_all_clone_free__allow_null_val),
-		TEST(ppmap_put_all_clone_free__duplicate_val),
+		TEST(ppmap_put_all_clone_free__free_val),
 
 		TEST(ppmap_remove__null),
 		TEST(ppmap_remove__null_key),
@@ -2889,7 +2811,6 @@ int main(void) {
 		TEST(ppmap_remove_all_free__null),
 		TEST(ppmap_remove_all_free__empty),
 		TEST(ppmap_remove_all_free__present),
-		TEST(ppmap_remove_all_free__duplicate_val),
 		TEST(ppmap_remove_all_free__free_key),
 		TEST(ppmap_remove_all_free__free_val),
 		TEST(ppmap_remove_all_free__allow_null_val),
@@ -2897,14 +2818,12 @@ int main(void) {
 		TEST(ppmap_remove_in__null),
 		TEST(ppmap_remove_in__empty),
 		TEST(ppmap_remove_in__exists),
-		TEST(ppmap_remove_in__duplicate_val),
 		TEST(ppmap_remove_in__free_key),
 		TEST(ppmap_remove_in__allow_null_val),
 
 		TEST(ppmap_remove_in_free__null),
 		TEST(ppmap_remove_in_free__empty),
 		TEST(ppmap_remove_in_free__exists),
-		TEST(ppmap_remove_in_free__duplicate_val),
 		TEST(ppmap_remove_in_free__free_val),
 		TEST(ppmap_remove_in_free__allow_null_val),
 
