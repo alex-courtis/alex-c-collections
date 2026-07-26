@@ -75,7 +75,7 @@ static bool filter_blocks(const struct PPmapFilter *filter, const void* const ke
 		(filter->key_val_data && !filter->key_val_data(key,  val, filter->data));
 }
 
-// return true if val_old populated
+// return true if overwritten - val_old populated, maybe NULL
 static bool put(const void **val_old, const struct PPmap* const map, const void* const key, const void* const val, fn_clone alloc_val, bool overwrite) {
 	if (!val && !map->params.allow_null_val)
 		return NULL;
@@ -133,31 +133,45 @@ static bool put(const void **val_old, const struct PPmap* const map, const void*
 	return false;
 }
 
-static bool put_free(const struct PPmap* const map, const void* const key, const void* const val, fn_clone clone_val) {
-	const void *val_old = NULL;
-	bool was_overwritten = put(&val_old, map, key, val, clone_val, true);
-
-	if (val_old) {
-		map->params.free_val ? map->params.free_val((void*)val_old) : free((void*)val_old);
-	}
-
-	return was_overwritten;
-}
-
 static size_t put_all(const struct PPmap* const map, const struct PPmap* const from, fn_clone clone_val, bool do_free) {
 	size_t overwritten = 0;
 
+	// values to free, no duplicates or nulls
+	const void **to_free = calloc(map->size, sizeof(void*));
+	size_t ntf = 0;
+
 	for (const void **k = from->keys, **v = from->vals; k < from->keys + from->size; k++, v++) {
-		if (do_free) {
-			if (put_free(map, *k, *v, clone_val)) {
-				overwritten++;
-			}
-		} else {
-			if (put(NULL, map, *k, *v, clone_val, true)) {
-				overwritten++;
+		const void *val_old = NULL;
+
+		if (put(&val_old, map, *k, *v, clone_val, true)) {
+			overwritten++;
+
+			if (do_free && val_old) {
+				bool dup = false;
+				for (const void **vf = to_free; vf < to_free + ntf; vf++) {
+					if (val_old == *vf) {
+						dup = true;
+						break;
+					}
+				}
+
+				if (!dup) {
+					*(to_free + ntf++) = val_old;
+				}
 			}
 		}
 	}
+
+	if (do_free) {
+		for (const void **vtf = to_free; vtf < to_free + ntf; vtf++) {
+			if (map->params.free_val) {
+				map->params.free_val((void*)*vtf);
+			} else {
+				free((void*)*vtf);
+			}
+		}
+	}
+	free(to_free);
 
 	return overwritten;
 }
@@ -293,21 +307,21 @@ static size_t remove_in(const struct PPmap* const map, const struct PPmap* const
 	size_t ntf = 0;
 
 	for (const void **k = in->keys; k < in->keys + in->size; k++) {
-		const void *val = NULL;
-		if (remove_(&val, map, *k, false)) {
+		const void *val_old = NULL;
+		if (remove_(&val_old, map, *k, false)) {
 			removed++;
 
-			if (val && do_free) {
+			if (val_old && do_free) {
 				bool dup = false;
 				for (const void **vf = to_free; vf < to_free + ntf; vf++) {
-					if (val == *vf) {
+					if (val_old == *vf) {
 						dup = true;
 						break;
 					}
 				}
 
 				if (!dup) {
-					*(to_free + ntf++) = val;
+					*(to_free + ntf++) = val_old;
 				}
 			}
 		}
@@ -581,7 +595,17 @@ const void *ppmap_put_if_absent(const struct PPmap* const map, const void* const
 }
 
 bool ppmap_put_free(const struct PPmap* const map, const void* const key, const void* const val) {
-	return map ? put_free(map, key, val, map->params.alloc_val) : false;
+	if (!map)
+		return false;
+
+	const void *val_old = NULL;
+	bool was_overwritten = put(&val_old, map, key, val, map->params.alloc_val, true);
+
+	if (val_old) {
+		map->params.free_val ? map->params.free_val((void*)val_old) : free((void*)val_old);
+	}
+
+	return was_overwritten;
 }
 
 size_t ppmap_put_all(const struct PPmap* const map, const struct PPmap* const from) {
