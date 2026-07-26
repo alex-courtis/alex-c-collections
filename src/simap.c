@@ -275,6 +275,10 @@ bool simap_it_remove(const struct SImapIt* const it) {
 }
 
 bool simap_equal(const struct SImap* const a, const struct SImap* const b) {
+	return a && b ? ppmap_equal(a->ppmap, b->ppmap) : false;
+}
+
+bool simap_equal_ordered(const struct SImap* const a, const struct SImap* const b) {
 	return a && b ? ppmap_equal_ordered(a->ppmap, b->ppmap) : false;
 }
 

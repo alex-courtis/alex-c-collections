@@ -137,10 +137,11 @@ bool simap_it_remove(const struct SImapIt* const it);
  * Comparison
  */
 
-// TODO unordered variant
+// same length, keys and vals equal, uses case from a
+bool simap_equal(const struct SImap* const a, const struct SImap* const b);
 
 // same length, keys and vals equal in order, uses case from a
-bool simap_equal(const struct SImap* const a, const struct SImap* const b);
+bool simap_equal_ordered(const struct SImap* const a, const struct SImap* const b);
 
 /*
  * Conversion
