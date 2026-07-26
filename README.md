@@ -68,5 +68,3 @@ libc string helpers
 function typedefs for equals, less_than, predicates, freeing, cloning and to-string.
 
 Some convenience implementations provided.
-
-TODO: doxygen

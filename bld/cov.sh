@@ -56,7 +56,7 @@ for EXEC in ${EXECS}; do
 		"./${EXEC}"
 	fi
 
-	# TODO regression in lcov 2.5 results in unpredictable incorrect branch reports for fn, just remove it as it's not important
+	# regression in lcov 2.5 results in unpredictable incorrect branch reports for fn, just remove it as it's not important
 	rm -f src/fn.gcno src/fn.gcda
 
 	# generate coverage info for the individual test
