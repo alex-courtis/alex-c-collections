@@ -163,6 +163,8 @@ void plist_sort(const struct Plist* const list, fn_less_than less_than_val);
  * Comparison
  */
 
+// TODO unordered variant
+
 // same length, vals equal in order, uses params from a [equal_val]
 bool plist_equal(const struct Plist* const a, const struct Plist* const b);
 
