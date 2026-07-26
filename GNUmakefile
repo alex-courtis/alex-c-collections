@@ -8,49 +8,57 @@ SRC_O = $(SRC_C:.c=.o)
 TST_H = $(wildcard tst/*.h)
 TST_C = $(wildcard tst/*.c)
 TST_O = $(TST_C:.c=.o)
-TST_E = $(patsubst tst/%.c,%,$(wildcard tst/tst-*.c))
-TST_T = $(patsubst tst-%,test-%,$(TST_E))
+TST_E = $(filter tst/tst%,$(TST_O:.o=))
 
 all: $(SRC_O)
 
-$(SRC_O): $(INC_H) config.mk GNUmakefile
-$(TST_O): $(TST_H) $(SRC_O) config.mk GNUmakefile
-$(TST_E): $(SRC_O) $(TST_O)
-	$(CC) -o $(@) tst/$(@).o $(SRC_O) $(LDFLAGS) $(LDLIBS)
-
 clean:
-	rm -f $(SRC_O) $(TST_O) $(TST_E)
+	rm -f $(SRC_O) $(TST_O) $(TST_E) actual.* expected.*
+	find . -name '*.gcno' -type f -delete -print
+	find . -name '*.gcda' -type f -delete -print
 
 #
-# valgrind
+# lib
 #
-%-vg: VALGRIND = valgrind \
-	--error-exitcode=1 \
-	--leak-check=full \
-	--show-leak-kinds=all \
-	--errors-for-leak-kinds=all \
-	$(VG_SUPP) \
-	--gen-suppressions=all
-%-vg: % ;
+$(SRC_O): CFLAGS += $(COVCFLAGS)
+$(SRC_O): $(INC_H) config.mk GNUmakefile
 
 #
 # test
 #
-test: $(TST_T)
-test-vg: $(TST_T)
 
-$(TST_T): $(TST_E)
-	$(VALGRIND) ./$(patsubst test-%,tst-%,$(@))
+$(TST_O): $(TST_H) $(SRC_O) config.mk GNUmakefile
+
+# test executables exclude: other tst-x.o
+$(TST_E): $(SRC_O) $(filter-out tst/tst%,$(TST_O))
+
+# test-x builds tst/tst-x and executes it
+test: $(patsubst tst/tst%,test%,$(TST_E))
+test-%: tst/tst-%
+	./$(^)
+
+# test-x-vg builds tst/tst-x and executes it with valgrind
+test-vg: $(patsubst tst/tst%,test%-vg,$(TST_E))
+test-%-vg: tst/tst-%
+	$(VALGRIND) ./$(^)
+
+# individual test wraps
+tst/tst-fs: LDFLAGS += -Wl,--wrap=fclose
+
+ifneq (,$(or $(findstring test,$(MAKECMDGOALS)), $(findstring tst/tst,$(MAKECMDGOALS))))
+CFLAGS += -Wno-unused-function
+endif
 
 #
 # iwyu
 #
-IWYU = include-what-you-use \
-	   -Xiwyu --no_fwd_decls \
-	   -Xiwyu --error=1 \
-	   -Xiwyu --verbose=3
-
-iwyu: CC = $(IWYU) -Xiwyu --check_also="inc/*h" -Xiwyu --check_also="tst/*h"
+iwyu: override CC = include-what-you-use \
+	-Xiwyu --no_fwd_decls \
+	-Xiwyu --error=1 \
+	-Xiwyu --verbose=3 \
+	-Xiwyu --mapping_file=.iwyu.imp \
+	-Xiwyu --check_also="inc/*h" \
+	-Xiwyu --check_also="tst/*h"
 iwyu: clean $(SRC_O) $(TST_O)
 
 #
@@ -58,12 +66,15 @@ iwyu: clean $(SRC_O) $(TST_O)
 #
 cppcheck: $(INC_H) $(SRC_C) $(TST_H) $(TST_C)
 	cppcheck $(^) \
-		--enable=warning,unusedFunction,performance,portability,style \
+		--enable=all \
+		--disable=information \
+		--inconclusive \
 		--check-level=exhaustive \
+		--inline-suppr \
 		--suppressions-list=.cppcheck.supp \
 		--error-exitcode=1 \
 		$(CPPFLAGS)
 
-.PHONY: all clean test test-vg $(TST_T) iwyu cppcheck
+.PHONY: all clean test test-vg iwyu cppcheck
 
 .NOTPARALLEL: iwyu test test-vg

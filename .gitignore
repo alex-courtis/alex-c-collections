@@ -1,5 +1,13 @@
 **/*.o
 
-/tst-*
+**/*.gcda
+**/*.gcno
+
+tst/tst-*
+!tst/tst-*.h
+!tst/tst-*.c
+
+actual.*
+expected.*
 
 /.ccls-cache

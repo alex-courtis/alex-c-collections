@@ -6,96 +6,149 @@
 
 #include "fn.h"
 
-struct SList {
-	void *val;
-	struct SList *nex;
+/*
+ * `Plist` with string values
+ * Values are memory managed.
+ */
+struct Slist; // IWYU pragma: keep
+
+/*
+ * Entry iterator.
+ */
+struct SlistItState; // IWYU pragma: keep
+struct SlistIt {
+	const void* val;
+	struct SlistItState *st;
+};
+
+/*
+ * Filter, must match all when multiple predicates specified, empty filter matches anything
+ */
+struct SlistFilter {
+	// test vals
+	fn_pred_p val;
+
+	// test vals against user data
+	const void *data;
+	fn_pred_sp val_data;
+};
+
+/*
+ * Optional constructor params (default)
+ */
+struct SlistParams {
+	const bool allow_null_val;   // false
+	const bool case_insensitive; // false
+	const size_t initial;        // 10
+	const size_t grow;           // 10
 };
 
 /*
  * Lifecycle
  */
 
-// deep clone the list, cloning values with fn_clone_val, NULL means shallow copy
-struct SList *slist_clone(struct SList *head, fn_clone_val);
+// construct with SlistParams defaults
+const struct Slist *slist_init(void);
 
-// clone the list, setting val pointers
-struct SList *slist_shallow_clone(struct SList *head);
+// construct with params
+const struct Slist *slist_init_with(const struct SlistParams params);
+
+// clone a list
+const struct Slist *slist_clone(const struct Slist* const from);
 
 // free list
-void slist_free(struct SList **head);
+void slist_free(const struct Slist* const list);
 
-// free list and vals, NULL fn_free_val uses free()
-void slist_free_vals(struct SList **head, fn_free_val);
-
-/*
- * Mutate
- */
-
-// append val to a list
-struct SList *slist_append(struct SList **head, void *val);
-
-// remove an item, returning the val
-void *slist_remove(struct SList **head, struct SList **item);
-
-// remove items, NULL fn_equals is val pointer comparison
-size_t slist_remove_all(struct SList **head, fn_equals, const void *b);
-
-// remove items and free vals, NULL equals is val pointer comparison, NULL fn_free_val calls free()
-size_t slist_remove_all_free(struct SList **head, fn_equals, const void *b, fn_free_val);
-
-// merges list2 into list1, such that the resulting list contains only elements that appeared exclusively in list1 or list2.
-void slist_xor_free(struct SList **head1, struct SList *head2, fn_equals, fn_free_val, fn_clone_val);
+// free iterator
+void slist_it_free(const struct SlistIt* const it);
 
 /*
  * Access
  */
 
-// val at position
-void *slist_at(const struct SList *head, size_t index);
+// true if this list contains the specified element
+bool slist_contains(const struct Slist* const list, const char* const val);
 
-// find
-struct SList *slist_find(struct SList *head, fn_test);
+// put first index of val in index if present, 0 and return false if not present
+bool slist_index_of(size_t *index, const struct Slist* const list, const char* const val);
 
-// find a val
-void *slist_find_val(struct SList *head, fn_test);
+// element at zero indexed position
+const char *slist_at(const struct Slist* const list, const size_t i);
 
-// find, NULL fn_equals is val pointer comparison
-struct SList *slist_find_equal(struct SList *head, fn_equals, const void *b);
+// find the first, NULL when no matches or allow_null_val and NULL present, first entry when empty filter
+const char *slist_find(const struct Slist* const list, const struct SlistFilter filter);
 
-// find a val, NULL fn_equals is val pointer comparison
-void *slist_find_equal_val(struct SList *head, fn_equals, const void *b);
+// create an iterator at the start, caller must slist_it_free or invoke slist_next/prev until NULL
+const struct SlistIt *slist_it_start(const struct Slist* const list);
+
+// create an iterator at the end
+const struct SlistIt *slist_it_end(const struct Slist* const list);
+
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
+const struct SlistIt *slist_filter_it_start(const struct Slist* const list, const struct SlistFilter filter);
+
+// create a filtering iterator at the end of the list, return NULL when no matches, last entry when empty filter
+const struct SlistIt *slist_filter_it_end(const struct Slist* const list, const struct SlistFilter filter);
+
+// next iterator val, NULL at end of list
+const struct SlistIt *slist_it_next(const struct SlistIt* const it);
+
+// prev iterator val, NULL at beginning of list
+const struct SlistIt *slist_it_prev(const struct SlistIt* const it);
+
+/*
+ * Mutate
+ */
+
+// add at index, appends when index >= size, return true if added
+bool slist_insert(const struct Slist* const list, size_t index, const char* const val);
+
+// add to end, return true if added
+bool slist_append(const struct Slist* const list, const char* const val);
+
+// add to start, return true if added
+bool slist_prepend(const struct Slist* const list, const char* const val);
+
+// replace val at index, return true if replaced, NOP when index >= size
+bool slist_replace(const struct Slist* const list, size_t index, const char* const val);
+
+// add from vals, return number added
+size_t slist_append_all(const struct Slist* const list, const struct Slist* const from);
+
+// if the list contains val, remove the first occurrence and return true
+bool slist_remove(const struct Slist* const list, const char* const val);
+
+// remove val at i, return true if removed
+bool slist_remove_at(const struct Slist* const list, const size_t i);
+
+// remove all vals, returning number removed
+size_t slist_remove_all(const struct Slist* const list);
+
+// remove the it.val, return true if removed, it is unusable, slist_it_next or slist_it_prev must be called
+bool slist_it_remove(const struct SlistIt* const it);
+
+// shell sort in place
+void slist_sort(const struct Slist* const list);
 
 /*
  * Comparison
  */
 
-// same length and every item equal in order, NULL fn_equals compares pointers
-bool slist_equal(struct SList *a, struct SList *b, fn_equals);
+// same length, vals equal
+bool slist_equal(const struct Slist* const a, const struct Slist* const b);
 
-/*
- * Utility
- */
-
-// sort into a new list
-struct SList *slist_sort(struct SList *head, fn_less_than);
-
-// move items between lists where from value equals b, NULL fn_equals does nothing
-void slist_move(struct SList **to, struct SList **from, fn_equals, const void *b);
-
-// move items between lists where from value equals b, NULL fn_equals does nothing
-void slist_move(struct SList **to, struct SList **from, fn_equals, const void *b);
+// same length, vals equal in order
+bool slist_equal_ordered(const struct Slist* const a, const struct Slist* const b);
 
 /*
  * Info
  */
 
-// to string, user frees
-// lines with format "%s\n"
-// values must be char*
-char *slist_str(const struct SList *head);
+// to string, user frees, format "%s\n"
+char *slist_str(const struct Slist* const list);
 
-// length
-size_t slist_length(const struct SList *head);
+// number of values
+size_t slist_size(const struct Slist* const list);
 
 #endif // SLIST_H
 

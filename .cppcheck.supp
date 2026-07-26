@@ -1,10 +1,25 @@
 unusedFunction:tst/asserts.h
-unusedFunction:tst/expects.h
 
-unusedFunction:tst/util-file.c
+unusedFunction:tst/expects.h
+unusedFunction:tst/expect-*list.h
+unusedFunction:tst/expect-*map.h
+unusedFunction:tst/expect-*set.h
+
+unusedFunction:tst/mock-fn.c
+
+staticFunction:tst/util-col.c
 
 # this is just not practical
 nullPointerOutOfMemory
+nullPointerArithmeticOutOfMemory
 
 # does not identify correctly
 unusedStructMember
+
+# not sure why this doesn't work
+missingIncludeSystem
+
+# this is explicitly OK
+varFuncNullUB:tst/*c
+
+# vim:ft=conf

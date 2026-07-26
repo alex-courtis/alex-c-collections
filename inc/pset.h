@@ -7,91 +7,163 @@
 #include "fn.h"
 
 /*
- * Array backed ordered set.
+ * Array backed pointer set.
+ * Entries preserve insertion order.
  * Operations linearly traverse values.
  * NULL not permitted.
- * Not thread safe.
-*/
-struct PSet; // IWYU pragma: keep
+ */
+struct Pset; // IWYU pragma: keep
 
 /*
  * Entry iterator.
  */
-struct PSetIter; // IWYU pragma: keep
+struct PsetItState; // IWYU pragma: keep
+struct PsetIt {
+	const void* val;
+	struct PsetItState *st;
+};
+
+/*
+ * Filter, must match all when multiple predicates specified, empty filter matches anything
+ */
+struct PsetFilter {
+	// test vals
+	fn_pred_p val;
+
+	// test vals against user data
+	const void *data;
+	fn_pred_pp val_data;
+};
+
+/*
+ * Optional constructor params (default)
+ */
+struct PsetParams {
+	const fn_equal equal_val; // compare val pointers
+	const fn_clone alloc_val; // use pointer
+	const fn_free free_val;   // free
+	const fn_clone clone_val; // use pointer
+	const fn_str str_val;     // %p
+	const size_t initial;     // 10
+	const size_t grow;        // 10
+};
 
 /*
  * Lifecycle
  */
 
-// construct a set with initial size 10, growing by 10 as necessary
-const struct PSet *pset_init(void);
+// construct with PsetParams defaults
+const struct Pset *pset_init(void);
 
-// construct a set with initial size, grow as needed, NULL on zero param
-const struct PSet *pset_init_with(const size_t initial, const size_t grow);
+// construct with params
+const struct Pset *pset_init_with(const struct PsetParams params);
+
+// same params, caller frees vals when alloc_val present [alloc_val]
+const struct Pset *pset_clone(const struct Pset* const from);
+
+// set ordered vals, caller frees vals, NULL when NULL clone_val, alloc_val overrides clone_val [alloc_val, clone_val]
+const struct Pset *pset_clone_deep(const struct Pset* const from);
 
 // free set
-void pset_free(const void* const set);
+void pset_free(const struct Pset* const set);
 
-// free set and vals, NULL fn_free_val uses free()
-void pset_free_vals(const struct PSet* const set, fn_free_val);
+// free set and vals [free_val]
+void pset_free_vals(const struct Pset* const set);
 
-// free iter
-void pset_iter_free(const struct PSetIter* const iter);
+// free iterator
+void pset_it_free(const struct PsetIt* const it);
 
 /*
  * Access
  */
 
-// true if this set contains the specified element
-bool pset_contains(const struct PSet* const set, const void* const val);
+// true if this set contains the specified element [equal_val]
+bool pset_contains(const struct Pset* const set, const void* const val);
 
-// create an iterator, caller must pset_iter_free or invoke pset_next until NULL
-const struct PSetIter *pset_iter(const struct PSet* const set);
+// element at zero indexed position
+const void *pset_at(const struct Pset* const set, const size_t i);
 
-// next iterator value, NULL at end of set
-const struct PSetIter *pset_iter_next(const struct PSetIter* const iter);
+// find the first, NULL when no matches, first entry when empty filter
+const void *pset_find(const struct Pset* const set, const struct PsetFilter filter);
 
-// iterator value, NULL on NULL iter
-const void *pset_iter_val(const struct PSetIter* const iter);
+// create an iterator, caller must pset_it_free or invoke pset_next until NULL
+const struct PsetIt *pset_it(const struct Pset* const set);
+
+// create a filtering iterator, return NULL when no matches, first entry when empty filter
+const struct PsetIt *pset_filter_it(const struct Pset* const set, const struct PsetFilter filter);
+
+// next iterator val, NULL at end of set
+const struct PsetIt *pset_it_next(const struct PsetIt* const it);
 
 /*
  * Mutate
  */
 
-// true if this set did not already contain the specified element
-bool pset_add(const struct PSet* const set, const void* const val);
+// add if the set does not contain val, return true if added [equal_val, alloc_val]
+bool pset_add(const struct Pset* const set, const void* const val);
 
-// true if this set contained the element
-bool pset_remove(const struct PSet* const set, const void* const val);
+// add from vals not contained in the set, return number added [equal_val, alloc_val]
+size_t pset_add_all(const struct Pset* const set, const struct Pset* const from);
+
+// add from vals not contained in the set, return number added, NOP when NULL clone_val [equal_val, clone_val]
+size_t pset_add_all_clone(const struct Pset* const set, const struct Pset* const from);
+
+// remove val, return val if removed [equal_val]
+const void *pset_remove(const struct Pset* const set, const void* const val);
+
+// remove and free val, return true if removed [equal_val, alloc_val, free_val]
+bool pset_remove_free(const struct Pset* const set, const void* const val);
+
+// remove all vals, returning number removed
+size_t pset_remove_all(const struct Pset* const set);
+
+// remove all vals and free, returning number removed [free_val]
+size_t pset_remove_all_free(const struct Pset* const set);
+
+// remove vals contained in, return number removed [equal_val]
+size_t pset_remove_in(const struct Pset* const set, const struct Pset* const in);
+
+// remove and free vals contained in, return number removed [equal_val, free_val]
+size_t pset_remove_in_free(const struct Pset* const set, const struct Pset* const in);
+
+// remove the it.val, return val if removed, it is unusable, pset_it_next must be called
+const void *pset_it_remove(const struct PsetIt* const it);
+
+// remove and free the it.val, return true if removed, it is unusable, pset_it_next must be called [free_val]
+bool pset_it_remove_free(const struct PsetIt* const it);
+
+// shell sort in place, NULL less_than_val NOP
+void pset_sort(const struct Pset* const set, fn_less_than less_than_val);
 
 /*
  * Comparison
  */
 
-// same length, vals equal in order, NULL equal compares pointers
-bool pset_equal(const struct PSet* const a, const struct PSet* const b, bool (*equal)(const void *a, const void *b));
+// same length, contains same vals, uses params from a [equal_val]
+bool pset_equal(const struct Pset* const a, const struct Pset* const b);
+
+// same length, vals equal in order, uses params from a [equal_val]
+bool pset_equal_ordered(const struct Pset* const a, const struct Pset* const b);
 
 /*
  * Conversion
  */
 
-// ordered val pointers to set, caller frees list only
-struct SList *pset_vals_slist(const struct PSet* const set);
+// set ordered vals, caller frees contents when alloc_val present [alloc_val]
+const struct Plist *pset_plist(const struct Pset* const set);
+
+// set ordered vals, caller frees contents, NULL when NULL clone_val [clone_val]
+const struct Plist *pset_plist_clone(const struct Pset* const set);
 
 /*
  * Info
  */
 
-// to string, user frees
-// lines with format "%s\n"
-// values must be char*
-char *pset_str(const struct PSet* const set);
+// to string, user frees, format "str_val\n"
+char *pset_str(const struct Pset* const set);
 
 // number of values
-size_t pset_size(const struct PSet* const set);
-
-// current capacity: initial + n * grow
-size_t pset_capacity(const struct PSet* const set);
+size_t pset_size(const struct Pset* const set);
 
 #endif // PSET_H
 

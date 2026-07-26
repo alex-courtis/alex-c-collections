@@ -3,293 +3,227 @@
 #include <string.h>
 
 #include "fn.h"
-#include "str.h"
+#include "plist.h"
 
 #include "slist.h"
 
-struct SList *slist_clone(struct SList *head, fn_clone_val clone_val) {
-	struct SList *c, *i;
+struct Slist {
+	const struct SlistParams params;
+	const struct Plist *plist;
+};
 
-	c = NULL;
-	for (i = head; i; i = i->nex) {
-		if (clone_val) {
-			slist_append(&c, clone_val(i->val));
-		} else {
-			slist_append(&c, i->val);
-		}
+struct SlistItState {
+	const struct PlistIt *pit;
+};
+
+static const struct SlistIt *it_init(const struct PlistIt *pit) {
+	if (!pit)
+		return NULL;
+
+	struct SlistIt *it = calloc(1, sizeof(struct SlistIt));
+	it->st = calloc(1, sizeof(struct SlistItState));
+
+	it->st->pit = pit;
+	it->val = pit->val;
+
+	return it;
+}
+
+static const struct SlistIt *it_next_prev(const struct SlistIt* const it, bool prev) {
+	if (!it->st) {
+		slist_it_free(it);
+		return NULL;
 	}
 
-	return c;
-}
-
-struct SList *slist_shallow_clone(struct SList *head) {
-	return slist_clone(head, NULL);
-}
-
-void slist_free(struct SList **head) {
-	struct SList *i = *head;
-	while (i) {
-		struct SList *f = i;
-		i = i->nex;
-		free(f);
-	}
-
-	*head = NULL;
-}
-
-void slist_free_vals(struct SList **head, fn_free_val free_val) {
-	struct SList *i;
-
-	for (i = *head; i; i = i->nex) {
-		if (free_val) {
-			free_val(i->val);
-		} else {
-			free(i->val);
-		}
-	}
-
-	slist_free(head);
-}
-
-struct SList *slist_append(struct SList **head, void *val) {
-	struct SList *i, *l;
-
-	i = calloc(1, sizeof(struct SList));
-	i->val = val;
-
-	if (*head) {
-		for (l = *head; l->nex; l = l->nex);
-		l->nex = i;
+	if (prev) {
+		it->st->pit = plist_it_prev(it->st->pit);
 	} else {
-		*head = i;
+		it->st->pit = plist_it_next(it->st->pit);
 	}
 
-	return i;
-}
-
-void *slist_remove(struct SList **head, struct SList **item) {
-	struct SList *i, *f, *p;
-	void *removed = NULL;
-
-	p = NULL;
-	f = NULL;
-
-	for (i = *head; i; i = i->nex) {
-		if (i == *item) {
-			f = *item;
-			break;
-		}
-		p = i;
-	}
-
-	if (f) {
-		if (p) {
-			p->nex = f->nex;
-		} else {
-			*head = f->nex;
-		}
-		removed = f->val;
-		free(f);
-		*item = NULL;
-	}
-
-	return removed;
-}
-
-size_t slist_remove_all(struct SList **head, fn_equals equals, const void *b) {
-	struct SList *i;
-	size_t removed = 0;
-
-	while ((i = slist_find_equal(*head, equals, b))) {
-		slist_remove(head, &i);
-		removed++;
-	}
-
-	return removed;
-}
-
-size_t slist_remove_all_free(struct SList **head, fn_equals equals, const void *b, fn_free_val free_val) {
-	struct SList *i;
-	size_t removed = 0;
-
-	while ((i = slist_find_equal(*head, equals, b))) {
-		if (free_val) {
-			free_val(i->val);
-		} else {
-			free(i->val);
-		}
-		slist_remove(head, &i);
-		removed++;
-	}
-
-	return removed;
-}
-
-void slist_xor_free(struct SList **head1, struct SList *head2, fn_equals equals, fn_free_val free_val, fn_clone_val clone_val) {
-	struct SList *i = head2;
-
-	while (i) {
-		if (!slist_remove_all_free(head1, equals, i->val, free_val)) {
-			if (clone_val) {
-				slist_append(head1, clone_val(i->val));
-			} else {
-				slist_append(head1, i->val);
-			}
-		}
-
-		i = i->nex;
+	if (it->st->pit) {
+		struct SlistIt *it_m = (struct SlistIt*)it;
+		it_m->val = it->st->pit->val;
+		return it;
+	} else {
+		slist_it_free(it);
+		return NULL;
 	}
 }
 
-void *slist_at(const struct SList *head, size_t index) {
-	size_t c = 0;
-	for (const struct SList *i = head; i; i = i->nex, c++) {
-		if (c == index) {
-			return i->val;
-		}
-	}
+static struct PlistFilter plist_filter_init(const struct SlistFilter *filter) {
+	const struct PlistFilter ppmap_filter = {
+		.val = (fn_pred_p)filter->val,
+		.data = filter->data,
+		.val_data = (fn_pred_pp)filter->val_data,
+	};
 
-	return NULL;
+	return ppmap_filter;
 }
 
-struct SList *slist_find(struct SList *head, fn_test test) {
-	struct SList *i;
+const struct Slist *slist_init(void) {
+	const struct SlistParams params = { 0 };
+	return slist_init_with(params);
+}
 
-	if (!test)
+const struct Slist *slist_init_with(const struct SlistParams params) {
+	const struct PlistParams plist_params = {
+		.equal_val = params.case_insensitive ? (fn_equal)equal_strcasecmp : (fn_equal)equal_strcmp,
+		.alloc_val = (fn_clone)clone_strdup,
+		.free_val = free,
+		.str_val = (fn_str)str_or_null,
+		.allow_null_val = params.allow_null_val,
+		.initial = params.initial,
+		.grow = params.grow,
+	};
+
+	struct Slist *list = calloc(1, sizeof(struct Slist));
+	list->plist = plist_init_with(plist_params);;
+	memcpy((void*)&list->params, &params, sizeof(struct SlistParams));
+
+	return list;
+}
+
+const struct Slist *slist_clone(const struct Slist* const from) {
+	if (!from)
 		return NULL;
 
-	for (i = head; i; i = i->nex) {
-		if (test(i->val)) {
-			return i;
-		}
-	}
+	struct Slist *to = calloc(1, sizeof(struct Slist));
+	to->plist = plist_clone(from->plist);
+	memcpy((void*)&to->params, &from->params, sizeof(struct SlistParams));
 
-	return NULL;
+	return to;
 }
 
-void *slist_find_val(struct SList *head, fn_test test) {
-	const struct SList *f = slist_find(head, test);
-	if (f)
-		return f->val;
-	else
-		return NULL;
+void slist_free(const struct Slist* const list) {
+	if (!list)
+		return;
+
+	plist_free_vals(list->plist);
+
+	free((void*)list);
 }
 
-struct SList *slist_find_equal(struct SList *head, fn_equals equals, const void *b) {
-	struct SList *i;
+void slist_it_free(const struct SlistIt* const it) {
+	if (!it)
+		return;
 
-	for (i = head; i; i = i->nex) {
-		if (equals) {
-			if (equals(i->val, b)) {
-				return i;
-			}
-		} else if (i->val == b) {
-			return i;
-		}
-	}
+	if (it->st)
+		plist_it_free(it->st->pit);
 
-	return NULL;
+	free((void*)it->st);
+	free((void*)it);
 }
 
-void *slist_find_equal_val(struct SList *head, fn_equals equals, const void *b) {
-	const struct SList *f = slist_find_equal(head, equals, b);
-	if (f)
-		return f->val;
-	else
-		return NULL;
+bool slist_contains(const struct Slist* const list, const char* const val) {
+	return list ? plist_contains(list->plist, val) : false;
 }
 
-bool slist_equal(struct SList *a, struct SList *b, fn_equals equals) {
-	struct SList *ai, *bi;
+bool slist_index_of(size_t *index, const struct Slist* const list, const char* const val) {
+	if (index)
+		*index = 0;
 
-	for (ai = a, bi = b; ai && bi; ai = ai->nex, bi = bi->nex) {
-		if (equals) {
-			if (!equals(ai->val, bi->val)) {
-				return false;
-			}
-		} else if (ai->val != bi->val) {
-			return false;
-		}
-	}
+	if (!list)
+		return false;
 
-	if (ai || bi) {
+	return plist_index_of(index, list->plist, val);
+}
+
+const char *slist_at(const struct Slist* const list, const size_t i) {
+	return list ? plist_at(list->plist, i) : NULL;
+}
+
+const char *slist_find(const struct Slist* const list, const struct SlistFilter filter) {
+	return list ? plist_find(list->plist, plist_filter_init(&filter)) : NULL;
+}
+
+const struct SlistIt *slist_it_start(const struct Slist* const list) {
+	return list ? it_init(plist_it_start(list->plist)) : NULL;
+}
+
+const struct SlistIt *slist_it_end(const struct Slist* const list) {
+	return list ? it_init(plist_it_end(list->plist)) : NULL;
+}
+
+const struct SlistIt *slist_filter_it_start(const struct Slist* const list, const struct SlistFilter filter) {
+	return list ? it_init(plist_filter_it_start(list->plist, plist_filter_init(&filter))) : NULL;
+}
+
+const struct SlistIt *slist_filter_it_end(const struct Slist* const list, const struct SlistFilter filter) {
+	return list ? it_init(plist_filter_it_end(list->plist, plist_filter_init(&filter))) : NULL;
+}
+
+const struct SlistIt *slist_it_next(const struct SlistIt* const it) {
+	return it ? it_next_prev(it, false) : NULL;
+}
+
+const struct SlistIt *slist_it_prev(const struct SlistIt* const it) {
+	return it ? it_next_prev(it, true) : NULL;
+}
+
+bool slist_insert(const struct Slist* const list, size_t index, const char* const val) {
+	return list ? plist_insert(list->plist, index, val) : false;
+}
+
+bool slist_append(const struct Slist* const list, const char* const val) {
+	return list ? plist_append(list->plist, val) : false;
+}
+
+bool slist_prepend(const struct Slist* const list, const char* const val) {
+	return list ? plist_prepend(list->plist, val) : false;
+}
+
+bool slist_replace(const struct Slist* const list, size_t index, const char* const val) {
+	return list ? plist_replace_free(list->plist, index, val) : false;
+}
+
+size_t slist_append_all(const struct Slist* const list, const struct Slist* const from) {
+	return list && from ? plist_append_all(list->plist, from->plist) : 0;
+}
+
+bool slist_remove(const struct Slist* const list, const char* const val) {
+	return list ? plist_remove_free(list->plist, val) : false;
+}
+
+bool slist_remove_at(const struct Slist* const list, const size_t i) {
+	return list ? plist_remove_at_free(list->plist, i) : false;
+}
+
+size_t slist_remove_all(const struct Slist* const list) {
+	return list ? plist_remove_all_free(list->plist) : 0;
+}
+
+bool slist_it_remove(const struct SlistIt* const it) {
+	if (!it)
+		return false;
+
+	if (!it->st) {
+		slist_it_free(it);
 		return false;
 	}
 
-	return true;
+	((struct SlistIt*)it)->val = NULL;
+
+	return plist_it_remove_free(it->st->pit);
 }
 
-size_t slist_length(const struct SList *head) {
-	size_t length = 0;
-
-	for (const struct SList *i = head; i; i = i->nex) {
-		length++;
-	}
-
-	return length;
+void slist_sort(const struct Slist* const list) {
+	if (list)
+		plist_sort(list->plist, list->params.case_insensitive ? (fn_pred_pp)less_than_strcasecmp : (fn_pred_pp)less_than_strcmp);
 }
 
-struct SList *slist_sort(struct SList *head, fn_less_than less_than) {
-	struct SList *sorted = NULL;
-
-	if (!head || !less_than) {
-		return sorted;
-	}
-
-	if (!head->nex) {
-		slist_append(&sorted, head->val);
-		return sorted;
-	}
-
-	struct SList *sorting = slist_shallow_clone(head);
-
-	struct SList *sorting_head;
-
-	while (sorting != NULL) {
-		struct SList **sorted_trail = &sorted;
-
-		sorting_head = sorting;
-
-		sorting = sorting->nex;
-
-		while (!(*sorted_trail == NULL || less_than(sorting_head->val, (*sorted_trail)->val))) {
-			sorted_trail = &(*sorted_trail)->nex;
-		}
-
-		sorting_head->nex = *sorted_trail;
-		*sorted_trail = sorting_head;
-	}
-
-	slist_free(&sorting);
-	return sorted;
+bool slist_equal(const struct Slist* const a, const struct Slist* const b) {
+	return a && b ? plist_equal(a->plist, b->plist) : false;
 }
 
-void slist_move(struct SList **to, struct SList **from, fn_equals equals, const void *b) {
-	if (!to || !from || !equals)
-		return;
-
-	struct SList *f = *from;
-	while (f) {
-		struct SList *r = f;
-		void *val = f->val;
-		f = f->nex;
-		if (equals(val, b)) {
-			slist_append(to, val);
-			slist_remove(from, &r);
-		}
-	}
+bool slist_equal_ordered(const struct Slist* const a, const struct Slist* const b) {
+	return a && b ? plist_equal_ordered(a->plist, b->plist) : false;
 }
 
-char *slist_str(const struct SList *head) {
-	if (!head)
-		return NULL;
-
-	char *str = strdup("");
-
-	for (const struct SList *i = head; i; i = i->nex) {
-		str = sprintf_append(str, "%s\n", (char*)i->val);
-	}
-
-	return str;
+char *slist_str(const struct Slist* const list) {
+	return list ? plist_str(list->plist) : NULL;
 }
 
+size_t slist_size(const struct Slist* const list) {
+	return list ? plist_size(list->plist) : 0;
+}

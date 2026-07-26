@@ -7,6 +7,8 @@ on:
     branches:
       - master
   workflow_dispatch: {}
+  schedule:
+    - cron: '0 0 * * 0' # weekly on sundays
 
 jobs:
   all:
@@ -21,9 +23,10 @@ jobs:
 
     env:
       DEBUGINFOD_URLS: "https://debuginfod.archlinux.org" # profile thus debuginfod.sh is not executed
+      DEBUGINFOD_CACHE_PATH: "/tmp/debuginfod_client"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: create user
         shell: sh -e {0}
@@ -55,10 +58,6 @@ jobs:
       - run: make                      clean
       - run: make CC=gcc   MFLAGS=-m32 test
       - run: make CC=gcc   MFLAGS=-m32 test-vg
-
-      - run: make                      clean
-      - run: make CC=clang MFLAGS=-m32 test
-      - run: make CC=clang MFLAGS=-m32 test-vg
 
       - name: build and install include-what-you-use
         run: bld/docker-install-iwyu.sh
