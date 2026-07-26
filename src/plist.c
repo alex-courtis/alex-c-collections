@@ -161,39 +161,44 @@ static bool remove_at(const void **removed, const struct Plist* const list, cons
 	return true;
 }
 
+// static size_t remove_in(const struct Pset* const set, const struct Pset* const in, bool do_free) {
+// 	size_t removed = 0;
+//
+// 	for (const void **v = in->vals; v < in->vals + in->size; v++) {
+// 		if (remove(NULL, set, *v, do_free)) {
+// 			removed++;
+// 		}
+// 	}
+//
+// 	return removed;
+// }
+
 static void free_vals(const struct Plist* const list) {
 
 	// values to free, no duplicates or nulls
-	const void **to_free = calloc(list->size, sizeof(void*));
-	size_t ntf = 0;
+	const void **freed = calloc(list->size, sizeof(void*));
+	size_t nf = 0;
 
 	for (const void **vl = list->vals; vl < list->vals + list->size; vl++) {
 		if (!*vl)
 			continue;
 
-		bool dup = false;
+		bool already_freed = false;
 
-		for (const void **vf = to_free; vf < to_free + ntf; vf++) {
+		for (const void **vf = freed; vf < freed + nf; vf++) {
 			if (*vl == *vf) {
-				dup = true;
+				already_freed = true;
 				break;
 			}
 		}
 
-		if (!dup) {
-			*(to_free + ntf++) = *vl;
+		if (!already_freed) {
+			list->params.free_val ? list->params.free_val((void*)*vl) : free((void*)*vl);
+			*(freed + nf++) = *vl;
 		}
 	}
 
-	for (const void **vf = to_free; vf < to_free + ntf; vf++) {
-		if (list->params.free_val) {
-			list->params.free_val((void*)*vf);
-		} else {
-			free((void*)*vf);
-		}
-	}
-
-	free(to_free);
+	free(freed);
 }
 
 static size_t remove_all(const struct Plist* const list) {
@@ -526,6 +531,14 @@ size_t plist_remove_all_free(const struct Plist* const list) {
 
 	return remove_all(list);
 }
+
+// size_t plist_remove_in(const struct Plist* const map, const struct Plist* const in) {
+// 	return map && in ? remove_in(map, in, false) : 0;
+// }
+//
+// size_t plist_remove_in_free(const struct Plist* const set, const struct Plist* const in) {
+// 	return map && in ? remove_in(map, in, true) : 0;
+// }
 
 const void *plist_it_remove(const struct PlistIt* const it) {
 	if (!it)

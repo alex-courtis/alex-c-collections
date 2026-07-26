@@ -150,6 +150,12 @@ size_t plist_remove_all(const struct Plist* const list);
 // remove all vals and free, returning number removed [free_val]
 size_t plist_remove_all_free(const struct Plist* const list);
 
+// remove vals contained in, return number removed [equal_val]
+size_t plist_remove_in(const struct Plist* const set, const struct Plist* const in);
+
+// remove and free vals contained in, return number removed [equal_val, free_val]
+size_t plist_remove_in_free(const struct Plist* const set, const struct Plist* const in);
+
 // remove the it.val, return val if removed, it is unusable, plist_it_next or plist_it_prev must be called
 const void *plist_it_remove(const struct PlistIt* const it);
 

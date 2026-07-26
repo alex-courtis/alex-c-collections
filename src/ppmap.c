@@ -136,9 +136,9 @@ static bool put(const void **val_old, const struct PPmap* const map, const void*
 static size_t put_all(const struct PPmap* const map, const struct PPmap* const from, fn_clone clone_val, bool do_free) {
 	size_t overwritten = 0;
 
-	// values to free, no duplicates or nulls
-	const void **to_free = calloc(map->size, sizeof(void*));
-	size_t ntf = 0;
+	// values already freed
+	const void **freed = calloc(map->size, sizeof(void*));
+	size_t nf = 0;
 
 	for (const void **k = from->keys, **v = from->vals; k < from->keys + from->size; k++, v++) {
 		const void *val_old = NULL;
@@ -147,31 +147,23 @@ static size_t put_all(const struct PPmap* const map, const struct PPmap* const f
 			overwritten++;
 
 			if (do_free && val_old) {
-				bool dup = false;
-				for (const void **vf = to_free; vf < to_free + ntf; vf++) {
+				bool already_freed = false;
+				for (const void **vf = freed; vf < freed + nf; vf++) {
 					if (val_old == *vf) {
-						dup = true;
+						already_freed = true;
 						break;
 					}
 				}
 
-				if (!dup) {
-					*(to_free + ntf++) = val_old;
+				if (!already_freed) {
+					map->params.free_val ? map->params.free_val((void*)val_old) : free((void*)val_old);
+					*(freed + nf++) = val_old;
 				}
 			}
 		}
 	}
 
-	if (do_free) {
-		for (const void **vtf = to_free; vtf < to_free + ntf; vtf++) {
-			if (map->params.free_val) {
-				map->params.free_val((void*)*vtf);
-			} else {
-				free((void*)*vtf);
-			}
-		}
-	}
-	free(to_free);
+	free(freed);
 
 	return overwritten;
 }
@@ -199,36 +191,29 @@ static void free_keys(const struct PPmap* const map) {
 
 static void free_vals(const struct PPmap* const map) {
 
-	// values to free, no duplicates or nulls
-	const void **to_free = calloc(map->size, sizeof(void*));
-	size_t ntf = 0;
+	// values already freed
+	const void **freed = calloc(map->size, sizeof(void*));
+	size_t nf = 0;
 
 	for (const void **v = map->vals; v < map->vals + map->size; v++) {
 		if (!*v)
 			continue;
 
-		bool dup = false;
-		for (const void **vf = to_free; vf < to_free + ntf; vf++) {
+		bool already_freed = false;
+		for (const void **vf = freed; vf < freed + nf; vf++) {
 			if (*v == *vf) {
-				dup = true;
+				already_freed = true;
 				break;
 			}
 		}
 
-		if (!dup) {
-			*(to_free + ntf++) = *v;
+		if (!already_freed) {
+			map->params.free_val ? map->params.free_val((void*)*v) : free((void*)*v);
+			*(freed + nf++) = *v;
 		}
 	}
 
-	for (const void **vtf = to_free; vtf < to_free + ntf; vtf++) {
-		if (map->params.free_val) {
-			map->params.free_val((void*)*vtf);
-		} else {
-			free((void*)*vtf);
-		}
-	}
-
-	free(to_free);
+	free(freed);
 }
 
 static bool remove_(const void **removed, const struct PPmap* const map, const void* const key, bool do_free) {
@@ -303,8 +288,8 @@ static size_t remove_in(const struct PPmap* const map, const struct PPmap* const
 	size_t removed = 0;
 
 	// values to free, no duplicates or nulls
-	const void **to_free = calloc(map->size, sizeof(void*));
-	size_t ntf = 0;
+	const void **freed = calloc(map->size, sizeof(void*));
+	size_t nf = 0;
 
 	for (const void **k = in->keys; k < in->keys + in->size; k++) {
 		const void *val_old = NULL;
@@ -312,32 +297,23 @@ static size_t remove_in(const struct PPmap* const map, const struct PPmap* const
 			removed++;
 
 			if (val_old && do_free) {
-				bool dup = false;
-				for (const void **vf = to_free; vf < to_free + ntf; vf++) {
+				bool already_freed = false;
+				for (const void **vf = freed; vf < freed + nf; vf++) {
 					if (val_old == *vf) {
-						dup = true;
+						already_freed = true;
 						break;
 					}
 				}
 
-				if (!dup) {
-					*(to_free + ntf++) = val_old;
+				if (!already_freed) {
+					map->params.free_val ? map->params.free_val((void*)val_old) : free((void*)val_old);
+					*(freed + nf++) = val_old;
 				}
 			}
 		}
 	}
 
-	if (do_free) {
-		for (const void **vtf = to_free; vtf < to_free + ntf; vtf++) {
-			if (map->params.free_val) {
-				map->params.free_val((void*)*vtf);
-			} else {
-				free((void*)*vtf);
-			}
-		}
-	}
-
-	free(to_free);
+	free(freed);
 
 	return removed;
 }
