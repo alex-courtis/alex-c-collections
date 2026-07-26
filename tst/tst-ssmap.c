@@ -1,5 +1,5 @@
-#include "assert-sset.h"
 #include "assert-slist.h"
+#include "assert-sset.h"
 #include "assert-ssmap.h"
 #include "asserts.h"
 #include "tst.h"
@@ -64,7 +64,7 @@ static void ssmap_clone__(void **state) {
 }
 
 static void ssmap_clone__params__constructor(void **state) {
-    struct SSmapParams params = {
+	struct SSmapParams params = {
 		.case_insensitive_key = true,
 		.case_insensitive_val = true,
 		.allow_null_val = true,
@@ -248,12 +248,12 @@ static void ssmap_find__(void **state) {
 	assert_str_equal(ssmap_find(map, (struct SSmapFilter){ 0 }).key, "a");
 	assert_str_equal(ssmap_find(map, (struct SSmapFilter){ 0 }).val, "x0");
 
-    struct SSmapPair pair = ssmap_find(map, (struct SSmapFilter){ .val_data = match_starts_with_a, .data = "x", });
+	struct SSmapPair pair = ssmap_find(map, (struct SSmapFilter){ .val_data = match_starts_with_a, .data = "x", });
 
 	assert_str_equal(pair.key, "c");
 	assert_str_equal(pair.val, "a2");
 
-    pair = ssmap_find(map, (struct SSmapFilter){ .key_data = match_starts_with_a, .data = "x", });
+	pair = ssmap_find(map, (struct SSmapFilter){ .key_data = match_starts_with_a, .data = "x", });
 
 	assert_str_equal(pair.key, "a");
 	assert_str_equal(pair.val, "x0");
@@ -660,7 +660,7 @@ static void ssmap_keys_sset__(void **state) {
 	set = ssmap_keys_sset(map);
 
 	const struct Sset *expected = sset_init();
-	sset_add_many(expected, "a", "b", "c", NULL);
+	sset_add_many(expected, "A", "b", "c", NULL);
 
 	assert_sset_equal(set, expected);
 
@@ -683,12 +683,12 @@ static void ssmap_vals_slist__(void **state) {
 
 	slist_free(list);
 
-	ssmap_put_many(map, "a", "0", "b", "1", "c", "2", NULL);
+	ssmap_put_many(map, "a", "aa", "b", "1", "c", "2", NULL);
 
 	list = ssmap_vals_slist(map);
 
 	const struct Slist *expected = slist_init();
-	slist_append_many(expected, "0", "1", "2", NULL);
+	slist_append_many(expected, "AA", "1", "2", NULL);
 
 	assert_slist_equal(list, expected);
 
