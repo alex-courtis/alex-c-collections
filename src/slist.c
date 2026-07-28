@@ -138,7 +138,7 @@ const char *slist_find(const struct Slist* const list, const struct SlistFilter 
 }
 
 const struct SlistIt *slist_it_start(const struct Slist* const list) {
-	return list ? it_init(plist_it_start(list->plist)) : NULL;
+	return list ? it_init(plist_it(list->plist)) : NULL;
 }
 
 const struct SlistIt *slist_it_end(const struct Slist* const list) {
@@ -146,7 +146,7 @@ const struct SlistIt *slist_it_end(const struct Slist* const list) {
 }
 
 const struct SlistIt *slist_filter_it_start(const struct Slist* const list, const struct SlistFilter filter) {
-	return list ? it_init(plist_filter_it_start(list->plist, plist_filter_init(&filter))) : NULL;
+	return list ? it_init(plist_filter_it(list->plist, plist_filter_init(&filter))) : NULL;
 }
 
 const struct SlistIt *slist_filter_it_end(const struct Slist* const list, const struct SlistFilter filter) {

@@ -102,6 +102,8 @@ const struct PsetIt *pset_it_next(const struct PsetIt* const it);
 // add if the set does not contain val, return true if added [equal_val, alloc_val]
 bool pset_add(const struct Pset* const set, const void* const val);
 
+// TODO pset_add_clone
+
 // add from vals not contained in the set, return number added [equal_val, alloc_val]
 size_t pset_add_all(const struct Pset* const set, const struct Pset* const from);
 

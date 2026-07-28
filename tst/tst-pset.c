@@ -1371,9 +1371,7 @@ static void pset_plist__empty(void **state) {
 
 static void pset_plist__many(void **state) {
 	const struct Pset *set = pset_init();
-
-	assert_true(pset_add(set, V0));
-	assert_true(pset_add(set, V1));
+	pset_add_many(set, V0, V1, NULL);
 
 	const struct Plist *list = pset_plist(set);
 

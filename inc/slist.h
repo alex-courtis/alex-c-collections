@@ -78,6 +78,7 @@ const char *slist_at(const struct Slist* const list, const size_t i);
 // find the first, NULL when no matches or allow_null_val and NULL present, first entry when empty filter
 const char *slist_find(const struct Slist* const list, const struct SlistFilter filter);
 
+// TODO slist_it
 // create an iterator at the start, caller must slist_it_free or invoke slist_next/prev until NULL
 const struct SlistIt *slist_it_start(const struct Slist* const list);
 

@@ -129,11 +129,17 @@ const struct PPmapIt *ppmap_it_next(const struct PPmapIt* const it);
 // set key/val, return old val if overwritten [equal_key, alloc_key, alloc_val]
 const void *ppmap_put(const struct PPmap* const map, const void* const key, const void* const val);
 
+// set key/val, free old val, return true if overwritten [equal_key, alloc_key, alloc_val, free_key, free_val]
+bool ppmap_put_free(const struct PPmap* const map, const void* const key, const void* const val);
+
+// TODO ppmap_put_clone
+
+// TODO ppmap_put_clone_free
+
 // set key/val if not present, return existing val if present [equal_key, alloc_key, alloc_val]
 const void *ppmap_put_if_absent(const struct PPmap* const map, const void* const key, const void* const val);
 
-// set key/val, free old val, return true if overwritten [equal_key, alloc_key, alloc_val, free_key, free_val]
-bool ppmap_put_free(const struct PPmap* const map, const void* const key, const void* const val);
+// TODO ppmap_put_if_absent_clone
 
 // set all from key/val, returning number overwritten [equal_key, alloc_key, alloc_val]
 size_t ppmap_put_all(const struct PPmap* const map, const struct PPmap* const from);
@@ -194,8 +200,16 @@ const struct Pset *ppmap_keys_pset(const struct PPmap* const map);
 // map ordered vals, same params, caller frees contents when alloc_val present [alloc_val]
 const struct Plist *ppmap_vals_plist(const struct PPmap* const map);
 
+// TODO ppmap_vals_pset
+// map ordered vals with duplicates removed, same params, caller frees contents when alloc_val present [alloc_val]
+const struct Plist *ppmap_vals_pset(const struct PPmap* const map);
+
 // map ordered vals, same params, caller frees contents, NULL when NULL clone_val [clone_val]
 const struct Plist *ppmap_vals_plist_clone(const struct PPmap* const map);
+
+// TODO ppmap_vals_pset_clone
+// map ordered vals with duplicates removed, same params, caller frees contents, NULL when NULL clone_val [clone_val]
+const struct Plist *ppmap_vals_pset_clone(const struct PPmap* const map);
 
 /*
  * Info
