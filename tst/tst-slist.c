@@ -1,4 +1,5 @@
 #include "assert-slist.h"
+#include "assert-sset.h"
 #include "asserts.h"
 #include "tst.h"
 #include "util-col.h"
@@ -9,6 +10,7 @@
 
 #include "fn.h"
 #include "plist.h"
+#include "sset.h"
 
 #include "slist.h"
 
@@ -28,6 +30,11 @@ struct Plist {
 	const void **vals;
 	size_t capacity;
 	size_t size;
+};
+
+struct Sset {
+	const struct SsetParams params;
+	const struct Pset *pset;
 };
 
 static bool match_starts_with_a(const char* const a, const void* const b) {
@@ -161,16 +168,16 @@ static void slist_find__(void **state) {
 	slist_free(set);
 }
 
-static void slist_it_start__(void **state) {
-	assert_nul(slist_it_start(NULL));
+static void slist_it__(void **state) {
+	assert_nul(slist_it(NULL));
 
 	const struct Slist *set = slist_init();
 
-	assert_nul(slist_it_start(set));
+	assert_nul(slist_it(set));
 
 	slist_append_many(set, "a", "b", NULL);
 
-	const struct SlistIt *it = slist_it_start(set);
+	const struct SlistIt *it = slist_it(set);
 
 	assert_non_nul(it);
 	assert_str_equal(it->val, "a");
@@ -189,7 +196,7 @@ static void slist_it_end__(void **state) {
 
 	const struct Slist *set = slist_init();
 
-	assert_nul(slist_it_start(set));
+	assert_nul(slist_it(set));
 
 	slist_append_many(set, "a", "b", NULL);
 
@@ -207,16 +214,16 @@ static void slist_it_end__(void **state) {
 	slist_free(set);
 }
 
-static void slist_filter_it_start__(void **state) {
-	assert_nul(slist_filter_it_start(NULL, (struct SlistFilter){ 0 }));
+static void slist_filter_it__(void **state) {
+	assert_nul(slist_filter_it(NULL, (struct SlistFilter){ 0 }));
 
 	const struct Slist *set = slist_init();
 
-	assert_nul(slist_filter_it_start(set, (struct SlistFilter){ 0 }));
+	assert_nul(slist_filter_it(set, (struct SlistFilter){ 0 }));
 
 	slist_append_many(set, "a1", "b1", "a2", "b2", NULL);
 
-	const struct SlistIt *it = slist_filter_it_start(set, (struct SlistFilter){ .val_data = match_starts_with_a, .data = "x", });
+	const struct SlistIt *it = slist_filter_it(set, (struct SlistFilter){ .val_data = match_starts_with_a, .data = "x", });
 
 	assert_non_nul(it);
 	assert_str_equal(it->val, "a1");
@@ -464,7 +471,7 @@ static void slist_it_remove__(void **state) {
 	const struct Slist *set = slist_init();
 	slist_append_many(set, "a", "b", "c", "d", "e", NULL);
 
-	it = slist_it_start(set);
+	it = slist_it(set);
 	it = slist_it_next(it);
 	assert_str_equal(it->val, "b");
 
@@ -596,6 +603,34 @@ static void slist_equal_ordered__case_insensitive(void **state) {
 	slist_free(b);
 }
 
+static void slist_sset__(void **state) {
+	assert_nul(slist_sset(NULL));
+
+	const struct Slist *list = slist_init_with((struct SlistParams){ .case_insensitive = true, .initial = 2, .grow = 1, });
+
+	const struct Sset *set = slist_sset(list);
+	assert_int_equal(sset_size(set), 0);
+
+	assert_true(set->params.case_insensitive);
+	assert_int_equal(set->params.initial, 2);
+	assert_int_equal(set->params.grow, 1);
+
+	sset_free(set);
+
+	slist_append_many(list, "c", "a", "b", "c", NULL);
+
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "a", "b", "c", NULL);
+
+	set = slist_sset(list);
+
+	assert_sset_equal(set, expected);
+
+	sset_free(set);
+	sset_free(expected);
+	slist_free(list);
+}
+
 static void slist_str__(void **state) {
 	assert_nul(slist_str(NULL));
 
@@ -642,11 +677,11 @@ int main(void) {
 
 		TEST(slist_find__),
 
-		TEST(slist_it_start__),
+		TEST(slist_it__),
 
 		TEST(slist_it_end__),
 
-		TEST(slist_filter_it_start__),
+		TEST(slist_filter_it__),
 
 		TEST(slist_filter_it_end__),
 
@@ -681,6 +716,8 @@ int main(void) {
 
 		TEST(slist_equal_ordered__),
 		TEST(slist_equal_ordered__case_insensitive),
+
+		TEST(slist_sset__),
 
 		TEST(slist_str__),
 

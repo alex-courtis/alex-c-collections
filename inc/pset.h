@@ -151,10 +151,10 @@ bool pset_equal_ordered(const struct Pset* const a, const struct Pset* const b);
  * Conversion
  */
 
-// set ordered vals, caller frees contents when alloc_val present [alloc_val]
+// set ordered vals, same params, caller frees contents when alloc_val present [alloc_val]
 const struct Plist *pset_plist(const struct Pset* const set);
 
-// set ordered vals, caller frees contents, NULL when NULL clone_val [clone_val]
+// set ordered vals, same params, caller frees contents, NULL when NULL clone_val [clone_val]
 const struct Plist *pset_plist_clone(const struct Pset* const set);
 
 /*

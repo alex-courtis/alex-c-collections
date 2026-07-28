@@ -151,6 +151,7 @@ static void pset_clone_deep__no_clone_val(void **state) {
 	pset_free(set);
 }
 
+// TODO pset_clone_deep: alloc_val overriding clone_val makes no sense
 static void pset_clone_deep__alloc_val_overrides_clone_val(void **state) {
 	const struct Pset *set = pset_init_with((struct PsetParams){ .clone_val = mock_clone, .alloc_val = mock_alloc, });
 
