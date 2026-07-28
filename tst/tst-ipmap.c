@@ -16,6 +16,7 @@
 #include "fn.h"
 #include "plist.h"
 #include "ppmap.h"
+#include "pset.h"
 #include "str.h"
 
 #include "ipmap.h"

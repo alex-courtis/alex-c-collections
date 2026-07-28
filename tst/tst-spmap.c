@@ -18,6 +18,7 @@
 #include "fn.h"
 #include "plist.h"
 #include "ppmap.h"
+#include "pset.h"
 #include "slist.h"
 #include "sset.h"
 #include "str.h"
