@@ -132,14 +132,17 @@ const void *ppmap_put(const struct PPmap* const map, const void* const key, cons
 // set key/val, free old val, return true if overwritten [equal_key, alloc_key, alloc_val, free_key, free_val]
 bool ppmap_put_free(const struct PPmap* const map, const void* const key, const void* const val);
 
-// TODO ppmap_put_clone
+// set key/val, return old val if overwritten, NOP when NULL clone_val [equal_key, alloc_key, clone_val]
+const void *ppmap_put_clone(const struct PPmap* const map, const void* const key, const void* const val);
 
-// TODO ppmap_put_clone_free
+// set key/val, free old val, return true if overwritten, NOP when NULL clone_val [equal_key, alloc_key, clone_val, free_key, free_val]
+bool ppmap_put_clone_free(const struct PPmap* const map, const void* const key, const void* const val);
 
 // set key/val if not present, return existing val if present [equal_key, alloc_key, alloc_val]
 const void *ppmap_put_if_absent(const struct PPmap* const map, const void* const key, const void* const val);
 
-// TODO ppmap_put_if_absent_clone
+// set key/val if not present, return existing val if present, NOP when NULL clone_val [equal_key, alloc_key, clone_val]
+const void *ppmap_put_if_absent_clone(const struct PPmap* const map, const void* const key, const void* const val);
 
 // set all from key/val, returning number overwritten [equal_key, alloc_key, alloc_val]
 size_t ppmap_put_all(const struct PPmap* const map, const struct PPmap* const from);

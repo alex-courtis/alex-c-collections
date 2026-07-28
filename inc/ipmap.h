@@ -123,11 +123,17 @@ const struct IPmapIt *ipmap_it_next(const struct IPmapIt* const it);
 // set key/val, return old val if overwritten [alloc_val]
 const void *ipmap_put(const struct IPmap* const map, const size_t key, const void* const val);
 
+// set key/val, free old val, return true if overwritten [alloc_val, free_val]
+bool ipmap_put_free(const struct IPmap* const map, const size_t key, const void* const val);
+
+// TODO ipmap_put_clone
+
+// TODO ipmap_put_clone_free
+
 // set key/val if not present, return existing val if present [alloc_val]
 const void *ipmap_put_if_absent(const struct IPmap* const map, const size_t key, const void* const val);
 
-// set key/val, free old val, return true if overwritten [alloc_val, free_val]
-bool ipmap_put_free(const struct IPmap* const map, const size_t key, const void* const val);
+// TODO ipmap_put_if_absent_clone
 
 // set all from key/val, returning number overwritten [alloc_val]
 size_t ipmap_put_all(const struct IPmap* const map, const struct IPmap* const from);

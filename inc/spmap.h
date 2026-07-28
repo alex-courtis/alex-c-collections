@@ -124,11 +124,17 @@ const struct SPmapIt *spmap_it_next(const struct SPmapIt* const it);
 // set key/val, return old val if overwritten [alloc_val]
 const void *spmap_put(const struct SPmap* const map, const char* const key, const void* const val);
 
+// set key/val, free old val, return true if overwritten [alloc_val, free_val]
+bool spmap_put_free(const struct SPmap* const map, const  char* const key, const void* const val);
+
+// TODO spmap_put_clone
+
+// TODO spmap_put_clone_free
+
 // set key/val if not present, return existing val if present [alloc_val]
 const void *spmap_put_if_absent(const struct SPmap* const map, const char* const key, const void* const val);
 
-// set key/val, free old val, return true if overwritten [alloc_val, free_val]
-bool spmap_put_free(const struct SPmap* const map, const  char* const key, const void* const val);
+// TODO spmap_put_if_absent_clone
 
 // set all from key/val, returning number overwritten [alloc_val]
 size_t spmap_put_all(const struct SPmap* const map, const struct SPmap* const from);
