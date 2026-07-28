@@ -335,6 +335,14 @@ const struct Plist *ipmap_vals_plist_clone(const struct IPmap* const map) {
 	return map ? ppmap_vals_plist_clone(map->ppmap) : NULL;
 }
 
+const struct Pset *ipmap_vals_pset(const struct IPmap* const map) {
+	return map ? ppmap_vals_pset(map->ppmap) : NULL;
+}
+
+const struct Pset *ipmap_vals_pset_clone(const struct IPmap* const map) {
+	return map ? ppmap_vals_pset_clone(map->ppmap) : NULL;
+}
+
 char *ipmap_str(const struct IPmap* const map) {
 	return map ? ppmap_str(map->ppmap) : NULL;
 }

@@ -1,5 +1,6 @@
 #include "assert-ipmap.h"
 #include "assert-plist.h"
+#include "assert-pset.h"
 #include "asserts.h"
 #include "data.h"
 #include "expects.h"
@@ -29,6 +30,13 @@ struct PPmap {
 
 struct Plist {
 	const struct PlistParams params;
+	const void **vals;
+	size_t capacity;
+	size_t size;
+};
+
+struct Pset {
+	const struct PsetParams params;
 	const void **vals;
 	size_t capacity;
 	size_t size;
@@ -998,6 +1006,64 @@ static void ipmap_vals_plist_clone__(void **state) {
 	ipmap_free(map);
 }
 
+static void ipmap_vals_pset__(void **state) {
+	assert_nul(ipmap_vals_pset(NULL));
+
+	const struct IPmap *map = ipmap_init_with((struct IPmapParams){ .allow_null_val = true, .initial = 2, .grow = 1, });
+
+	const struct Pset *set = ipmap_vals_pset(map);
+	assert_int_equal(pset_size(set), 0);
+
+	assert_int_equal(set->params.initial, 2);
+	assert_int_equal(set->params.grow, 1);
+
+	pset_free(set);
+
+	ipmap_put(map, 0, V0);
+	ipmap_put(map, 1, NULL);
+	ipmap_put(map, 2, V2);
+	ipmap_put(map, 3, V2);
+
+	set = ipmap_vals_pset(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V0, V2, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	ipmap_free(map);
+}
+
+static void ipmap_vals_pset_clone__(void **state) {
+	assert_nul(ipmap_vals_pset_clone(NULL));
+
+	const struct IPmap *map = ipmap_init_with((struct IPmapParams){ .clone_val = mock_clone, });
+
+	const struct Pset *set = ipmap_vals_pset_clone(map);
+	assert_int_equal(pset_size(set), 0);
+
+	pset_free(set);
+
+	ipmap_put(map, 0, V0);
+	ipmap_put(map, 1, V1);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V4, void*);
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V5, void*);
+
+	set = ipmap_vals_pset_clone(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V4, V5, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	ipmap_free(map);
+}
+
 static void ipmap_str__(void **state) {
 	const struct IPmapParams params = { .allow_null_val = true, };
 	const struct IPmap *map = ipmap_init_with(params);
@@ -1112,6 +1178,10 @@ int main(void) {
 		TEST(ipmap_vals_plist__),
 
 		TEST(ipmap_vals_plist_clone__),
+
+		TEST(ipmap_vals_pset__),
+
+		TEST(ipmap_vals_pset_clone__),
 
 		TEST(ipmap_str__),
 
