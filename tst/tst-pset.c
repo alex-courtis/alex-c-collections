@@ -24,6 +24,13 @@ struct Pset {
 	size_t size;
 };
 
+struct Plist {
+	const struct PlistParams params;
+	const void **vals;
+	size_t capacity;
+	size_t size;
+};
+
 static const char *starts_with_a_or_null(const char* const key) {
 	return key && *key == 'a' ? strdup(key) : NULL;
 }
@@ -1458,6 +1465,32 @@ static void pset_plist__alloc_val(void **state) {
 	pset_free(set);
 }
 
+static void pset_plist__params(void **state) {
+	const struct Pset *set = pset_init_with((struct PsetParams){
+		.equal_val = mock_equal,
+		.alloc_val = mock_alloc,
+		.free_val = mock_free,
+		.str_val = mock_str,
+		.initial = 99,
+		.grow = 1,
+	});
+
+	const struct Plist *list = pset_plist(set);
+
+	assert_int_equal(list->size, 0);
+	assert_int_equal(list->capacity, 99);
+	assert_int_equal(list->params.grow, 1);
+	assert_ptr_equal(list->params.equal_val, mock_equal);
+	assert_ptr_equal(list->params.alloc_val, mock_alloc);
+	assert_ptr_equal(list->params.free_val, mock_free);
+	assert_ptr_equal(list->params.str_val, mock_str);
+	assert_false(list->params.allow_null_val);
+
+	pset_free(set);
+
+	plist_free(list);
+}
+
 static void pset_plist_clone__null(void **state) {
 	assert_nul(pset_plist_clone(NULL));
 }
@@ -1709,6 +1742,7 @@ int main(void) {
 		TEST(pset_plist__empty),
 		TEST(pset_plist__many),
 		TEST(pset_plist__alloc_val),
+		TEST(pset_plist__params),
 
 		TEST(pset_plist_clone__null),
 		TEST(pset_plist_clone__empty),

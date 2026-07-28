@@ -732,6 +732,7 @@ const struct Plist *ppmap_keys_plist(const struct PPmap* const map) {
 		.free_val = map->params.free_key,
 		.clone_val = map->params.alloc_key,
 		.str_val = map->params.str_key,
+		.allow_null_val = map->params.allow_null_val,
 		.initial = MAX(map->size, map->params.initial),
 		.grow  = map->params.grow,
 	};
