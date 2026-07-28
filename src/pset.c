@@ -350,6 +350,10 @@ bool pset_add(const struct Pset* const set, const void* const val) {
 	return set ? add(set, val, set->params.alloc_val) : false;
 }
 
+bool pset_add_clone(const struct Pset* const set, const void* const val) {
+	return set && set->params.clone_val ? add(set, val, set->params.clone_val) : false;
+}
+
 size_t pset_add_all(const struct Pset* const set, const struct Pset* const from) {
 	return set && from ? add_all(set, from, set->params.alloc_val) : 0;
 }
