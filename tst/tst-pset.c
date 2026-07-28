@@ -24,6 +24,13 @@ struct Pset {
 	size_t size;
 };
 
+struct Plist {
+	const struct PlistParams params;
+	const void **vals;
+	size_t capacity;
+	size_t size;
+};
+
 static const char *starts_with_a_or_null(const char* const key) {
 	return key && *key == 'a' ? strdup(key) : NULL;
 }
@@ -148,24 +155,6 @@ static void pset_clone_deep__no_clone_val(void **state) {
 
 	assert_nul(pset_clone_deep(set));
 
-	pset_free(set);
-}
-
-static void pset_clone_deep__alloc_val_overrides_clone_val(void **state) {
-	const struct Pset *set = pset_init_with((struct PsetParams){ .clone_val = mock_clone, .alloc_val = mock_alloc, });
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-	pset_add(set, V0);
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-
-	const struct Pset *clone = pset_clone_deep(set);
-
-	assert_non_nul(clone);
-	assert_int_equal(clone->size, 1);
-	assert_ptr_equal(clone->vals[0], V0);
-
-	pset_free(clone);
 	pset_free(set);
 }
 
@@ -585,6 +574,81 @@ static void pset_add__grow(void **state) {
 	assert_true(pset_add(set, V5));
 	assert_int_equal(set->size, 6);
 	assert_int_equal(set->capacity, 7);
+
+	pset_free(set);
+}
+
+static void pset_add_clone__null(void **state) {
+	assert_false(pset_add_clone(NULL, NULL));
+}
+
+static void pset_add_clone__no_clone_val(void **state) {
+	const struct Pset *set = pset_init();
+
+	assert_false(pset_add_clone(set, V0));
+
+	assert_int_equal(set->size, 0);
+
+	pset_free(set);
+}
+
+static void pset_add_clone__clone_val(void **state) {
+	const struct Pset *set = pset_init_with((struct PsetParams){ .clone_val = mock_clone, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V2, void*);
+	assert_true(pset_add_clone(set, V0));
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V3, void*);
+	assert_true(pset_add_clone(set, V1));
+
+	assert_int_equal(set->size, 2);
+	assert_ptr_equal(set->vals[0], V2);
+	assert_ptr_equal(set->vals[1], V3);
+
+	pset_free(set);
+}
+
+static void pset_add_clone__null_val(void **state) {
+	const struct Pset *set = pset_init_with((struct PsetParams){ .clone_val = mock_clone, });
+
+	assert_false(pset_add_clone(set, NULL));
+
+	assert_int_equal(set->size, 0);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, NULL, void*);
+
+	assert_false(pset_add_clone(set, V0));
+
+	assert_int_equal(set->size, 0);
+
+	pset_free(set);
+}
+
+static void pset_add_clone__present(void **state) {
+	const struct Pset *set = pset_init_with((struct PsetParams){ .clone_val = mock_clone, });
+	pset_add_many(set, V0, NULL);
+
+	assert_false(pset_add_clone(set, V0));
+
+	assert_int_equal(set->size, 1);
+
+	pset_free(set);
+}
+
+static void pset_add_clone__equal_val(void **state) {
+	const struct Pset *set = pset_init_with((struct PsetParams){ .equal_val = mock_equal, });
+
+	assert_true(pset_add(set, V0));
+
+	expect_ptr(mock_equal, a, V0); expect_ptr(mock_equal, b, V1); will_return(mock_equal, false);
+	assert_true(pset_add(set, V1));
+
+	expect_ptr(mock_equal, a, V0); expect_ptr(mock_equal, b, V0); will_return(mock_equal, true);
+	assert_false(pset_add(set, V0));
+
+	assert_int_equal(set->size, 2);
+	assert_ptr_equal(set->vals[0], V0);
+	assert_ptr_equal(set->vals[1], V1);
 
 	pset_free(set);
 }
@@ -1371,9 +1435,7 @@ static void pset_plist__empty(void **state) {
 
 static void pset_plist__many(void **state) {
 	const struct Pset *set = pset_init();
-
-	assert_true(pset_add(set, V0));
-	assert_true(pset_add(set, V1));
+	pset_add_many(set, V0, V1, NULL);
 
 	const struct Plist *list = pset_plist(set);
 
@@ -1401,6 +1463,32 @@ static void pset_plist__alloc_val(void **state) {
 
 	plist_free(list);
 	pset_free(set);
+}
+
+static void pset_plist__params(void **state) {
+	const struct Pset *set = pset_init_with((struct PsetParams){
+		.equal_val = mock_equal,
+		.alloc_val = mock_alloc,
+		.free_val = mock_free,
+		.str_val = mock_str,
+		.initial = 99,
+		.grow = 1,
+	});
+
+	const struct Plist *list = pset_plist(set);
+
+	assert_int_equal(list->size, 0);
+	assert_int_equal(list->capacity, 99);
+	assert_int_equal(list->params.grow, 1);
+	assert_ptr_equal(list->params.equal_val, mock_equal);
+	assert_ptr_equal(list->params.alloc_val, mock_alloc);
+	assert_ptr_equal(list->params.free_val, mock_free);
+	assert_ptr_equal(list->params.str_val, mock_str);
+	assert_false(list->params.allow_null_val);
+
+	pset_free(set);
+
+	plist_free(list);
 }
 
 static void pset_plist_clone__null(void **state) {
@@ -1519,7 +1607,6 @@ int main(void) {
 		TEST(pset_clone_deep__null),
 		TEST(pset_clone_deep__clone_val),
 		TEST(pset_clone_deep__no_clone_val),
-		TEST(pset_clone_deep__alloc_val_overrides_clone_val),
 
 		TEST(pset_free__null),
 		TEST(pset_free__empty),
@@ -1571,6 +1658,13 @@ int main(void) {
 		TEST(pset_add__alloc_val),
 		TEST(pset_add__alloc_val_returned_null),
 		TEST(pset_add__grow),
+
+		TEST(pset_add_clone__null),
+		TEST(pset_add_clone__no_clone_val),
+		TEST(pset_add_clone__clone_val),
+		TEST(pset_add_clone__null_val),
+		TEST(pset_add_clone__present),
+		TEST(pset_add_clone__equal_val),
 
 		TEST(pset_add_all__null),
 		TEST(pset_add_all__duplicates),
@@ -1648,6 +1742,7 @@ int main(void) {
 		TEST(pset_plist__empty),
 		TEST(pset_plist__many),
 		TEST(pset_plist__alloc_val),
+		TEST(pset_plist__params),
 
 		TEST(pset_plist_clone__null),
 		TEST(pset_plist_clone__empty),

@@ -1,3 +1,4 @@
+#include "assert-slist.h"
 #include "assert-sset.h"
 #include "asserts.h"
 #include "tst.h"
@@ -493,13 +494,17 @@ static void sset_slist__(void **state) {
 
 	slist_free(list);
 
-	sset_add_many(set, "a", "b", "c", NULL);
+	sset_add_many(set, "a", "B", "c", NULL);
+
+	const struct Slist *expected = slist_init_with((struct SlistParams){ .case_insensitive = true, });
+	slist_append_many(expected, "a", "B", "c", NULL);
 
 	list = sset_slist(set);
 
-	assert_int_equal(slist_size(list), 3);
+	assert_slist_equal(list, expected);
 
 	slist_free(list);
+	slist_free(expected);
 	sset_free(set);
 }
 

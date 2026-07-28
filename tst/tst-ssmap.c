@@ -747,6 +747,34 @@ static void ssmap_vals_slist__(void **state) {
 	ssmap_free(map);
 }
 
+static void ssmap_vals_sset__(void **state) {
+	assert_nul(ssmap_vals_sset(NULL));
+
+	const struct SSmap *map = ssmap_init_with((struct SSmapParams){ .case_insensitive_val = true, .initial = 2, .grow = 1, });
+
+	const struct Sset *set = ssmap_vals_sset(map);
+	assert_int_equal(sset_size(set), 0);
+
+	assert_true(set->params.case_insensitive);
+	assert_int_equal(set->params.initial, 2);
+	assert_int_equal(set->params.grow, 1);
+
+	sset_free(set);
+
+	ssmap_put_many(map, "a", "aa", "b", NULL, "c", "2", "d", "3", NULL);
+
+	set = ssmap_vals_sset(map);
+
+	const struct Sset *expected = sset_init();
+	sset_add_many(expected, "AA", "2", "3", NULL);
+
+	assert_sset_equal(set, expected);
+
+	sset_free(set);
+	sset_free(expected);
+	ssmap_free(map);
+}
+
 static void ssmap_str__(void **state) {
 	assert_nul(ssmap_str(NULL));
 
@@ -842,6 +870,8 @@ int main(void) {
 		TEST(ssmap_keys_sset__),
 
 		TEST(ssmap_vals_slist__),
+
+		TEST(ssmap_vals_sset__),
 
 		TEST(ssmap_str__),
 

@@ -1,4 +1,5 @@
 #include "assert-plist.h"
+#include "assert-pset.h"
 #include "assert-slist.h"
 #include "assert-spmap.h"
 #include "assert-sset.h"
@@ -17,6 +18,7 @@
 #include "fn.h"
 #include "plist.h"
 #include "ppmap.h"
+#include "pset.h"
 #include "slist.h"
 #include "sset.h"
 #include "str.h"
@@ -46,6 +48,13 @@ struct Plist {
 struct Sset {
 	const struct SsetParams params;
 	const struct Pset *pset;
+};
+
+struct Pset {
+	const struct PsetParams params;
+	const void **vals;
+	size_t capacity;
+	size_t size;
 };
 
 struct SPmap {
@@ -363,13 +372,13 @@ static void spmap_it_next__(void **state) {
 }
 
 static void spmap_put__(void **state) {
-	assert_false(spmap_put(NULL, "a", V0));
+	assert_nul(spmap_put(NULL, "a", V0));
 
 	const struct SPmap *map = spmap_init();
 
-	assert_false(spmap_put(map, "a", V0));
+	assert_nul(spmap_put(map, "a", V0));
 
-	assert_true(spmap_put(map, "a", V1));
+	assert_ptr_equal(spmap_put(map, "a", V1), V0);
 
 	assert_int_equal(spmap_size(map), 1);
 
@@ -381,43 +390,11 @@ static void spmap_put__(void **state) {
 static void spmap_put__case_insensitive(void **state) {
 	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .case_insensitive_key = true, });
 
-	assert_false(spmap_put(map, "a", V0));
+	assert_nul(spmap_put(map, "a", V0));
 
-	assert_true(spmap_put(map, "A", V1));
+	assert_ptr_equal(spmap_put(map, "A", V1), V0);
 
 	assert_ptr_equal(spmap_get(map, "a"), V1);
-
-	spmap_free(map);
-}
-
-static void spmap_put_if_absent__(void **state) {
-	assert_false(spmap_put_if_absent(NULL, "a", V0));
-
-	const struct SPmap *map = spmap_init();
-
-	assert_false(spmap_put_if_absent(map, "a", V0));
-
-	assert_true(spmap_put_if_absent(map, "a", V1));
-
-	assert_int_equal(spmap_size(map), 1);
-
-	assert_ptr_equal(spmap_get(map, "a"), V0);
-
-	assert_false(spmap_put_if_absent(map, "b", V2));
-
-	assert_ptr_equal(spmap_get(map, "b"), V2);
-
-	spmap_free(map);
-}
-
-static void spmap_put_if_absent__case_insensitive(void **state) {
-	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .case_insensitive_key = true, });
-
-	assert_false(spmap_put_if_absent(map, "a", V0));
-
-	assert_true(spmap_put_if_absent(map, "A", V1));
-
-	assert_ptr_equal(spmap_get(map, "a"), V0);
 
 	spmap_free(map);
 }
@@ -434,6 +411,122 @@ static void spmap_put_free__(void **state) {
 	assert_int_equal(spmap_size(map), 1);
 
 	assert_ptr_equal(spmap_get(map, "a"), V1);
+
+	spmap_free(map);
+}
+
+static void spmap_put_clone__(void **state) {
+	assert_nul(spmap_put_clone(NULL, "a", V0));
+
+	const struct SPmap *map = spmap_init();
+	spmap_put_many(map, "a", V0, NULL);
+
+	assert_nul(spmap_put_clone(map, "a", V4));
+	assert_ptr_equal(spmap_get(map, "a"), V0);
+
+	spmap_free(map);
+
+	map = spmap_init_with((struct SPmapParams){ .clone_val = mock_clone, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	assert_nul(spmap_put_clone(map, "a", V0));
+
+	assert_ptr_equal(spmap_get(map, "a"), V0);
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+	assert_ptr_equal(spmap_put_clone(map, "a", V1), V0);
+
+	assert_ptr_equal(spmap_get(map, "a"), V1);
+
+	spmap_free(map);
+}
+
+static void spmap_put_clone_free__(void **state) {
+	assert_false(spmap_put_clone_free(NULL, "a", V0));
+
+	const struct SPmap *map = spmap_init();
+	spmap_put_many(map, "a", V0, NULL);
+
+	assert_false(spmap_put_clone_free(map, "a", V4));
+	assert_ptr_equal(spmap_get(map, "a"), V0);
+
+	spmap_free(map);
+
+	map = spmap_init_with((struct SPmapParams){ .clone_val = mock_clone, .free_val = mock_free, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	assert_false(spmap_put_clone_free(map, "a", V0));
+
+	assert_ptr_equal(spmap_get(map, "a"), V0);
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+	expect_ptr(mock_free, ptr, V0);
+
+	assert_true(spmap_put_clone_free(map, "a", V1));
+
+	assert_ptr_equal(spmap_get(map, "a"), V1);
+
+	spmap_free(map);
+}
+
+static void spmap_put_if_absent__(void **state) {
+	assert_nul(spmap_put_if_absent(NULL, "a", V0));
+
+	const struct SPmap *map = spmap_init();
+
+	assert_nul(spmap_put_if_absent(map, "a", V0));
+
+	assert_ptr_equal(spmap_put_if_absent(map, "a", V1), V0);
+
+	assert_int_equal(spmap_size(map), 1);
+
+	assert_ptr_equal(spmap_get(map, "a"), V0);
+
+	assert_nul(spmap_put_if_absent(map, "b", V2));
+
+	assert_ptr_equal(spmap_get(map, "b"), V2);
+
+	spmap_free(map);
+}
+
+static void spmap_put_if_absent_clone__(void **state) {
+	assert_nul(spmap_put_if_absent_clone(NULL, "a", V0));
+
+	const struct SPmap *map = spmap_init();
+
+	assert_nul(spmap_put_if_absent_clone(map, "a", V4));
+
+	assert_int_equal(spmap_size(map), 0);
+
+	spmap_free(map);
+
+	map = spmap_init_with((struct SPmapParams){ .clone_val = mock_clone, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	assert_nul(spmap_put_if_absent_clone(map, "a", V0));
+
+	assert_ptr_equal(spmap_put_if_absent_clone(map, "a", V1), V0);
+
+	assert_int_equal(spmap_size(map), 1);
+
+	assert_ptr_equal(spmap_get(map, "a"), V0);
+
+	expect_ptr(mock_clone, ptr, V2); will_return_ptr_type(mock_clone, V2, void*);
+	assert_nul(spmap_put_if_absent_clone(map, "b", V2));
+
+	assert_ptr_equal(spmap_get(map, "b"), V2);
+
+	spmap_free(map);
+}
+
+static void spmap_put_if_absent__case_insensitive(void **state) {
+	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .case_insensitive_key = true, });
+
+	assert_nul(spmap_put_if_absent(map, "a", V0));
+
+	assert_ptr_equal(spmap_put_if_absent(map, "A", V1), V0);
+
+	assert_ptr_equal(spmap_get(map, "a"), V0);
 
 	spmap_free(map);
 }
@@ -579,16 +672,16 @@ static void spmap_remove__(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "B", V1, NULL);
 
-	assert_false(spmap_remove(NULL, "x"));
+	assert_nul(spmap_remove(NULL, "x"));
 
 	const struct SPmap *map = spmap_init();
 	spmap_put_many(map, "A", V0, "B", V1, NULL);
 
-	assert_true(spmap_remove(map, "A"));
+	assert_ptr_equal(spmap_remove(map, "A"), V0);
 
-	assert_false(spmap_remove(map, NULL));
+	assert_nul(spmap_remove(map, NULL));
 
-	assert_false(spmap_remove(map, "x"));
+	assert_nul(spmap_remove(map, "x"));
 
 	assert_spmap_equal_ordered(map, expected);
 
@@ -603,7 +696,7 @@ static void spmap_remove__case_insensitive(void **state) {
 	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .case_insensitive_key = true, });
 	spmap_put_many(map, "A", V0, "B", V1, NULL);
 
-	assert_true(spmap_remove(map, "a"));
+	assert_ptr_equal(spmap_remove(map, "a"), V0);
 
 	assert_spmap_equal_ordered(map, expected);
 
@@ -737,11 +830,11 @@ static void spmap_it_remove__(void **state) {
 	const struct SPmap *expected = spmap_init();
 	spmap_put_many(expected, "a", V0, "c", V2, "d", V3, "e", V4, NULL);
 
-	assert_false(spmap_it_remove(NULL));
+	assert_nul(spmap_it_remove(NULL));
 
 	const struct SPmapIt *it = calloc(1, sizeof(struct SPmapIt));
 
-	assert_false(spmap_it_remove(it));
+	assert_nul(spmap_it_remove(it));
 
 	const struct SPmap *map = spmap_init();
 	spmap_put_many(map, "a", V0, "b", V1, "c", V2, "d", V3, "e", V4, NULL);
@@ -751,7 +844,7 @@ static void spmap_it_remove__(void **state) {
 	assert_str_equal(it->key, "b");
 	assert_ptr_equal(it->val, V1);
 
-	assert_true(spmap_it_remove(it));
+	assert_ptr_equal(spmap_it_remove(it), V1);
 
 	assert_false(spmap_contains_key(map, "b"));
 
@@ -986,6 +1079,60 @@ static void spmap_vals_plist_clone__(void **state) {
 	spmap_free(map);
 }
 
+static void spmap_vals_pset__(void **state) {
+	assert_nul(spmap_vals_pset(NULL));
+
+	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .allow_null_val = true, .initial = 2, .grow = 1, });
+
+	const struct Pset *set = spmap_vals_pset(map);
+	assert_int_equal(pset_size(set), 0);
+
+	assert_int_equal(set->params.initial, 2);
+	assert_int_equal(set->params.grow, 1);
+
+	pset_free(set);
+
+	spmap_put_many(map, "a", V0, "b", V1, "c", V2, "d", V2, NULL);
+
+	set = spmap_vals_pset(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V0, V1, V2, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	spmap_free(map);
+}
+
+static void spmap_vals_pset_clone__(void **state) {
+	assert_nul(spmap_vals_pset_clone(NULL));
+
+	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .clone_val = mock_clone, });
+
+	const struct Pset *set = spmap_vals_pset_clone(map);
+	assert_int_equal(pset_size(set), 0);
+
+	pset_free(set);
+
+	spmap_put_many(map, "a", V0, "b", V1, NULL);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V4, void*);
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V5, void*);
+
+	set = spmap_vals_pset_clone(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V4, V5, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	spmap_free(map);
+}
+
 static void spmap_str__(void **state) {
 	assert_nul(spmap_str(NULL));
 
@@ -1059,10 +1206,16 @@ int main(void) {
 		TEST(spmap_put__),
 		TEST(spmap_put__case_insensitive),
 
+		TEST(spmap_put_free__),
+
+		TEST(spmap_put_clone__),
+
+		TEST(spmap_put_clone_free__),
+
 		TEST(spmap_put_if_absent__),
 		TEST(spmap_put_if_absent__case_insensitive),
 
-		TEST(spmap_put_free__),
+		TEST(spmap_put_if_absent_clone__),
 
 		TEST(spmap_put_all__),
 		TEST(spmap_put_all__case_insensitive),
@@ -1104,6 +1257,10 @@ int main(void) {
 		TEST(spmap_vals_plist__),
 
 		TEST(spmap_vals_plist_clone__),
+
+		TEST(spmap_vals_pset__),
+
+		TEST(spmap_vals_pset_clone__),
 
 		TEST(spmap_str__),
 

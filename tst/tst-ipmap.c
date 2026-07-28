@@ -1,5 +1,6 @@
 #include "assert-ipmap.h"
 #include "assert-plist.h"
+#include "assert-pset.h"
 #include "asserts.h"
 #include "data.h"
 #include "expects.h"
@@ -15,6 +16,7 @@
 #include "fn.h"
 #include "plist.h"
 #include "ppmap.h"
+#include "pset.h"
 #include "str.h"
 
 #include "ipmap.h"
@@ -29,6 +31,13 @@ struct PPmap {
 
 struct Plist {
 	const struct PlistParams params;
+	const void **vals;
+	size_t capacity;
+	size_t size;
+};
+
+struct Pset {
+	const struct PsetParams params;
 	const void **vals;
 	size_t capacity;
 	size_t size;
@@ -488,6 +497,76 @@ static void ipmap_put__(void **state) {
 	ipmap_free(map);
 }
 
+static void ipmap_put_free__(void **state) {
+	assert_false(ipmap_put_free(NULL, 0, V0));
+
+	const struct IPmap *map = ipmap_init();
+
+	assert_false(ipmap_put_free(map, 0, strdup("to be freed")));
+
+	assert_true(ipmap_put_free(map, 0, V0));
+
+	assert_int_equal(ipmap_size(map), 1);
+
+	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	ipmap_free(map);
+}
+
+static void ipmap_put_clone__(void **state) {
+	ipmap_put_clone(NULL, 0, V0);
+
+	const struct IPmap *map = ipmap_init();
+	ipmap_put(map, 0, V0);
+
+	assert_nul(ipmap_put_clone(map, 0, V4));
+	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	ipmap_free(map);
+
+	map = ipmap_init_with((struct IPmapParams){ .clone_val = mock_clone, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	assert_nul(ipmap_put_clone(map, 0, V0));
+
+	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+	assert_ptr_equal(ipmap_put_clone(map, 0, V1), V0);;
+
+	assert_ptr_equal(ipmap_get(map, 0), V1);
+
+	ipmap_free(map);
+}
+
+static void ipmap_put_clone_free__(void **state) {
+	ipmap_put_clone_free(NULL, 0, V0);
+
+	const struct IPmap *map = ipmap_init();
+	ipmap_put(map, 0, V0);
+
+	assert_false(ipmap_put_clone_free(map, 0, V4));
+	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	ipmap_free(map);
+
+	map = ipmap_init_with((struct IPmapParams){ .clone_val = mock_clone, .free_val = mock_free, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	assert_false(ipmap_put_clone_free(map, 0, V0));
+
+	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+	expect_ptr(mock_free, ptr, V0);
+
+	assert_true(ipmap_put_clone_free(map, 0, V1));
+
+	assert_ptr_equal(ipmap_get(map, 0), V1);
+
+	ipmap_free(map);
+}
+
 static void ipmap_put_if_absent__(void **state) {
 	assert_nul(ipmap_put_if_absent(NULL, 0, V0));
 
@@ -508,18 +587,32 @@ static void ipmap_put_if_absent__(void **state) {
 	ipmap_free(map);
 }
 
-static void ipmap_put_free__(void **state) {
-	assert_false(ipmap_put_free(NULL, 0, V0));
+static void ipmap_put_if_absent_clone__(void **state) {
+	assert_nul(ipmap_put_if_absent_clone(NULL, 0, V0));
 
 	const struct IPmap *map = ipmap_init();
+	ipmap_put(map, 0, V0);
 
-	assert_false(ipmap_put_free(map, 0, strdup("to be freed")));
+	assert_nul(ipmap_put_if_absent_clone(map, 0, V4));
+	assert_ptr_equal(ipmap_get(map, 0), V0);
 
-	assert_true(ipmap_put_free(map, 0, V0));
+	ipmap_free(map);
+
+	map = ipmap_init_with((struct IPmapParams){ .clone_val = mock_clone, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	assert_nul(ipmap_put_if_absent_clone(map, 0, V0));
+
+	assert_ptr_equal(ipmap_put_if_absent_clone(map, 0, V5), V0);
 
 	assert_int_equal(ipmap_size(map), 1);
 
 	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+	assert_nul(ipmap_put_if_absent_clone(map, 1, V1));
+
+	assert_ptr_equal(ipmap_get(map, 1), V1);
 
 	ipmap_free(map);
 }
@@ -998,6 +1091,64 @@ static void ipmap_vals_plist_clone__(void **state) {
 	ipmap_free(map);
 }
 
+static void ipmap_vals_pset__(void **state) {
+	assert_nul(ipmap_vals_pset(NULL));
+
+	const struct IPmap *map = ipmap_init_with((struct IPmapParams){ .allow_null_val = true, .initial = 2, .grow = 1, });
+
+	const struct Pset *set = ipmap_vals_pset(map);
+	assert_int_equal(pset_size(set), 0);
+
+	assert_int_equal(set->params.initial, 2);
+	assert_int_equal(set->params.grow, 1);
+
+	pset_free(set);
+
+	ipmap_put(map, 0, V0);
+	ipmap_put(map, 1, NULL);
+	ipmap_put(map, 2, V2);
+	ipmap_put(map, 3, V2);
+
+	set = ipmap_vals_pset(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V0, V2, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	ipmap_free(map);
+}
+
+static void ipmap_vals_pset_clone__(void **state) {
+	assert_nul(ipmap_vals_pset_clone(NULL));
+
+	const struct IPmap *map = ipmap_init_with((struct IPmapParams){ .clone_val = mock_clone, });
+
+	const struct Pset *set = ipmap_vals_pset_clone(map);
+	assert_int_equal(pset_size(set), 0);
+
+	pset_free(set);
+
+	ipmap_put(map, 0, V0);
+	ipmap_put(map, 1, V1);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V4, void*);
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V5, void*);
+
+	set = ipmap_vals_pset_clone(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V4, V5, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	ipmap_free(map);
+}
+
 static void ipmap_str__(void **state) {
 	const struct IPmapParams params = { .allow_null_val = true, };
 	const struct IPmap *map = ipmap_init_with(params);
@@ -1077,9 +1228,15 @@ int main(void) {
 
 		TEST(ipmap_put__),
 
-		TEST(ipmap_put_if_absent__),
+		TEST(ipmap_put_clone__),
+
+		TEST(ipmap_put_clone_free__),
 
 		TEST(ipmap_put_free__),
+
+		TEST(ipmap_put_if_absent__),
+
+		TEST(ipmap_put_if_absent_clone__),
 
 		TEST(ipmap_put_all__),
 
@@ -1112,6 +1269,10 @@ int main(void) {
 		TEST(ipmap_vals_plist__),
 
 		TEST(ipmap_vals_plist_clone__),
+
+		TEST(ipmap_vals_pset__),
+
+		TEST(ipmap_vals_pset_clone__),
 
 		TEST(ipmap_str__),
 
