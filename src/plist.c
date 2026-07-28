@@ -618,12 +618,12 @@ size_t plist_remove_all_free(const struct Plist* const list) {
 	return remove_all(list);
 }
 
-size_t plist_remove_in(const struct Plist* const map, const struct Plist* const in) {
-	return map && in ? remove_in(map, in, false) : 0;
+size_t plist_remove_in(const struct Plist* const list, const struct Plist* const in) {
+	return list && in ? remove_in(list, in, false) : 0;
 }
 
-size_t plist_remove_in_free(const struct Plist* const map, const struct Plist* const in) {
-	return map && in ? remove_in(map, in, true) : 0;
+size_t plist_remove_in_free(const struct Plist* const list, const struct Plist* const in) {
+	return list && in ? remove_in(list, in, true) : 0;
 }
 
 const void *plist_it_remove(const struct PlistIt* const it) {

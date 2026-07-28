@@ -209,16 +209,20 @@ bool spmap_put_free(const struct SPmap* const map, const char* const key, const 
 	return map ? ppmap_put_free(map->ppmap, key, val) : false;
 }
 
-const void *spmap_put_clone(const struct SPmap* const map, const void* const key, const void* const val) {
+const void *spmap_put_clone(const struct SPmap* const map, const char* const key, const void* const val) {
 	return map && map->params.clone_val ? ppmap_put_clone(map->ppmap, key, val) : NULL;
 }
 
-bool spmap_put_clone_free(const struct SPmap* const map, const void* const key, const void* const val) {
+bool spmap_put_clone_free(const struct SPmap* const map, const char* const key, const void* const val) {
 	return map && map->params.clone_val ? ppmap_put_clone_free(map->ppmap, key, val) : false;
 }
 
 const void *spmap_put_if_absent(const struct SPmap* const map, const char* const key, const void* const val) {
 	return map ? ppmap_put_if_absent(map->ppmap, key, val) : NULL;
+}
+
+const void *spmap_put_if_absent_clone(const struct SPmap* const map, const char* const key, const void* const val) {
+	return map && map->params.clone_val ? ppmap_put_if_absent_clone(map->ppmap, key, val) : NULL;
 }
 
 const void *spmap_remove(const struct SPmap* const map, const char* const key) {

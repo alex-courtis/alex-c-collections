@@ -1131,13 +1131,13 @@ static void ppmap_put_free__allow_null_val(void **state) {
 }
 
 static void ppmap_put_clone__null(void **state) {
-	assert_false(ppmap_put_clone(NULL, K0, V0));
+	assert_nul(ppmap_put_clone(NULL, K0, V0));
 }
 
 static void ppmap_put_clone__no_clone_val(void **state) {
 	const struct PPmap *map = ppmap_init();
 
-	assert_false(ppmap_put_clone(map, K0, V1));
+	assert_nul(ppmap_put_clone(map, K0, V1));
 
 	ppmap_free(map);
 }

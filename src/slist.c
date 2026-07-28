@@ -54,13 +54,13 @@ static const struct SlistIt *it_next_prev(const struct SlistIt* const it, bool p
 }
 
 static struct PlistFilter plist_filter_init(const struct SlistFilter *filter) {
-	const struct PlistFilter ppmap_filter = {
+	const struct PlistFilter plist_filter = {
 		.val = (fn_pred_p)filter->val,
 		.data = filter->data,
 		.val_data = (fn_pred_pp)filter->val_data,
 	};
 
-	return ppmap_filter;
+	return plist_filter;
 }
 
 const struct Slist *slist_init(void) {
