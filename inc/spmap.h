@@ -192,6 +192,12 @@ const struct Plist *spmap_vals_plist(const struct SPmap* const map);
 // map ordered vals, caller frees contents, NULL when NULL clone_val [clone_val]
 const struct Plist *spmap_vals_plist_clone(const struct SPmap* const map);
 
+// map ordered vals with duplicates removed, same params, caller frees contents when alloc_val present [alloc_val]
+const struct Pset *spmap_vals_pset(const struct SPmap* const map);
+
+// map ordered vals with duplicates removed, same params, caller frees contents, NULL when NULL clone_val [clone_val]
+const struct Pset *spmap_vals_pset_clone(const struct SPmap* const map);
+
 /*
  * Info
  */

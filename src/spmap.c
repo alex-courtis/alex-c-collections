@@ -335,6 +335,14 @@ const struct Plist *spmap_vals_plist_clone(const struct SPmap* const map) {
 	return map ? ppmap_vals_plist_clone(map->ppmap) : NULL;
 }
 
+const struct Pset *spmap_vals_pset(const struct SPmap* const map) {
+	return map ? ppmap_vals_pset(map->ppmap) : NULL;
+}
+
+const struct Pset *spmap_vals_pset_clone(const struct SPmap* const map) {
+	return map ? ppmap_vals_pset_clone(map->ppmap) : NULL;
+}
+
 char *spmap_str(const struct SPmap* const map) {
 	return map ? ppmap_str(map->ppmap) : NULL;
 }

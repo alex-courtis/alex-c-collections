@@ -1,4 +1,5 @@
 #include "assert-plist.h"
+#include "assert-pset.h"
 #include "assert-slist.h"
 #include "assert-spmap.h"
 #include "assert-sset.h"
@@ -46,6 +47,13 @@ struct Plist {
 struct Sset {
 	const struct SsetParams params;
 	const struct Pset *pset;
+};
+
+struct Pset {
+	const struct PsetParams params;
+	const void **vals;
+	size_t capacity;
+	size_t size;
 };
 
 struct SPmap {
@@ -986,6 +994,60 @@ static void spmap_vals_plist_clone__(void **state) {
 	spmap_free(map);
 }
 
+static void spmap_vals_pset__(void **state) {
+	assert_nul(spmap_vals_pset(NULL));
+
+	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .allow_null_val = true, .initial = 2, .grow = 1, });
+
+	const struct Pset *set = spmap_vals_pset(map);
+	assert_int_equal(pset_size(set), 0);
+
+	assert_int_equal(set->params.initial, 2);
+	assert_int_equal(set->params.grow, 1);
+
+	pset_free(set);
+
+	spmap_put_many(map, "a", V0, "b", V1, "c", V2, "d", V2, NULL);
+
+	set = spmap_vals_pset(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V0, V1, V2, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	spmap_free(map);
+}
+
+static void spmap_vals_pset_clone__(void **state) {
+	assert_nul(spmap_vals_pset_clone(NULL));
+
+	const struct SPmap *map = spmap_init_with((struct SPmapParams){ .clone_val = mock_clone, });
+
+	const struct Pset *set = spmap_vals_pset_clone(map);
+	assert_int_equal(pset_size(set), 0);
+
+	pset_free(set);
+
+	spmap_put_many(map, "a", V0, "b", V1, NULL);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V4, void*);
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V5, void*);
+
+	set = spmap_vals_pset_clone(map);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V4, V5, NULL);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	spmap_free(map);
+}
+
 static void spmap_str__(void **state) {
 	assert_nul(spmap_str(NULL));
 
@@ -1104,6 +1166,10 @@ int main(void) {
 		TEST(spmap_vals_plist__),
 
 		TEST(spmap_vals_plist_clone__),
+
+		TEST(spmap_vals_pset__),
+
+		TEST(spmap_vals_pset_clone__),
 
 		TEST(spmap_str__),
 
