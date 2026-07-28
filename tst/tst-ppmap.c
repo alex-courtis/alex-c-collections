@@ -2655,6 +2655,128 @@ static void ppmap_vals_plist_clone__no_clone_val(void **state) {
 	ppmap_free(map);
 }
 
+static void ppmap_vals_pset__null(void **state) {
+	assert_nul(ppmap_vals_pset(NULL));
+}
+
+static void ppmap_vals_pset__empty(void **state) {
+	const struct PPmap *map = ppmap_init();
+
+	const struct Pset *set = ppmap_vals_pset(map);
+
+	assert_non_nul(set);
+	assert_int_equal(pset_size(set), 0);
+
+	ppmap_free(map);
+	pset_free(set);
+}
+
+static void ppmap_vals_pset__allow_null_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, });
+	ppmap_put_many(map, K0, V1, K1, NULL, K2, V3, NULL);
+
+	const struct Pset *set = ppmap_vals_pset(map);
+
+	assert_non_nul(set);
+	assert_int_equal(pset_size(set), 2);
+
+	assert_ptr_equal(pset_at(set, 0), V1);
+	assert_ptr_equal(pset_at(set, 1), V3);
+
+	pset_free(set);
+	ppmap_free(map);
+}
+
+static void ppmap_vals_pset__alloc_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .alloc_val = mock_alloc, });
+
+	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
+
+	ppmap_put(map, K0, V0);
+
+	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
+
+	const struct Pset *set = ppmap_vals_pset(map);
+
+	assert_int_equal(pset_size(set), 1);
+	assert_ptr_equal(pset_at(set, 0), V0);
+
+	pset_free(set);
+	ppmap_free(map);
+}
+
+static void ppmap_vals_pset_clone__null(void **state) {
+	assert_nul(ppmap_vals_pset_clone(NULL));
+}
+
+static void ppmap_vals_pset_clone__no_clone_val(void **state) {
+	const struct PPmap *map = ppmap_init();
+	ppmap_put_many(map, K0, V0, K1, V1, NULL);
+
+	assert_nul(ppmap_vals_pset_clone(map));
+
+	ppmap_free(map);
+}
+
+static void ppmap_vals_pset_clone__no_free_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .clone_val = (fn_clone)clone_strdup, .equal_val = (fn_equal)equal_strcmp, });
+	ppmap_put_many(map, K0, "V0", K1, "V1", K2, "V0", NULL);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, "V0", "V1", NULL);
+
+	const struct Pset *set = ppmap_vals_pset_clone(map);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free_vals(set);
+	pset_free(expected);
+	ppmap_free(map);
+}
+
+static void ppmap_vals_pset_clone__free_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .clone_val = mock_clone, .allow_null_val = true, .free_val = mock_free, });
+	ppmap_put_many(map, K0, V0, K1, V1, K2, V1, NULL);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*); // duplicate will be freed next
+	expect_ptr(mock_free, ptr, V1);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V0, V1, NULL);
+
+	const struct Pset *set = ppmap_vals_pset_clone(map);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	ppmap_free(map);
+}
+
+static void ppmap_vals_pset_clone__allow_null_val(void **state) {
+	const struct PPmap *map = ppmap_init_with((struct PPmapParams){ .allow_null_val = true, .free_val = mock_free, .clone_val = mock_clone, });
+	ppmap_put_many(map, K0, V0, K1, NULL, NULL);
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+
+	expect_ptr(mock_clone, ptr, NULL); will_return_ptr_type(mock_clone, NULL, void*);
+	expect_ptr(mock_free, ptr, NULL);
+
+	const struct Pset *expected = pset_init();
+	pset_add_many(expected, V0, NULL);
+
+	const struct Pset *set = ppmap_vals_pset_clone(map);
+
+	assert_pset_equal_ordered(set, expected);
+
+	pset_free(set);
+	pset_free(expected);
+	ppmap_free(map);
+}
+
 static void ppmap_str__null(void **state) {
 	assert_nul(ppmap_str(NULL));
 }
@@ -2985,6 +3107,17 @@ int main(void) {
 		TEST(ppmap_vals_plist_clone__null),
 		TEST(ppmap_vals_plist_clone__clone_val),
 		TEST(ppmap_vals_plist_clone__no_clone_val),
+
+		TEST(ppmap_vals_pset__null),
+		TEST(ppmap_vals_pset__empty),
+		TEST(ppmap_vals_pset__allow_null_val),
+		TEST(ppmap_vals_pset__alloc_val),
+
+		TEST(ppmap_vals_pset_clone__null),
+		TEST(ppmap_vals_pset_clone__no_clone_val),
+		TEST(ppmap_vals_pset_clone__no_free_val),
+		TEST(ppmap_vals_pset_clone__free_val),
+		TEST(ppmap_vals_pset_clone__allow_null_val),
 
 		TEST(ppmap_str__null),
 		TEST(ppmap_str__empty),

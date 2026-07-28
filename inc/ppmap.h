@@ -200,16 +200,14 @@ const struct Pset *ppmap_keys_pset(const struct PPmap* const map);
 // map ordered vals, same params, caller frees contents when alloc_val present [alloc_val]
 const struct Plist *ppmap_vals_plist(const struct PPmap* const map);
 
-// TODO ppmap_vals_pset
-// map ordered vals with duplicates removed, same params, caller frees contents when alloc_val present [alloc_val]
-const struct Plist *ppmap_vals_pset(const struct PPmap* const map);
-
 // map ordered vals, same params, caller frees contents, NULL when NULL clone_val [clone_val]
 const struct Plist *ppmap_vals_plist_clone(const struct PPmap* const map);
 
-// TODO ppmap_vals_pset_clone
+// map ordered vals with duplicates removed, same params, caller frees contents when alloc_val present [alloc_val]
+const struct Pset *ppmap_vals_pset(const struct PPmap* const map);
+
 // map ordered vals with duplicates removed, same params, caller frees contents, NULL when NULL clone_val [clone_val]
-const struct Plist *ppmap_vals_pset_clone(const struct PPmap* const map);
+const struct Pset *ppmap_vals_pset_clone(const struct PPmap* const map);
 
 /*
  * Info

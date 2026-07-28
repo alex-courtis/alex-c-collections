@@ -353,7 +353,7 @@ static const struct Plist *vals_plist(const struct PPmap* const map, fn_clone cl
 	const struct Plist *list = plist_init_with(params);
 
 	for (const void **v = map->vals; v < map->vals + map->size; v++) {
-		if (*v && clone_val) {
+		if (clone_val) {
 			plist_append(list, (void*)clone_val(*v));
 		} else {
 			plist_append(list, (void*)*v);
@@ -361,6 +361,32 @@ static const struct Plist *vals_plist(const struct PPmap* const map, fn_clone cl
 	}
 
 	return list;
+}
+
+static const struct Pset *vals_pset(const struct PPmap* const map, fn_clone clone_val) {
+	const struct PsetParams params = {
+		.equal_val = map->params.equal_val,
+		.alloc_val = map->params.alloc_val,
+		.free_val = map->params.free_val,
+		.clone_val = map->params.clone_val,
+		.str_val = map->params.str_val,
+		.initial = MAX(map->size, map->params.initial),
+		.grow  = map->params.grow,
+	};
+	const struct Pset *set = pset_init_with(params);
+
+	for (const void **v = map->vals; v < map->vals + map->size; v++) {
+		if (clone_val) {
+			void *val = clone_val(*v);
+			if (!pset_add(set, val)) {
+				map->params.free_val ? map->params.free_val(val) : free(val);
+			}
+		} else {
+			pset_add(set, (void*)*v);
+		}
+	}
+
+	return set;
 }
 
 const struct PPmap *ppmap_init(void) {
@@ -748,6 +774,20 @@ const struct Plist *ppmap_vals_plist_clone(const struct PPmap* const map) {
 		return NULL;
 
 	return vals_plist(map, map->params.clone_val);
+}
+
+const struct Pset *ppmap_vals_pset(const struct PPmap* const map) {
+	if (!map)
+		return NULL;
+
+	return vals_pset(map, NULL);
+}
+
+const struct Pset *ppmap_vals_pset_clone(const struct PPmap* const map) {
+	if (!map || !map->params.clone_val)
+		return NULL;
+
+	return vals_pset(map, map->params.clone_val);
 }
 
 char *ppmap_str(const struct PPmap* const map) {
