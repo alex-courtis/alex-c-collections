@@ -587,6 +587,36 @@ static void ipmap_put_if_absent__(void **state) {
 	ipmap_free(map);
 }
 
+static void ipmap_put_if_absent_clone__(void **state) {
+	assert_nul(ipmap_put_if_absent_clone(NULL, 0, V0));
+
+	const struct IPmap *map = ipmap_init();
+	ipmap_put(map, 0, V0);
+
+	assert_nul(ipmap_put_if_absent_clone(map, 0, V4));
+	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	ipmap_free(map);
+
+	map = ipmap_init_with((struct IPmapParams){ .clone_val = mock_clone, });
+
+	expect_ptr(mock_clone, ptr, V0); will_return_ptr_type(mock_clone, V0, void*);
+	assert_nul(ipmap_put_if_absent_clone(map, 0, V0));
+
+	assert_ptr_equal(ipmap_put_if_absent_clone(map, 0, V5), V0);
+
+	assert_int_equal(ipmap_size(map), 1);
+
+	assert_ptr_equal(ipmap_get(map, 0), V0);
+
+	expect_ptr(mock_clone, ptr, V1); will_return_ptr_type(mock_clone, V1, void*);
+	assert_nul(ipmap_put_if_absent_clone(map, 1, V1));
+
+	assert_ptr_equal(ipmap_get(map, 1), V1);
+
+	ipmap_free(map);
+}
+
 static void ipmap_put_all__(void **state) {
 	assert_int_equal(ipmap_put_all(NULL, NULL), 0);
 
@@ -1205,6 +1235,8 @@ int main(void) {
 		TEST(ipmap_put_free__),
 
 		TEST(ipmap_put_if_absent__),
+
+		TEST(ipmap_put_if_absent_clone__),
 
 		TEST(ipmap_put_all__),
 

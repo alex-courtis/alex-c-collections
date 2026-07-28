@@ -257,6 +257,10 @@ const void *ipmap_put_if_absent(const struct IPmap* const map, const size_t key,
 	return map ? ppmap_put_if_absent(map->ppmap, &key, val) : NULL;
 }
 
+const void *ipmap_put_if_absent_clone(const struct IPmap* const map, const size_t key, const void* const val) {
+	return map && map->params.clone_val ? ppmap_put_if_absent_clone(map->ppmap, &key, val) : NULL;
+}
+
 const void *ipmap_remove(const struct IPmap* const map, const size_t key) {
 	return map ? ppmap_remove(map->ppmap, &key) : NULL;
 }

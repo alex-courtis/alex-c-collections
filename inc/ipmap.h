@@ -135,7 +135,8 @@ bool ipmap_put_clone_free(const struct IPmap* const map, const size_t key, const
 // set key/val if not present, return existing val if present [alloc_val]
 const void *ipmap_put_if_absent(const struct IPmap* const map, const size_t key, const void* const val);
 
-// TODO ipmap_put_if_absent_clone
+// set key/val if not present, return existing val if present, NOP when NULL clone_val [clone_val]
+const void *ipmap_put_if_absent_clone(const struct IPmap* const map, const size_t key, const void* const val);
 
 // set all from key/val, returning number overwritten [alloc_val]
 size_t ipmap_put_all(const struct IPmap* const map, const struct IPmap* const from);
