@@ -126,9 +126,11 @@ const void *ipmap_put(const struct IPmap* const map, const size_t key, const voi
 // set key/val, free old val, return true if overwritten [alloc_val, free_val]
 bool ipmap_put_free(const struct IPmap* const map, const size_t key, const void* const val);
 
-// TODO ipmap_put_clone
+// set key/val, return old val if overwritten, NOP when NULL clone_val [clone_val]
+const void *ipmap_put_clone(const struct IPmap* const map, const size_t key, const void* const val);
 
-// TODO ipmap_put_clone_free
+// set key/val, free old val, return true if overwritten, NOP when NULL clone_val [clone_val, free_val]
+bool ipmap_put_clone_free(const struct IPmap* const map, const size_t key, const void* const val);
 
 // set key/val if not present, return existing val if present [alloc_val]
 const void *ipmap_put_if_absent(const struct IPmap* const map, const size_t key, const void* const val);

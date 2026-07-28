@@ -241,12 +241,20 @@ const void *ipmap_put(const struct IPmap* const map, const size_t key, const voi
 	return map ? ppmap_put(map->ppmap, &key, val) : NULL;
 }
 
-const void *ipmap_put_if_absent(const struct IPmap* const map, const size_t key, const void* const val) {
-	return map ? ppmap_put_if_absent(map->ppmap, &key, val) : NULL;
-}
-
 bool ipmap_put_free(const struct IPmap* const map, const size_t key, const void* const val) {
 	return map ? ppmap_put_free(map->ppmap, &key, val) : false;
+}
+
+const void *ipmap_put_clone(const struct IPmap* const map, const size_t key, const void* const val) {
+	return map && map->params.clone_val ? ppmap_put_clone(map->ppmap, &key, val) : NULL;
+}
+
+bool ipmap_put_clone_free(const struct IPmap* const map, const size_t key, const void* const val) {
+	return map && map->params.clone_val ? ppmap_put_clone_free(map->ppmap, &key, val) : false;
+}
+
+const void *ipmap_put_if_absent(const struct IPmap* const map, const size_t key, const void* const val) {
+	return map ? ppmap_put_if_absent(map->ppmap, &key, val) : NULL;
 }
 
 const void *ipmap_remove(const struct IPmap* const map, const size_t key) {
