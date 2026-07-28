@@ -726,8 +726,6 @@ const struct Pset *ppmap_keys_pset(const struct PPmap* const map) {
 		.equal_val = map->params.equal_key,
 		.alloc_val = map->params.alloc_key,
 		.free_val = map->params.free_key,
-		// TODO is Pset clone_val == alloc_val desirable on ppmap_keys_pset and plist_pset ?
-		.clone_val = map->params.alloc_key,
 		.str_val = map->params.str_key,
 		.initial = MAX(map->size, map->params.initial),
 		.grow  = map->params.grow,

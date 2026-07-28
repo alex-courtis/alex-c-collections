@@ -2569,7 +2569,6 @@ static void ppmap_keys_pset__params(void **state) {
 	assert_ptr_equal(set->params.equal_val, mock_equal);
 	assert_ptr_equal(set->params.alloc_val, mock_alloc);
 	assert_ptr_equal(set->params.free_val, mock_free);
-	assert_ptr_equal(set->params.clone_val, mock_alloc);
 	assert_ptr_equal(set->params.str_val, mock_str);
 
 	ppmap_free(map);

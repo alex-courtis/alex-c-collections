@@ -309,7 +309,7 @@ static const struct Pset *pset(const struct Plist* const list, fn_clone clone_va
 
 	for (const void **v = list->vals; v < list->vals + list->size; v++) {
 		if (clone_val) {
-			void *val = (void*)clone_val(*v);
+			void *val = clone_val(*v);
 			if (!pset_add(set, val)) {
 				list->params.free_val ? list->params.free_val(val) : free(val);
 			}

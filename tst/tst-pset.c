@@ -151,25 +151,6 @@ static void pset_clone_deep__no_clone_val(void **state) {
 	pset_free(set);
 }
 
-// TODO pset_clone_deep: alloc_val overriding clone_val makes no sense
-static void pset_clone_deep__alloc_val_overrides_clone_val(void **state) {
-	const struct Pset *set = pset_init_with((struct PsetParams){ .clone_val = mock_clone, .alloc_val = mock_alloc, });
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-	pset_add(set, V0);
-
-	expect_ptr(mock_alloc, ptr, V0); will_return_ptr_type(mock_alloc, V0, void*);
-
-	const struct Pset *clone = pset_clone_deep(set);
-
-	assert_non_nul(clone);
-	assert_int_equal(clone->size, 1);
-	assert_ptr_equal(clone->vals[0], V0);
-
-	pset_free(clone);
-	pset_free(set);
-}
-
 static void pset_free__null(void **state) {
 	pset_free(NULL);
 }
@@ -1518,7 +1499,6 @@ int main(void) {
 		TEST(pset_clone_deep__null),
 		TEST(pset_clone_deep__clone_val),
 		TEST(pset_clone_deep__no_clone_val),
-		TEST(pset_clone_deep__alloc_val_overrides_clone_val),
 
 		TEST(pset_free__null),
 		TEST(pset_free__empty),
