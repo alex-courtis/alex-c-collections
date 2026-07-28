@@ -127,9 +127,11 @@ const void *spmap_put(const struct SPmap* const map, const char* const key, cons
 // set key/val, free old val, return true if overwritten [alloc_val, free_val]
 bool spmap_put_free(const struct SPmap* const map, const  char* const key, const void* const val);
 
-// TODO spmap_put_clone
+// set key/val, return old val if overwritten, NOP when NULL clone_val [clone_val]
+const void *spmap_put_clone(const struct SPmap* const map, const void* const key, const void* const val);
 
-// TODO spmap_put_clone_free
+// set key/val, free old val, return true if overwritten, NOP when NULL clone_val [clone_val, free_val]
+bool spmap_put_clone_free(const struct SPmap* const map, const void* const key, const void* const val);
 
 // set key/val if not present, return existing val if present [alloc_val]
 const void *spmap_put_if_absent(const struct SPmap* const map, const char* const key, const void* const val);
