@@ -6,6 +6,7 @@ unusedFunction:tst/expect-*map.h
 unusedFunction:tst/expect-*set.h
 
 unusedFunction:tst/mock-fn.c
+unusedFunction:tst/util-file.c
 
 staticFunction:tst/util-col.c
 
